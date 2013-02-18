@@ -20,7 +20,7 @@ class FakeAlignedRead():
 class Test(unittest.TestCase):
 
     def testReadAhead(self):
-        readahead = ReadAheadIteratorPET.ReadAheadIteratorPET("/home/afejes/workspacePython/data/ex1.sam", 200, "r", True)
+        readahead = ReadAheadIteratorPET.ReadAheadIteratorPET("../testdata/ex1.sam", 200, "r", True)
         count = 0
         while readahead.isValid():
             alignedreadobjpet = readahead.getNext()

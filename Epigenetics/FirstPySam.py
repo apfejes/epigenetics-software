@@ -17,7 +17,7 @@ def makeIslands(start, end):
 
 #do something with input
 
-readahead = ReadAheadIterator.ReadAheadIterator("/home/afejes/python/ChipSeqGSE31221/GSE31221_RAW/GSM773994_TCF7_ChIPSeq.bam", fragmentLength, "rb")
+readahead = ReadAheadIterator.ReadAheadIterator("testdata/ChipSeqGSE31221/GSE31221_RAW/GSM773994_TCF7_ChIPSeq.bam", fragmentLength, "rb")
 while True:
     alignedreadobj = readahead.getNext()
     alignedreadobj.type()

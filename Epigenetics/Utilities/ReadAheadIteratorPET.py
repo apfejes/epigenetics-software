@@ -22,8 +22,9 @@ class ReadAheadIteratorPET():
         print ("ReadAheadIteratorPET")
     
     '''initialize the readahead iterator with the parameters it requires'''
+    
     def __init__(self, filename, fragmentLength, flags, only_PET):
-        self.samfile = pysam.Samfile(filename, flags)
+        self.samfile = pysam.Samfile(filename, flags) #@UndefinedVariable
         self.iterator = self.samfile.__iter__()
         self.isReadValid = True
         self.fragmentLength = fragmentLength
