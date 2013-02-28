@@ -63,7 +63,7 @@ class DLL(object):
         self.__len +=1
     
     def insert_before(self, node, thing):
-        #test if first node
+        #test if first node, then use convenience method:
         if node == DLL.head:
             DLL.insert_at_head(thing)
             return None
@@ -76,7 +76,7 @@ class DLL(object):
             self.__len +=1  
     
     def insert_after(self, node, thing):
-        #test if first node
+        #test if last node, then use convenience method.
         if node == DLL.tail:
             DLL.append(self,thing)
             return None

@@ -92,7 +92,7 @@ class ReadAheadIterator():
             first_start = -1
             last_start = -1
 
-        print "before:", first_start + ReadAheadIterator.MaxReadAhead,">", last_start
+        #print "before:", first_start + ReadAheadIterator.MaxReadAhead,">", last_start
         while (self.isReadValid and ((first_start == -1) or (first_start + ReadAheadIterator.MaxReadAhead > last_start))):
 
             read = self._next()
@@ -105,7 +105,7 @@ class ReadAheadIterator():
                 last_start = min_read.left_end
                 '''print min_read.get_left_end(), min_read.get_right_end(), min_read.get_read()'''
                 self._insert_into_buffer(min_read)
-            print "After:", first_start + ReadAheadIterator.MaxReadAhead,">", last_start
+            #print "After:", first_start + ReadAheadIterator.MaxReadAhead,">", last_start
         return None
 
     def _insert_into_buffer(self, read):

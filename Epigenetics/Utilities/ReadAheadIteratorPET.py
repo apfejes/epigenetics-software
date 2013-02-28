@@ -13,9 +13,11 @@ class ReadAheadIteratorPET():
     
     '''create variables used by the readahead iterator.'''
     buffer_reads = DoublyLinkedList.DLL()
+    reserve_read = None
     MaxReadAhead = 5000
     reads_processed = dict()
-    only_PET_reads = True
+    only_PET_reads = False
+    current_chromosome = None
     
     
     def type(self):
@@ -28,7 +30,8 @@ class ReadAheadIteratorPET():
         self.iterator = self.samfile.__iter__()
         self.isReadValid = True
         self.fragmentLength = fragmentLength
-        only_PET_reads = only_PET
+        self.only_PET_reads = only_PET
+        print "self.only_PET_reads", self.only_PET_reads 
         return
 
     '''private version of next - should not be used by external next calls'''
@@ -38,20 +41,28 @@ class ReadAheadIteratorPET():
                 a = self.iterator.next()   # try to get the next element
                 while a.is_unmapped:       #ignore reads that are unmapped
                     a = self.iterator.next()
-                if ReadAheadIteratorPET.reads_processed.has_key(a.qname):
-                    a2 = ReadAheadIteratorPET.reads_processed.pop(a.qname)
-                    if ReadAheadIteratorPET.reads_processed.has_key(a.qname):
-                        print "key a.qname still found", a.qname
-                    
-                    return ReadAheadIteratorPET._apply_frag_properties(self, a, a2)
-                else:
-                    if (a.mate_is_unmapped):
-                        if (ReadAheadIteratorPET.only_PET_reads):
-                            continue
-                        else:
-                            return ReadAheadIteratorPET._apply_frag_properties(self, a, None)
+                if a.is_paired: #if it's a PET read
+                    if ReadAheadIteratorPET.reads_processed.has_key(a.qname):   #have you seen the other pair?
+                        a2 = ReadAheadIteratorPET.reads_processed.pop(a.qname)
+                        if ReadAheadIteratorPET.reads_processed.has_key(a.qname):
+                            print "key a.qname still found", a.qname
+                            return ReadAheadIteratorPET._apply_frag_properties(self, a, a2)
+                    else:   #if you haven't seen the other pair
+                        if (a.mate_is_unmapped): #if it's pair isn't mappped,
+                            if (ReadAheadIteratorPET.only_PET_reads): #don't keep it if you only want Paired reads
+                                #print "only keeping PET reads"
+                                continue
+                            else: #otherwise, keep if and process it if you want SET reads too.
+                                return ReadAheadIteratorPET._apply_frag_properties(self, a, None)
+                        else: #mate is mapped, but you haven't seen it, put it into the processed reads bin
+                            ReadAheadIteratorPET.reads_processed[a.qname] = a 
+                else:  #single end read.
+                    if (not ReadAheadIteratorPET.only_PET_reads):
+                        #print "processing", a
+                        return ReadAheadIteratorPET._apply_frag_properties(self, a, None)
                     else:
-                        ReadAheadIteratorPET.reads_processed[a.qname] = a
+                        #print "continuing"
+                        continue
             '''end while'''
         except StopIteration:           # can't retrieve next element
         #   print "Stop iteration hit -", self.buffer_reads.size(), "reads found in buffer"
@@ -68,8 +79,18 @@ class ReadAheadIteratorPET():
         left_end= 0
         right_end = 0
         ''' print 'proper pairing:' + (" Yes" if alignedread1.is_proper_pair else " No") + (" Yes" if alignedread2.is_proper_pair else " No")'''
-        if alignedread1.is_proper_pair and alignedread2.is_proper_pair:
-            
+        #handling unpaired
+        if alignedread2 == None:
+            if alignedread1.is_reverse:
+                left_end = alignedread1.pos - alignedread1.alen
+            else:
+                left_end = alignedread1.pos
+            if alignedread1.is_reverse:
+                right_end = alignedread1.pos
+            else:
+                right_end = alignedread1.pos + alignedread1.alen  
+        #Handling PET below
+        elif (alignedread1.is_proper_pair and alignedread2.is_proper_pair):
             if alignedread1.is_reverse:
                 e1 = alignedread1.pos - alignedread1.alen
             else:
@@ -92,79 +113,74 @@ class ReadAheadIteratorPET():
             '''*********************************'''
         else:
             print "These reads are not properly paired!", alignedread1, alignedread2
-        return AlignedReadObjPET.AlignedReadObjPET(left_end, right_end, alignedread1, alignedread2)
+        return AlignedReadObjPET.AlignedReadObjPET(alignedread1.tid, left_end, right_end, alignedread1, alignedread2)
         
     '''read ahead, go as far as needed - pushes data into the buffer'''
     def read_ahead(self):
-        first_read_start = ReadAheadIteratorPET.buffer_reads.head.holding.left_end
-        last_read_start = ReadAheadIteratorPET.buffer_reads.tail.holding.left_end
+        if (self.reserve_read != None):  #break when there is already a read in the reserve.  don't read ahead.
+            return None
+        if ReadAheadIteratorPET.buffer_reads.size() > 0: 
+            first_read_start = ReadAheadIteratorPET.buffer_reads.head.holding.left_end
+            last_read_start = ReadAheadIteratorPET.buffer_reads.tail.holding.left_end
+        else:
+            first_read_start = -1
+            last_read_start = -1
 
-        while self.isReadValid and first_read_start + ReadAheadIteratorPET.MaxReadAhead < last_read_start:
+        while self.isReadValid and first_read_start + ReadAheadIteratorPET.MaxReadAhead > last_read_start and self.reserve_read == None:
+            
             read = self._next()
             if read == None:
                 return None
             else:
-                
-                min_read = self._apply_frag_properties(read)
+                if self.current_chromosome == None:
+                    self.current_chromosome = read.chromosome_id
+                else:
+                    if self.current_chromosome != read.chromosome_id:
+                        self.reserve_read = read
+                        return None                            
                 if ReadAheadIteratorPET.buffer_reads.size() == 0:  #handles empty buffer.
-                    last_read_start = min_read.left_end
-                    first_read_start = min_read.left_end
-                else:                                   #handles non-empty buffer.
-                    if min_read.left_end < first_read_start:
-                        first_read_start = min_read.left_end
-                        ReadAheadIteratorPET.buffer_reads.insert_at_head(min_read)
-                    elif min_read.left_end > last_read_start:
-                        last_read_start = min_read.left_end
-                        ReadAheadIteratorPET.buffer_reads.append(min_read)
-                    else:   #read should be put in the buffer where it belongs.
-                        '''traverse list backwards'''
-                        p = ReadAheadIteratorPET.buffer_reads.tail
-                        while not p == None: 
-                            if read.left_end >= p.holding.left_end:
-                                ReadAheadIteratorPET.buffer_reads.insert_after(p, read)
-                                break
-                            p = p.next
+                    ReadAheadIteratorPET.buffer_reads.insert_at_head(read)
+                    first_read_start = read.left_end;
+                    last_read_start = read.left_end;
+                elif read.left_end < first_read_start:
+                    first_read_start = read.left_end
+                    ReadAheadIteratorPET.buffer_reads.insert_at_head(read)
+                    #print "added at head"
+                elif read.left_end > last_read_start:
+                    last_read_start = read.left_end
+                    ReadAheadIteratorPET.buffer_reads.append(read)
+                    #print "added at tail"
+                else:   #read should be put in the buffer where it belongs.
+                    '''traverse list backwards'''
+                    p = ReadAheadIteratorPET.buffer_reads.tail
+                    while not p == None: 
+                        if read.left_end >= p.holding.left_end:
+                            ReadAheadIteratorPET.buffer_reads.insert_after(p, read)
+                            #print "added from tail"
+                            break
+                        p = p.next
         return None
         
-    '''private function for populating the buffer and reading ahead.'''
-    def populate_buffer(self):
-        if ReadAheadIteratorPET.buffer_reads.size() > 0: 
-            first_start = ReadAheadIteratorPET.buffer_reads.head.holding.left_end
-            last_start = ReadAheadIteratorPET.buffer_reads.tail.holding.left_end
-        else:
-            first_start = -1
-            last_start = -1
-        while (self.isReadValid and ((last_start == -1) or (first_start + ReadAheadIteratorPET.MaxReadAhead < last_start))):
-            read = self._next()  # returns min_read
-            if read == None:
-                return None            
-            else:
-                '''print read.get_left_end(), read.get_right_end(), read.get_read1(), read.get_read2()'''
-                self._insert_into_buffer(read)
-        return None
-
-    def _insert_into_buffer(self, read):
-        if (self.buffer_reads.size() == 0):
-            self.buffer_reads.append(read)
-        else:
-            p = self.buffer_reads.tail
-            while not p == None:
-                if p.holding.left_end < read.left_end:
-                    self.buffer_reads.insert_after(p, read)
-                    return None
-                p = p.prev
-            else:
-                self.buffer_reads.insert_at_head(read)
-
+ 
     '''function to get next - to be used externally to access the buffer'''
     def getNext(self):
         if ReadAheadIteratorPET.buffer_reads.size() == 0 and not self.isReadValid:
+            #End of file.
             return None
+        elif ReadAheadIteratorPET.buffer_reads.size() == 0 and self.isReadValid:
+            #end of chromosome - move to next
+            if self.reserve_read != None: #there is a read from the next chromosome waiting
+                self.current_chromosome = self.reserve_read.chromosome_id
+                ReadAheadIteratorPET.buffer_reads.append(self.reserve_read) #move it to the buffer
+                self.reserve_read = None
+            #regardless, keep processing:
+            self.read_ahead() #populate the buffer.
+            return ReadAheadIteratorPET.buffer_reads.pop_head()   
         else:
-            if self.isReadValid:
-                self.populate_buffer()
-            return ReadAheadIteratorPET.buffer_reads.pop_head()        
-        
+            if self.isReadValid:  #buffer has reads, but not end of file
+                self.read_ahead()
+            #print "buffer now contains", ReadAheadIteratorPET.buffer_reads.size(), "reads"
+            return ReadAheadIteratorPET.buffer_reads.pop_head()
         
     '''use this function to close the file after reading is complete'''
     def close(self):
@@ -174,7 +190,15 @@ class ReadAheadIteratorPET():
 
     '''function to be used to test if the current read is valid.'''
     def isValid(self):
-        if ReadAheadIteratorPET.buffer_reads.size() > 0:
+        if ReadAheadIteratorPET.buffer_reads.size() > 0 or ReadAheadIteratorPET.reserve_read == None:
             return True
         else:
             return self.isReadValid
+        
+        '''Use this function to push reads back into the buffer, if you've read too far'''
+    def pushback(self, reads):
+        for min_read in reversed(reads):
+            ReadAheadIteratorPET.buffer_reads.insert_at_head(min_read)
+        
+    def get_ref_name(self, tid):
+        return self.samfile.getrname(tid)
