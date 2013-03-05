@@ -19,6 +19,11 @@ class ReadAheadIteratorPET():
     only_PET_reads = False
     current_chromosome = None
     
+    #stats
+    unmapped_reads = 0
+    paired_reads = 0
+    unpaired_reads =0
+    gets = 0
     
     def type(self):
         print ("ReadAheadIteratorPET")
@@ -31,7 +36,7 @@ class ReadAheadIteratorPET():
         self.isReadValid = True
         self.fragmentLength = fragmentLength
         self.only_PET_reads = only_PET
-        print "self.only_PET_reads", self.only_PET_reads 
+        #print "self.only_PET_reads", self.only_PET_reads 
         return
 
     '''private version of next - should not be used by external next calls'''
@@ -39,29 +44,32 @@ class ReadAheadIteratorPET():
         try:
             while (True):  # may only break out by hitting end of file or by finding a pair.
                 a = self.iterator.next()   # try to get the next element
+                self.gets +=1
                 while a.is_unmapped:       #ignore reads that are unmapped
+                    self.unmapped_reads +=1
                     a = self.iterator.next()
+                    if a == None:
+                        return None
                 if a.is_paired: #if it's a PET read
                     if ReadAheadIteratorPET.reads_processed.has_key(a.qname):   #have you seen the other pair?
                         a2 = ReadAheadIteratorPET.reads_processed.pop(a.qname)
-                        if ReadAheadIteratorPET.reads_processed.has_key(a.qname):
-                            print "key a.qname still found", a.qname
-                            return ReadAheadIteratorPET._apply_frag_properties(self, a, a2)
+                        #if ReadAheadIteratorPET.reads_processed.has_key(a.qname):
+                        #    print "key a.qname still found", a.qname
+                        self.paired_reads +=2
+                        return ReadAheadIteratorPET._apply_frag_properties(self, a, a2)
+
                     else:   #if you haven't seen the other pair
-                        if (a.mate_is_unmapped): #if it's pair isn't mappped,
+                        if a.mate_is_unmapped: #if it's pair isn't mappped,
                             if (ReadAheadIteratorPET.only_PET_reads): #don't keep it if you only want Paired reads
-                                #print "only keeping PET reads"
                                 continue
                             else: #otherwise, keep if and process it if you want SET reads too.
                                 return ReadAheadIteratorPET._apply_frag_properties(self, a, None)
                         else: #mate is mapped, but you haven't seen it, put it into the processed reads bin
                             ReadAheadIteratorPET.reads_processed[a.qname] = a 
                 else:  #single end read.
-                    if (not ReadAheadIteratorPET.only_PET_reads):
-                        #print "processing", a
+                    if not ReadAheadIteratorPET.only_PET_reads:
                         return ReadAheadIteratorPET._apply_frag_properties(self, a, None)
                     else:
-                        #print "continuing"
                         continue
             '''end while'''
         except StopIteration:           # can't retrieve next element
@@ -137,7 +145,7 @@ class ReadAheadIteratorPET():
                 else:
                     if self.current_chromosome != read.chromosome_id:
                         self.reserve_read = read
-                        return None                            
+                        return None                     
                 if ReadAheadIteratorPET.buffer_reads.size() == 0:  #handles empty buffer.
                     ReadAheadIteratorPET.buffer_reads.insert_at_head(read)
                     first_read_start = read.left_end;
@@ -153,12 +161,16 @@ class ReadAheadIteratorPET():
                 else:   #read should be put in the buffer where it belongs.
                     '''traverse list backwards'''
                     p = ReadAheadIteratorPET.buffer_reads.tail
-                    while not p == None: 
+                    added = False
+                    while p != None: 
                         if read.left_end >= p.holding.left_end:
                             ReadAheadIteratorPET.buffer_reads.insert_after(p, read)
+                            added = True
                             #print "added from tail"
                             break
-                        p = p.next
+                        p = p.prev
+                    if not added:
+                        print "Read was not added to buffer!!!!!!!"
         return None
         
  
@@ -171,10 +183,14 @@ class ReadAheadIteratorPET():
             #end of chromosome - move to next
             if self.reserve_read != None: #there is a read from the next chromosome waiting
                 self.current_chromosome = self.reserve_read.chromosome_id
-                ReadAheadIteratorPET.buffer_reads.append(self.reserve_read) #move it to the buffer
+                if (self.reserve_read.read1.is_paired and not self.reserve_read.read1.mate_is_unmapped):
+                    ReadAheadIteratorPET.reads_processed[self.reserve_read.read1.qname] = self.reserve_read.read1
+                else:
+                    ReadAheadIteratorPET.buffer_reads.append(self.reserve_read) #move it to the buffer
                 self.reserve_read = None
             #regardless, keep processing:
             self.read_ahead() #populate the buffer.
+            #print "popping read from buffer of size", ReadAheadIteratorPET.buffer_reads.size()
             return ReadAheadIteratorPET.buffer_reads.pop_head()   
         else:
             if self.isReadValid:  #buffer has reads, but not end of file
@@ -190,7 +206,7 @@ class ReadAheadIteratorPET():
 
     '''function to be used to test if the current read is valid.'''
     def isValid(self):
-        if ReadAheadIteratorPET.buffer_reads.size() > 0 or ReadAheadIteratorPET.reserve_read == None:
+        if ReadAheadIteratorPET.buffer_reads.size() > 0 or ReadAheadIteratorPET.reserve_read != None:
             return True
         else:
             return self.isReadValid

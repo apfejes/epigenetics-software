@@ -29,7 +29,7 @@ while True:
         #flush chromosomome related objects, then continue
         continue
     
-    alignedread = alignedreadobjpet.get_read1()
+    alignedread = alignedreadobjpet.read1
     chromosome = readahead.get_ref_name(alignedread.tid)
     
     if current_chromosome != chromosome:
