@@ -53,7 +53,7 @@ class Test(unittest.TestCase):
         
         
         
-    '''def testReadAhead_allReads(self):
+    def testReadAhead_allReads(self):
         readahead = ReadAheadIteratorPET.ReadAheadIteratorPET("../testdata/ex1.sam", 200, "r", False)
         count = 0
         while readahead.isValid():
@@ -62,30 +62,37 @@ class Test(unittest.TestCase):
                 break
             count +=1
         #print "read", count, "objects"
-        self.assertEqual(count, 1572)
+        self.assertEqual(count, 1699)
         
 
     def testPushBack(self):
         readahead = ReadAheadIteratorPET.ReadAheadIteratorPET("../testdata/ex1.sam", 200, "r", True)
         count = 0
         array_of_reads = []
+        current_chromosome = None
         for dummy in range(0,10):
             alignedreadobjpet = readahead.getNext()
             array_of_reads.append(alignedreadobjpet)
         readahead.pushback(array_of_reads)
         
-        last_read_start=-1000000;  #a useless start point, we can be sure reads won't be mapped that far upstream
+        last_read_start=-1000000  #a useless start point, we can be sure reads won't be mapped that far upstream
         while readahead.isValid():
             alignedreadobjpet = readahead.getNext()
-            self.assert_(last_read_start <= alignedreadobjpet.left_end, "reads passed out of order!")
+            alignedread1 = alignedreadobjpet.read1
+            chromosome = readahead.get_ref_name(alignedread1.tid)
+            if current_chromosome != chromosome:
+                last_read_start=-1000000;
+                current_chromosome= chromosome
+            else:
+                self.assert_(last_read_start <= alignedreadobjpet.left_end, "reads passed out of order!")
             if alignedreadobjpet == None:
                 break
             last_read_start = alignedreadobjpet.left_end
             count +=1
         #print "read", count, "objects"
-        self.assertEqual(count, 1572)
+        self.assertEqual(count, 1699)
 
-'''
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
