@@ -1,12 +1,8 @@
-import array
+
 from Utilities import ReadAheadIteratorPET 
 
 fragmentLength = 250
 
-def makeIslands(start, end):
-    #map = array('I')
-    map_i = array.array('i',(0 for i in range(0,end-start)))
-    print(map_i[0])
 
 
 # Once a file is opened you can iterate over all of the read mapping to a specified region using fetch(). Each iteration returns a AlignedRead object which represents a single read along with its fields and optional tags:
@@ -22,20 +18,14 @@ while True:
     alignedreadobjpet = readahead.getNext()
     if not readahead.isReadValid:
         break
-    
-    #print alignedreadobjpet.type()
-    
     if (alignedreadobjpet == None) :
         #flush chromosomome related objects, then continue
         continue
-    
     alignedread = alignedreadobjpet.read1
     chromosome = readahead.get_ref_name(alignedread.tid)
-    
     if current_chromosome != chromosome:
         if current_chromosome != None:
             print "chromosome", current_chromosome, "had", count, "reads"
-
         current_chromosome = chromosome
         count= 0
     count +=1
