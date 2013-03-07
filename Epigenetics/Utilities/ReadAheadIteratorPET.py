@@ -213,7 +213,7 @@ class ReadAheadIteratorPET():
 
         '''Use this function to push read(s) back into the buffer, if you've read too far'''
     def pushback(self, reads):
-        if reads.type() == "AlignedReadObjPET":    # if only one read
+        if isinstance(reads, AlignedReadObjPET.AlignedReadObjPET):
             ReadAheadIteratorPET.buffer_reads.insert_at_head(reads)
         else:    # if list of reads
             for min_read in reversed(reads):
