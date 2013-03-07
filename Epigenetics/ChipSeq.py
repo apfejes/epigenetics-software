@@ -1,7 +1,9 @@
-import sys
+
 from Utilities import ReadAheadIteratorPET, LinkedList, MapMaker
 
-fragmentLength = 250
+fragment_length = 250
+map_type = "Triangle"
+
 
 
 
@@ -10,7 +12,7 @@ fragmentLength = 250
 
 # do something with input
 
-readahead = ReadAheadIteratorPET.ReadAheadIteratorPET("testdata/ChipSeqGSE31221/GSE31221_RAW/18_19_GSM773994_TCF7_ChIPSeq.bam", fragmentLength, "rb", False)
+readahead = ReadAheadIteratorPET.ReadAheadIteratorPET("testdata/ChipSeqGSE31221/GSE31221_RAW/18_19_GSM773994_TCF7_ChIPSeq.bam", fragment_length, "rb", False)
 current_chromosome = None
 count = 0;
 new_block = True;
@@ -18,6 +20,8 @@ last_block_l = 0
 last_block_r = 0
 
 reads_list = LinkedList.LL()
+mapmaker = MapMaker.MapMaker(map_type, 50, 150, fragment_length)
+
 
 while True:
     # print count, "reads processed"
@@ -61,17 +65,9 @@ while True:
                 block_right = read_right
                 # print "block extended:", block_left, "-", block_right
         else:
-            # coverage_map = MapMaker(block_left, block_right, reads_list)
-            p = reads_list.head
-            r_l = p.holding.get_left_end()
-            r_r = p.holding.get_right_end()
-            p = p.next
-            while p != None:
-                if p.holding.get_left_end() < r_l:
-                    r_l = p.holding.get_left_end()
-                if p.holding.get_right_end() > r_r:
-                    r_r = p.holding.get_right_end()
-                p = p.next
+
+            coverage_map = mapmaker.makeIslands(block_left, block_right, reads_list)
+
             # print "region", r_l, "-", r_r
             # if r_l < last_block_r:
             #    print "OVERLAPPING REGIONS!"
@@ -79,8 +75,8 @@ while True:
             # print "region", reads_list.head.holding.left_end, "-", reads_list.tail.holding.right_end
             reads_list.destroy()
             new_block = True
-            last_block_l = r_l
-            last_block_r = r_r
+            last_block_l = block_left
+            last_block_r = block_right
             readahead.pushback(alignedreadobjpet)    # push back the current read, so we can start again with a new block
 
     '''process the reads'''

@@ -30,11 +30,11 @@ class ReadAheadIteratorPET():
 
     '''initialize the readahead iterator with the parameters it requires'''
 
-    def __init__(self, filename, fragmentLength, flags, only_PET):
+    def __init__(self, filename, fragment_length, flags, only_PET):
         self.samfile = pysam.Samfile(filename, flags)    # @UndefinedVariable
         self.iterator = self.samfile.__iter__()
         self.isReadValid = True
-        self.fragmentLength = fragmentLength
+        self.fragmentLength = fragment_length
         self.only_PET_reads = only_PET
         # print "self.only_PET_reads", self.only_PET_reads
         return
@@ -90,32 +90,32 @@ class ReadAheadIteratorPET():
         # handling unpaired
         if alignedread2 == None:
             if alignedread1.is_reverse:
-                left_end = alignedread1.pos - alignedread1.alen
+                left_end = alignedread1.pos - self.fragmentLength
             else:
                 left_end = alignedread1.pos
             if alignedread1.is_reverse:
                 right_end = alignedread1.pos
             else:
-                right_end = alignedread1.pos + alignedread1.alen
+                right_end = alignedread1.pos + self.fragmentLength
         # Handling PET below
         elif (alignedread1.is_proper_pair and alignedread2.is_proper_pair):
             if alignedread1.is_reverse:
-                e1 = alignedread1.pos - alignedread1.alen
+                e1 = alignedread1.pos - self.fragmentLength
             else:
                 e1 = alignedread1.pos
             if alignedread2.is_reverse:
-                e2 = alignedread2.pos - alignedread2.alen
+                e2 = alignedread2.pos - self.fragmentLength
             else:
                 e2 = alignedread2.pos
             left_end = (e1 if e1 <= e2 else e2)
             if alignedread1.is_reverse:
                 e1 = alignedread1.pos
             else:
-                e1 = alignedread1.pos + alignedread1.alen
+                e1 = alignedread1.pos + self.fragmentLength
             if alignedread2.is_reverse:
                 e2 = alignedread2.pos
             else:
-                e2 = alignedread2.pos + alignedread1.alen
+                e2 = alignedread2.pos + self.fragmentLength
             right_end = (e1 if e1 >= e2 else e2)
             '''print "position of the mates:", alignedread1.mpos, alignedread1.mpos'''
             '''*********************************'''
