@@ -5,6 +5,7 @@
 ###############################################################################
 ###############################################################################
 
+<<<<<<< HEAD
 rm(list=ls()) # Clear variables
 
 
@@ -32,6 +33,8 @@ GetBetas <- function(x){
 # The code
 ###############################################################################
 ###############################################################################
+=======
+>>>>>>> 1c290c92fa840fe14b115117310bdf7cd242913f
 # Load required packages
 # 
 # Installing these packages on linux was a pain.
@@ -46,6 +49,7 @@ library("methylumi")
 library("lumi")
 
 
+<<<<<<< HEAD
 # Define directories, input contains .RData files, output is where we write to.
 InputDirectory <- "/home/jyeung/Documents/Inputs/"
 OutputDirectory <- "/home/jyeung/Documents/Outputs/"
@@ -64,3 +68,16 @@ lapply(data_files, GetBetas)
 
 
 
+=======
+# Load .RData files
+FileDirectory <- "/home/jyeung/Documents/Project - Kollman/R file/bin"
+setwd(FileDirectory)
+load("20120228-01 Kollman.final.RData")
+
+
+# First, write expression table from .RData and put it into tab delimited file.
+# Seocnd, write experimental design into tab delimited file. 
+write.exprs(Kollman.final, file="kollman_expression.txt")
+write.table(pData(Kollman.final), file="kollman_pdata.txt", sep="\t",
+            quote=FALSE, row.names=FALSE, col.names=TRUE)
+>>>>>>> 1c290c92fa840fe14b115117310bdf7cd242913f
