@@ -17,6 +17,9 @@ GetBetas <- function(x){
     var <- mget(var_loaded, envir)
     print (class(var[[1]]))
     if (class(var[[1]]) == "MethyLumiM"){
+    write.table(exprs(var[[1]]),
+                file=paste(OutputDirectory, var_loaded, "_expression.txt", sep=""),
+                sep="\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
     write.table(betas(var[[1]]), 
                 file=paste(OutputDirectory, var_loaded, "_betas.txt", sep=""),
                 sep="\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
