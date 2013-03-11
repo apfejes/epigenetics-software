@@ -11,13 +11,13 @@ queue = Queue.Queue()
 
 class wave():
     crest = 0
-    std_dev = 0
+    sigma = 0
     chromosome = None
 
-    def __init__(self, chromosome, crest, std_dev, height):
+    def __init__(self, chromosome, crest, sigma, height):
         wave.chromosome = chromosome
         wave.crest = crest
-        wave.std_dev = std_dev
+        wave.sigma = sigma
         wave.height = height
 
     def type(self):
