@@ -1,6 +1,8 @@
 
-from Utilities import ReadAheadIteratorPET, LinkedList, MapMaker
+from Utilities import ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread
 
+
+make_wig = True
 fragment_length = 250
 map_type = "Triangle"
 
@@ -18,9 +20,16 @@ count = 0;
 new_block = True;
 last_block_l = 0
 last_block_r = 0
-
 reads_list = LinkedList.LL()
 mapmaker = MapMaker.MapMaker(map_type, 50, 150, fragment_length)
+if make_wig:
+    wigfile = WigFileThread.WigFileWriter(None)
+    wigfile.start_wig_writer()
+'''processor threads'''
+
+
+
+
 
 
 while True:
@@ -65,25 +74,14 @@ while True:
                 block_right = read_right
                 # print "block extended:", block_left, "-", block_right
         else:
-
             coverage_map = mapmaker.makeIslands(block_left, block_right, reads_list)
-
-            # print "region", r_l, "-", r_r
-            # if r_l < last_block_r:
-            #    print "OVERLAPPING REGIONS!"
-            #    sys.exit("dying")
-            # print "region", reads_list.head.holding.left_end, "-", reads_list.tail.holding.right_end
+            if make_wig:
+                wigfile.add_map(coverage_map, current_chromosome, block_left)
             reads_list.destroy()
             new_block = True
             last_block_l = block_left
             last_block_r = block_right
             readahead.pushback(alignedreadobjpet)    # push back the current read, so we can start again with a new block
-
-    '''process the reads'''
-    # check if the next read is contiguous with the last
-    # if read shows a gap, then pass the reads on to the map maker
-
-    # store the maps somewhere
 
 
 
@@ -91,5 +89,6 @@ while True:
     # print readahead.get_ref_name(alignedread.tid), alignedread.pos, alignedread.alen, alignedread.is_reverse, alignedread.is_paired, alignedread.is_proper_pair
 print "chromosome", current_chromosome, "had", count, "reads"
 
-
+if make_wig:
+    wigfile.close_wig_writer()
 readahead.close()
