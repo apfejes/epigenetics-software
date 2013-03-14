@@ -65,9 +65,11 @@ class MapDecomposer(threading.Thread):
     @staticmethod
     def subtract_gausian(coverage_map, height, sigma, mu):
         max_ht = MapDecomposer.gausian_value_at_peak(sigma)
-        for i in range(0, len(coverage_map)):
-            # print "coverage_map[", i, "]", coverage_map[i], "-", (height * (MapDecomposer.gausian_value_at_x(sigma, mu, i) / max_ht))
-            coverage_map[i] -= (height * (MapDecomposer.gausian_value_at_x(sigma, mu, i) / max_ht))
+        s = sigma * 3
+        for i in range(-s, s):
+            if (i + mu >= 0 and i + mu < len(coverage_map)):
+                # print "coverage_map[", i + mu, "]", coverage_map[i + mu], "-", (height * (MapDecomposer.sigma_height_table[sigma][math.fabs(i)] / max_ht)) =
+                coverage_map[i + mu] -= (height * (MapDecomposer.sigma_height_table[sigma][math.fabs(i)] / max_ht))
         return coverage_map
 
 
@@ -80,14 +82,15 @@ class MapDecomposer(threading.Thread):
         while True:
             area_over = 0
             area_under = 0
-            s2 = 2 * sigma
+            s = 3 * sigma
 
-            for x in xrange(-s2, s2):
-                if (i + x >= 0 and i + x < 900):
+            for x in xrange(-s, s):
+                if (i + x >= 0 and x < 900 and i + x < len(coverage_map)):
+                    # print x
                     expected = MapDecomposer.sigma_height_table[sigma][math.fabs(x)] * height / MapDecomposer.sigma_height_table[sigma][0]
                     # print "sigma:", sigma, "i,x:", i, x, "(", MapDecomposer.sigma_height_table[sigma][math.fabs(x)], "*", height, "/", MapDecomposer.sigma_height_table[sigma][0], "=", expected, ")"
                     actual = -1
-                    if i + x >= 0 and i + x < len(coverage_map):
+                    if i + x >= 0:
                         actual = coverage_map[i + x]
                     else:
                         actual = -1
