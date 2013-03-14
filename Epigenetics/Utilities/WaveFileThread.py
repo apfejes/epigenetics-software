@@ -13,6 +13,7 @@ class wave():
     crest = 0
     sigma = 0
     chromosome = None
+    height = 0
 
     def __init__(self, chromosome, crest, sigma, height):
         wave.chromosome = chromosome

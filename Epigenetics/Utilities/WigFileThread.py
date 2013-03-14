@@ -6,22 +6,11 @@ Created on 2013-03-08
 
 import Queue
 import threading
+import MappingItem
 
 queue = Queue.Queue()
 
-class item():
-    coverage_map = []
-    start = 0
-    chr = None
 
-
-    def __init__(self, cov_map, chromosome, start):
-        item.coverage_map = cov_map
-        item.start = start
-        item.chr = chromosome
-
-    def type(self):
-        return "WigfileItem"
 
 class WigFileWriter(threading.Thread):
 
@@ -77,6 +66,6 @@ class WigFileWriter(threading.Thread):
 
     def add_map(self, map_region, chromosome, start):
         # populate queue with data
-        queue.put(item(map_region, chromosome, start))
+        queue.put(MappingItem.item(map_region, chromosome, start))
         # wait on the queue until everything has been processed
 
