@@ -1,10 +1,13 @@
 
 from Utilities import ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread
+from Utilities import MapDecompingThread, Parameters
 
 
-make_wig = True
-fragment_length = 250
-map_type = "Triangle"
+param = Parameters.parameter()
+param.set_parameter("make_wig", True)
+param.set_parameter("fragment_length", 250)
+param.set_parameter("map_type", "Triangle")
+param.set_parameter("min_height", 4)
 
 
 
@@ -14,18 +17,22 @@ map_type = "Triangle"
 
 # do something with input
 
-readahead = ReadAheadIteratorPET.ReadAheadIteratorPET("testdata/ChipSeqGSE31221/GSE31221_RAW/18_19_GSM773994_TCF7_ChIPSeq.bam", fragment_length, "rb", False)
+readahead = ReadAheadIteratorPET.ReadAheadIteratorPET("testdata/ChipSeqGSE31221/GSE31221_RAW/18_19_GSM773994_TCF7_ChIPSeq.bam",
+                                                       param.get_parameter("fragment_length"), "rb", False)
 current_chromosome = None
 count = 0;
 new_block = True;
 last_block_l = 0
 last_block_r = 0
 reads_list = LinkedList.LL()
-mapmaker = MapMaker.MapMaker(map_type, 50, 150, fragment_length)
-if make_wig:
+mapmaker = MapMaker.MapMaker(param.get_parameter("map_type"), 50, 150, param.get_parameter("fragment_length")
+                             )
+'''processor threads'''
+if param.get_parameter("make_wig"):
     wigfile = WigFileThread.WigFileWriter(None)
     wigfile.start_wig_writer()
-'''processor threads'''
+mapprocessor = MapDecompingThread.MapDecomposer(param)
+mapprocessor.start_map_decomposer()
 
 
 
@@ -75,7 +82,9 @@ while True:
                 # print "block extended:", block_left, "-", block_right
         else:
             coverage_map = mapmaker.makeIslands(block_left, block_right, reads_list)
-            if make_wig:
+            # print "adding map: ", current_chromosome, block_left
+            mapprocessor.add_map(coverage_map, current_chromosome, block_left)
+            if param.get_parameter("make_wig"):
                 wigfile.add_map(coverage_map, current_chromosome, block_left)
             reads_list.destroy()
             new_block = True
@@ -89,6 +98,7 @@ while True:
     # print readahead.get_ref_name(alignedread.tid), alignedread.pos, alignedread.alen, alignedread.is_reverse, alignedread.is_paired, alignedread.is_proper_pair
 print "chromosome", current_chromosome, "had", count, "reads"
 
-if make_wig:
+mapprocessor.close_map_decomposer()
+if param.get_parameter("make_wig"):
     wigfile.close_wig_writer()
 readahead.close()
