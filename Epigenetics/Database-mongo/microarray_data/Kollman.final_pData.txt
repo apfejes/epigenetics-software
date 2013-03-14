@@ -1,0 +1,7 @@
+SampleLabel	Disease	Infected	Age	Sentrix.Barcode	Sample.Section	Detected.CpG..0.01.	Detected.CpG..0.05.	Signal.Average.GRN	Signal.Average.RED	Sample_Well
+NeoLm	NeoLm	Listeria	Infected	Neonate	6929742106	R01C01	485243	485306	4041.364	3921.541	C1
+NeoN0	NeoN0	Listeria	NotInfected	Neonate	6929742106	R02C01	485280	485421	4562.01	4010.383	C2
+AduLm	AduLm	Listeria	Infected	Adult	6929742106	R03C01	484970	485035	5365.508	4332.105	C3
+AduN0	AduN0	Listeria	NotInfected	Adult	6929742106	R04C01	484925	485010	5543.43	4559.934	C4
+OldLm	OldLm	Listeria	Infected	Old	6929742106	R05C01	485276	485352	6144.979	4711.643	C5
+OldN0	OldN0	Listeria	NotInfected	Old	6929742106	R06C01	485055	485253	6008.243	4676.586	C6
