@@ -1,6 +1,7 @@
 
 from Utilities import ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread
-from Utilities import MapDecompingThread, Parameters
+from Utilities import MapDecomposingThread, Parameters, WaveFileThread
+
 
 
 param = Parameters.parameter()
@@ -31,7 +32,9 @@ mapmaker = MapMaker.MapMaker(param.get_parameter("map_type"), 50, 150, param.get
 if param.get_parameter("make_wig"):
     wigfile = WigFileThread.WigFileWriter(None)
     wigfile.start_wig_writer()
-mapprocessor = MapDecompingThread.MapDecomposer(param)
+wavefile = WaveFileThread.WaveFileWriter(None)
+wavefile.start_wave_writer()
+mapprocessor = MapDecomposingThread.MapDecomposer(param)
 mapprocessor.start_map_decomposer()
 
 
@@ -101,4 +104,5 @@ print "chromosome", current_chromosome, "had", count, "reads"
 mapprocessor.close_map_decomposer()
 if param.get_parameter("make_wig"):
     wigfile.close_wig_writer()
+wavefile.close_wave_writer()
 readahead.close()
