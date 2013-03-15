@@ -12,8 +12,8 @@ rm(list=ls()) # Clear variables
 ###############################################################################
 GetData <- function(x){
     envir = environment()
-    print(envir)
     var_loaded <- load(x, envir)
+    print(var_loaded)
     var <- mget(var_loaded, envir)
     print (class(var[[1]]))
     if (class(var[[1]]) == "MethyLumiM"){
@@ -50,7 +50,7 @@ library("lumi")
 
 # Define directories, input contains .RData files, output is where we write to.
 InputDirectory <- "/home/jyeung/Documents/Inputs/SubsetOfThree"
-OutputDirectory <- "/home/jyeung/git/epigenetics-software/Epigenetics/Database-mongo/microarray_data/"
+OutputDirectory <- "/home/jyeung/Documents/Outputs/"
 setwd(InputDirectory)
 
 # First, get list of .RData files in InputDirectory.
