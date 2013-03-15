@@ -8,7 +8,7 @@ gets the beta values, expression values and design information.
 import os
 import glob
 import re
-import CreatePanel
+import pandas
 
 
 class Files(object):
@@ -27,9 +27,9 @@ class Files(object):
         # Second, sort them in alphabetical order
         # Third, get project name
         # 1. 
-        self.betas_fname = glob.glob("*_betas.txt")
-        self.design_fname = glob.glob("*_pData.txt")
-        self.expressions_fname = glob.glob("*_expression.txt")
+        self.betas_fname = glob.glob('*_betas.txt')
+        self.design_fname = glob.glob('*_pData.txt')
+        self.expressions_fname = glob.glob('*_expression.txt')
         # 2. 
         self.betas_fname.sort()
         self.design_fname.sort()
@@ -41,9 +41,28 @@ class Files(object):
             projects.append(project_name)
         self.projects = projects
         self.projects.sort()
-        self.betas = CreatePanel.CreatePanel(self.projects, 'betas', 20)
-        self.design = CreatePanel.CreatePanel(self.projects, 'design')
-        self.expressions = CreatePanel.CreatePanel(self.projects, 'expressions', 20)
+        print(str(len(projects)) + ' projects found in ' + Directory)
+    
+    def GetBetas(self, project_name, nrows=None):
+        filename = project_name + '_betas.txt'
+        return pandas.read_csv(filename, sep="\t", nrows=nrows)
+    
+    def GetExpressions(self, project_name, nrows=None):
+        filename = project_name + '_expression.txt'
+        return pandas.read_csv(filename, sep="\t", nrows=nrows)
+    
+    def GetDesign(self, project_name, nrows=None):
+        filename = project_name + '_pData.txt'
+        return pandas.read_csv(filename, sep="\t", nrows=nrows)
+  
+    def GetAnnotation(self, nrows=None):
+        return pandas.read_csv('annotation_probes.txt', sep='\t', nrows=nrows)
+            
+
+
+        
+
+        
         
         
         

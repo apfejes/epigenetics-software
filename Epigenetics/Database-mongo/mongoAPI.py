@@ -11,27 +11,35 @@ import os
 import glob
 import csv
 import gridfs
-from mongoUtilities import FilesInDirectory
+from mongoUtilities import ConnectToMongo, FilesInDirectory, InsertToMongo
 
 
-connection = MongoClient('kruncher.cmmt.ubc.ca', 27017)
-db = connection.epigenetics_database
-# Add code to test connection
-OutputDir = "/home/jyeung/Documents/Outputs"
+db = ConnectToMongo.ConnectToMongo() # db is our database
+OutputDir = '/home/jyeung/Documents/Outputs'
 files = FilesInDirectory.Files(OutputDir)
-i = 0 # Project index, i
-j = 0 # column index, j
-df = files.expressions[files.projects[i]]
-column_one = df.columns[j]
-expression_probe_1 = {"project_name": str(files.projects[i]), 
-                      "sample_name": df.columns[j], 
-                      "probe_index": str(df.index[i]), 
-                      "beta_value" : column_one[0]} 
-new_collection = db.new_collection
-new_collection_id = new_collection.insert(expression_probe_1)
-
-
-
-
-
+projects = files.projects
+# Test if there are betas, expressions and pData for each project?
+for project in projects:
+    print project
+    betas = files.GetBetas(project)
+    collection_betas = db.collection_betas
+    InsertToMongo.InsertBetas(betas, collection_betas)
+    del betas # Would this make it run faster??
+    print('Inserted ' + str(collection_betas.count()) + ' into collection_betas.')
+    expressions = files.GetExpressions(project)
+    collection_expressions = db.collection_expressions
+    InsertToMongo.InsertExpressions(expressions, collection_expressions)
+    del expressions
+    print('Inserted ' + str(collection_expressions.count()) + ' into collection_expressions.')
+    design = files.GetDesign(project)
+    collection_design = db.collection_design
+    InsertToMongo.InsertDesign(design, collection_design)
+    del design
+    print('Inserted ' + str(collection_design.count()) + ' into collection_design.')
+    annotation = files.GetAnnotation()
+    collection_annotation = db.collection_annotation
+    InsertToMongo.InsertAnnotation(annotation, collection_annotation)
+    del annotation
+    print('Inserted ' + str(collection_annotation.count()) + ' into collection_annotation.')
+    
 
