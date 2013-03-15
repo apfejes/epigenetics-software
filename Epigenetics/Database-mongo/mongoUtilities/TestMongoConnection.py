@@ -8,6 +8,7 @@ Add test_collection and test_document, test that it is there, then remove
 import unittest
 import pymongo
 from pymongo import MongoClient
+import ConnectToMongo
 
 
 class ConnectionTestCase(unittest.TestCase):
@@ -17,8 +18,11 @@ class ConnectionTestCase(unittest.TestCase):
         pass
     
     def test_add_remove(self):
+        '''
         connection = MongoClient('kruncher.cmmt.ubc.ca', 27017)
         db = connection.epigenetics_database
+        '''
+        db = ConnectToMongo.ConnectToMongo()
         test_document = {'key 1': 'value 1',
                          'key 2': 'value 2',
                          'key 3': 'value 3'}
