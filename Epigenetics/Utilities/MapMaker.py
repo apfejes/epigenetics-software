@@ -9,9 +9,6 @@ from Utilities import ReadModels
 
 class MapMaker():
 
-    template_length = 0;
-    coverage_template = None
-
     def __init__(self, map_type, parm1, parm2, parm3):
         if map_type == "Triangle":
             self.coverage_template = ReadModels.Distribution.Triangle(parm1, parm2, parm3)

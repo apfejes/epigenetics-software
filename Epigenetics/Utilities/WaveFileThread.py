@@ -11,16 +11,12 @@ import os
 queue = Queue.Queue()
 
 class wave():
-    crest = 0
-    sigma = 0
-    chromosome = None
-    height = 0
 
     def __init__(self, chromosome, crest, sigma, height):
-        wave.chromosome = chromosome
-        wave.crest = crest
-        wave.sigma = sigma
-        wave.height = height
+        self.chromosome = chromosome
+        self.crest = crest
+        self.sigma = sigma
+        self.height = height
 
     def type(self):
         return "Wave"
@@ -41,7 +37,7 @@ class WaveFileWriter(threading.Thread):
             self.f = filewriter
 
     def process_wave(self, wave):
-        self.f.write(wave.chromosome + "\t" + wave.crest + "\t" + wave.std_dev + "\t" + wave.height)
+        self.f.write(wave.chromosome + "\t" + str(wave.crest) + "\t" + str(wave.sigma) + "\t" + str(wave.height))
 
     def run(self):
         while True:
