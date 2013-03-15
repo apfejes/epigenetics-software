@@ -15,9 +15,6 @@ queue = Queue.Queue()
 
 class WigFileWriter(threading.Thread):
 
-    f = None
-    t = None
-
     def __init__(self, filewriter):
         threading.Thread.__init__(self)
         self.queue = queue
@@ -69,5 +66,5 @@ class WigFileWriter(threading.Thread):
 
     def add_map(self, map_region, chromosome, start):
         # populate queue with data
-        queue.put(MappingItem.item(map_region, chromosome, start))
+        queue.put(MappingItem.Item(map_region, chromosome, start))
         # wait on the queue until everything has been processed

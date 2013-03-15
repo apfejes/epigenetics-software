@@ -4,7 +4,7 @@ Created on 2013-03-06
 @author: afejes
 '''
 
-from Tkinter import *
+from Tkinter import Frame, Label, Button, OptionMenu, Tk
 
 class Application(Frame):
 
