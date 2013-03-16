@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 /.pydevproject
 *.pyc
 *.pyo
 *.*~
+=======
+*.*~
+*.pyc
+*.pyo
+>>>>>>> branch 'master' of https://github.com/apfejes/epigenetics-software.git
