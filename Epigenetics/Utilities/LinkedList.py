@@ -9,7 +9,7 @@ Created on 2013-01-29
 
 class Node(object):
     def type(self):
-        print ("DoublyLinkedList.Node")
+        print ("LinkedList.Node")
 
     def __init__(self, thing):
         self.holding = thing
@@ -22,7 +22,7 @@ class LL(object):
     '''
 
     def type(self):
-        print ("DoublyLinkedList")
+        print ("LinkedList")
 
     def __init__(self):
         self.__len = 0

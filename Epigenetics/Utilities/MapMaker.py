@@ -9,16 +9,21 @@ from Utilities import ReadModels
 
 class MapMaker():
 
-    def __init__(self, map_type, parm1, parm2, parm3):
+    def __init__(self, param):
+        map_type = param.get_parameter("map_type")
+        frag_length = param.get_parameter("fragment_length")
         if map_type == "Triangle":
-            self.coverage_template = ReadModels.Distribution.Triangle(parm1, parm2, parm3)
+            self.coverage_template = ReadModels.Distribution.Triangle(
+                                    param.get_parameter("triangle_min"),
+                                    param.get_parameter("triangle_median"),
+                                    frag_length)
         elif map_type == "Flat":
-            self.coverage_template = ReadModels.Distribution.Flat(parm1)
-            if parm2 != None or parm3 != None:
-                sys.exit("too many parameters passed for Flat distribution")
+            self.coverage_template = ReadModels.Distribution.Flat(frag_length)
         else:
             sys.exit("Unrecognized Readmodel type:", map_type)
 
+        if param.get_parameter("round_leading_edge"):
+            self.coverage_template = ReadModels.Distribution.round_leading_edge(self.coverage_template)
         self.template_length = len(self.coverage_template)
         # print "template_length", self.template_length
         # map = array('I')
