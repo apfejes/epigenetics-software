@@ -8,36 +8,35 @@ import multiprocessing
 import math
 import numpy
 from Utilities import WaveFileThread, MappingItem
-import copy
 import os
 import Queue
 
 queue = multiprocessing.Queue(400)    # don't let the main process get too far ahead
 max_sigma = 300
-
+END_PROCESSES = False
 
 class MapDecomposer(multiprocessing.Process):
 
     f = None
     t = None
-    param = None
+    PARAM = None
     sigma_height_table = None
     print_queue = None
     wave_queue = None
 
-    def __init__(self, param, wave_queue, print_queue, name):
+    def __init__(self, PARAM, wave_queue, print_queue, name):
         self._parent_pid = os.getpid()
         self._name = name
         self._popen = None
         self._daemonic = True
-        self.end_process = False
+
         if (MapDecomposer.wave_queue == None):
             MapDecomposer.wave_queue = wave_queue
         self.queue = queue
         if (MapDecomposer.print_queue == None):
             MapDecomposer.print_queue = print_queue
-        if (MapDecomposer.param == None):
-            MapDecomposer.param = param
+        if (MapDecomposer.PARAM == None):
+            MapDecomposer.PARAM = PARAM
         if (MapDecomposer.sigma_height_table == None):
             MapDecomposer.sigma_height_table = numpy.ndarray((max_sigma, 3 * max_sigma))
             '''first variable is the sigma, second is the number of spaces away 
@@ -123,7 +122,7 @@ class MapDecomposer(multiprocessing.Process):
                     elif actual > expected:
                         area_under += expected
             if (area_over > (1.0 / sigma) * area_under):
-                return sigma - 1;
+                return sigma - 1
             if sigma >= 299:
                 return sigma - 1
             sigma += 1
@@ -134,10 +133,10 @@ class MapDecomposer(multiprocessing.Process):
         '''takes in a coverage map object and begins the process of identifying
          the normal curves that best fit the map.'''
         peaks = []
-        n = copy.deepcopy(item.coverage_map)
+        n = list(item.coverage_map)    # creates a new, independent list
         v = MapDecomposer.get_tallest_point(n)    # identify tallest point
-        min_height = MapDecomposer.param.get_parameter("min_height")
-        lastWave_pos = 0;
+        min_height = MapDecomposer.PARAM.get_parameter("min_height")
+        lastWave_pos = 0
         while v.get('height') >= min_height:
             p = v.get('position')
             if lastWave_pos == p:
@@ -157,7 +156,7 @@ class MapDecomposer(multiprocessing.Process):
             v = MapDecomposer.get_tallest_point(n)    # re-calculate tallest point
             # repeat
         for n in peaks:
-                MapDecomposer.wave_queue.put(n)
+            MapDecomposer.wave_queue.put(n)
         return None
 
 
@@ -176,18 +175,19 @@ class MapDecomposer(multiprocessing.Process):
                 map_item = queue.get()    # grabs host from queue
                 self.process_map(map_item, self.f)
             except Queue.Empty:
-                if self.end_process:
+                if END_PROCESSES:
+                    self.print_queue.put("thread received signal to quit")
                     break
                 else:
                     continue
 
-    def close_map_decomposer(self):
-        queue.join_thread()
-        self.queue.all_tasks_done
-        self.end_process = True
+    # def close_map_decomposer(self):
+    #    '''instructions to close out the thread and end the process.'''
+    #    queue.join_thread()
+    #    self.end_process = True
 
-
-    def add_map(self, map_region, chromosome, start):
+    @staticmethod
+    def add_map(map_region, chromosome, start):
         '''populate queue with data'''
         queue.put(MappingItem.Item(map_region, chromosome, start))
         # wait on the queue until everything has been processed
