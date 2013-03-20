@@ -41,7 +41,7 @@ class ReadAheadIteratorPET():
                 a = self.iterator.next()    # try to get the next element
                 self.gets += 1
                 while a.is_unmapped:    # ignore reads that are unmapped
-                    self.unmapped_reads += 1
+                    # self.unmapped_reads += 1
                     a = self.iterator.next()
                     if a == None:
                         return None
@@ -50,7 +50,7 @@ class ReadAheadIteratorPET():
                         a2 = ReadAheadIteratorPET.reads_processed.pop(a.qname)
                         # if ReadAheadIteratorPET.reads_processed.has_key(a.qname):
                         #    print "key a.qname still found", a.qname
-                        self.paired_reads += 2
+                        # self.paired_reads += 2
                         return ReadAheadIteratorPET._apply_frag_properties(self, a, a2)
 
                     else:    # if you haven't seen the other pair

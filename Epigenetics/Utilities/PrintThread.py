@@ -42,7 +42,6 @@ class StringWriter(threading.Thread):
         self.t.setDaemon(True)
         self.t.start()
 
-    def close_wig_writer(self):
-        self.queue.join()
-        self.queue.all_tasks_done
+    def close_print_writer(self):
+        pass
 
