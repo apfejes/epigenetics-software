@@ -12,7 +12,7 @@ import copy
 import os
 import Queue
 
-queue = multiprocessing.Queue()
+queue = multiprocessing.Queue(400)    # don't let the main process get too far ahead
 max_sigma = 300
 
 
@@ -30,6 +30,7 @@ class MapDecomposer(multiprocessing.Process):
         self._name = name
         self._popen = None
         self._daemonic = True
+        self.end_process = False
         if (MapDecomposer.wave_queue == None):
             MapDecomposer.wave_queue = wave_queue
         self.queue = queue
@@ -178,9 +179,10 @@ class MapDecomposer(multiprocessing.Process):
                         if this_sigma > sigma:
                             sigma = this_sigma
                             mu = i
-            MapDecomposer.print_queue.put("appending peak: " +
+            '''MapDecomposer.print_queue.put("appending peak: " +
                                 str(item.chr) + " " + str(item.start + mu) +
                                 " " + str(sigma) + " " + str(v.get('height')))
+                                '''
             peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, v.get('height')))
             '''MapDecomposer.printthread.add_string(str(n))
             MapDecomposer.printthread.add_string("subtracting: " + str(v.get('height')) + " " + str(sigma) + " " + str(mu))
@@ -267,7 +269,10 @@ class MapDecomposer(multiprocessing.Process):
                 self.process_map(map_item, self.f)
                 # print "processed", map_item.start
             except Queue.Empty:
-                continue
+                if self.end_process:
+                    break
+                else:
+                    continue
 
     def start_map_decomposer(self):
         pass
@@ -287,6 +292,7 @@ class MapDecomposer(multiprocessing.Process):
 
         queue.join_thread()
         self.queue.all_tasks_done
+        self.end_process = True
         # self.f.close()
 
         # wait on the queue until everything has been processed

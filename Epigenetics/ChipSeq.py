@@ -53,18 +53,19 @@ def main():
     wavefile = WaveFileThread.WaveFileWriter(None, wave_queue)
     wavefile.start_wave_writer()
 
-    print_thread = PrintThread.StringWriter(print_queue)
+    print_thread = PrintThread.StringWriter(print_queue)    # reads the print_queue
     print_thread.start_print_writer()
 
     procs = []
     for x in range(param.get_parameter("processor_threads")):
-        print "starting process number ", x
+
         mapprocessor = MapDecomposingThread.MapDecomposer(param, wave_queue, print_queue, x)
         p = multiprocessing.Process(target = mapprocessor.run)
         p.daemon = True
         p.start()
         procs.append(p)
 
+    print_queue.put("All Processor threads started successfully.")
     print_queue.put("Chromosome processing has started, along with " +
                 "threads to handle output.  Please wait until all threads " +
                 "have completed. Note, threads for processing may continue " +
@@ -132,9 +133,10 @@ def main():
                                     # read, so we can start again with a new block
     print "chromosome", current_chromosome, "had", count, "reads"
 
-    mapprocessor.close_map_decomposer()
+
     for p in procs:
         p.join()
+    mapprocessor.close_map_decomposer()
     if param.get_parameter("make_wig"):
         wigfile.close_wig_writer()
     wavefile.close_wave_writer()
