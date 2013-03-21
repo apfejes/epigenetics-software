@@ -19,13 +19,15 @@ class Files(object):
 
     def __init__(self, Directory):
         '''
-        Initialize
+        Initialize by gettin filenames and projectnames and sorting them.
         '''
         self.directory = Directory
         os.chdir(Directory)
+        '''
         # First, get betas, design and expression filenames
         # Second, sort them in alphabetical order
         # Third, get project name
+        '''
         # 1. 
         self.betas_fname = glob.glob('*_betas.txt')
         self.design_fname = glob.glob('*_pData.txt')
