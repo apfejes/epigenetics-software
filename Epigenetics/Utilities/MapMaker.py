@@ -9,16 +9,21 @@ from Utilities import ReadModels
 
 class MapMaker():
 
-    def __init__(self, map_type, parm1, parm2, parm3):
+    def __init__(self, PARAM):
+        map_type = PARAM.get_parameter("map_type")
+        frag_length = PARAM.get_parameter("fragment_length")
         if map_type == "Triangle":
-            self.coverage_template = ReadModels.Distribution.Triangle(parm1, parm2, parm3)
+            self.coverage_template = ReadModels.Distribution.Triangle(
+                                    PARAM.get_parameter("triangle_min"),
+                                    PARAM.get_parameter("triangle_median"),
+                                    frag_length)
         elif map_type == "Flat":
-            self.coverage_template = ReadModels.Distribution.Flat(parm1)
-            if parm2 != None or parm3 != None:
-                sys.exit("too many parameters passed for Flat distribution")
+            self.coverage_template = ReadModels.Distribution.Flat(frag_length)
         else:
             sys.exit("Unrecognized Readmodel type:", map_type)
 
+        if PARAM.get_parameter("round_leading_edge"):
+            self.coverage_template = ReadModels.Distribution.round_leading_edge(self.coverage_template)
         self.template_length = len(self.coverage_template)
         # print "template_length", self.template_length
         # map = array('I')
@@ -60,11 +65,19 @@ class MapMaker():
                         coverage_map[i] += self.coverage_template[i - read_st]
 
             else:    # PET TAG
-                print "PET"
-                sys.exit("PET not handled yet")
-            p = p.next
+                # print "PET"
+                # sys.exit("PET not handled yet")
+                read1 = p.holding.read1
+                read2 = p.holding.read2
 
-            # if PET
-            # if SET
+                ends = [read1.get_left_end(),
+                        read1.get_right_end(),
+                        read2.get_left_end(),
+                        read2.get_right_end()]
+                le = min(ends) - start
+                re = max(ends) - start
+                for i in range(le, re):    # No rounding done.
+                    coverage_map[i] += self.coverage_template[i - le]
+            p = p.next
 
         return coverage_map

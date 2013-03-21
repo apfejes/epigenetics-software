@@ -21,7 +21,12 @@ class Distribution():
             a[i] = 0.5 - (0.5 * (float(i) - med_point) / (float(max_point) - med_point))
         return a
 
-
+    @staticmethod
+    def round_leading_edge(array):
+        d = 25
+        for i in xrange(d):
+            array[i] = (i + 1) / (d + 1)
+        return array
 
 
 
