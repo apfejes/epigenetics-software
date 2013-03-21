@@ -27,7 +27,9 @@ InputDir = '/home/jyeung/Documents/Outputs'
 files = FilesInDirectory.Files(InputDir)
 projects = files.projects
 # 3.
-collection = db.down2
+collection_name = raw_input('Insert collection name: ')
+collection = db[collection_name]
+# collection = db.down
 # 4.
 for project in projects:
     
@@ -46,11 +48,11 @@ for project in projects:
     design = files.GetDesign(project)
     InsertToMongo.InsertDesign(design, collection)
     del design
- 
+
 # Get Annotation
 annotation = files.GetAnnotation()
 collection = db.annotation
 InsertToMongo.InsertAnnotation(annotation, collection)
 del annotation
-    
+
 
