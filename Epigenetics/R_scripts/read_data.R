@@ -10,22 +10,22 @@ rm(list=ls()) # Clear variables
 # Declare functions
 ###############################################################################
 ###############################################################################
-GetBetas <- function(x){
+GetData <- function(x){
     envir = environment()
-    print(envir)
     var_loaded <- load(x, envir)
+    print(var_loaded)
     var <- mget(var_loaded, envir)
     print (class(var[[1]]))
     if (class(var[[1]]) == "MethyLumiM"){
     write.table(exprs(var[[1]]),
                 file=paste(OutputDirectory, var_loaded, "_expression.txt", sep=""),
-                sep="\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
+                sep="\t", quote=FALSE, row.names=TRUE, col.names=TRUE)
     write.table(betas(var[[1]]), 
                 file=paste(OutputDirectory, var_loaded, "_betas.txt", sep=""),
-                sep="\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
+                sep="\t", quote=FALSE, row.names=TRUE, col.names=TRUE)
     write.table(pData(var[[1]]),
                 file=paste(OutputDirectory, var_loaded, "_pData.txt", sep=""),
-                sep="\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
+                sep="\t", quote=FALSE, row.names=TRUE, col.names=TRUE)
     } else{
     warning(paste(var_loaded), 'is not a MethyLumiM object')
     }
@@ -49,7 +49,7 @@ library("lumi")
 
 
 # Define directories, input contains .RData files, output is where we write to.
-InputDirectory <- "/home/jyeung/Documents/Inputs/"
+InputDirectory <- "/home/jyeung/Documents/Inputs/SubsetOfThree"
 OutputDirectory <- "/home/jyeung/Documents/Outputs/"
 setwd(InputDirectory)
 
@@ -60,4 +60,4 @@ setwd(InputDirectory)
 # Fifth, if methylumi, get betas of methylumi object, then writes
 # 1.
 data_files <- list.files(pattern="*.RData")
-lapply(data_files, GetBetas)
+lapply(data_files, GetData)

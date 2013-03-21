@@ -19,12 +19,6 @@ class ReadAheadIteratorPET():
     only_PET_reads = False
     current_chromosome = None
 
-    # stats
-    unmapped_reads = 0
-    paired_reads = 0
-    unpaired_reads = 0
-    gets = 0
-
     def type(self):
         print ("ReadAheadIteratorPET")
 
@@ -36,6 +30,7 @@ class ReadAheadIteratorPET():
         self.isReadValid = True
         self.fragmentLength = fragment_length
         self.only_PET_reads = only_PET
+        self.gets = 0
         # print "self.only_PET_reads", self.only_PET_reads
         return
 
