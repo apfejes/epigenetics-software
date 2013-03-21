@@ -8,6 +8,7 @@ from Utilities import ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread
 from Utilities import MapDecomposingThread, Parameters, WaveFileThread
 from Utilities import PrintThread
 import multiprocessing
+import math
 
 
 PARAM = None
@@ -15,14 +16,16 @@ PARAM = None
 def init_parameters():
     '''initialize the parameters used by the WaveGenerator.  To be replaced 
     with an external input source.'''
-    PARAM.set_parameter("make_wig", True)
-    PARAM.set_parameter("triangle_min", 200)
-    PARAM.set_parameter("triangle_median", 250)
-    PARAM.set_parameter("fragment_length", 300)
+    PARAM.set_parameter("make_wig", True)    # create a wig file
+    PARAM.set_parameter("triangle_min", 200)    # weighted reads start weighting
+    PARAM.set_parameter("triangle_median", 250)    # weighted reads - median weighting
+    PARAM.set_parameter("fragment_length", 300)    # longest read length
     PARAM.set_parameter("round_leading_edge", True)
     PARAM.set_parameter("map_type", "Triangle")
     PARAM.set_parameter("min_height", 10)
     PARAM.set_parameter("processor_threads", 8)
+    PARAM.set_parameter("number_waves", True)
+    PARAM.set_parameter("max_pet_length", 2000)
     PARAM.set_parameter("input_file", "testdata/ChipSeqGSE31221/" +
                        "GSE31221_RAW/18_19_GSM773994_TCF7_ChIPSeq.bam")
     # PARAM.set_parameter("input_file", "testdata/ex1.bam")
@@ -89,6 +92,8 @@ def main():
             again from the start of the next chromosome.'''
             read_left = alignedreadobjpet.get_left_end()
             read_right = alignedreadobjpet.get_right_end()
+            if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get_parameter("max_pet_length"):
+                continue    # simply move to the
             if not new_block:
             # flush current reads to map
                 coverage_map = mapmaker.makeIslands(block_left, block_right,
@@ -111,7 +116,8 @@ def main():
 
         read_left = alignedreadobjpet.get_left_end()
         read_right = alignedreadobjpet.get_right_end()
-
+        if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get_parameter("max_pet_length"):
+            continue
         if new_block:
             reads_list = LinkedList.LL()
             block_left = read_left
