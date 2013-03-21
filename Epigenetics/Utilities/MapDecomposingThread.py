@@ -136,8 +136,14 @@ class MapDecomposer(multiprocessing.Process):
         n = list(item.coverage_map)    # creates a new, independent list
         v = MapDecomposer.get_tallest_point(n)    # identify tallest point
         min_height = MapDecomposer.PARAM.get_parameter("min_height")
+        number_waves = MapDecomposer.PARAM.get_parameter("number_waves")
+
         lastWave_pos = 0
-        while v.get('height') >= min_height:
+        if number_waves:
+            wave_number = 1
+        else:
+            wave_number = None
+        while v.get('height') >= min_height:    # TODO: Should be replaced with percentage of maxheight.
             p = v.get('position')
             if lastWave_pos == p:
                 break
@@ -151,9 +157,12 @@ class MapDecomposer(multiprocessing.Process):
                         if this_sigma > sigma:
                             sigma = this_sigma
                             mu = i
-            peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, v.get('height')))
+
+            peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, v.get('height'), wave_number))
             n = MapDecomposer.subtract_gausian(n, v.get('height'), sigma, mu)    # subtract gausian
             v = MapDecomposer.get_tallest_point(n)    # re-calculate tallest point
+            if number_waves:
+                wave_number += 1
             # repeat
         for n in peaks:
             MapDecomposer.wave_queue.put(n)
