@@ -8,7 +8,7 @@ Created on 2013-03-15
 import pymongo
 from pymongo import MongoClient
 
-@staticmethod
+
 def ConnectToMongo():
     '''
     Connects and checks connection to mongoDB
