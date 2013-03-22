@@ -10,6 +10,7 @@ import numpy
 from Utilities import WaveFileThread, MappingItem
 import os
 import Queue
+import sys
 
     # don't let the main process get too far ahead
 max_sigma = 300
@@ -105,7 +106,7 @@ class MapDecomposer(multiprocessing.Process):
 
 
     @staticmethod
-    def best_fit_test(coverage_map, i, height):
+    def best_fit_slow(coverage_map, i, height):
         '''i is the position to test for the best fit in the coverage_map.'''
         sigma = 1
         while True:
@@ -131,6 +132,46 @@ class MapDecomposer(multiprocessing.Process):
         return sigma - 1    # once it breaks, it has gone one sigma further than it should have, so subtract one.
 
     @staticmethod
+    def best_fit_newton(coverage_map, i, height):
+        '''i is the position to test for the best fit in the coverage_map.'''
+        low_sigma = 1
+        high_sigma = max_sigma - 1
+        if MapDecomposer.sigma_test(coverage_map, max_sigma - 1, i, height):    # still too high
+            sys.exit("max sigma not set high enough - halting")
+        sigma = int((high_sigma - low_sigma) / 2.0)
+        while low_sigma != high_sigma - 1:
+            if not MapDecomposer.sigma_test(coverage_map, sigma, i, height):    # still too high
+                high_sigma = sigma
+            else:    # still too low
+                low_sigma = sigma
+            sigma = ((high_sigma - low_sigma) / 2) + low_sigma
+        return low_sigma
+
+
+    @staticmethod
+    def sigma_test(coverage_map, sigma, i, height):
+        area_over = 0
+        area_under = 0
+        s = 3 * sigma
+        for x in xrange(-s, s):
+            if (i + x >= 0 and x < 900 and i + x < len(coverage_map)):
+                expected = height * (MapDecomposer.sigma_height_table[sigma][math.fabs(x)] / MapDecomposer.sigma_height_table[sigma][0])
+                actual = 0
+                if i + x >= 0:
+                    actual = coverage_map[i + x]
+                if actual < expected:
+                    area_over += (expected - actual)
+                    area_under += actual
+                elif actual > expected:
+                    area_under += expected
+        if (area_over > (1.0 / sigma) * area_under):
+            return False
+        if sigma >= 299:
+            return False
+        return True
+
+
+    @staticmethod
     def process_map(item, filename):
         '''takes in a coverage map object and begins the process of identifying
          the normal curves that best fit the map.'''
@@ -152,10 +193,10 @@ class MapDecomposer(multiprocessing.Process):
             else:
                 lastWave_pos = p
             sigma = 1
-            for i in range(p - 20, p + 20):
+            for i in range(p - 15, p + 15):
                 if i > 0 and i < len(n):
                     if (n[i] >= 0.9 * n[p]):    # find best fit widest gausian
-                        this_sigma = MapDecomposer.best_fit_test(n, i, v.get('height'))
+                        this_sigma = MapDecomposer.best_fit_newton(n, i, v.get('height'))
                         if this_sigma > sigma:
                             sigma = this_sigma
                             mu = i
