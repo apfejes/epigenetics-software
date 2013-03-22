@@ -5,13 +5,8 @@ Created on 2013-03-15
 '''
 import unittest
 from Utilities import MapDecomposingThread
-import copy
-
 
 class Test(unittest.TestCase):
-
-
-
 
     def testBuild_and_destroy(self):
         mapdecomp = MapDecomposingThread.MapDecomposer(None, None, None, None, None)
@@ -41,11 +36,22 @@ class Test(unittest.TestCase):
         peak = mapdecomp.gausian_value_at_peak(sigma)
         for x in xrange(90):
             coverage_map[x] = (mapdecomp.gausian_value_at_x(sigma, mu, x) / peak) * height
-        s = mapdecomp.best_fit_test(coverage_map, mu, height)
+        s = mapdecomp.best_fit_slow(coverage_map, mu, height)
         self.assertEqual(s, sigma, "sigma returned by best fit is incorrect.  expected "
                          + str(sigma) + " got " + str(s))
 
-
+def testFind_best_sigma(self):
+        mapdecomp = MapDecomposingThread.MapDecomposer(None, None, None, None, None)
+        height = 15
+        sigma = 15
+        mu = 45
+        coverage_map = [0] * 90
+        peak = mapdecomp.gausian_value_at_peak(sigma)
+        for x in xrange(90):
+            coverage_map[x] = (mapdecomp.gausian_value_at_x(sigma, mu, x) / peak) * height
+        s = mapdecomp.best_fit_newton(coverage_map, mu, height)
+        self.assertEqual(s, sigma, "sigma returned by best fit is incorrect.  expected "
+                         + str(sigma) + " got " + str(s))
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
