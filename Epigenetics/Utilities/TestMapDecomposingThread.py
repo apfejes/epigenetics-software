@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
 
 
     def testBuild_and_destroy(self):
-        mapdecomp = MapDecomposingThread.MapDecomposer(None, None)
+        mapdecomp = MapDecomposingThread.MapDecomposer(None, None, None, None, None)
         length = 90
         height = 15
         sigma = 15
@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
             self.assert_(coverage_map[x] == 0.0, "Subtraction failed: " + str(coverage_map[x]))
 
     def testFind_best_sigma(self):
-        mapdecomp = MapDecomposingThread.MapDecomposer(None, None)
+        mapdecomp = MapDecomposingThread.MapDecomposer(None, None, None, None, None)
         height = 15
         sigma = 15
         mu = 45
@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
         peak = mapdecomp.gausian_value_at_peak(sigma)
         for x in xrange(90):
             coverage_map[x] = (mapdecomp.gausian_value_at_x(sigma, mu, x) / peak) * height
-        s = mapdecomp.best_fit_test(coverage_map, mu)
+        s = mapdecomp.best_fit_test(coverage_map, mu, height)
         self.assertEqual(s, sigma, "sigma returned by best fit is incorrect.  expected "
                          + str(sigma) + " got " + str(s))
 

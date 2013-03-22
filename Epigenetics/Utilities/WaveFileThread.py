@@ -22,9 +22,6 @@ class wave():
 
 class WaveFileWriter(threading.Thread):
 
-    # f = None
-    # t = None
-
     def type(self):
         return "WaveFileThread"
 
@@ -35,10 +32,16 @@ class WaveFileWriter(threading.Thread):
 
     def process_wave(self, wave):
         if (wave.number != None):
-            self.f.write(wave.chromosome + "\t" + str(wave.crest) + "\t" + str(wave.sigma) + "\t" + str(wave.height) +
-                         "\t" + str(wave.number) + "\n")
+            self.f.write(wave.chromosome + "\t" +
+                         str(wave.crest) + "\t" +
+                         str(wave.sigma) + "\t" +
+                         str(round(wave.height, 2)) + "\t" +
+                         str(wave.number) + "\n")
         else:
-            self.f.write(wave.chromosome + "\t" + str(wave.crest) + "\t" + str(wave.sigma) + "\t" + str(wave.height) + "\n")
+            self.f.write(wave.chromosome + "\t" +
+                         str(wave.crest) + "\t" +
+                         str(wave.sigma) + "\t" +
+                         str(round(wave.height, 2)) + "\n")
 
     def run(self):
         while True:
@@ -47,7 +50,6 @@ class WaveFileWriter(threading.Thread):
             self.process_wave(wave)
             # signals to queue job is done
             # self.queue.task_done()
-
 
     def start_wave_writer(self):
         # spawn a pool of threads, and pass them queue instance
@@ -63,7 +65,6 @@ class WaveFileWriter(threading.Thread):
             self.t = WaveFileWriter(self.f, self.queue)
             self.t.setDaemon(True)
             self.t.start()
-
 
     def close_wave_writer(self):
         self.f.close()

@@ -11,7 +11,7 @@ from Utilities import WaveFileThread, MappingItem
 import os
 import Queue
 
-queue = multiprocessing.Queue(400)    # don't let the main process get too far ahead
+    # don't let the main process get too far ahead
 max_sigma = 300
 END_PROCESSES = False
 
@@ -22,9 +22,10 @@ class MapDecomposer(multiprocessing.Process):
     PARAM = None
     sigma_height_table = None
     print_queue = None
+    map_queue = None
     wave_queue = None
 
-    def __init__(self, PARAM, wave_queue, print_queue, name):
+    def __init__(self, PARAM, wave_queue, print_queue, map_queue, name):
         self._parent_pid = os.getpid()
         self._name = name
         self._popen = None
@@ -32,7 +33,8 @@ class MapDecomposer(multiprocessing.Process):
 
         if (MapDecomposer.wave_queue == None):
             MapDecomposer.wave_queue = wave_queue
-        self.queue = queue
+        if (MapDecomposer.map_queue == None):
+            MapDecomposer.map_queue = map_queue
         if (MapDecomposer.print_queue == None):
             MapDecomposer.print_queue = print_queue
         if (MapDecomposer.PARAM == None):
@@ -181,8 +183,9 @@ class MapDecomposer(multiprocessing.Process):
     def run(self):
         while True:
             try:
-                map_item = queue.get()    # grabs host from queue
+                map_item = MapDecomposer.map_queue.get()    # grabs host from queue
                 self.process_map(map_item, self.f)
+                # MapDecomposer.map_queue.task_done()
             except Queue.Empty:
                 if END_PROCESSES:
                     self.print_queue.put("thread received signal to quit")
@@ -198,5 +201,5 @@ class MapDecomposer(multiprocessing.Process):
     @staticmethod
     def add_map(map_region, chromosome, start):
         '''populate queue with data'''
-        queue.put(MappingItem.Item(map_region, chromosome, start))
+        MapDecomposer.map_queue.put(MappingItem.Item(map_region, chromosome, start))
         # wait on the queue until everything has been processed
