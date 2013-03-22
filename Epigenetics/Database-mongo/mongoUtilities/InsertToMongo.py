@@ -19,7 +19,7 @@ we iterate through columns in each row.
 
 def InsertBetas(betas, collection):
     print ('Inserting betas into mongo...')
-    for column_index in range(0, len(betas.columns)):    # columns are samples
+    for column_index in range(0, len(betas.columns)): # columns are samples
         sample_name = betas.columns[column_index]
         for row_index in range(0, len(betas.index)):
             probe_index = betas.index[row_index]
@@ -29,11 +29,11 @@ def InsertBetas(betas, collection):
                              'beta_value': beta_value}
             # Prepared equivalent in SQL?
             collection_id = collection.insert(beta_document)
-    print('Inserted ' + str(collection.count()) + ' into collection.')
-
+    print('Inserted ' + str(collection.count()) + ' into collection.') 
+            
 def InsertExpressions(expressions, collection):
     print('Inserting expressions into mongo...')
-    for column_index in range(0, len(expressions.columns)):    # columns = samples
+    for column_index in range(0, len(expressions.columns)): # columns = samples
         sample_name = expressions.columns[column_index]
         for row_index in range(0, len(expressions.index)):
             probe_index = expressions.index[row_index]
@@ -43,26 +43,26 @@ def InsertExpressions(expressions, collection):
                                    'expression_value': expression_value}
             collection_id = collection.insert(expression_document)
     print('Inserted ' + str(collection.count()) + ' into collection.')
-
+            
 def InsertDesign(design, collection):
     print('Inserting design into mongo...')
-    for row_index in range(0, len(design.index)):    # rows are samples
-        design_document = {}    # Initialize empty document
+    for row_index in range(0, len(design.index)): # rows are samples
+        design_document = {} # Initialize empty document
         for column_index in range(0, len(design.columns)):
-            design_attribute = str(design.columns[column_index])    # our key
-            design_value = str(design[design_attribute][row_index])    # our value
-            design_attribute = design_attribute.replace('.', '_')
+            design_attribute = str(design.columns[column_index]) # our key
+            design_value = str(design[design_attribute][row_index]) # our value
+            design_attribute = design_attribute.replace('.', '_') 
             # It seems mongoDB doesn't like periods as keys??
-            design_document[design_attribute] = design_value    # key:value pair
+            design_document[design_attribute] = design_value # key:value pair
         collection_id = collection.insert(design_document)
     print('Inserted ' + str(collection.count()) + ' into collection.')
 
 def InsertAnnotation(annotation, collection):
     print('Inserting annotation into mongo...')
-    for row_index in range(0, len(annotation.index)):    # rows are samples
-        annotation_document = {}    # Initialize empty document
+    for row_index in range(0, len(annotation.index)): # rows are samples
+        annotation_document = {} # Initialize empty document
         for column_index in range(0, len(annotation.columns)):
-            annotation_attribute = str(annotation.columns[column_index])    # key
+            annotation_attribute = str(annotation.columns[column_index]) # key
             annotation_value = annotation[annotation_attribute][row_index]
             annotation_attribute = annotation_attribute.replace('.', '_')
             # It seems mongoDB doesn't like periods in keys??
@@ -70,15 +70,4 @@ def InsertAnnotation(annotation, collection):
         collection_id = collection.insert(annotation_document)
     print('Inserted ' + str(collection.count()) + ' into collection.')
 
-
-def Insert(object, collection):
-    '''Generic insertion function for dictionary objects into mongodb'''
-    print('Inserting object into mongo...')
-    if type(object) == dict:
-        collection_id = collection.insert(object)
-        print('Inserted ' + str(collection.count()) + ' into collection.')
-    else:
-        print("Attempted to insert a non-dictionary object into the database.")
-        sys.exit()
-
-
+    
