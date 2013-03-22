@@ -9,49 +9,65 @@ import pymongo
 from pymongo import MongoClient
 import pandas
 
+'''
+Because sample names are the columns of the beta/expression table, 
+we iterate through rows in each column.
+
+But in design and annotation tables, the sample names are the rows, so
+we iterate through columns in each row. 
+'''
 
 def InsertBetas(betas, collection):
-    for column_index in range(0, len(betas.columns)):
-        sample_name = str(betas.columns[column_index])
+    print ('Inserting betas into mongo...')
+    for column_index in range(0, len(betas.columns)): # columns are samples
+        sample_name = betas.columns[column_index]
         for row_index in range(0, len(betas.index)):
             probe_index = betas.index[row_index]
-            beta_value = betas[sample_name][row_index]
-            beta_document = {'sample_name': str(sample_name),
-                             'probe_index': str(probe_index),
-                             'beta_value': str(beta_value)}
-            collection_id = collection.insert(beta_document) 
+            beta_value = float(betas[sample_name][row_index])
+            beta_document = {'sample_name': sample_name,
+                             'probe_index': probe_index,
+                             'beta_value': beta_value}
+            # Prepared equivalent in SQL?
+            collection_id = collection.insert(beta_document)
+    print('Inserted ' + str(collection.count()) + ' into collection.') 
             
 def InsertExpressions(expressions, collection):
-    for column_index in range(0, len(expressions.columns)):
-        sample_name = str(expressions.columns[column_index])
+    print('Inserting expressions into mongo...')
+    for column_index in range(0, len(expressions.columns)): # columns = samples
+        sample_name = expressions.columns[column_index]
         for row_index in range(0, len(expressions.index)):
             probe_index = expressions.index[row_index]
-            expression_value = expressions[sample_name][row_index]
-            expression_document = {'sample_name': str(sample_name),
-                             'probe_index': str(probe_index),
-                             'beta_value': str(expression_value)}
+            expression_value = float(expressions[sample_name][row_index])
+            expression_document = {'sample_name': sample_name,
+                                   'probe_index': probe_index,
+                                   'expression_value': expression_value}
             collection_id = collection.insert(expression_document)
+    print('Inserted ' + str(collection.count()) + ' into collection.')
             
 def InsertDesign(design, collection):
-    for row_index in range(0, len(design.index)):
+    print('Inserting design into mongo...')
+    for row_index in range(0, len(design.index)): # rows are samples
         design_document = {} # Initialize empty document
-        #for column_index in range(0, len(design.columns)):
-        for column_index in range(0, 4):
-            design_attribute = str(design.columns[column_index])
-            design_value = str(design[design_attribute][row_index])
-            design_attribute = design_attribute.replace('.', '_')
-            design_value = design_value.replace('.', '_')
-            design_document[design_attribute] = design_value
+        for column_index in range(0, len(design.columns)):
+            design_attribute = str(design.columns[column_index]) # our key
+            design_value = str(design[design_attribute][row_index]) # our value
+            design_attribute = design_attribute.replace('.', '_') 
+            # It seems mongoDB doesn't like periods as keys??
+            design_document[design_attribute] = design_value # key:value pair
         collection_id = collection.insert(design_document)
+    print('Inserted ' + str(collection.count()) + ' into collection.')
 
 def InsertAnnotation(annotation, collection):
-    for row_index in range(0, len(annotation.index)):
-        annotation_document = {} # Initialize
+    print('Inserting annotation into mongo...')
+    for row_index in range(0, len(annotation.index)): # rows are samples
+        annotation_document = {} # Initialize empty document
         for column_index in range(0, len(annotation.columns)):
-            annotation_attribute = str(annotation.columns[column_index])
-            annotation_value = str(annotation[annotation_attribute][row_index])
+            annotation_attribute = str(annotation.columns[column_index]) # key
+            annotation_value = annotation[annotation_attribute][row_index]
             annotation_attribute = annotation_attribute.replace('.', '_')
-            annotation_value = annotation_value.replace('.', '_')
+            # It seems mongoDB doesn't like periods in keys??
             annotation_document[annotation_attribute] = annotation_value
-        # print(annotation_document)
         collection_id = collection.insert(annotation_document)
+    print('Inserted ' + str(collection.count()) + ' into collection.')
+
+    
