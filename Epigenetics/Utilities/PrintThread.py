@@ -9,6 +9,11 @@ import threading
 
 
 class StringWriter(threading.Thread):
+    '''This class handles a multithreaded queue, allowing all threads to dump 
+    their output text or other messages into a single location.  This prevents 
+    concurrency issues and allows a multithreaded/multiprocess program to have 
+    consistently clean output.'''
+
 
     def __init__(self, queue):
         threading.Thread.__init__(self)
@@ -18,7 +23,8 @@ class StringWriter(threading.Thread):
     def type():
         return "PrintThread.StringWriter"
 
-    def process_string(self, string):
+    @staticmethod
+    def process_string(string):
         print string
 
     def run(self):
@@ -36,7 +42,6 @@ class StringWriter(threading.Thread):
         self.t.setDaemon(True)
         self.t.start()
 
-    def close_wig_writer(self):
-        self.queue.join()
-        self.queue.all_tasks_done
+    def close_print_writer(self):
+        pass
 

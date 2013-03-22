@@ -14,32 +14,45 @@ import gridfs
 from mongoUtilities import ConnectToMongo, FilesInDirectory, InsertToMongo
 
 
-db = ConnectToMongo.ConnectToMongo() # db is our database
-OutputDir = '/home/jyeung/Documents/Outputs'
-files = FilesInDirectory.Files(OutputDir)
+'''
+First, connect to db database.
+Second, grab files from directory and sort them into projects.
+Third, create a collection (have to type db.collection_name).
+Fourth, iterate through projects to insert betas, expressions, design & annotation
+'''
+# 1. 
+db = ConnectToMongo.ConnectToMongo()
+# 2.
+InputDir = '/home/jyeung/Documents/Outputs'
+files = FilesInDirectory.Files(InputDir)
 projects = files.projects
-# Test if there are betas, expressions and pData for each project?
+# 3.
+collection_name = raw_input('Insert collection name: ')
+collection = db[collection_name]
+# collection = db.down
+# 4.
 for project in projects:
+    
+    # Get Betas
     print project
     betas = files.GetBetas(project)
-    collection_betas = db.collection_betas
-    InsertToMongo.InsertBetas(betas, collection_betas)
-    del betas # Would this make it run faster??
-    print('Inserted ' + str(collection_betas.count()) + ' into collection_betas.')
-    expressions = files.GetExpressions(project)
-    collection_expressions = db.collection_expressions
-    InsertToMongo.InsertExpressions(expressions, collection_expressions)
-    del expressions
-    print('Inserted ' + str(collection_expressions.count()) + ' into collection_expressions.')
-    design = files.GetDesign(project)
-    collection_design = db.collection_design
-    InsertToMongo.InsertDesign(design, collection_design)
-    del design
-    print('Inserted ' + str(collection_design.count()) + ' into collection_design.')
-    annotation = files.GetAnnotation()
-    collection_annotation = db.collection_annotation
-    InsertToMongo.InsertAnnotation(annotation, collection_annotation)
-    del annotation
-    print('Inserted ' + str(collection_annotation.count()) + ' into collection_annotation.')
+    InsertToMongo.InsertBetas(betas, collection)
+    del betas
     
+    # Get Expression
+    expressions = files.GetExpressions(project)
+    InsertToMongo.InsertExpressions(expressions, collection)
+    del expressions
+    
+    # Get Design
+    design = files.GetDesign(project)
+    InsertToMongo.InsertDesign(design, collection)
+    del design
+
+# Get Annotation
+annotation = files.GetAnnotation()
+collection = db.annotation
+InsertToMongo.InsertAnnotation(annotation, collection)
+del annotation
+
 

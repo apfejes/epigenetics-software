@@ -8,35 +8,35 @@ import multiprocessing
 import math
 import numpy
 from Utilities import WaveFileThread, MappingItem
-import copy
 import os
 import Queue
 
-queue = multiprocessing.Queue()
+queue = multiprocessing.Queue(400)    # don't let the main process get too far ahead
 max_sigma = 300
-
+END_PROCESSES = False
 
 class MapDecomposer(multiprocessing.Process):
 
     f = None
     t = None
-    param = None
+    PARAM = None
     sigma_height_table = None
     print_queue = None
     wave_queue = None
 
-    def __init__(self, param, wave_queue, print_queue, name):
+    def __init__(self, PARAM, wave_queue, print_queue, name):
         self._parent_pid = os.getpid()
         self._name = name
         self._popen = None
         self._daemonic = True
+
         if (MapDecomposer.wave_queue == None):
             MapDecomposer.wave_queue = wave_queue
         self.queue = queue
         if (MapDecomposer.print_queue == None):
             MapDecomposer.print_queue = print_queue
-        if (MapDecomposer.param == None):
-            MapDecomposer.param = param
+        if (MapDecomposer.PARAM == None):
+            MapDecomposer.PARAM = PARAM
         if (MapDecomposer.sigma_height_table == None):
             MapDecomposer.sigma_height_table = numpy.ndarray((max_sigma, 3 * max_sigma))
             '''first variable is the sigma, second is the number of spaces away 
@@ -106,18 +106,13 @@ class MapDecomposer(multiprocessing.Process):
     def best_fit_test(coverage_map, i, height):
         '''i is the position to test for the best fit in the coverage_map.'''
         sigma = 1
-        # height = coverage_map[i]
-        # MapDecomposer.printthread.add_string("Starting Best Fit. height " + str(height))
         while True:
-
             area_over = 0
             area_under = 0
             s = 3 * sigma
-
             for x in xrange(-s, s):
                 if (i + x >= 0 and x < 900 and i + x < len(coverage_map)):
                     expected = height * (MapDecomposer.sigma_height_table[sigma][math.fabs(x)] / MapDecomposer.sigma_height_table[sigma][0])
-                    # print "sigma:", sigma, "i,x:", i, x, "(", MapDecomposer.sigma_height_table[sigma][math.fabs(x)], "*", height, "/", MapDecomposer.sigma_height_table[sigma][0], "=", expected, ")"
                     actual = 0
                     if i + x >= 0:
                         actual = coverage_map[i + x]
@@ -126,9 +121,8 @@ class MapDecomposer(multiprocessing.Process):
                         area_under += actual
                     elif actual > expected:
                         area_under += expected
-            # MapDecomposer.printthread.add_string("sigma: " + str(sigma) + " over " + str(area_over) + " under " + str(area_under) + " fraction " + str(area_over / area_under))
             if (area_over > (1.0 / sigma) * area_under):
-                return sigma - 1;
+                return sigma - 1
             if sigma >= 299:
                 return sigma - 1
             sigma += 1
@@ -138,159 +132,71 @@ class MapDecomposer(multiprocessing.Process):
     def process_map(item, filename):
         '''takes in a coverage map object and begins the process of identifying
          the normal curves that best fit the map.'''
-        # print "Processing map starting at " , item.start
-        # MapDecomposer.print_queue.put("Processing map starting at " + str(item.start))
-        '''tempMatr = [[0 for x_ in xrange(10)] for x_ in xrange(len(item.coverage_map))]    # debugging
-        temp_i = 0;    # debugging
-        '''
-
         peaks = []
-        n = copy.deepcopy(item.coverage_map)
-        '''for i in xrange(len(n)):    # debugging
-            # print i
-            tempMatr[i][temp_i] = n[i]
-        temp_i += 1                    #debugging
-        '''
-
-        # identify tallest point
+        n = list(item.coverage_map)    # creates a new, independent list
         v = MapDecomposer.get_tallest_point(n)    # identify tallest point
-        # first = True    # debugging
-        # count = 0    #debugging
-        min_height = MapDecomposer.param.get_parameter("min_height")
+        min_height = MapDecomposer.PARAM.get_parameter("min_height")
+        number_waves = MapDecomposer.PARAM.get_parameter("number_waves")
 
-        lastWave_pos = 0;
-        while v.get('height') >= min_height:
+        lastWave_pos = 0
+        if number_waves:
+            wave_number = 1
+        else:
+            wave_number = None
+        while v.get('height') >= min_height:    # TODO: Should be replaced with percentage of maxheight.
             p = v.get('position')
             if lastWave_pos == p:
                 break
             else:
                 lastWave_pos = p
-            '''MapDecomposer.printthread.add_string("running map decomposer with " + str(v.get('height')) +
-                                                 ">=" + str(min_height) + " and position " + str(p + item.start))
-                                                 #debugging
-            '''
             sigma = 1
             for i in range(p - 20, p + 20):
-                # MapDecomposer.printthread.add_string("i =" + str(i) + " " + str(p - 30) + " " + str(p + 30))
                 if i > 0 and i < len(n):
                     if (n[i] >= 0.9 * n[p]):    # find best fit widest gausian
                         this_sigma = MapDecomposer.best_fit_test(n, i, v.get('height'))
                         if this_sigma > sigma:
                             sigma = this_sigma
                             mu = i
-            MapDecomposer.print_queue.put("appending peak: " +
-                                str(item.chr) + " " + str(item.start + mu) +
-                                " " + str(sigma) + " " + str(v.get('height')))
-            peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, v.get('height')))
-            '''MapDecomposer.printthread.add_string(str(n))
-            MapDecomposer.printthread.add_string("subtracting: " + str(v.get('height')) + " " + str(sigma) + " " + str(mu))
-            '''
 
+            peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, v.get('height'), wave_number))
             n = MapDecomposer.subtract_gausian(n, v.get('height'), sigma, mu)    # subtract gausian
-
-            '''
-            MapDecomposer.printthread.add_string(str(n))
-            '''
             v = MapDecomposer.get_tallest_point(n)    # re-calculate tallest point
-            '''if count == 4:
-                sys.exit()
-            count += 1'''
-            '''MapDecomposer.printthread.add_string("After subtraction: pos: " +
-                                    str(v.get("position")) + " height: " +
-                                    str(v.get("height")))
-            '''
-
-            '''    
-            if first:    #debugging
-                filename.write("before:" + MapDecomposer.print_array(item.coverage_map))
-                first = False
-            filename.write(MapDecomposer.print_array(n))
-            '''
-
-            '''if temp_i < 10:         #debugging
-                for i in xrange(len(n)):
-                    tempMatr[i][temp_i] = n[i]
-                temp_i += 1
-            '''
+            if number_waves:
+                wave_number += 1
             # repeat
-            # MapDecomposer.printthread.add_string("Peaks now has " + str(len(peaks)) + " peaks")
-        '''the following section is mostly for displaying values for debugging purposes.'''
-        '''tempMatr_p = [[0 for _x in xrange(len(peaks))] for _y in xrange(len(item.coverage_map))]
-        p_count = 0;
-        for p in peaks:
-            c_map = MapDecomposer.coverage_from_peak(p.height, p.sigma, p.crest,
-                                                     len(n))
-            for q in xrange(len(n)):
-                tempMatr_p[q][p_count] = c_map[q]
-            p_count += 1
-        if temp_i > 1:
-            filename.write("New peak: " + str(item.chr) + " " + str(item.start) + "\n")
-            for q in xrange(len(n)):
-                string = []
-                for w in xrange(temp_i):
-                    m = str(tempMatr[q][w])
-                    string.append(m[:m.find(".") + 3] + ",")
-
-                for w in xrange(p_count):
-                    m = str(tempMatr_p[q][w])
-                    string.append(m[:m.find(".") + 3] + ",")
-                filename.write("".join(string) + "\n")
-            print "wrote peak to file"
-        '''
-
-        '''MapDecomposer.printthread.add_string("Peaks now has " + str(len(peaks)) + " elements")'''
         for n in peaks:
-                # MapDecomposer.printthread.add_string("Calling wavefile.add_wave") #debugging
-                MapDecomposer.wave_queue.put(n)
+            MapDecomposer.wave_queue.put(n)
         return None
 
 
     @staticmethod
     def print_array(n):
-        # print "N!:", n
         string = []
         for l in n:
             m = str(l)
-            # print "m:", m, " - ", m[:m.find(".") + 3]
             string.append(m[:m.find(".") + 3] + ",")
         return "".join(string) + "last\n"
 
 
     def run(self):
-        # path = os.path.dirname(os.path.abspath(__file__))
-        # path = path.rsplit("/", 1)
-        # self.f = open(path[0] + '/testdata/tmp/findwaves.graphs', 'w')
         while True:
             try:
                 map_item = queue.get()    # grabs host from queue
-                # print "processing", map_item.start
                 self.process_map(map_item, self.f)
-                # print "processed", map_item.start
             except Queue.Empty:
-                continue
+                if END_PROCESSES:
+                    self.print_queue.put("thread received signal to quit")
+                    break
+                else:
+                    continue
 
-    def start_map_decomposer(self):
-        pass
-            # p = multiprocessing.Process.__init__()
-            # (target = worker, args = (nums[chunksize * i:chunksize * (i + 1)], out_q))
+    # def close_map_decomposer(self):
+    #    '''instructions to close out the thread and end the process.'''
+    #    queue.join_thread()
+    #    self.end_process = True
 
-
-
-
-            # self.t = MapDecomposer(MapDecomposer.param, MapDecomposer.wavefile,
-            #                       MapDecomposer.printthread)
-            # self.t.setDaemon(True)
-            # self.t.start()
-
-
-    def close_map_decomposer(self):
-
-        queue.join_thread()
-        self.queue.all_tasks_done
-        # self.f.close()
-
-        # wait on the queue until everything has been processed
-    def add_map(self, map_region, chromosome, start):
-        # populate queue with data
+    @staticmethod
+    def add_map(map_region, chromosome, start):
+        '''populate queue with data'''
         queue.put(MappingItem.Item(map_region, chromosome, start))
         # wait on the queue until everything has been processed
