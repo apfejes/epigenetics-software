@@ -58,8 +58,8 @@ class WigFileWriter(threading.Thread):
 
     def close_wig_writer(self):
         queue.join()
-        self.queue.all_tasks_done()
-        self.f.close()
+        if (self.f != None):
+            self.f.close()
 
     def add_map(self, map_region, chromosome, start):
         # populate queue with data

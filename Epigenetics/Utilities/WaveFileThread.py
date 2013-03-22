@@ -68,6 +68,9 @@ class WaveFileWriter(threading.Thread):
 
     def close_wave_writer(self):
         self.f.close()
+#        if self.t.is_alive():
+#           self.t.join()
+
 
 
 

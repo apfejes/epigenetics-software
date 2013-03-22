@@ -183,20 +183,18 @@ def main():
             time.sleep(1)
         wavefile.close_wave_writer()
         wave_queue.close()
-        wavefile.join()
+        print  ("wave_queue closed")
 
         while print_queue.qsize() > 0:
             print "waiting on print_queue to empty"
             time.sleep(1)
         print_thread.END_PROCESSES = True
         print_queue.close()
-        print_queue.join()
+        print  ("print_queue closed")
+        # print_queue.join()
 
         readahead.close()
         print "all closed"
-
-
-
 
 if __name__ == "__main__":
     main()

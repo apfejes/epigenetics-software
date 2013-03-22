@@ -1,0 +1,59 @@
+################################################################################
+# Parameters for WaveGenerator.  Make a copy of this file and store with the 
+# results so that you don't lose the conditions used to process the data.
+################################################################################
+#
+# Input Options
+#-------------------------------------------------------------------------------
+input_file = testdata/ChipSeqGSE31221/GSE31221_RAW/18_19_GSM773994_TCF7_ChIPSeq.bam
+#input_file = testdata/ex1.bam 
+#
+################################################################################
+# 
+# Extention options
+#-------------------------------------------------------------------------------
+# Single End Reads must be treated with an extension.  Use this to set the 
+# parameters for guiding the extension properties.
+map_type = Triangle
+#
+# For weighted reads, in the Triangle distribution, start weighting at this 
+# position
+triangle_min = 200
+#
+# For weighted reads, in the Triangle distribution, median weighting at this 
+# position
+triangle_median = 250
+#
+# the maximum extension length of a single read for all extension types.
+fragment_length = 300
+#
+# Smooth out the leading edge of a read, to prevent very bumpy maps.
+round_leading_edge = True
+#
+# maximum allowable length of a PET read.  Reads with ends longer than this 
+distance will be discarded.
+max_pet_length = 2000
+################################################################################
+#
+# Wave calling options
+#-------------------------------------------------------------------------------
+# minimum peak height to call
+min_height = 10
+#
+################################################################################
+#
+# Run time configuration
+#-------------------------------------------------------------------------------
+processor_threads = 8
+#
+################################################################################
+#
+# Output options
+#-------------------------------------------------------------------------------
+# place a number next to the wave data indicating the order of peaks in this 
+# grouping.
+number_waves = True
+#
+# Make a wig file: Values can be True or False
+make_wig = True
+
