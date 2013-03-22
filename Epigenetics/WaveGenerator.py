@@ -10,6 +10,8 @@ from Utilities import PrintThread
 import multiprocessing
 import math
 import time
+import exceptions
+import sys
 
 
 PARAM = None
@@ -155,35 +157,30 @@ def main():
         print_queue.put("chromosome " + current_chromosome + " had " +
                         str(count) + " reads")
         print_queue.put("Completed all Processing - Shutting down.")
+    except exceptions.EOFError:
+        print "Unexpected error:", sys.exc_info()[0]
 
     finally:
-
-        print "closing map_queue"
-
+        print_queue.put("closing process started...")
         while map_queue.qsize() > 0:
-            print "waiting on map_queue to empty"
-            time.sleep(1)
+            print_queue.put("waiting on map_queue to empty")
+            time.sleep(3)
         MapDecomposingThread.END_PROCESSES = True
         map_queue.close()
-        print "terminating procs"
         for proc in procs:
             proc.terminate()
         # MapDecomposingThread.queue.join_thread()
-        print_queue.put("Processor threads sent termination messages.")
-
-
-
+        print_queue.put("Processor threads terminated.")
         if PARAM.get_parameter("make_wig"):
             wigfile.close_wig_writer()
-
-        print_queue.put("Wigwriter sent termination messages.")
+            print_queue.put("Wigwriter closed.")
 
         while wave_queue.qsize() > 0:
-            print "waiting on wave_queue to empty"
+            print_queue.put("waiting on wave_queue to empty")
             time.sleep(1)
         wavefile.close_wave_writer()
         wave_queue.close()
-        print  ("wave_queue closed")
+        print_queue.put("wave_queue closed")
 
         while print_queue.qsize() > 0:
             print "waiting on print_queue to empty"
