@@ -10,8 +10,9 @@ from Utilities import PrintThread
 import multiprocessing
 import math
 import time
-import exceptions
 import sys
+import os
+import traceback
 
 
 PARAM = None
@@ -46,10 +47,20 @@ def main():
         print_queue = multiprocessing.Queue()
         wave_queue = multiprocessing.Queue()
         map_queue = multiprocessing.Queue(200)
+        wigfile = None    # must asign variables in case of unexpected termination.
+        wavefile = None    # otherwise, they are closed, but never initialized
+        print_thread = None
 
         global PARAM
-        PARAM = Parameters.parameter()
-        init_parameters()
+        path = os.path.dirname(os.path.abspath(__file__))
+        path = path.rsplit("/", 0)
+        parameter_file = path[0] + '/sample_input_chipseq.inp'
+        PARAM = Parameters.parameter(parameter_file)
+        #        init_parameters()
+
+        print PARAM.get_parameter("input_file")
+
+
         ''' Once a file is opened you can iterate over all of the read mapping to a 
         specified region using fetch(). Each iteration returns a AlignedRead object 
         which represents a single read along with its fields and optional tags:
@@ -157,8 +168,10 @@ def main():
         print_queue.put("chromosome " + current_chromosome + " had " +
                         str(count) + " reads")
         print_queue.put("Completed all Processing - Shutting down.")
-    except exceptions.EOFError:
-        print "Unexpected error:", sys.exc_info()[0]
+    except:
+        print "Unexpected error in Wave Generator:", sys.exc_info()[0]
+        print traceback.format_exc()
+
 
     finally:
         print_queue.put("closing process started...")
@@ -171,21 +184,25 @@ def main():
             proc.terminate()
         # MapDecomposingThread.queue.join_thread()
         print_queue.put("Processor threads terminated.")
-        if PARAM.get_parameter("make_wig"):
+        if PARAM.get_parameter("make_wig") and wigfile != None:
             wigfile.close_wig_writer()
             print_queue.put("Wigwriter closed.")
 
         while wave_queue.qsize() > 0:
             print_queue.put("waiting on wave_queue to empty")
             time.sleep(1)
-        wavefile.close_wave_writer()
+        if wavefile != None:
+            wavefile.close_wave_writer()
         wave_queue.close()
         print_queue.put("wave_queue closed")
 
         while print_queue.qsize() > 0:
-            print "waiting on print_queue to empty"
+            print "waiting on print_queue to empty", print_queue.qsize()
+            if print_thread == None or not print_thread.is_alive():
+                break
             time.sleep(1)
-        print_thread.END_PROCESSES = True
+        if not print_thread == None:
+            print_thread.END_PROCESSES = True
         print_queue.close()
         print  ("print_queue closed")
         # print_queue.join()

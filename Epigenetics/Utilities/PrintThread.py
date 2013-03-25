@@ -7,6 +7,7 @@ Created on 2013-03-08
 
 import threading
 import sys
+import traceback
 END_PROCESSES = False
 
 
@@ -38,7 +39,8 @@ class StringWriter(threading.Thread):
                 string = self.queue.get()    # grabs string from queue
                 self.process_string(string)    # print retrieved string
             except:
-                print "Unexpected error:", sys.exc_info()[0]
+                print "Unexpected error in print thread:", sys.exc_info()[0]
+                print traceback.format_exc()
                 sys.exit()
             # except self.queue.Empty:
             #    if END_PROCESSES:
