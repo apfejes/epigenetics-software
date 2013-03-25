@@ -31,7 +31,7 @@ fragment_length = 300
 round_leading_edge = True
 #
 # maximum allowable length of a PET read.  Reads with ends longer than this 
-distance will be discarded.
+# distance will be discarded.
 max_pet_length = 2000
 ################################################################################
 #
@@ -56,4 +56,4 @@ number_waves = True
 #
 # Make a wig file: Values can be True or False
 make_wig = True
-
+#
