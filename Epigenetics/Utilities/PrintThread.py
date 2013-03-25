@@ -6,6 +6,9 @@ Created on 2013-03-08
 
 
 import threading
+import sys
+import traceback
+END_PROCESSES = False
 
 
 class StringWriter(threading.Thread):
@@ -15,9 +18,10 @@ class StringWriter(threading.Thread):
     consistently clean output.'''
 
 
-    def __init__(self, queue):
+    def __init__(self, queue_var):
         threading.Thread.__init__(self)
-        self.queue = queue
+
+        self.queue = queue_var
 
     @staticmethod
     def type():
@@ -29,12 +33,22 @@ class StringWriter(threading.Thread):
 
     def run(self):
         while True:
-            # grabs host from queue
-            string = self.queue.get()
-            # print "got", string
-            self.process_string(string)
-            # signals to queue job is done
-            # self.queue.task_done()
+            try:
+                if self.queue == None:
+                    break
+                string = self.queue.get()    # grabs string from queue
+                self.process_string(string)    # print retrieved string
+            except:
+                print "Unexpected error in print thread:", sys.exc_info()[0]
+                print traceback.format_exc()
+                sys.exit()
+            # except self.queue.Empty:
+            #    if END_PROCESSES:
+            #        self.print_queue.put("thread received signal to quit")
+            #        break
+            #    else:
+            #        continue'''
+
 
     def start_print_writer(self):
         # spawn a pool of threads, and pass them queue instance
@@ -42,6 +56,4 @@ class StringWriter(threading.Thread):
         self.t.setDaemon(True)
         self.t.start()
 
-    def close_print_writer(self):
-        pass
 

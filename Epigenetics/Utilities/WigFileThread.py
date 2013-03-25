@@ -37,8 +37,6 @@ class WigFileWriter(threading.Thread):
 
 
     def start_wig_writer(self):
-        # spawn a pool of threads, and pass them queue instance
-#        for i in range(1):
         path = os.path.dirname(os.path.abspath(__file__))
         path = path.rsplit("/", 1)
         self.f = open(path[0] + '/testdata/tmp/findwaves.wig', 'w')
@@ -60,9 +58,8 @@ class WigFileWriter(threading.Thread):
 
     def close_wig_writer(self):
         queue.join()
-        self.queue.all_tasks_done
-
-        self.f.close()
+        if (self.f != None):
+            self.f.close()
 
     def add_map(self, map_region, chromosome, start):
         # populate queue with data
