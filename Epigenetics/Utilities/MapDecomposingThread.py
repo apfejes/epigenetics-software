@@ -178,6 +178,8 @@ class MapDecomposer(multiprocessing.Process):
         peaks = []
         n = list(item.coverage_map)    # creates a new, independent list
         v = MapDecomposer.get_tallest_point(n)    # identify tallest point
+        highest_point = v.get('height')
+        cur_height = v.get('height')
         min_height = MapDecomposer.PARAM.get_parameter("min_height")
         number_waves = MapDecomposer.PARAM.get_parameter("number_waves")
 
@@ -186,7 +188,7 @@ class MapDecomposer(multiprocessing.Process):
             wave_number = 1
         else:
             wave_number = None
-        while v.get('height') >= min_height:    # TODO: Should be replaced with percentage of maxheight.
+        while cur_height >= 0.2 * highest_point and cur_height >= min_height:    # TODO: Should be replaced with percentage of maxheight.
             p = v.get('position')
             if lastWave_pos == p:
                 break
@@ -196,14 +198,15 @@ class MapDecomposer(multiprocessing.Process):
             for i in range(p - 15, p + 15):
                 if i > 0 and i < len(n):
                     if (n[i] >= 0.9 * n[p]):    # find best fit widest gausian
-                        this_sigma = MapDecomposer.best_fit_newton(n, i, v.get('height'))
+                        this_sigma = MapDecomposer.best_fit_newton(n, i, cur_height)
                         if this_sigma > sigma:
                             sigma = this_sigma
                             mu = i
 
-            peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, v.get('height'), wave_number))
-            n = MapDecomposer.subtract_gausian(n, v.get('height'), sigma, mu)    # subtract gausian
+            peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, cur_height, wave_number))
+            n = MapDecomposer.subtract_gausian(n, cur_height, sigma, mu)    # subtract gausian
             v = MapDecomposer.get_tallest_point(n)    # re-calculate tallest point
+            cur_height = v.get('height')
             if number_waves:
                 wave_number += 1
             # repeat
