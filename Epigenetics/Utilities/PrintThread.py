@@ -8,6 +8,8 @@ Created on 2013-03-08
 import threading
 import sys
 import traceback
+import Queue
+import exceptions
 END_PROCESSES = False
 
 
@@ -20,8 +22,8 @@ class StringWriter(threading.Thread):
 
     def __init__(self, queue_var):
         threading.Thread.__init__(self)
-
-        self.queue = queue_var
+        global queue
+        queue = queue_var
 
     @staticmethod
     def type():
@@ -32,16 +34,27 @@ class StringWriter(threading.Thread):
         print string
 
     def run(self):
-        while True:
+        # global queue
+        while not END_PROCESSES:
             try:
-                if self.queue == None:
+                if queue == None:
                     break
-                string = self.queue.get()    # grabs string from queue
+                string = queue.get()    # grabs string from queue
                 self.process_string(string)    # print retrieved string
+            except Queue.Empty():
+                if END_PROCESSES:
+                    print("print thread received signal to quit")
+                    break
+                else:
+                    continue
+            except exceptions.IOError:
+                pass    # ignoring this error - it's normal, and a known error.
+                # http://bugs.python.org/issue5155
+            except exceptions.EOFError:
+                pass
             except:
                 print "Unexpected error in print thread:", sys.exc_info()[0]
                 print traceback.format_exc()
-                sys.exit()
             # except self.queue.Empty:
             #    if END_PROCESSES:
             #        self.print_queue.put("thread received signal to quit")
@@ -52,7 +65,8 @@ class StringWriter(threading.Thread):
 
     def start_print_writer(self):
         # spawn a pool of threads, and pass them queue instance
-        self.t = StringWriter(self.queue)
+        global queue
+        self.t = StringWriter(queue)
         self.t.setDaemon(True)
         self.t.start()
 
