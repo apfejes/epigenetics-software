@@ -1,58 +1,51 @@
 '''
-Created on 2013-03-12
-mongoDB API
+Created on 2013-03-25
+
 @author: jyeung
 '''
 
 
 import pymongo
 from pymongo import MongoClient
-import os
-import glob
+from mongoUtilities import ConnectToMongo, FilesInDirectory
 import csv
-import gridfs
-from mongoUtilities import ConnectToMongo, FilesInDirectory, InsertToMongo
 
 
-'''
-First, connect to db database.
-Second, grab files from directory and sort them into projects.
-Third, create a collection (have to type db.collection_name).
-Fourth, iterate through projects to insert betas, expressions, design & annotation
-'''
-# 1. 
+# Connect to database
 db = ConnectToMongo.ConnectToMongo()
-# 2.
-InputDir = '/home/jyeung/Documents/Outputs'
+# Set directory, grab all files in that directory.
+InputDir = '/home/jyeung/Documents/Outputs/Down'
 files = FilesInDirectory.Files(InputDir)
+# Find all projects in that directory
 projects = files.projects
-# 3.
-collection_name = raw_input('Insert collection name: ')
+# Create a collection for inserting documents, user input.
+collection_name = raw_input('Insert collection name for inserting documents: ')
+# collection_name = 'fData'
 collection = db[collection_name]
-# collection = db.down
+
+'''
+First, insert beta values.
+Second, insert expression values.
+Third, insert design values.
+Fourth, insert annotation information.
+'''
+
+
+# 1.
+files.InsertElementsToDB(files.betas_fnames, 
+                         collection, 
+                         colname = 'sample_name',
+                         rowname = 'probe_name',
+                         keyname = 'beta_value')
+# 2.
+files.InsertElementsToDB(files.expressions_fnames, 
+                         collection, 
+                         colname = 'sample_name',
+                         rowname = 'probe_name',
+                         keyname = 'expression_value')
+# 3.
+files.InsertRowsToDB(files.design_fnames, collection)
+
 # 4.
-for project in projects:
-    
-    # Get Betas
-    print project
-    betas = files.GetBetas(project)
-    InsertToMongo.InsertBetas(betas, collection)
-    del betas
-    
-    # Get Expression
-    expressions = files.GetExpressions(project)
-    InsertToMongo.InsertExpressions(expressions, collection)
-    del expressions
-    
-    # Get Design
-    design = files.GetDesign(project)
-    InsertToMongo.InsertDesign(design, collection)
-    del design
-
-# Get Annotation
-annotation = files.GetAnnotation()
-collection = db.annotation
-InsertToMongo.InsertAnnotation(annotation, collection)
-del annotation
-
-
+files.InsertRowsToDB(files.annotation_fnames, collection)
+            

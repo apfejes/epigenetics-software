@@ -15,7 +15,23 @@ we iterate through rows in each column.
 
 But in design and annotation tables, the sample names are the rows, so
 we iterate through columns in each row. 
+'''     
+        
+def InsertKeyValue(collection, **kwargs):
+    document = {}   # Initialize document that is empty
+    for key, value in kwargs.iteritems():
+        document[key] = value
+        collection.insert(document)
+    print('{0}{1}{2}'.format('There are ', 
+                             str(collection.count()), 
+                                 ' docs in collection'))
+
+    
 '''
+# The InsertBetas, Expressions, Design, Annotation functions are absolute, they are 
+# now functions in FilesInDirectory class.
+# 
+# 
 
 def InsertBetas(betas, collection):
     print ('Inserting betas into mongo...')
@@ -69,5 +85,7 @@ def InsertAnnotation(annotation, collection):
             annotation_document[annotation_attribute] = annotation_value
         collection_id = collection.insert(annotation_document)
     print('Inserted ' + str(collection.count()) + ' into collection.')
+'''
+
 
     
