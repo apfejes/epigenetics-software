@@ -17,34 +17,13 @@ import traceback
 
 PARAM = None
 
-def init_parameters():
-    '''initialize the parameters used by the WaveGenerator.  To be replaced 
-    with an external input source.'''
-    PARAM.set_parameter("make_wig", True)    # create a wig file
-    PARAM.set_parameter("triangle_min", 200)    # weighted reads start weighting
-    PARAM.set_parameter("triangle_median", 250)    # weighted reads - median weighting
-    PARAM.set_parameter("fragment_length", 300)    # longest read length
-    PARAM.set_parameter("round_leading_edge", True)
-    PARAM.set_parameter("map_type", "Triangle")
-    PARAM.set_parameter("min_height", 10)
-    PARAM.set_parameter("processor_threads", 8)
-    PARAM.set_parameter("number_waves", True)
-    PARAM.set_parameter("max_pet_length", 2000)
-    PARAM.set_parameter("input_file", "testdata/ChipSeqGSE31221/" +
-                     "GSE31221_RAW/18_19_GSM773994_TCF7_ChIPSeq.bam")
-    # PARAM.set_parameter("input_file", "testdata/ex1.bam")
 
-
-def main():
+def main(param_file):
     '''This is the main command for running the Wave Generator peak finder.'''
     procs = []
 
-    # catch TERM signal to allow finalizers to run and reap daemonic children
-    # signal.signal(signal.SIGTERM, lambda *args: sys.exit(-signal.SIGTERM))
-
     try:
 
-        print_queue = multiprocessing.Queue()
         wave_queue = multiprocessing.Queue()
         map_queue = multiprocessing.Queue(200)
         wigfile = None    # must asign variables in case of unexpected termination.
@@ -52,13 +31,13 @@ def main():
         print_thread = None
 
         global PARAM
-        path = os.path.dirname(os.path.abspath(__file__))
-        path = path.rsplit("/", 0)
-        parameter_file = path[0] + '/sample_input_chipseq.inp'
-        PARAM = Parameters.parameter(parameter_file)
-        #        init_parameters()
+        if os.path.exists(param_file):
+            PARAM = Parameters.parameter(param_file)
+            print PARAM.get_parameter("input_file")
+        else:
+            print "Could not find input parameter file"
+            sys.exit()
 
-        print PARAM.get_parameter("input_file")
 
 
         ''' Once a file is opened you can iterate over all of the read mapping to a 
@@ -77,9 +56,11 @@ def main():
         mapmaker = MapMaker.MapMaker(PARAM)
         if PARAM.get_parameter("make_wig"):    # processor threads
             wigfile = WigFileThread.WigFileWriter(None)
-            wigfile.start_wig_writer()
+            wigfile.start_wig_writer(PARAM.get_parameter('output_path'),
+                                     PARAM.get_parameter('file_name'))
         wavefile = WaveFileThread.WaveFileWriter(None, wave_queue)
-        wavefile.start_wave_writer()
+        wavefile.start_wave_writer(PARAM.get_parameter('output_path'),
+                                   PARAM.get_parameter('file_name'))
 
         '''launch thread to read and process the print queue'''
         print_thread = PrintThread.StringWriter(print_queue)
@@ -196,14 +177,14 @@ def main():
         wave_queue.close()
         print_queue.put("wave_queue closed")
 
-        while print_queue.qsize() > 0:
-            print "waiting on print_queue to empty", print_queue.qsize()
-            if print_thread == None or not print_thread.is_alive():
-                break
-            time.sleep(1)
-        if not print_thread == None:
+        if print_thread == None or not print_thread.is_alive():
+            pass
+        else:
+            while print_queue.qsize() > 0:
+                print "waiting on print_queue to empty", print_queue.qsize()
+                time.sleep(1)
             print_thread.END_PROCESSES = True
-        print_queue.close()
+        # print_queue.close()
         print  ("print_queue closed")
         # print_queue.join()
 
@@ -211,4 +192,10 @@ def main():
         print "all closed"
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 0 :
+        for arg in sys.argv:
+            print arg
+    # sys.argv[1] must be equal to the file name of the input file.
+
+    print_queue = multiprocessing.Queue()
+    main(sys.argv[1])
