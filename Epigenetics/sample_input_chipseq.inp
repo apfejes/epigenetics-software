@@ -5,6 +5,7 @@
 #
 # Input Options
 #-------------------------------------------------------------------------------
+#
 input_file = testdata/ChipSeqGSE31221/GSE31221_RAW/18_19_GSM773994_TCF7_ChIPSeq.bam
 #input_file = testdata/ex1.bam 
 #
@@ -33,10 +34,12 @@ round_leading_edge = True
 # maximum allowable length of a PET read.  Reads with ends longer than this 
 # distance will be discarded.
 max_pet_length = 2000
+#
 ################################################################################
 #
 # Wave calling options
 #-------------------------------------------------------------------------------
+#
 # minimum peak height to call
 min_height = 10
 #
@@ -50,10 +53,13 @@ processor_threads = 8
 #
 # Output options
 #-------------------------------------------------------------------------------
+#
 # Output directory for results - must end with a slash.
 output_path = /home/afejes/temp/
+#
 # name for the data set
 file_name = data1
+#
 # place a number next to the wave data indicating the order of peaks in this 
 # grouping.
 number_waves = True
