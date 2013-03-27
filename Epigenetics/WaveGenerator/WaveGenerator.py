@@ -71,7 +71,7 @@ def main(param_file):
 
             mapprocessor = MapDecomposingThread.MapDecomposer(PARAM,
                                         wave_queue, print_queue, map_queue, x)
-            p = multiprocessing.Process(target = mapprocessor.run)
+            p = multiprocessing.Process(target = mapprocessor.run, args = (x,))
             p.daemon = True
             p.start()
             procs.append(p)
