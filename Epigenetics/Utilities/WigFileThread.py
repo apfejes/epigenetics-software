@@ -22,9 +22,9 @@ class WigFileWriter(threading.Thread):
             self.f = filewriter
 
     def process_map(self, item):
-        self.f.write("fixedStep chrom=" + item.chr + " start=" + str(item.start) + " step=1\n")
+        self.f.write("fixedStep chrom=%s start=%i step=1\n" % (item.chr, item.start))
         for i in item.coverage_map:
-            self.f.write(str(i) + "\n")
+            self.f.write("%i\n" % (i))
 
 
     def run(self):

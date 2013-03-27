@@ -5,7 +5,6 @@ Created on 2013-03-08
 '''
 
 import threading
-import os
 
 class wave():
 
@@ -32,16 +31,12 @@ class WaveFileWriter(threading.Thread):
 
     def process_wave(self, wave):
         if (wave.number != None):
-            self.f.write(wave.chromosome + "\t" +
-                         str(wave.crest) + "\t" +
-                         str(wave.sigma) + "\t" +
-                         str(round(wave.height, 2)) + "\t" +
-                         str(wave.number) + "\n")
+            self.f.write("%s\t%i\t%i\t%s\t%i\n" % (wave.chromosome, wave.crest,
+                                           wave.sigma, str(round(wave.height, 2)),
+                                           wave.number))
         else:
-            self.f.write(wave.chromosome + "\t" +
-                         str(wave.crest) + "\t" +
-                         str(wave.sigma) + "\t" +
-                         str(round(wave.height, 2)) + "\n")
+            self.f.write("%s\t%i\t%i\t%s\n" % (wave.chromosome, wave.crest,
+                                           wave.sigma, str(round(wave.height, 2))))
 
     def run(self):
         while True:
