@@ -24,7 +24,7 @@ class MongoConnector():
 
     def insert(self, collection_name, dictionary):
         collection = self.db[collection_name]
-        collection.insert(dictionary)
+        return collection.insert(dictionary)
 
     def count(self, collection_name):
         collection = self.db[collection_name]
