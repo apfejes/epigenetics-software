@@ -6,27 +6,26 @@
 ###############################################################################
 
 
-from pandas import *
-import pandas # Or try import as pd if something weird happens?
+
+import pandas
 import os
 import glob
-import operator
-import random
+from pandas.core.panel import Panel
 
 
 def CreatePanel(files):
 # Takes a list of x filenames and creates a panel containing x dataframes.
-# 
-# Inputs: 
+#
+# Inputs:
 # files: a list of x filenames containing beta-values or design-information.
 #
 # Outputs:
 # panel: a panel containing x dataframes
-    df = {}  # Empty dataframe
-    for file in files:
-        name = file
-        df[file] = pandas.read_csv(file, sep="\t")
-        
+    df = {}    # Empty dataframe
+    for file_name in files:
+        # name = file_name
+        df[file_name] = pandas.read_csv(file_name, sep = "\t")
+
     panel = Panel(df)
     return(panel)
 
@@ -44,4 +43,4 @@ annotation_filename = glob.glob("*probes.txt")
 # 2.
 betas_panel = CreatePanel(betas_filename)
 design_panel = CreatePanel(design_filename)
-annotation_table = pandas.read_csv(annotation_filename, sep="\t")
+annotation_table = pandas.read_csv(annotation_filename, sep = "\t")

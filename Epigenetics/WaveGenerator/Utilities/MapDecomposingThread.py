@@ -194,14 +194,28 @@ class MapDecomposer(multiprocessing.Process):
                 break
             else:
                 lastWave_pos = p
-            sigma = 1
+            sigma = 0
+            processed = False
             for i in range(p - 15, p + 15):
                 if i > 0 and i < len(n):
-                    if (n[i] >= 0.9 * n[p]):    # find best fit widest gausian
+                    if (n[i] >= 0.9 * cur_height):    # find best fit widest gausian
                         this_sigma = MapDecomposer.best_fit_newton(n, i, cur_height)
                         if this_sigma > sigma:
                             sigma = this_sigma
                             mu = i
+                            processed = True
+            if not processed:
+                MapDecomposer.print_queue.put("A region was not processed")
+                MapDecomposer.print_queue.put("region start position: " + str(item.start))
+                MapDecomposer.print_queue.put("i was from p " + str(p) + ", giving " + str(p - 15) + " to " + str(p + 15))
+                MapDecomposer.print_queue.put("len(n) is  " + str(len(n)))
+                MapDecomposer.print_queue.put("height n[p] is  " + str(n[p]))
+                str_list = []
+                for i in range (p - 15, p + 15):
+                    str_list.append(str(n[i]))
+                    str_list.append(" ")
+                MapDecomposer.print_queue.put("".join(str_list))
+                return None
 
             peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, cur_height, wave_number))
             n = MapDecomposer.subtract_gausian(n, cur_height, sigma, mu)    # subtract gausian
