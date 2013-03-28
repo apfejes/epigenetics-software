@@ -5,10 +5,8 @@ Created on 2013-03-25
 '''
 
 
-import pymongo
-from pymongo import MongoClient
-from mongoUtilities import ConnectToMongo, FilesInDirectory
-import csv
+# from mongoUtilities import FilesInDirectory
+from MongoDB.mongoUtilities import ConnectToMongo, FilesInDirectory
 
 
 # Connect to database
@@ -32,14 +30,14 @@ Fourth, insert annotation information.
 
 
 # 1.
-files.InsertElementsToDB(files.betas_fnames, 
-                         collection, 
+files.InsertElementsToDB(files.betas_fnames,
+                         collection,
                          colname = 'sample_name',
                          rowname = 'probe_name',
                          keyname = 'beta_value')
 # 2.
-files.InsertElementsToDB(files.expressions_fnames, 
-                         collection, 
+files.InsertElementsToDB(files.expressions_fnames,
+                         collection,
                          colname = 'sample_name',
                          rowname = 'probe_name',
                          keyname = 'expression_value')
@@ -48,4 +46,3 @@ files.InsertRowsToDB(files.design_fnames, collection)
 
 # 4.
 files.InsertRowsToDB(files.annotation_fnames, collection)
-            
