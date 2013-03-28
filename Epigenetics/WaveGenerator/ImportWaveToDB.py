@@ -4,9 +4,8 @@ Created on 2013-03-27
 @author: afejes
 '''
 from MongoDB.mongoUtilities import Mongo_Connector
+from Utilities import Parameters
 import sys
-
-
 
 
 def run(file_name):
@@ -25,6 +24,7 @@ def run(file_name):
             wave["stddev"] = a[2]
             wave["item"] = a[3]
             mongo.insert("wave", wave)
+    print "Collection now contains %i records" % mongo.count("wave")
     mongo.close()
 
 
@@ -36,6 +36,12 @@ def run(file_name):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) < 1:
+        print"This program requires the name of the wave file to import and the database config file."
+        print" eg. python ImportWaveToDB.py /directory/data.waves /directory/database.conf"
+
     file_name = sys.argv[1]
+    conf_file = sys.argv[2]
+    p = Parameters.parameter(conf_file)
     run(file_name)
 
