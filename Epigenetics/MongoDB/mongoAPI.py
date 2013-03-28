@@ -28,7 +28,6 @@ Third, insert design values.
 Fourth, insert annotation information.
 '''
 
-
 # 1.
 files.InsertElementsToDB(files.betas_fnames,
                          collection,

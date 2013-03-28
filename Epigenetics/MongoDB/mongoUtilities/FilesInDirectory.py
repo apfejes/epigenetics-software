@@ -80,8 +80,9 @@ class Files(object):
         print('{0}{1}{2}'.format('There are ',
                                  str(collection.count()),
                                      ' docs in collection'))
-
-    def InsertElementsToDB(self, file_name, collection, colname, rowname, keyname, **optkeys):
+    
+    def InsertElementsToDB(self, file_name, collection, colname='col_name', 
+                           rowname='row_name', keyname='element_name', **optkeys):
         '''
         Inserts elements of a tab-delimited file_name into mongo. 
         The tab-delimited file_name should have column names and row names. 
