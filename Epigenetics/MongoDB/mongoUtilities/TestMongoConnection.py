@@ -6,7 +6,8 @@ Add test_collection and test_document, test that it is there, then remove
 
 
 import unittest
-import ConnectToMongo
+from  MongoDB.mongoUtilities import ConnectToMongo
+
 
 
 class ConnectionTestCase(unittest.TestCase):
@@ -28,7 +29,8 @@ class ConnectionTestCase(unittest.TestCase):
         db.test_collection.drop()
         ncollections = len(db.collection_names())
         ndocuments = test_collection.count()
-        test_collection_id = db.test_collection.insert(test_document)
+        # test_collection_id = db.test_collection.insert(test_document)  # don't assign to unused variable
+        db.test_collection.insert(test_document)
         self.assertEqual(len(db.collection_names()), ncollections + 1,
                          "Did not create test_collection or it was already there")
         self.assertEqual(test_collection.count(), ndocuments + 1,

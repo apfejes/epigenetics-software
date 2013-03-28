@@ -8,10 +8,8 @@ gets the beta values, expression values and design information.
 import os
 import glob
 import re
-import pandas
-import pymongo
-from pymongo import MongoClient
 import csv
+import pandas
 
 
 class Files(object):
@@ -31,32 +29,32 @@ class Files(object):
         # Second, sort them in alphabetical order
         # Third, get project name
         '''
-        # 1. 
+        # 1.
         self.betas_fnames = glob.glob('*_betas.txt')
         self.design_fnames = glob.glob('*_pData.txt')
         self.expressions_fnames = glob.glob('*_expression.txt')
         self.annotation_fnames = glob.glob('*_fData.txt')
-        # 2. 
+        # 2.
         self.betas_fnames.sort()
         self.design_fnames.sort()
         self.expressions_fnames.sort()
         self.annotation_fnames.sort()
-        # 3. 
+        # 3.
         projects = []
-        for file in self.betas_fnames: 
-            project_name = re.sub('\_betas.txt$', '', file)
+        for file_name in self.betas_fnames:
+            project_name = re.sub('\_betas.txt$', '', file_name)
             projects.append(project_name)
         self.projects = projects
         self.projects.sort()
         print(str(len(projects)) + ' projects found in ' + Directory)
-        
+
     def InsertRowsToDB(self, file_name, collection, **optkeys):
         '''
-        Inserts entire row of a tab-delimited file into mongo. 
-        The tab-delimited file should have column names (header)
+        Inserts entire row of a tab-delimited file_name into mongo. 
+        The tab-delimited file_name should have column names (header)
         
         Inputs:
-                file_name: filename of tab-delimited file. 
+                file_name: filename of tab-delimited file_name. 
                 collection: collection in which documents will be inserted.
                 optkeys: additional key:value pairs (entered as key='value')
                         that you want to include in the document for insertion.
@@ -64,40 +62,40 @@ class Files(object):
         Output:
                 nrows of documents inserted into collection.
         '''
-        for file in file_name:  # Since file_name is a list, we loop. 
-            fname = '{0}{1}{2}'.format(self.directory, "/", file)
+        for file_name in file_name:    # Since file_name is a list, we loop.
+            fname = '{0}{1}{2}'.format(self.directory, "/", file_name)
             print('{0}{1}'.format('Reading from ', fname))
-            with open('{0}{1}{2}'.format(self.directory, "/", file), 'rb') as Data:
-                reader = csv.DictReader(Data, delimiter='\t')
+            with open('{0}{1}{2}'.format(self.directory, "/", file_name), 'rb') as Data:
+                reader = csv.DictReader(Data, delimiter = '\t')
                 print('{0}{1}'.format('Inserting rows into ', collection.name))
                 for row in reader:
                     if None in row:
-                        del row[None]   # Cannot insert entries with keys as None
+                        del row[None]    # Cannot insert entries with keys as None
                     '''
                     optkeys are key:value pairs that will be included into doc.
                     '''
                     for key, value in optkeys.iteritems():
                         row[key] = value
                     collection.insert(row)
-        print('{0}{1}{2}'.format('There are ', 
-                                 str(collection.count()), 
+        print('{0}{1}{2}'.format('There are ',
+                                 str(collection.count()),
                                      ' docs in collection'))
-    
+
     def InsertElementsToDB(self, file_name, collection, colname, rowname, keyname, **optkeys):
         '''
-        Inserts elements of a tab-delimited file into mongo. 
-        The tab-delimited file should have column names and row names. 
+        Inserts elements of a tab-delimited file_name into mongo. 
+        The tab-delimited file_name should have column names and row names. 
         
         Inputs:
-                file_name: filename of tab-delimited file. 
+                file_name: filename of tab-delimited file_name. 
                 collection: collection in which documents will be inserted.
                 colname (e.g. 'sample_name'): generic descriptor for 
                     column name. Will be used as name for key.
                 rowname (e.g. 'probe_name'): generic descriptor for
                     row name. Will be used as name for key. 
                 keyname (e.g. 'beta_value', 'expression_value'): key name 
-                    for each key-value pair in the tab-delimited file. 
-                    If tab-delimited file is a table of beta values, 
+                    for each key-value pair in the tab-delimited file_name. 
+                    If tab-delimited file_name is a table of beta values, 
                     key should be something like 'beta_values'.
                 optkeys: additional key:value pairs (entered as key='value')
                         that you want to include in the document for insertion.
@@ -105,9 +103,9 @@ class Files(object):
         Output:
                 nrows of documents inserted into collection.
         '''
-        for file in file_name:  # file_name is a list.
-            with open('{0}{1}{2}'.format(self.directory, "/", file), 'rb') as Data:
-                reader = csv.reader(Data, delimiter='\t')
+        for file_name in file_name:    # file_name is a list.
+            with open('{0}{1}{2}'.format(self.directory, "/", file_name), 'rb') as Data:
+                reader = csv.reader(Data, delimiter = '\t')
                 headers = reader.next()
                 print('{0}{1}'.format('Inserting elements into ', collection.name))
                 for row in reader:
@@ -138,34 +136,34 @@ class Files(object):
                         print(rowcount)
                         print(elementcount)
                     '''
-        print('{0}{1}{2}'.format('There are ', 
-                                 str(collection.count()), 
+        print('{0}{1}{2}'.format('There are ',
+                                 str(collection.count()),
                                      ' docs in collection'))
 
-                            
-        
-    def GetBetas(self, project_name, nrows=None):
+
+
+    def GetBetas(self, project_name, nrows = None):
         filename = project_name + '_betas.txt'
-        return pandas.read_csv(filename, sep="\t", nrows=nrows)
-    
-    def GetExpressions(self, project_name, nrows=None):
+        return pandas.read_csv(filename, sep = "\t", nrows = nrows)
+
+    def GetExpressions(self, project_name, nrows = None):
         filename = project_name + '_expression.txt'
-        return pandas.read_csv(filename, sep="\t", nrows=nrows)
-    
-    def GetDesign(self, project_name, nrows=None):
+        return pandas.read_csv(filename, sep = "\t", nrows = nrows)
+
+    def GetDesign(self, project_name, nrows = None):
         filename = project_name + '_pData.txt'
-        return pandas.read_csv(filename, sep="\t", nrows=nrows)
-    
-        
+        return pandas.read_csv(filename, sep = "\t", nrows = nrows)
+
+
 '''  
     def GetAnnotation(self, nrows=None):
         return pandas.read_csv('annotation_probes.txt', sep='\t', nrows=nrows)
-'''            
+'''
 
 
-        
 
-        
-        
-        
-        
+
+
+
+
+
