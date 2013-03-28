@@ -4,14 +4,13 @@ can be analyzed with other modules, or imported into a database for further use.
 @author: afejes
 
 '''
-from Utilities import ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread
-from Utilities import MapDecomposingThread, Parameters, WaveFileThread
-from Utilities import PrintThread
-import multiprocessing
+from Utilities import MapDecomposingThread, Parameters, WaveFileThread, \
+    PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread
 import math
-import time
-import sys
+import multiprocessing
 import os
+import sys
+import time
 import traceback
 
 
@@ -71,7 +70,7 @@ def main(param_file):
 
             mapprocessor = MapDecomposingThread.MapDecomposer(PARAM,
                                         wave_queue, print_queue, map_queue, x)
-            p = multiprocessing.Process(target = mapprocessor.run)
+            p = multiprocessing.Process(target = mapprocessor.run, args = (x,))
             p.daemon = True
             p.start()
             procs.append(p)
