@@ -7,10 +7,12 @@ from MongoDB.mongoUtilities import Mongo_Connector
 import sys
 
 
+
+
 def run(file_name):
     print file_name
 
-    mongo = Mongo_Connector.MongoConnector("waves", "wave")
+    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, 'waves')
     f = open(file_name, 'r')    # open file
     for line in f:
         if line.startswith("#"):
@@ -22,8 +24,9 @@ def run(file_name):
             wave["position"] = a[1]
             wave["stddev"] = a[2]
             wave["item"] = a[3]
-            mongo.insert(wave)
+            mongo.insert("wave", wave)
     mongo.close()
+
 
 
     #  while not None
