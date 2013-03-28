@@ -9,9 +9,15 @@ import sys
 
 
 def run(file_name):
-    print file_name
+    '''simple script for reading in a wave file and inserting it into a table in a mongodb database.'''
+    print "processing %s..." % file_name
 
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, 'waves')
+    database_name = 'waves'
+    collection_name = 'wave'
+
+    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
+    print "Before insert, collection \'%s\' contains %i records" % \
+                        (collection_name, mongo.count(collection_name))
     f = open(file_name, 'r')    # open file
     for line in f:
         if line.startswith("#"):
@@ -24,16 +30,10 @@ def run(file_name):
             wave["stddev"] = a[2]
             wave["item"] = a[3]
             mongo.insert("wave", wave)
-    print "Collection now contains %i records" % mongo.count("wave")
+    f.close()
+    print "Collection \'%s\' now contains %i records" % \
+                        (collection_name, mongo.count(collection_name))
     mongo.close()
-
-
-
-    #  while not None
-        # read the wave
-        # insert the wave into
-
-
 
 if __name__ == '__main__':
     if len(sys.argv) < 1:
@@ -44,4 +44,5 @@ if __name__ == '__main__':
     conf_file = sys.argv[2]
     p = Parameters.parameter(conf_file)
     run(file_name)
+    print "Completed."
 
