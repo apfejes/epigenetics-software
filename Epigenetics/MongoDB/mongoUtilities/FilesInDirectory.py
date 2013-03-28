@@ -80,14 +80,9 @@ class Files(object):
         print('{0}{1}{2}'.format('There are ',
                                  str(collection.count()),
                                      ' docs in collection'))
-<<<<<<< HEAD:Epigenetics/Database-mongo/mongoUtilities/FilesInDirectory.py
     
     def InsertElementsToDB(self, file_name, collection, colname='col_name', 
                            rowname='row_name', keyname='element_name', **optkeys):
-=======
-
-    def InsertElementsToDB(self, file_name, collection, colname, rowname, keyname, **optkeys):
->>>>>>> 796766da5ebf0b73587043701d127ba3a5af30c0:Epigenetics/MongoDB/mongoUtilities/FilesInDirectory.py
         '''
         Inserts elements of a tab-delimited file_name into mongo. 
         The tab-delimited file_name should have column names and row names. 
