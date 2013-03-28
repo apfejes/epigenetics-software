@@ -10,26 +10,28 @@ import sys
 
 
 class MongoConnector():
+    '''Class for simplifying the interactions with a mongodb server'''
 
-
-
-    def __init__(self, database_name, collection_name):
+    def __init__(self, machine, port, database_name):
         '''wrapper around connect to Mongo, in order to consolidate all of the 
         necessary connections.'''
         try:
-            self.mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
+            self.mongo = MongoClient(machine, port)
             self.db = self.mongo[database_name]    # Create a collection for inserting documents, user input.
-            self.collection = self.db[collection_name]
-            print self.collection.name
-            print self.collection.count()
-            self.collection.insert({"author": "Mike"})
         except Exception, e:
             print e
             sys.exit("Failure to connect to database")
 
-    def insert(self, dictionary):
-        self.collection.insert(dictionary)
+    def insert(self, collection_name, dictionary):
+        collection = self.db[collection_name]
+        collection.insert(dictionary)
 
+    def count(self, collection_name):
+        collection = self.db[collection_name]
+        return collection.count()
+
+    def drop(self, collection_name):
+        self.db.drop_database(collection_name)
 
     def close(self):
         self.db.connection.disconnect()
