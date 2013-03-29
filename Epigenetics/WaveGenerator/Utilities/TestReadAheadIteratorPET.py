@@ -49,7 +49,6 @@ class Test(unittest.TestCase):
         # print "read", count, "objects"
         print "chromosome", current_chromosome, "had", chr_count, "reads"
         print "gets", readahead.gets
-        print "unmapped", readahead.unmapped_reads
         self.assertEqual(count, 1699)
 
 
