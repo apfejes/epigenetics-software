@@ -4,6 +4,7 @@ can be analyzed with other modules, or imported into a database for further use.
 @author: afejes
 
 '''
+
 from Utilities import MapDecomposingThread, Parameters, WaveFileThread, \
     PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread
 import math
@@ -12,10 +13,10 @@ import os
 import sys
 import time
 import traceback
+import cProfile
 
 
 PARAM = None
-
 
 def main(param_file):
     '''This is the main command for running the Wave Generator peak finder.'''
@@ -67,10 +68,15 @@ def main(param_file):
 
 
         for x in range(PARAM.get_parameter("processor_threads")):
-
+            p = None
             mapprocessor = MapDecomposingThread.MapDecomposer(PARAM,
                                         wave_queue, print_queue, map_queue, x)
-            p = multiprocessing.Process(target = mapprocessor.run, args = (x,))
+            print x
+            if x == 0:
+                p = multiprocessing.Process(target = cProfile.runctx("mapprocessor.run", globals(), locals()))
+                # p = cProfile.runctx(multiprocessing.Process(target = mapprocessor.run, args = (x,)), globals(), locals(), "file_%d" % x)
+            else:
+                p = multiprocessing.Process(target = mapprocessor.run)
             p.daemon = True
             p.start()
             procs.append(p)
