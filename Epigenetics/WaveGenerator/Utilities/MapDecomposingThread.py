@@ -242,8 +242,14 @@ class MapDecomposer(multiprocessing.Process):
         while True:
             try:
                 map_item = MapDecomposer.map_queue.get()    # grabs host from queue
+                if map_item == 'exit':
+                    print 'cleaning up worker'
+                    # TODO Add cleanup code
+                    break
                 self.process_map(map_item, self.f)
                 # MapDecomposer.map_queue.task_done()
+            except KeyboardInterrupt:
+                self.print_queue.put("ignoring Ctrl-C for worker process")
             except Queue.Empty:
                 if END_PROCESSES:
                     self.print_queue.put("thread received signal to quit")
