@@ -238,7 +238,7 @@ class MapDecomposer(multiprocessing.Process):
         return "".join(string) + "last\n"
 
 
-    def run(self):
+    def run(self, *args):
         while True:
             try:
                 map_item = MapDecomposer.map_queue.get()    # grabs host from queue
