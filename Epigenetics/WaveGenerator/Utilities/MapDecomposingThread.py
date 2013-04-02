@@ -7,7 +7,7 @@ Created on 2013-03-08
 import multiprocessing
 import math
 import numpy
-from Utilities import WaveFileThread, MappingItem
+from WaveGenerator.Utilities import WaveFileThread, MappingItem
 import os
 import Queue
 import sys
