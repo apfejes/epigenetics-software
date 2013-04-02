@@ -242,10 +242,6 @@ class MapDecomposer(multiprocessing.Process):
         while True:
             try:
                 map_item = MapDecomposer.map_queue.get()    # grabs host from queue
-                if map_item == 'exit':
-                    print 'cleaning up worker'
-                    # TODO Add cleanup code
-                    break
                 self.process_map(map_item, self.f)
                 # MapDecomposer.map_queue.task_done()
             except KeyboardInterrupt:
