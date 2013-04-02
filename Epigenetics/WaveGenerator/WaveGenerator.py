@@ -75,7 +75,7 @@ def main(param_file):
             try:
                 p.start()
             except KeyboardInterrupt:
-                map_queue.put('exit')
+                p.terminate()
             procs.append(p)
 
         print_queue.put("All Processor threads started successfully.")
