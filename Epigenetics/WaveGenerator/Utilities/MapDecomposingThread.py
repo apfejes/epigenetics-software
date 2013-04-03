@@ -11,6 +11,19 @@ from WaveGenerator.Utilities import WaveFileThread, MappingItem
 import os
 import Queue
 import sys
+import cProfile
+
+
+def profileit(func):
+    def wrapper(*args, **kwargs):
+        datafn = func.__name__ + ".profile"    # Name the data file sensibly
+        prof = cProfile.Profile()
+        retval = prof.runcall(func, *args, **kwargs)
+        prof.dump_stats(datafn)
+        return retval
+
+    return wrapper
+
 
     # don't let the main process get too far ahead
 max_sigma = 300
@@ -238,7 +251,9 @@ class MapDecomposer(multiprocessing.Process):
         return "".join(string) + "last\n"
 
 
+    @profileit
     def run(self, *args):
+
         while True:
             try:
                 map_item = MapDecomposer.map_queue.get()    # grabs host from queue
