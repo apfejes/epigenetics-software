@@ -4,7 +4,6 @@ can be analyzed with other modules, or imported into a database for further use.
 @author: afejes
 
 '''
-
 from Utilities import MapDecomposingThread, Parameters, WaveFileThread, \
     PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread
 import math
@@ -13,10 +12,10 @@ import os
 import sys
 import time
 import traceback
-import cProfile
 
 
 PARAM = None
+
 
 def main(param_file):
     '''This is the main command for running the Wave Generator peak finder.'''
