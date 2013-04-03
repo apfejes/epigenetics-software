@@ -71,12 +71,7 @@ def main(param_file):
             p = None
             mapprocessor = MapDecomposingThread.MapDecomposer(PARAM,
                                         wave_queue, print_queue, map_queue, x)
-            print x
-            if x == 0:
-                p = multiprocessing.Process(target = cProfile.runctx("mapprocessor.run", globals(), locals()))
-                # p = cProfile.runctx(multiprocessing.Process(target = mapprocessor.run, args = (x,)), globals(), locals(), "file_%d" % x)
-            else:
-                p = multiprocessing.Process(target = mapprocessor.run)
+            p = multiprocessing.Process(target = mapprocessor.run)
             p.daemon = True
             p.start()
             procs.append(p)
