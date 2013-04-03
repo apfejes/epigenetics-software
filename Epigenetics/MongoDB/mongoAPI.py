@@ -41,7 +41,9 @@ files.InsertElementsToDB(files.expressions_fnames,
                          rowname = 'probe_name',
                          keyname = 'expression_value')
 # 3.
-files.InsertRowsToDB(files.design_fnames, collection)
+files.InsertRowsToDB(files.design_fnames, collection,
+                     filetype = 'design')
 
 # 4.
-files.InsertRowsToDB(files.annotation_fnames, collection)
+files.InsertRowsToDB(files.annotation_fnames, collection,
+                     filetype = 'annotation')
