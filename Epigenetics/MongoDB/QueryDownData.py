@@ -11,7 +11,7 @@ import pylab
 
 
 # Connect to database
-db = ConnectToMongo.ConnectToMongo()
+db = ConnectToMongo.ConnectToMongo('epigenetics_database')
 
 # Get a collection
 collname = "down_kwargs"
@@ -57,62 +57,4 @@ print betas_sample
 
 PlotBarGraph.PlotBarGraph(betas_sample, 'Avg Betas Across Samples in Chromosome 21')
 
-
-        
-
-                
-                
-                 
-        
-        
-
-
-    
-    
-
-        
-
-
-
-    
-'''
-samples = design_docs.GetValuesFromKey('SampleID')
-for s in samples:
-    print s
-'''
-    
-'''
-for group in groups:
-    for doc in design_docs.documents:
-        print doc
-        sample_list = []    # Initialize
-        sample_list = []
-        sample_dict['group'] = []
-'''
-    
-    
-
-chromosome_unique = []
-# chromosome_unique.append(x for x in range(1, 22))
-# print(chromosome_unique)
-
-'''
-for x in range(1, 22):
-    chromosome_unique.append(str(x))
-chromosome_unique.append('X')
-chromosome_unique.append('Y')
-print(chromosome_unique)
-'''
-
-
-# Find all documents in fData, show only probename and chromosome
-# fData = collection.find({'MAPINFO': {'$exists': True}}, {'MAPINFO': 1, 'NAME': 1})
-
-'''
-fData = collection.find({'MAPINFO': {'$exists': True}}, {'MAPINFO': 1, 'NAME': 1})
-chromosomes = []
-for dat in fData:
-    chromosomes.append(dat['MAPINFO'])
-chromosome_unique = set(chromosomes)
-print(chromosome_unique)
-'''
+# 
