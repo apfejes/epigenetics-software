@@ -72,7 +72,10 @@ def main(param_file):
                                         wave_queue, print_queue, map_queue, x)
             p = multiprocessing.Process(target = mapprocessor.run, args = (x,))
             p.daemon = True
-            p.start()
+            try:
+                p.start()
+            except KeyboardInterrupt:
+                p.terminate()
             procs.append(p)
 
         print_queue.put("All Processor threads started successfully.")
@@ -156,7 +159,7 @@ def main(param_file):
     finally:
         print_queue.put("closing process started...")
         while map_queue.qsize() > 0:
-            print_queue.put("waiting on map_queue to empty")
+            print_queue.put("waiting on map_queue to empty: " + str(map_queue.qsize()))
             time.sleep(3)
         MapDecomposingThread.END_PROCESSES = True
         map_queue.close()
