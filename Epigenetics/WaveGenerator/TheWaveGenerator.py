@@ -5,7 +5,7 @@ can be analyzed with other modules, or imported into a database for further use.
 
 '''
 
-from Utilities import MapDecomposingThread, Parameters, WaveFileThread, \
+from WaveGenerator.Utilities import MapDecomposingThread, Parameters, WaveFileThread, \
     PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread
 import math
 import multiprocessing
@@ -13,19 +13,18 @@ import os
 import sys
 import time
 import traceback
-import cProfile
-
+from multiprocessing.sharedctypes import Value
 
 PARAM = None
 
 def main(param_file):
     '''This is the main command for running the Wave Generator peak finder.'''
     procs = []
+    end_signal = Value("b", False)    # allocate a piece of shared memory or threads to view
 
     try:
-
         wave_queue = multiprocessing.Queue()
-        map_queue = multiprocessing.Queue(200)
+        map_queue = multiprocessing.Queue(400)
         wigfile = None    # must asign variables in case of unexpected termination.
         wavefile = None    # otherwise, they are closed, but never initialized
         print_thread = None
@@ -70,13 +69,14 @@ def main(param_file):
         for x in range(PARAM.get_parameter("processor_threads")):
 
             mapprocessor = MapDecomposingThread.MapDecomposer(PARAM,
-                                        wave_queue, print_queue, map_queue, x)
-            p = multiprocessing.Process(target = mapprocessor.run, args = (x,))
+                                        wave_queue, print_queue, map_queue, x, end_signal)
+            p = multiprocessing.Process(target = mapprocessor.run_wrapper, args = (x,))
             p.daemon = True
             try:
                 p.start()
             except KeyboardInterrupt:
                 p.terminate()
+                map_queue.empty()
             procs.append(p)
 
         print_queue.put("All Processor threads started successfully.")
@@ -155,23 +155,29 @@ def main(param_file):
     except:
         print "Unexpected error in Wave Generator:", sys.exc_info()[0]
         print traceback.format_exc()
-
-
-    finally:
+    except KeyboardInterrupt:
+        print "Keyboard Interruption. ", sys.exc_info()[0]
+        print traceback.format_exc()
+        map_queue.empty()    # the processes will continue to run until the queue is empty, so empty the queue to cut it short.
+    finally:    # used to cleanly shut down the code
         print_queue.put("closing process started...")
         while map_queue.qsize() > 0:
             print_queue.put("waiting on map_queue to empty: " + str(map_queue.qsize()))
             time.sleep(3)
-        MapDecomposingThread.END_PROCESSES = True
+        print_queue.put("map_queue is empty.")
+        # MapDecomposingThread.END_PROCESSES = True
         map_queue.close()
+        print_queue.put("sending end_signal to processes.")
+        end_signal = True    # this is the signal for all processes to end.
         for proc in procs:
-            proc.terminate()
-        # MapDecomposingThread.queue.join_thread()
+            name = proc.name
+            print_queue.put("joining on process" + name)
+            proc.join()
+            print_queue.put("join completed")
         print_queue.put("Processor threads terminated.")
         if PARAM.get_parameter("make_wig") and wigfile != None:
             wigfile.close_wig_writer()
             print_queue.put("Wigwriter closed.")
-
         while wave_queue.qsize() > 0:
             print_queue.put("waiting on wave_queue to empty")
             time.sleep(1)

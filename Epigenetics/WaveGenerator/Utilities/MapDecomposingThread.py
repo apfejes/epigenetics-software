@@ -14,20 +14,8 @@ import sys
 import cProfile
 
 
-def profileit(func):
-    def wrapper(*args, **kwargs):
-        datafn = func.__name__ + ".profile"    # Name the data file sensibly
-        prof = cProfile.Profile()
-        retval = prof.runcall(func, *args, **kwargs)
-        prof.dump_stats(datafn)
-        return retval
-
-    return wrapper
-
-
     # don't let the main process get too far ahead
 max_sigma = 300
-END_PROCESSES = False
 
 class MapDecomposer(multiprocessing.Process):
 
@@ -39,11 +27,12 @@ class MapDecomposer(multiprocessing.Process):
     map_queue = None
     wave_queue = None
 
-    def __init__(self, PARAM, wave_queue, print_queue, map_queue, name):
+    def __init__(self, PARAM, wave_queue, print_queue, map_queue, name, end_signal):
         self._parent_pid = os.getpid()
         self._name = name
         self._popen = None
         self._daemonic = True
+        self.END_PROCESS = end_signal
 
         if (MapDecomposer.wave_queue == None):
             MapDecomposer.wave_queue = wave_queue
@@ -251,27 +240,31 @@ class MapDecomposer(multiprocessing.Process):
         return "".join(string) + "last\n"
 
 
-    @profileit
-    def run(self, *args):
+    def run_wrapper(self, *args):
+        self.print_queue.put("profiling started")
+        cProfile.runctx("self.run(args)", globals(), locals())
+        self.print_queue.put("finished profiling")
 
-        while True:
+    def run(self, *args):
+        while not self.END_PROCESS.value:
             try:
-                map_item = MapDecomposer.map_queue.get()    # grabs host from queue
+                map_item = MapDecomposer.map_queue.get(False)    # grabs map from queue
                 self.process_map(map_item, self.f)
-                # MapDecomposer.map_queue.task_done()
             except KeyboardInterrupt:
                 self.print_queue.put("ignoring Ctrl-C for worker process")
             except Queue.Empty:
-                if END_PROCESSES:
-                    self.print_queue.put("thread received signal to quit")
-                    break
-                else:
-                    continue
+                continue
+
+
 
     # def close_map_decomposer(self):
     #    '''instructions to close out the thread and end the process.'''
     #    queue.join_thread()
     #    self.end_process = True
+
+    def name(self):
+        return self.name
+
 
     @staticmethod
     def add_map(map_region, chromosome, start):
