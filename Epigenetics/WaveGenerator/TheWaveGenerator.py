@@ -14,13 +14,15 @@ import sys
 import time
 import traceback
 from multiprocessing.sharedctypes import Value
+import ctypes
 
 PARAM = None
+end_signal = None
 
 def main(param_file):
     '''This is the main command for running the Wave Generator peak finder.'''
     procs = []
-    end_signal = Value("b", False)    # allocate a piece of shared memory or threads to view
+    global end_signal
 
     try:
         wave_queue = multiprocessing.Queue()
@@ -152,26 +154,30 @@ def main(param_file):
         print_queue.put("chromosome " + current_chromosome + " had " +
                         str(count) + " reads")
         print_queue.put("Completed all Processing - Shutting down.")
-    except:
-        print "Unexpected error in Wave Generator:", sys.exc_info()[0]
-        print traceback.format_exc()
+
     except KeyboardInterrupt:
         print "Keyboard Interruption. ", sys.exc_info()[0]
         print traceback.format_exc()
         map_queue.empty()    # the processes will continue to run until the queue is empty, so empty the queue to cut it short.
+    except:
+        print "Unexpected error in Wave Generator:", sys.exc_info()[0]
+        print traceback.format_exc()
     finally:    # used to cleanly shut down the code
         print_queue.put("closing process started...")
+        # Add Sentinels to end of queue
+        print_queue.put("adding terminator sentinels to queue.")
+        for x in range(PARAM.get_parameter("processor_threads")):
+            map_queue.put(None)
         while map_queue.qsize() > 0:
             print_queue.put("waiting on map_queue to empty: " + str(map_queue.qsize()))
             time.sleep(3)
         print_queue.put("map_queue is empty.")
         # MapDecomposingThread.END_PROCESSES = True
         map_queue.close()
-        print_queue.put("sending end_signal to processes.")
-        end_signal = True    # this is the signal for all processes to end.
+        # end_signal = True    # this is the signal for all processes to end.
         for proc in procs:
             name = proc.name
-            print_queue.put("joining on process" + name)
+            print_queue.put("joining on process " + name)
             proc.join()
             print_queue.put("join completed")
         print_queue.put("Processor threads terminated.")
@@ -205,6 +211,8 @@ if __name__ == "__main__":
         for arg in sys.argv:
             print arg
     # sys.argv[1] must be equal to the file name of the input file.
-
+    # global end_signal
+    end_signal = Value(ctypes.c_bool, False)    # allocate a piece of shared memory or threads to view
+                                # 0 is false, so don't end.  1 is true, so end.
     print_queue = multiprocessing.Queue()
     main(sys.argv[1])

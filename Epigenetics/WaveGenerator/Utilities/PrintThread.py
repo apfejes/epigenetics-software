@@ -10,7 +10,6 @@ import sys
 import traceback
 import Queue
 import exceptions
-from exceptions import EOFError, IOError
 END_PROCESSES = False
 
 
