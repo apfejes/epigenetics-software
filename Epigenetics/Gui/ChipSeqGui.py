@@ -20,7 +20,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
         self.title("Epigenetics Analysis Suite")
         self.createWidgets()
-        self.parameters = parameter('')
+        self.parameters = parameter('WaveGenerator/sample_input_chipseq.input')
 
     def createWidgets(self):
         menu_bar = tk.Menu(self)
@@ -52,8 +52,6 @@ class Application(tk.Tk):
         filename = tkFileDialog.askopenfilename(defaultextension='.input', title='Open File')
         if filename:
             self.parameters.set_parameter('input_file', filename)
-
-
 
 def main():
     app = Application()
