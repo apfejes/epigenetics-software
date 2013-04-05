@@ -38,13 +38,12 @@ class ParametersEditor (tk.Toplevel):
         self.triangle_median_entry.set(250)
 
         self.fragment_length_lab = tk.Label(self.extension_options_frame, text="Fragment Length:")
-        self.fragment_length_lab.grid(row=3, column=0)
+        self.fragment_length_lab.grid(row=3, column=0, sticky=tk.W)
         self.fragment_length_entry = tk.Entry(self.extension_options_frame)
         self.fragment_length_entry.grid(row=3,column=1)
-        self.fragment_length_entry.insert(0, 300)
 
         self.max_pet_length_lab = tk.Label(self.extension_options_frame, text="Max PET Length:")
-        self.max_pet_length_lab.grid(row=4, column=0)
+        self.max_pet_length_lab.grid(row=4, column=0, sticky=tk.W)
         self.max_pet_length_entry = tk.Entry(self.extension_options_frame)
         self.max_pet_length_entry.grid(row=4,column=1)
 
