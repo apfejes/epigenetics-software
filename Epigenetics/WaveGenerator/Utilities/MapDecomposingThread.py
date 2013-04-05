@@ -13,6 +13,7 @@ import Queue
 import sys
 import cProfile
 
+END_PROCESS = None
 
     # don't let the main process get too far ahead
 max_sigma = 300
@@ -190,7 +191,7 @@ class MapDecomposer(multiprocessing.Process):
             wave_number = 1
         else:
             wave_number = None
-        while cur_height >= 0.2 * highest_point and cur_height >= min_height:    # TODO: Should be replaced with percentage of maxheight.
+        while cur_height >= 0.2 * highest_point and cur_height >= min_height:
             p = v.get('position')
             if lastWave_pos == p:
                 break
@@ -246,14 +247,16 @@ class MapDecomposer(multiprocessing.Process):
         self.print_queue.put("finished profiling")
 
     def run(self, *args):
-        while not self.END_PROCESS.value:
+        while True:
             try:
-                map_item = MapDecomposer.map_queue.get(False)    # grabs map from queue
+                map_item = MapDecomposer.map_queue.get(True)    # grabs map from queue
+                if map_item == None:
+                    break
                 self.process_map(map_item, self.f)
             except KeyboardInterrupt:
                 self.print_queue.put("ignoring Ctrl-C for worker process")
             except Queue.Empty:
-                continue
+                pass    # ignore this error.
 
 
 
