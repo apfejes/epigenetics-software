@@ -21,6 +21,8 @@ def min_index(map_queues):
     smallest = map_queues[0].qsize()
     index = 0
     for i in range(1, len(map_queues)):
+        if map_queues[i].empty():    # shortcut - just feed it an empty queue
+            return i
         if map_queues[i].qsize() < smallest:
             index = i
     return index
@@ -32,17 +34,15 @@ def put_assigned(map_queues, item, max_threads):
     heavier amount of processing to to - and thus run longer, but a more 
     efficient work distributor can always be used in place of this one if 
     there's a need to optmize.'''
-    global counter
+    # global counter
     # print "counter:" + str(counter)
-    map_queues[counter].put(item)
-    counter += 1
-    if counter >= max_threads:
-        counter = 0
-
-
-    # i = min_index(map_queues)
-    # map_queues[i].put(item)
-    # print ''.join([(str(queue.qsize()) + " ") for queue in map_queues])
+    # map_queues[counter].put(item)
+    # counter += 1
+    # if counter >= max_threads:
+    #    counter = 0
+    i = min_index(map_queues)
+    map_queues[i].put(item)
+    print ''.join([(str(queue.qsize()) + " ") for queue in map_queues])
 
 def main(param_file):
     '''This is the main command for running the Wave Generator peak finder.'''
@@ -99,7 +99,7 @@ def main(param_file):
             mapprocessor = MapDecomposingThread.MapDecomposer(PARAM,
                                         wave_queue, print_queue, queue, x)
 
-            p = multiprocessing.Process(target = mapprocessor.run_wrapper, args = (x,))
+            p = multiprocessing.Process(target = mapprocessor.run, args = (x,))
             p.daemon = True
             try:
                 p.start()
@@ -195,16 +195,13 @@ def main(param_file):
         print_queue.put("closing process started...")
         # Add Sentinels to end of queue
         print_queue.put("adding terminator sentinels to queue.")
-        for x in range(PARAM.get_parameter("processor_threads")):
-            for queue in map_queues:
-                queue.put(None)
-                while queue.qsize() > 0:
-                    print_queue.put("waiting on queue" + str(x) + " to empty: " + str(queue.qsize()))
-                    time.sleep(3)
-                print_queue.put("map_queue is empty.")
-                queue.close()
+        # for x in range(PARAM.get_parameter("processor_threads")):
+        for queue in map_queues:
+            queue.put(None)
         for proc in procs:
             proc.join()
+        for queue in map_queues:
+            queue.close()
         print_queue.put("Processor threads terminated.")
         if PARAM.get_parameter("make_wig") and wigfile != None:
             wigfile.close_wig_writer()
