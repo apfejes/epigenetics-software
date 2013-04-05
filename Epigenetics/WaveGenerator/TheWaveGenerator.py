@@ -18,6 +18,7 @@ import traceback
 PARAM = None
 
 def min_index(map_queues):
+    '''identify empty queues, or find the smallest queue, and put stuff there.'''
     smallest = map_queues[0].qsize()
     index = 0
     for i in range(1, len(map_queues)):
@@ -29,17 +30,8 @@ def min_index(map_queues):
 
 
 def put_assigned(map_queues, item, max_threads):
-    '''Rotate through the 8 queues to add new items.  Of course, this isn't 
-    distributing the work load evenly, and one process might get stuck with a 
-    heavier amount of processing to to - and thus run longer, but a more 
-    efficient work distributor can always be used in place of this one if 
-    there's a need to optmize.'''
-    # global counter
-    # print "counter:" + str(counter)
-    # map_queues[counter].put(item)
-    # counter += 1
-    # if counter >= max_threads:
-    #    counter = 0
+    '''Use the min_index to determine which queue should be used.  Then place 
+    the new item in the queue'''
     i = min_index(map_queues)
     map_queues[i].put(item)
     print ''.join([(str(queue.qsize()) + " ") for queue in map_queues])
@@ -202,8 +194,9 @@ def main(param_file):
             proc.join()
         for queue in map_queues:
             queue.close()
-        print_queue.put("Processor threads terminated.")
+        print_queue.put("Processor threads terminated. Please be patient while buffers are flushed.")
         if PARAM.get_parameter("make_wig") and wigfile != None:
+            print_queue.put("Closing Wigwriter.  This may take some time.")
             wigfile.close_wig_writer()
             print_queue.put("Wigwriter closed.")
         while wave_queue.qsize() > 0:
@@ -221,10 +214,7 @@ def main(param_file):
                 print "waiting on print_queue to empty", print_queue.qsize()
                 time.sleep(1)
             print_thread.END_PROCESSES = True
-        # print_queue.close()
         print  ("print_queue closed")
-        # print_queue.join()
-
         readahead.close()
         print "Shutdown complete"
 
