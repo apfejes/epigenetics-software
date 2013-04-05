@@ -3,59 +3,45 @@ Created on 2013-03-06
 
 @author: afejes
 '''
-import sys
-import multiprocessing
-import tempfile
-import Tkinter as tk
-import tkFileDialog
 
-from ..WaveGenerator.TheWaveGenerator import main as wg_main
-from ..WaveGenerator.Utilities.Parameters import parameter
-from .ParametersEditor import ParametersEditor
+from Tkinter import Frame, Label, Button, OptionMenu, Tk
 
-class Application(tk.Tk):
-    """Main Application Class"""
-    def __init__(self):
-        """Constructor"""
-        tk.Tk.__init__(self)
-        self.title("Epigenetics Analysis Suite")
-        self.createWidgets()
-        self.parameters = parameter('WaveGenerator/sample_input_chipseq.input')
+class Application(Frame):
 
-    def createWidgets(self):
-        menu_bar = tk.Menu(self)
-        self.config(menu=menu_bar)
+    def createWidget(self):
+        self.Text = Label(self)
+        self.Text["text"] = "Hello World!"
+        self.Text.pack()
 
-        file_menu = tk.Menu(menu_bar)
-        file_menu.add_command(label="Open...", command=self.askopenfilename)
-        file_menu.add_command(label="Exit", command=self.quit)
-        menu_bar.add_cascade(label="File", menu=file_menu)
-        
-        edit_menu = tk.Menu(menu_bar)
-        edit_menu.add_command(label="Parameters", command=self.launchParametersEditor)
-        menu_bar.add_cascade(label="Edit", menu=edit_menu)
+        self.QUIT = Button(self)
+        self.QUIT["text"] = "QUIT"
+        self.QUIT["command"] = self.quit
 
-        run_wg_but = tk.Button(text="Run WaveGenerator", command= lambda: self.run_wg(self.parameters))
-        run_wg_but.pack()
+        self.QUIT.pack({"side":"left"})
 
-    def run_wg(self, parameters):
-        temp_paramfile = tempfile.NamedTemporaryFile(prefix='wavegen_', suffix='.input', delete=False)
-        for key, value in parameters.parameters.iteritems():
-            temp_paramfile.write('%s = %s\n' % (key, str(value)))
-        wg_proc = multiprocessing.Process(target=wg_main, args=(temp_paramfile.name,))
-        wg_proc.start()
+        self.hi = Button(self)
+        self.hi["text"] = "Run"
+        self.hi["command"] = self.run
 
-    def launchParametersEditor(self):
-        parameters_editor = ParametersEditor(self, self.parameters)
+        self.hi.pack({"side":"left"})
 
-    def askopenfilename(self):
-        filename = tkFileDialog.askopenfilename(defaultextension='.input', title='Open File')
-        if filename:
-            self.parameters.set_parameter('input_file', filename)
+        choices = ['Native Distribution - coverage is only for sequenced bases',
+                   'Flat Distribution - coverage is extended to user provided length',
+                   'Triangle Distribution - weighted coverage using user provided values']
+        self.OptionMenu = OptionMenu(root, 0, *choices)
+        self.OptionMenu.pack({"side":"left"})
+        # option = self.OptionMenu(root, 0, *choices)
 
-def main():
-    app = Application()
-    app.mainloop()
+    def run(self):
+        pass
 
-if __name__ == '__main__':
-    main()
+    def __init__(self, master = None):
+        Frame.__init__(self, master = None)
+        self.pack()
+        self.createWidget()
+
+
+root = Tk()
+app = Application(master = root)
+app.mainloop()
+root.destroy()
