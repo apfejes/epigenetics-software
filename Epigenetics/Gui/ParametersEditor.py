@@ -3,55 +3,55 @@ from tkFileDialog import askopenfilename
 from ..WaveGenerator.Utilities.Parameters import parameter
 
 class ParametersEditor (tk.Toplevel):
-    def __init__(self, parent):
+    def __init__(self, parent, parameters):
         tk.Toplevel.__init__(self, parent)
         self.parent = parent
+        self.parameters = parameters
         self.title("Parameters Editor")
-        self.geometry("640x320")
         self.createWidgets()
 
-    def createWidgets(self):
-        self.input_options_frame = tk.LabelFrame(self, text="Input Options")
-        self.input_options_frame.grid(row=0, column=0)
-        self.input_file_lab = tk.Label(self.input_options_frame, text="Input File:").grid(row=0)
-        self.input_file_entry = tk.Entry(self.input_options_frame)
-        self.input_file_entry.grid(row=0, column=1)
-        self.input_file_button = tk.Button(self.input_options_frame, text="Browse...", command=askopenfilename)
-        self.input_file_button.grid(row=0, column=2)
-        
-        self.extension_options_frame = tk.LabelFrame(self, text="Extension Options")
-        self.extension_options_frame.grid(row=1, column=0)
-        self.map_type_lab = tk.Label(self.extension_options_frame, text="Map Type:").grid(row=1)
-        choices = ['Native Distribution - coverage is only for sequenced bases',
-                   'Flat Distribution - coverage is extended to user provided length',
-                   'Triangle Distribution - weighted coverage using user provided values']
+    def createWidgets(self):        
+        self.extension_options_frame = tk.LabelFrame(self, text="Extension Options", padx=5, pady=5)
+        self.extension_options_frame.grid(row=0, column=0, sticky=tk.EW)
+        self.map_type_lab = tk.Label(self.extension_options_frame, text="Map Type:")
+        self.map_type_lab.grid(row=0, column=0, sticky=tk.W)
+        choices = ['Native Distribution',
+                   'Flat Distribution',
+                   'Triangle Distribution']
         map_type_selected = tk.StringVar(self.parent)
         map_type_selected.set(choices[0])
-        self.map_type_option = tk.OptionMenu(self.extension_options_frame, map_type_selected, *choices).grid(row=1, column=1)
+        self.map_type_option = tk.OptionMenu(self.extension_options_frame, map_type_selected, *choices)
+        self.map_type_option.grid(row=0, column=1)
 
-        self.triangle_min_lab = tk.Label(self.extension_options_frame, text="Triangle Minimum:").grid(row=2, column=0)
+        self.triangle_min_lab = tk.Label(self.extension_options_frame, text="Triangle Minimum:")
+        self.triangle_min_lab.grid(row=1, column=0, sticky=tk.SW)
         self.triangle_min_scale = tk.Scale(self.extension_options_frame, from_=0, to=500, orient=tk.HORIZONTAL)
-        self.triangle_min_scale.grid(row=2, column = 1)
+        self.triangle_min_scale.grid(row=1, column = 1)
         self.triangle_min_scale.set(200)
 
-        self.triangle_median_lab = tk.Label(self.extension_options_frame, text="Triangle Median:").grid(row=3, column=0) 
+        self.triangle_median_lab = tk.Label(self.extension_options_frame, text="Triangle Median:")
+        self.triangle_median_lab.grid(row=2, column=0, sticky=tk.SW) 
         self.triangle_median_entry = tk.Scale(self.extension_options_frame, from_=0, to=500, orient=tk.HORIZONTAL)
-        self.triangle_median_entry.grid(row=3, column = 1)
+        self.triangle_median_entry.grid(row=2, column = 1)
         self.triangle_median_entry.set(250)
 
-        self.fragment_length_lab = tk.Label(self.extension_options_frame, text="Fragment Length:").grid(row=4, column=0)
+        self.fragment_length_lab = tk.Label(self.extension_options_frame, text="Fragment Length:")
+        self.fragment_length_lab.grid(row=3, column=0)
         self.fragment_length_entry = tk.Entry(self.extension_options_frame)
-        self.fragment_length_entry.grid(row=4,column=1)
+        self.fragment_length_entry.grid(row=3,column=1)
         self.fragment_length_entry.insert(0, 300)
+
+        self.max_pet_length_lab = tk.Label(self.extension_options_frame, text="Max PET Length:")
+        self.max_pet_length_lab.grid(row=4, column=0)
+        self.max_pet_length_entry = tk.Entry(self.extension_options_frame)
+        self.max_pet_length_entry.grid(row=4,column=1)
 
         round_leading_edge = tk.IntVar(self.parent)
         self.round_leading_edge_button = tk.Checkbutton(self.extension_options_frame, text="Round Leading Edge",
                                                         variable=round_leading_edge, onvalue=True, 
-                                                        offvalue=False).grid(row=5, column=0)
+                                                        offvalue=False)
+        self.round_leading_edge_button.grid(row=5, column=1)
 
-        self.max_pet_length_lab = tk.Label(self.extension_options_frame, text="Max PET Length:").grid(row=6, column=0)
-        self.max_pet_length_entry = tk.Entry(self.extension_options_frame).grid(row=6,column=1)
-        
         self.wave_calling_options_frame = tk.LabelFrame(self, text="Wave Calling Options")
         self.wave_calling_options_frame.grid(row=2, column=0)
         self.min_height_lab = tk.Label(self.wave_calling_options_frame, text="Minimum Height:")
