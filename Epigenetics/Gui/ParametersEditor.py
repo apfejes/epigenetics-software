@@ -8,9 +8,11 @@ class ParametersEditor (tk.Toplevel):
         self.parent = parent
         self.parameters = parameters
         self.title("Parameters Editor")
+        self.config(padx=5, pady=5)
         self.createWidgets()
 
-    def createWidgets(self):        
+    def createWidgets(self):
+        '''Extension Options'''
         self.extension_options_frame = tk.LabelFrame(self, text="Extension Options", padx=5, pady=5)
         self.extension_options_frame.grid(row=0, column=0, sticky=tk.EW)
         self.map_type_lab = tk.Label(self.extension_options_frame, text="Map Type:")
@@ -52,6 +54,7 @@ class ParametersEditor (tk.Toplevel):
                                                         offvalue=False)
         self.round_leading_edge_button.grid(row=5, column=1)
 
+        '''Wave Calling Options'''
         self.wave_calling_options_frame = tk.LabelFrame(self, text="Wave Calling Options", padx=5, pady=5)
         self.wave_calling_options_frame.grid(row=2, column=0, sticky=tk.EW)
         self.min_height_lab = tk.Label(self.wave_calling_options_frame, text="Minimum Height:")
@@ -59,6 +62,7 @@ class ParametersEditor (tk.Toplevel):
         self.min_height_entry = tk.Entry(self.wave_calling_options_frame)
         self.min_height_entry.grid(row=0,column=1)
         
+        '''Runtime Configuration Options'''
         self.runtime_configuration_options_frame = tk.LabelFrame(self, text="Run Time Configuration", padx=5, pady=5)
         self.runtime_configuration_options_frame.grid(row=3, column=0, sticky=tk.EW)
         self.processor_threads_lab = tk.Label(self.runtime_configuration_options_frame, text="Processor Threads:")
@@ -66,35 +70,41 @@ class ParametersEditor (tk.Toplevel):
         self.processor_threads_entry = tk.Entry(self.runtime_configuration_options_frame)
         self.processor_threads_entry.grid(row=0,column=1)
         
+        '''Output Options'''
         self.output_options_frame = tk.LabelFrame(self, text="Output Options", padx=5, pady=5)
         self.output_options_frame.grid(row=4, column=0, sticky=tk.EW)
         self.output_path_lab = tk.Label(self.output_options_frame, text="Output Path:")
-        self.output_path_lab.grid(row=0, column=0)
+        self.output_path_lab.grid(row=0, column=0, sticky=tk.W)
         self.output_path_entry = tk.Entry(self.output_options_frame)
         self.output_path_entry.grid(row=0,column=1)
-        
-        self.file_name_lab = tk.Label(self, text="Output Filename Prefix:").grid(row=10, column=0)
-        self.file_name_entry = tk.Entry(self)
-        self.file_name_entry.grid(row=10,column=1)
+        self.file_name_lab = tk.Label(self.output_options_frame, text="Output Filename Prefix:")
+        self.file_name_lab.grid(row=1, column=0, sticky=tk.W)
+        self.file_name_entry = tk.Entry(self.output_options_frame)
+        self.file_name_entry.grid(row=1,column=1)
 
         number_waves = tk.IntVar(self.parent)
-        self.number_waves_button = tk.Checkbutton(self, text="Number Waves",
+        self.number_waves_button = tk.Checkbutton(self.output_options_frame, text="Number Waves",
                                                   variable=number_waves, onvalue=True,
                                                   offvalue=False)
-        self.number_waves_button.grid(row=11, column=0)
+        self.number_waves_button.grid(row=2, column=1, sticky=tk.W)
 
         make_wig = tk.IntVar(self.parent)
-        self.make_wig_button = tk.Checkbutton(self, text="Make Wig File",
+        self.make_wig_button = tk.Checkbutton(self.output_options_frame, text="Make Wig File",
                                               variable=make_wig, onvalue=True,
                                               offvalue=False)
-        self.make_wig_button.grid(row=12, column=0)
+        self.make_wig_button.grid(row=3, column=1, sticky=tk.W)
 
-        self.load = tk.Button(self, text="Load...", command=askopenfilename)
-        self.load.grid(row=13, column=0)
-        self.save = tk.Button(self, text="Save...")
-        self.save.grid(row=13, column=1)
-        self.cancel = tk.Button(self, text="Cancel", command=self.withdraw)
-        self.save.grid(row=13, column=2)
+        '''Bottom buttons (Apply, Load..., Save As..., Cancel)'''
+        self.bottom_button_frame = tk.Frame(self, padx=5, pady=5)
+        self.bottom_button_frame.grid(row=5, column=0)
+        self.apply_but = tk.Button(self.bottom_button_frame, text="Apply")
+        self.apply_but.grid(row=0, column=0)
+        self.load_but = tk.Button(self.bottom_button_frame, text="Load...", command=askopenfilename)
+        self.load_but.grid(row=0, column=1)
+        self.save_as_but = tk.Button(self.bottom_button_frame, text="Save...")
+        self.save_as_but.grid(row=0, column=2)
+        self.cancel_but = tk.Button(self.bottom_button_frame, text="Cancel", command=self.withdraw)
+        self.cancel_but.grid(row=0, column=3)
 
     def writeToFile():
         pass
