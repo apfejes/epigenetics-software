@@ -144,7 +144,7 @@ class MapDecomposer(multiprocessing.Process):
         '''takes in a coverage map object and begins the process of identifying
          the normal curves that best fit the map.'''
         peaks = []
-        n = numpy.copy(item.coverage_map)    # creates a new, independent list
+        n = list(item.coverage_map)    # creates a new, independent list
         v = MapDecomposer.get_tallest_point(n)    # identify tallest point
         highest_point = v.get('height')
         cur_height = v.get('height')

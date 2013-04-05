@@ -14,6 +14,7 @@ import os
 import sys
 import time
 import traceback
+import Queue
 
 PARAM = None
 
@@ -33,8 +34,11 @@ def put_assigned(map_queues, item, max_threads):
     '''Use the min_index to determine which queue should be used.  Then place 
     the new item in the queue'''
     i = min_index(map_queues)
-    map_queues[i].put(item)
-    print ''.join([(str(queue.qsize()) + " ") for queue in map_queues])
+    try:
+        map_queues[i].put(item, False)
+    except Queue.Full:    # if the queue is blocking, just pick another queue
+        put_assigned(map_queues, item, max_threads)
+    # print ''.join([(str(queue.qsize()) + " ") for queue in map_queues])
 
 def main(param_file):
     '''This is the main command for running the Wave Generator peak finder.'''
