@@ -6,28 +6,52 @@ can be analyzed with other modules, or imported into a database for further use.
 '''
 
 from WaveGenerator.Utilities import MapDecomposingThread, Parameters, WaveFileThread, \
-    PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread
+    PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread, \
+    MappingItem
 import math
 import multiprocessing
 import os
 import sys
 import time
 import traceback
-from multiprocessing.sharedctypes import Value
-import ctypes
 
 PARAM = None
-end_signal = None
+
+def min_index(map_queues):
+    smallest = map_queues[0].qsize()
+    index = 0
+    for i in range(1, len(map_queues)):
+        if map_queues[i].qsize() < smallest:
+            index = i
+    return index
+
+
+def put_assigned(map_queues, item, max_threads):
+    '''Rotate through the 8 queues to add new items.  Of course, this isn't 
+    distributing the work load evenly, and one process might get stuck with a 
+    heavier amount of processing to to - and thus run longer, but a more 
+    efficient work distributor can always be used in place of this one if 
+    there's a need to optmize.'''
+    global counter
+    # print "counter:" + str(counter)
+    map_queues[counter].put(item)
+    counter += 1
+    if counter >= max_threads:
+        counter = 0
+
+
+    # i = min_index(map_queues)
+    # map_queues[i].put(item)
+    # print ''.join([(str(queue.qsize()) + " ") for queue in map_queues])
 
 def main(param_file):
     '''This is the main command for running the Wave Generator peak finder.'''
     procs = []
-    global end_signal
 
     try:
         wave_queue = multiprocessing.Queue()
-        map_queue = multiprocessing.Queue(400)
-        wigfile = None    # must asign variables in case of unexpected termination.
+        map_queues = []
+        wigfile = None    # must assign variables in case of unexpected termination.
         wavefile = None    # otherwise, they are closed, but never initialized
         print_thread = None
 
@@ -67,18 +91,22 @@ def main(param_file):
         print_thread = PrintThread.StringWriter(print_queue)
         print_thread.start_print_writer()
 
-
-        for x in range(PARAM.get_parameter("processor_threads")):
-
+        worker_processes = PARAM.get_parameter("processor_threads")
+        print ("worker processes: " + str(worker_processes))
+        for x in range(worker_processes):
+            queue = multiprocessing.Queue()
+            map_queues.append(queue)
             mapprocessor = MapDecomposingThread.MapDecomposer(PARAM,
-                                        wave_queue, print_queue, map_queue, x, end_signal)
+                                        wave_queue, print_queue, queue, x)
+
             p = multiprocessing.Process(target = mapprocessor.run_wrapper, args = (x,))
             p.daemon = True
             try:
                 p.start()
             except KeyboardInterrupt:
                 p.terminate()
-                map_queue.empty()
+                for queue in map_queues:
+                    queue.empty()
             procs.append(p)
 
         print_queue.put("All Processor threads started successfully.")
@@ -107,8 +135,7 @@ def main(param_file):
                     coverage_map = mapmaker.makeIslands(block_left, block_right,
                                                         reads_list)
                     # print "adding map: ", current_chromosome, block_left
-                    mapprocessor.add_map(coverage_map, current_chromosome,
-                                         block_left)
+                    put_assigned(map_queues, MappingItem.Item(coverage_map, chromosome, block_left), worker_processes)
                     if PARAM.get_parameter("make_wig"):
                         wigfile.add_map(coverage_map, current_chromosome,
                                         block_left)
@@ -140,8 +167,9 @@ def main(param_file):
                 else:
                     coverage_map = mapmaker.makeIslands(block_left, block_right,
                                                         reads_list)
-                    mapprocessor.add_map(coverage_map, current_chromosome,
-                                         block_left)
+
+                    put_assigned(map_queues, MappingItem.Item(coverage_map, chromosome, block_left), worker_processes)
+                    # mapprocessor.add_map(coverage_map, current_chromosome, block_left)
                     if PARAM.get_parameter("make_wig"):
                         wigfile.add_map(coverage_map, current_chromosome,
                                         block_left)
@@ -158,7 +186,8 @@ def main(param_file):
     except KeyboardInterrupt:
         print "Keyboard Interruption. ", sys.exc_info()[0]
         print traceback.format_exc()
-        map_queue.empty()    # the processes will continue to run until the queue is empty, so empty the queue to cut it short.
+        for queue in map_queues:
+            queue.empty()    # the processes will continue to run until the queue is empty, so empty the queue to cut it short.
     except:
         print "Unexpected error in Wave Generator:", sys.exc_info()[0]
         print traceback.format_exc()
@@ -167,19 +196,15 @@ def main(param_file):
         # Add Sentinels to end of queue
         print_queue.put("adding terminator sentinels to queue.")
         for x in range(PARAM.get_parameter("processor_threads")):
-            map_queue.put(None)
-        while map_queue.qsize() > 0:
-            print_queue.put("waiting on map_queue to empty: " + str(map_queue.qsize()))
-            time.sleep(3)
-        print_queue.put("map_queue is empty.")
-        # MapDecomposingThread.END_PROCESSES = True
-        map_queue.close()
-        # end_signal = True    # this is the signal for all processes to end.
+            for queue in map_queues:
+                queue.put(None)
+                while queue.qsize() > 0:
+                    print_queue.put("waiting on queue" + str(x) + " to empty: " + str(queue.qsize()))
+                    time.sleep(3)
+                print_queue.put("map_queue is empty.")
+                queue.close()
         for proc in procs:
-            name = proc.name
-            print_queue.put("joining on process " + name)
             proc.join()
-            print_queue.put("join completed")
         print_queue.put("Processor threads terminated.")
         if PARAM.get_parameter("make_wig") and wigfile != None:
             wigfile.close_wig_writer()
@@ -204,15 +229,15 @@ def main(param_file):
         # print_queue.join()
 
         readahead.close()
-        print "all closed"
+        print "Shutdown complete"
+
+counter = 0
 
 if __name__ == "__main__":
     if len(sys.argv) > 0 :
         for arg in sys.argv:
             print arg
     # sys.argv[1] must be equal to the file name of the input file.
-    # global end_signal
-    end_signal = Value(ctypes.c_bool, False)    # allocate a piece of shared memory or threads to view
-                                # 0 is false, so don't end.  1 is true, so end.
     print_queue = multiprocessing.Queue()
     main(sys.argv[1])
+
