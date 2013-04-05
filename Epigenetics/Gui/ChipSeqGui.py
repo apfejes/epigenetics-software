@@ -9,9 +9,9 @@ import tempfile
 import Tkinter as tk
 import tkFileDialog
 
-from Epigenetics.WaveGenerator import TheWaveGenerator as wg
-from Epigenetics.WaveGenerator.Utilities.Parameters import Parameters
-from Epigenetics.Gui.ParametersEditor import ParametersEditor
+from ..WaveGenerator.TheWaveGenerator import main as wg_main
+from ..WaveGenerator.Utilities.Parameters import parameter
+from .ParametersEditor import ParametersEditor
 
 class Application(tk.Tk):
     """Main Application Class"""
@@ -20,7 +20,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
         self.title("Epigenetics Analysis Suite")
         self.createWidgets()
-        self.parameters = Parameters(None)
+        self.parameters = parameter('')
 
     def createWidgets(self):
         menu_bar = tk.Menu(self)
@@ -43,11 +43,11 @@ class Application(tk.Tk):
         run_wg_but.pack()
 
     def run_wg(self, parameters):
-        parent_conn, child_conn = multiprocessing.Pipe()
+#        parent_conn, child_conn = multiprocessing.Pipe()
         temp_paramfile = tempfile.NamedTemporaryFile(prefix='wavegen_', suffix='.input', delete=False)
         for key, value in parameters.parameters.iteritems():
             temp_paramfile.write('%s = %s\n' % (key, str(value)))
-        wg_proc = multiprocessing.Process(target=wg.main, args=(temp_paramfile.name,))
+        wg_proc = multiprocessing.Process(target=wg_main, args=(temp_paramfile.name,))
         wg_proc.start()
 
     def launchParametersEditor(self):
