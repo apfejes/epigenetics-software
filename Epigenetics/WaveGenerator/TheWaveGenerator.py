@@ -5,16 +5,24 @@ can be analyzed with other modules, or imported into a database for further use.
 
 '''
 
-from WaveGenerator.Utilities import MapDecomposingThread, Parameters, WaveFileThread, \
-    PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread, \
-    MappingItem
+
+
 import math
 import multiprocessing
 import os
 import sys
+import inspect
 import time
 import traceback
 import Queue
+cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
+if cmd_folder not in sys.path:
+    sys.path.insert(0, cmd_folder)
+sys.path.insert(0, "..")
+from WaveGenerator.Utilities import MapDecomposingThread, Parameters, WaveFileThread, \
+    PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread, \
+    MappingItem
+
 
 PARAM = None
 
@@ -27,6 +35,8 @@ def min_index(map_queues):
             return i
         if map_queues[i].qsize() < smallest:
             index = i
+    if smallest > 1000:
+        time.sleep(1)    # slow this thread down, if it gets too far ahead.
     return index
 
 
@@ -54,20 +64,16 @@ def main(param_file):
         global PARAM
         if os.path.exists(param_file):
             PARAM = Parameters.parameter(param_file)
-            print PARAM.get_parameter("input_file")
+
         else:
             print "Could not find input parameter file"
             sys.exit()
 
+        '''launch thread to read and process the print queue'''
+        print_thread = PrintThread.StringWriter(print_queue)
+        print_thread.start_print_writer()
+        print_queue.put("Print queue and thread have started")
 
-
-        ''' Once a file is opened you can iterate over all of the read mapping to a 
-        specified region using fetch(). Each iteration returns a AlignedRead object 
-        which represents a single read along with its fields and optional tags:
-        '''
-        readahead = ReadAheadIteratorPET.ReadAheadIteratorPET(
-                    PARAM.get_parameter("input_file"),
-                    PARAM.get_parameter("fragment_length"), "rb", False)
         current_chromosome = None
         count = 0
         new_block = True
@@ -83,12 +89,7 @@ def main(param_file):
         wavefile.start_wave_writer(PARAM.get_parameter('output_path'),
                                    PARAM.get_parameter('file_name'))
 
-        '''launch thread to read and process the print queue'''
-        print_thread = PrintThread.StringWriter(print_queue)
-        print_thread.start_print_writer()
-
         worker_processes = PARAM.get_parameter("processor_threads")
-        print ("worker processes: " + str(worker_processes))
         for x in range(worker_processes):
             queue = multiprocessing.Queue()
             map_queues.append(queue)
@@ -104,12 +105,24 @@ def main(param_file):
                 for queue in map_queues:
                     queue.empty()
             procs.append(p)
-
         print_queue.put("All Processor threads started successfully.")
+        print_queue.put("Parameters provided:")
+        for par in PARAM.parameters.keys():
+            print_queue.put("%s\t%s" % par, PARAM.get_parameter(par))
+        print_queue.put("-------------------------------------------")
+
         print_queue.put("Chromosome processing has started, along with " +
                     "threads to handle output.  Please wait until all threads " +
                     "have completed. Note, threads for processing may continue " +
                     "after the final chromosome input has been read and counted.")
+
+        ''' Once a file is opened you can iterate over all of the read mapping to a 
+        specified region using fetch(). Each iteration returns a AlignedRead object 
+        which represents a single read along with its fields and optional tags:
+        '''
+        readahead = ReadAheadIteratorPET.ReadAheadIteratorPET(
+                    PARAM.get_parameter("input_file"),
+                    PARAM.get_parameter("fragment_length"), "rb", False)
         while True:
             # print count, "reads processed"
             alignedreadobjpet = readahead.getNext()
@@ -126,18 +139,20 @@ def main(param_file):
                 read_right = alignedreadobjpet.get_right_end()
                 if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get_parameter("max_pet_length"):
                     continue    # simply move to the
-                if not new_block:
-                # flush current reads to map
+                if not new_block:    # flush current reads to map
                     coverage_map = mapmaker.makeIslands(block_left, block_right,
                                                         reads_list)
                     # print "adding map: ", current_chromosome, block_left
-                    put_assigned(map_queues, MappingItem.Item(coverage_map, chromosome, block_left), worker_processes)
+                    put_assigned(map_queues,
+                                 MappingItem.Item(coverage_map, chromosome,
+                                                  block_left),
+                                 worker_processes)
                     if PARAM.get_parameter("make_wig"):
                         wigfile.add_map(coverage_map, current_chromosome,
                                         block_left)
                 '''reset all variables to move onto new chromosome'''
                 if current_chromosome != None:
-                    print "chromosome", current_chromosome, "had", count, "reads"
+                    print_queue.put("chromosome %s had %i reads" % (current_chromosome, count))
                 current_chromosome = chromosome
                 reads_list.destroy()
                 new_block = True
