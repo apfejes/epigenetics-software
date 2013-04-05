@@ -34,16 +34,11 @@ class Application(tk.Tk):
         edit_menu = tk.Menu(menu_bar)
         edit_menu.add_command(label="Parameters", command=self.launchParametersEditor)
         menu_bar.add_cascade(label="Edit", menu=edit_menu)
-        
-#        console = STDText(self, wrap='word', width=80, height=40, background="black", foreground="orange", state=tk.DISABLED)
-#        console.pack()
-#        sys.stdout = console
 
         run_wg_but = tk.Button(text="Run WaveGenerator", command= lambda: self.run_wg(self.parameters))
         run_wg_but.pack()
 
     def run_wg(self, parameters):
-#        parent_conn, child_conn = multiprocessing.Pipe()
         temp_paramfile = tempfile.NamedTemporaryFile(prefix='wavegen_', suffix='.input', delete=False)
         for key, value in parameters.parameters.iteritems():
             temp_paramfile.write('%s = %s\n' % (key, str(value)))
