@@ -10,7 +10,7 @@ from MongoDB.mongoUtilities import ConnectToMongo, FilesInDirectory
 
 
 # Connect to database
-db = ConnectToMongo.ConnectToMongo()
+db = ConnectToMongo.ConnectToMongo('epigenetics_database')
 # Set directory, grab all files in that directory.
 InputDir = '/home/jyeung/Documents/Outputs/Down'
 files = FilesInDirectory.Files(InputDir)
