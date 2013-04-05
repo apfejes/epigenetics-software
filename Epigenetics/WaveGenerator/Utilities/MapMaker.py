@@ -5,6 +5,7 @@ Created on 2013-03-05
 '''
 
 import sys
+import numpy
 from WaveGenerator.Utilities import ReadModels
 
 class MapMaker():
@@ -32,7 +33,7 @@ class MapMaker():
 
     def makeIslands(self, start, end, list_reads,):
 
-        coverage_map = [0.0] * (end - start)
+        coverage_map = numpy.zeros(end - start)
         # print "coverage_map length:", end, ":", start, "=", end - start
         p = list_reads.head
 
