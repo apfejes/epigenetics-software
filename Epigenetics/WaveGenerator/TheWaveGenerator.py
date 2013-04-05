@@ -5,9 +5,8 @@ can be analyzed with other modules, or imported into a database for further use.
 
 '''
 
-from WaveGenerator.Utilities import MapDecomposingThread, Parameters, WaveFileThread, \
-    PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread, \
-    MappingItem
+
+
 import math
 import multiprocessing
 import os
@@ -72,13 +71,6 @@ def main(PARAM):
         wavefile = None    # otherwise, they are closed, but never initialized
         print_thread = None
 
-        global PARAM
-        if os.path.exists(param_file):
-            PARAM = Parameters.parameter(param_file)
-            print PARAM.get_parameter("input_file")
-        else:
-            print "Could not find input parameter file"
-            sys.exit()
 
 
         '''launch thread to read and process the print queue'''
@@ -86,13 +78,6 @@ def main(PARAM):
         print_thread.start_print_writer()
         print_queue.put("Print queue and thread have started")
 
-        ''' Once a file is opened you can iterate over all of the read mapping to a 
-        specified region using fetch(). Each iteration returns a AlignedRead object 
-        which represents a single read along with its fields and optional tags:
-        '''
-        readahead = ReadAheadIteratorPET.ReadAheadIteratorPET(
-                    PARAM.get_parameter("input_file"),
-                    PARAM.get_parameter("fragment_length"), "rb", False)
         current_chromosome = None
         count = 0
         new_block = True
@@ -108,12 +93,7 @@ def main(PARAM):
         wavefile.start_wave_writer(PARAM.get_parameter('output_path'),
                                    PARAM.get_parameter('file_name'))
 
-        '''launch thread to read and process the print queue'''
-        print_thread = PrintThread.StringWriter(print_queue)
-        print_thread.start_print_writer()
-
         worker_processes = PARAM.get_parameter("processor_threads")
-        print ("worker processes: " + str(worker_processes))
         for x in range(worker_processes):
             queue = multiprocessing.Queue()
             map_queues.append(queue)
@@ -135,7 +115,6 @@ def main(PARAM):
             print_queue.put("%s\t%s" % par, PARAM.get_parameter(par))
         print_queue.put("-------------------------------------------")
 
-        print_queue.put("All Processor threads started successfully.")
         print_queue.put("Chromosome processing has started, along with " +
                     "threads to handle output.  Please wait until all threads " +
                     "have completed. Note, threads for processing may continue " +
@@ -258,10 +237,7 @@ def main(PARAM):
                 print "waiting on print_queue to empty", print_queue.qsize()
                 time.sleep(1)
             print_thread.END_PROCESSES = True
-        # print_queue.close()
         print  ("print_queue closed")
-        # print_queue.join()
-
         readahead.close()
         print "Shutdown complete"
 
