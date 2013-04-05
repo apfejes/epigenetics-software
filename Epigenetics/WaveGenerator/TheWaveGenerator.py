@@ -50,7 +50,17 @@ def put_assigned(map_queues, item, max_threads):
         put_assigned(map_queues, item, max_threads)
     # print ''.join([(str(queue.qsize()) + " ") for queue in map_queues])
 
-def main(param_file):
+def create_param_obj(param_file):
+    PARAM = None
+    if os.path.exists(param_file):
+        PARAM = Parameters.parameter(param_file)
+    else:
+        print "Could not find input parameter file"
+        sys.exit()
+    return PARAM
+
+
+def main(PARAM):
     '''This is the main command for running the Wave Generator peak finder.'''
     procs = []
 
@@ -61,13 +71,7 @@ def main(param_file):
         wavefile = None    # otherwise, they are closed, but never initialized
         print_thread = None
 
-        global PARAM
-        if os.path.exists(param_file):
-            PARAM = Parameters.parameter(param_file)
 
-        else:
-            print "Could not find input parameter file"
-            sys.exit()
 
         '''launch thread to read and process the print queue'''
         print_thread = PrintThread.StringWriter(print_queue)
@@ -245,5 +249,6 @@ if __name__ == "__main__":
             print arg
     # sys.argv[1] must be equal to the file name of the input file.
     print_queue = multiprocessing.Queue()
-    main(sys.argv[1])
+    PARAM = create_param_obj(sys.argv[1])
+    main(PARAM)
 
