@@ -1,5 +1,5 @@
 import Tkinter as tk
-from tkFileDialog import askopenfilename
+from tkFileDialog import askopenfilename, asksaveasfilename
 from ..WaveGenerator.Utilities.Parameters import parameter
 
 class ParametersEditor (tk.Toplevel):
@@ -100,13 +100,21 @@ class ParametersEditor (tk.Toplevel):
         self.apply_but.grid(row=0, column=0)
         self.load_but = tk.Button(self.bottom_button_frame, text="Load...", command=askopenfilename)
         self.load_but.grid(row=0, column=1)
-        self.save_as_but = tk.Button(self.bottom_button_frame, text="Save...")
+        self.save_as_but = tk.Button(self.bottom_button_frame, text="Save...", command=self.asksaveasfile)
         self.save_as_but.grid(row=0, column=2)
         self.cancel_but = tk.Button(self.bottom_button_frame, text="Cancel", command=self.withdraw)
         self.cancel_but.grid(row=0, column=3)
 
-    def writeToFile():
+    def asksaveasfile(self):
+        filename = asksaveasfilename()
+        if filename:
+            f = open(filename, mode='w')
+            for key, value in self.parameters.parameters.iteritems():
+                f.write(key + " = " + str(value) + "\n")
+            f.close()
+
+    def apply_parameters():
         pass
 
-    def readParameterFile():
+    def read_parameter_file():
         pass
