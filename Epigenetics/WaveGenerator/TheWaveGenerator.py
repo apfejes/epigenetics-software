@@ -112,7 +112,7 @@ def main(PARAM):
         print_queue.put("All Processor threads started successfully.")
         print_queue.put("Parameters provided:")
         for par in PARAM.parameters.keys():
-            print_queue.put("%s\t%s" % par, PARAM.get_parameter(par))
+            print_queue.put("%s\t%s" % (par, PARAM.get_parameter(par)))
         print_queue.put("-------------------------------------------")
 
         print_queue.put("Chromosome processing has started, along with " +

@@ -140,6 +140,47 @@ class MapDecomposer(multiprocessing.Process):
             return False
         return True
 
+    def to_be_tested(self, sample):
+        sample.sort()
+        to_be_tested = set()
+        for i in range(len(sample) - 1):
+            if i == 0 and sample[i][1] > sample[i + 1][1]:
+                if sample[i + 1][0] - sample[i][0] > 1:
+                    t = int((sample[i + 1][0] - sample[i][0]) / 2) + sample[i][0]
+                    if t not in to_be_tested:
+                        to_be_tested.add(t)
+            elif i == len(sample) and sample[i][1] > sample[i - 1][1]:
+                if sample[i][0] - sample[i - 1][0] > 1:
+                    t = int((sample[i][0] - sample[i - 1][0]) / 2) + sample[i - 1][0]
+                    if t not in to_be_tested:
+                        to_be_tested.add(t)
+            elif sample[i][1] >= sample[i - 1][1] and sample[i][1] >= sample[i + 1][1]:
+                if sample[i + 1][0] - sample[i][0] > 1:
+                    t = int((sample[i + 1][0] - sample[i][0]) / 2) + sample[i][0]
+                    if t not in to_be_tested:
+                        to_be_tested.add(t)
+                if sample[i][0] - sample[i - 1][0] > 1:
+                    t = int((sample[i][0] - sample[i - 1][0]) / 2) + sample[i - 1][0]
+                    if t not in to_be_tested:
+                        to_be_tested.add(t)
+        return to_be_tested
+
+    def get_mu(self, testing):
+        start = 0
+        end = 0
+        height = 0    # this is actuall the best sigma value
+        for t in testing:
+            if t[1] > height:
+                start = t[0]
+                end = 0
+                height = t[1]
+            elif t[1] == height:
+                end = t[0]
+        if not end == 0:
+            return (int((end - start) / 2) + start, height)
+        else :
+            return (start, height)
+
     def process_map(self, item, filename):
         '''takes in a coverage map object and begins the process of identifying
          the normal curves that best fit the map.'''
@@ -164,29 +205,21 @@ class MapDecomposer(multiprocessing.Process):
                 break
             else:
                 lastWave_pos = p
-            sigma = 0
-            processed = False
-            for i in range(p - 15, p + 15):
+            width = 40    # for now, must be divisible by 10
+            tested = []
+            for i in range(p - width, p + width, 10):
                 if i > 0 and i < len(n):
-                    if (n[i] >= 0.9 * cur_height):    # find best fit widest gausian
-                        this_sigma = self.best_fit_newton(n, i, cur_height)
-                        if this_sigma > sigma:
-                            sigma = this_sigma
-                            mu = i
-                            processed = True
-            if not processed:
-                MapDecomposer.print_queue.put("A region was not processed")
-                MapDecomposer.print_queue.put("region start position: " + str(item.start))
-                MapDecomposer.print_queue.put("i was from p " + str(p) + ", giving " + str(p - 15) + " to " + str(p + 15))
-                MapDecomposer.print_queue.put("len(n) is  " + str(len(n)))
-                MapDecomposer.print_queue.put("height n[p] is  " + str(n[p]))
-                str_list = []
-                for i in range (p - 15, p + 15):
-                    str_list.append(str(n[i]))
-                    str_list.append(" ")
-                MapDecomposer.print_queue.put("".join(str_list))
-                return None
-
+                    this_sigma = self.best_fit_newton(n, i, cur_height)
+                    tested.append((i - (p - width), this_sigma))
+            tbt = self.to_be_tested(tested)
+            while len(tbt) > 0:
+                for t in tbt:
+                    tested.append((t, self.best_fit_newton(n, (t + (p - width)), cur_height)))
+                tbt = []
+                tbt = self.to_be_tested(tested)
+            best = self.get_mu(tested)    # returns mu and sigma.
+            mu = best[0] + (p - width)
+            sigma = best[1]
             peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, cur_height, wave_number))
             # print "appended a wave"
             n = self.subtract_gausian(n, cur_height, sigma, mu)    # subtract gausian
