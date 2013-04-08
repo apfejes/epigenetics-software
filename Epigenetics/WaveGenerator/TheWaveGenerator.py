@@ -6,24 +6,23 @@ can be analyzed with other modules, or imported into a database for further use.
 '''
 
 
-
+import time
 import math
 import multiprocessing
 import os
 import sys
 import inspect
-import time
 import traceback
 import Queue
-
-from Utilities import (MapDecomposingThread, Parameters, WaveFileThread, 
-                       PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread,
-                       MappingItem)
-
 cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
 if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
 sys.path.insert(0, "..")
+from Utilities import (MapDecomposingThread, Parameters, WaveFileThread,
+                       PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread,
+                       MappingItem)
+
+
 
 PARAM = None
 
@@ -101,7 +100,7 @@ def main(PARAM):
             mapprocessor = MapDecomposingThread.MapDecomposer(PARAM,
                                         wave_queue, print_queue, queue, x)
 
-            p = multiprocessing.Process(target = mapprocessor.run, args = (x,))
+            p = multiprocessing.Process(target = mapprocessor.run_wrapper, args = (x,))
             p.daemon = True
             try:
                 p.start()
