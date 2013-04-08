@@ -5,7 +5,8 @@ Created on 2013-03-05
 '''
 
 import sys
-from WaveGenerator.Utilities import ReadModels
+import numpy
+from . import ReadModels
 
 class MapMaker():
 

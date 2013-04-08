@@ -15,14 +15,15 @@ import inspect
 import time
 import traceback
 import Queue
+
+from Utilities import (MapDecomposingThread, Parameters, WaveFileThread, 
+                       PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread,
+                       MappingItem)
+
 cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
 if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
 sys.path.insert(0, "..")
-from WaveGenerator.Utilities import MapDecomposingThread, Parameters, WaveFileThread, \
-    PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread, \
-    MappingItem
-
 
 PARAM = None
 
