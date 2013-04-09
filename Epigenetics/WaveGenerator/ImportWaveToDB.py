@@ -8,12 +8,9 @@ from Utilities import Parameters
 import sys
 
 
-def run(file_name):
+def run(file_name, database_name, collection_name):
     '''simple script for reading in a wave file and inserting it into a table in a mongodb database.'''
     print "processing %s..." % file_name
-
-    database_name = 'waves'
-    collection_name = 'wave'
 
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
     print "Before insert, collection \'%s\' contains %i records" % \
@@ -43,9 +40,9 @@ if __name__ == '__main__':
 
     file_name = sys.argv[1]
     conf_file = sys.argv[2]
-    database_name = sys.argv[3]
-    collection_name = sys.argv[4]
+    database_name = sys.argv[3]    # waves
+    collection_name = sys.argv[4]    # wave
     p = Parameters.parameter(conf_file)
-    run(file_name)
+    run(file_name, database_name, collection_name)
     print "Completed."
 
