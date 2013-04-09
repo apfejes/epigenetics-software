@@ -6,32 +6,31 @@ can be analyzed with other modules, or imported into a database for further use.
 '''
 
 
-
+import time
 import math
 import multiprocessing
-import os
-import sys
-import inspect
-import time
 import traceback
 import Queue
-
-from Utilities import (MapDecomposingThread, Parameters, WaveFileThread, 
-                       PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker, WigFileThread,
-                       MappingItem)
-
-cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
-if cmd_folder not in sys.path:
-    sys.path.insert(0, cmd_folder)
-sys.path.insert(0, "..")
+import os
+import sys
+from random import randint
+_root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.insert(0, _root_dir)
+from WaveGenerator.Utilities import (MapDecomposingThread, Parameters, WaveFileThread,
+                       PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker,
+                        WigFileThread, MappingItem)
 
 PARAM = None
 
-def min_index(map_queues):
+def random_index(num_queues):
+    return randint(0, num_queues - 1)
+
+
+def min_index(map_queues, max_threads):
     '''identify empty queues, or find the smallest queue, and put stuff there.'''
     smallest = map_queues[0].qsize()
     index = 0
-    for i in range(1, len(map_queues)):
+    for i in range(1, max_threads):
         if map_queues[i].empty():    # shortcut - just feed it an empty queue
             return i
         if map_queues[i].qsize() < smallest:
@@ -44,7 +43,8 @@ def min_index(map_queues):
 def put_assigned(map_queues, item, max_threads):
     '''Use the min_index to determine which queue should be used.  Then place 
     the new item in the queue'''
-    i = min_index(map_queues)
+    i = random_index(max_threads)
+    # i = min_index(map_queues, max_threads)
     try:
         map_queues[i].put(item, False)
     except Queue.Full:    # if the queue is blocking, just pick another queue
@@ -64,7 +64,6 @@ def create_param_obj(param_file):
 def main(PARAM):
     '''This is the main command for running the Wave Generator peak finder.'''
     procs = []
-
     try:
         wave_queue = multiprocessing.Queue()
         map_queues = []
