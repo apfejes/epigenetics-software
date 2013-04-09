@@ -124,6 +124,9 @@ class ParametersEditor (tk.Toplevel):
 
         '''Wave Calling Options'''
         self.parameters.set_parameter('min_height', self.min_height_entry.get())
-        
+
+        '''Runtime Configuration Options'''
+        self.parameters.set_parameter('processor_threads', self.processor_threads_entry.get())
+
     def read_parameter_file():
         pass
