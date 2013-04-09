@@ -78,6 +78,8 @@ class ParametersEditor (tk.Toplevel):
         self.output_path_lab.grid(row=0, column=0, sticky=tk.W)
         self.output_path_entry = tk.Entry(self.output_options_frame)
         self.output_path_entry.grid(row=0,column=1)
+        self.output_path_button = tk.Button(self.output_options_frame, text="Browse...")
+        self.output_path_button.grid(row=0, column=2)
         self.file_name_lab = tk.Label(self.output_options_frame, text="Output Filename Prefix:")
         self.file_name_lab.grid(row=1, column=0, sticky=tk.W)
         self.file_name_entry = tk.Entry(self.output_options_frame)
