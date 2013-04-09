@@ -1,6 +1,6 @@
 import Tkinter as tk
 from tkFileDialog import askopenfilename, asksaveasfilename
-from ..WaveGenerator.Utilities.Parameters import parameter
+from Epigenetics.WaveGenerator.Utilities.Parameters import parameter
 
 class ParametersEditor (tk.Toplevel):
     def __init__(self, parent, parameters):
