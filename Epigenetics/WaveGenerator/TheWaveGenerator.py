@@ -13,12 +13,21 @@ import traceback
 import Queue
 import os
 import sys
+
+# from .Utilities import *
+import MapDecomposingThread
+import Parameters
+import WaveFileThread
+import PrintThread
+import ReadAheadIteratorPET
+import LinkedList
+import MapMaker
+import WigFileThread
+import MappingItem
+
 from random import randint
 _root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(0, _root_dir)
-from WaveGenerator.Utilities import (MapDecomposingThread, Parameters, WaveFileThread,
-                       PrintThread, ReadAheadIteratorPET, LinkedList, MapMaker,
-                        WigFileThread, MappingItem)
 
 PARAM = None
 

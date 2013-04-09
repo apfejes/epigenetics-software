@@ -7,7 +7,7 @@ Created on 2013-03-08
 import multiprocessing
 import math
 # import numpy
-from WaveGenerator.Utilities import WaveFileThread
+import WaveFileThread
 import os
 import Queue
 import cProfile

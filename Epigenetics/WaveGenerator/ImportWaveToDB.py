@@ -4,7 +4,7 @@ Created on 2013-03-27
 @author: afejes
 '''
 from MongoDB.mongoUtilities import Mongo_Connector
-from Utilities import Parameters
+import Parameters
 import sys
 
 
