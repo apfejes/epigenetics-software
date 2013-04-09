@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?eclipse-pydev version="1.0"?><pydev_project>
-<pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
-<path>/Epigenetics</path>
-</pydev_pathproperty>
+
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.7</pydev_property>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">python</pydev_property>
-<pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
-<path>/home/afejes/Downloads/pysam-0.7.4/dist/pysam-0.7.4-py2.7-linux-x86_64.egg</path>
+
+<pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
+<path>/Epigenetics</path>
+<path>/Epigenetics/library/pysam-0.7.4-py2.7-linux-x86_64.egg</path>
+<path>/Epigenetics/WaveGenerator</path>
+<path>/Epigenetics/WaveGenerator/Utilities</path>
 </pydev_pathproperty>
 </pydev_project>
