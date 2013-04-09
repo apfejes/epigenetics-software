@@ -21,7 +21,7 @@ class ConnectionTestCase(unittest.TestCase):
         connection = MongoClient('kruncher.cmmt.ubc.ca', 27017)
         db = connection.epigenetics_database
         '''
-        db = ConnectToMongo.ConnectToMongo()
+        db = ConnectToMongo.ConnectToMongo('epigenetics_database')
         test_document = {'key 1': 'value 1',
                          'key 2': 'value 2',
                          'key 3': 'value 3'}

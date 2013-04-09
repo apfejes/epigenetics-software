@@ -46,7 +46,7 @@ class Cursor(object):
         '''
         
         # 1.
-        chromosome_list = []    # Initialize list
+        chromosome_list = []    # Initialize list chr
         for chr in chromosomes:
             chromosome_list.append(str(chr))
             
