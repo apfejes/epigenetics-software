@@ -19,10 +19,10 @@ class ParametersEditor (tk.Toplevel):
         self.extension_options_frame.grid(row=0, column=0, sticky=tk.EW)
         self.map_type_lab = tk.Label(self.extension_options_frame, text="Map Type:")
         self.map_type_lab.grid(row=0, column=0, sticky=tk.W)
-        self.choices = ['Native Distribution',
-                        'Flat Distribution',
-                        'Triangle Distribution']
-        self.map_type_selected = tk.StringVar(self.parent)
+        self.choices = ['Native',
+                        'Flat',
+                        'Triangle']
+        self.map_type_selected = tk.StringVar(self)
         self.map_type_selected.set(self.choices[0])
         self.map_type_option = tk.OptionMenu(self.extension_options_frame, self.map_type_selected, *self.choices)
         self.map_type_option.grid(row=0, column=1)
@@ -120,11 +120,11 @@ class ParametersEditor (tk.Toplevel):
 
     def apply_parameters(self):
         '''Extension Options'''
-        self.parameters.set_parameter('map_type', self.map_type_selected)
+        self.parameters.set_parameter('map_type', self.map_type_selected.get())
         self.parameters.set_parameter('triangle_min', self.triangle_min_scale.get())
         self.parameters.set_parameter('triangle_median', self.triangle_median_scale.get())
         self.parameters.set_parameter('fragment_length', self.fragment_length_entry.get())
-        self.parameters.set_parameter('round_leading_edge', self.round_leading_edge)
+        self.parameters.set_parameter('round_leading_edge', self.round_leading_edge.get())
         self.parameters.set_parameter('max_pet_length', self.max_pet_length_entry.get())
 
         '''Wave Calling Options'''
@@ -136,8 +136,14 @@ class ParametersEditor (tk.Toplevel):
         '''Output Options'''
         self.parameters.set_parameter('output_path', self.output_path_entry.get())
         self.parameters.set_parameter('file_name', self.file_name_entry.get())
-        self.parameters.set_parameter('number_waves', self.number_waves)
-        self.parameters.set_parameter('make_wig', self.make_wig)
+        if (self.number_waves.get() == 0):
+            self.parameters.set_parameter('number_waves', False)
+        elif (self.number_waves.get() == 1):
+            self.parameters.set_parameter('number_waves', True)
+        if (self.make_wig.get() == 0):
+            self.parameters.set_parameter('make_wig', False)
+        elif (self.make_wig.get() == 1):
+            self.parameters.set_parameter('make_wig', True)
 
     def askopenfile(self):
         filename = askopenfilename()
