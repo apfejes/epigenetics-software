@@ -122,5 +122,8 @@ class ParametersEditor (tk.Toplevel):
         self.parameters.set_parameter('round_leading_edge', self.round_leading_edge)
         self.parameters.set_parameter('max_pet_length', self.max_pet_length_entry.get())
 
+        '''Wave Calling Options'''
+        self.parameters.set_parameter('min_height', self.min_height_entry.get())
+        
     def read_parameter_file():
         pass
