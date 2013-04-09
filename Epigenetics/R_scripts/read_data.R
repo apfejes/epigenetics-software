@@ -7,6 +7,11 @@
 rm(list=ls()) # Clear variables
 
 
+# Load libraries
+library("methylumi") 
+library("lumi")
+
+
 # Declare functions
 ###############################################################################
 ###############################################################################
@@ -44,8 +49,6 @@ GetData <- function(x){
 # source("http://bioconductor.org/biocLite.R")
 # biocLite("lumi")
 # 
-library("methylumi") 
-library("lumi")
 
 
 # Define directories, input contains .RData files, output is where we write to.

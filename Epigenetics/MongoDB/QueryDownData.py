@@ -57,4 +57,8 @@ print betas_sample
 
 PlotBarGraph.PlotBarGraph(betas_sample, 'Avg Betas Across Samples in Chromosome 21')
 
+
+
+
+
 # 
