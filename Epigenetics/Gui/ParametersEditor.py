@@ -165,14 +165,21 @@ class ParametersEditor (tk.Toplevel):
                 print "Unexpected error in parameter reading:", sys.exc_info()[0]
                 print "Reading parameters failed."
                 print traceback.format_exc()
+
+            '''Extension Options'''
             self.map_type_selected.set(self.parameters.get_parameter('map_type'))
             self.triangle_min_scale.set(self.parameters.get_parameter('triangle_min'))
             self.triangle_median_scale.set(self.parameters.get_parameter('triangle_median'))
+            self.fragment_length_entry.delete(0, tk.END)
             self.fragment_length_entry.insert(0, str(self.parameters.get_parameter('fragment_length')))
             self.round_leading_edge.set(self.parameters.get_parameter('round_leading_edge'))
             if (self.round_leading_edge.get()):
                 self.round_leading_edge_button.select()
             else:
                 self.round_leading_edge_button.deselect()
+            self.max_pet_length_entry.delete(0, tk.END)
             self.max_pet_length_entry.insert(0, str(self.parameters.get_parameter('max_pet_length')))
-        
+
+            '''Wave Calling Options'''
+            self.min_height_entry.delete(0, tk.END)
+            self.min_height_entry.insert(0, str(self.parameters.get_parameter('min_height')))
