@@ -127,6 +127,12 @@ class ParametersEditor (tk.Toplevel):
 
         '''Runtime Configuration Options'''
         self.parameters.set_parameter('processor_threads', self.processor_threads_entry.get())
+        
+        '''Output Options'''
+        self.parameters.set_parameter('output_path', self.output_path_entry.get())
+        self.parameters.set_parameter('file_name', self.file_name_entry.get())
+        self.parameters.set_parameter('number_waves', self.number_waves)
+        self.parameters.set_parameter('make_wig', self.make_wig)
 
     def read_parameter_file():
         pass
