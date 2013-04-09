@@ -83,15 +83,15 @@ class ParametersEditor (tk.Toplevel):
         self.file_name_entry = tk.Entry(self.output_options_frame)
         self.file_name_entry.grid(row=1,column=1)
 
-        number_waves = tk.IntVar(self.parent)
+        self.number_waves = tk.IntVar(self.parent)
         self.number_waves_button = tk.Checkbutton(self.output_options_frame, text="Number Waves",
-                                                  variable=number_waves, onvalue=True,
+                                                  variable=self.number_waves, onvalue=True,
                                                   offvalue=False)
         self.number_waves_button.grid(row=2, column=1, sticky=tk.W)
 
-        make_wig = tk.IntVar(self.parent)
+        self.make_wig = tk.IntVar(self.parent)
         self.make_wig_button = tk.Checkbutton(self.output_options_frame, text="Make Wig File",
-                                              variable=make_wig, onvalue=True,
+                                              variable=self.make_wig, onvalue=True,
                                               offvalue=False)
         self.make_wig_button.grid(row=3, column=1, sticky=tk.W)
 
@@ -173,7 +173,7 @@ class ParametersEditor (tk.Toplevel):
             self.fragment_length_entry.delete(0, tk.END)
             self.fragment_length_entry.insert(0, str(self.parameters.get_parameter('fragment_length')))
             self.round_leading_edge.set(self.parameters.get_parameter('round_leading_edge'))
-            if (self.round_leading_edge.get()):
+            if (self.parameters.get_parameter('round_leading_edge')):
                 self.round_leading_edge_button.select()
             else:
                 self.round_leading_edge_button.deselect()
@@ -183,3 +183,23 @@ class ParametersEditor (tk.Toplevel):
             '''Wave Calling Options'''
             self.min_height_entry.delete(0, tk.END)
             self.min_height_entry.insert(0, str(self.parameters.get_parameter('min_height')))
+
+            '''Runtime Configuration Options'''
+            self.processor_threads_entry.delete(0, tk.END)
+            self.processor_threads_entry.insert(0, str(self.parameters.get_parameter('processor_threads')))
+            
+            '''Output Options'''
+            self.output_path_entry.delete(0, tk.END)
+            self.output_path_entry.insert(0, self.parameters.get_parameter('output_path'))
+            self.file_name_entry.delete(0, tk.END)
+            self.file_name_entry.insert(0, self.parameters.get_parameter('file_name'))
+            if (self.parameters.get_parameter('number_waves')):
+                self.number_waves_button.select()
+            else:
+                self.number_waves_button.deselect()
+            if (self.parameters.get_parameter('make_wig')):
+                self.make_wig_button.select()
+            else:
+                self.make_wig_button.deselect()
+
+
