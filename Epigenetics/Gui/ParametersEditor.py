@@ -1,7 +1,7 @@
 import sys
 import traceback
 import Tkinter as tk
-from tkFileDialog import askopenfilename, asksaveasfilename
+from tkFileDialog import askopenfilename, asksaveasfilename, askdirectory
 from Epigenetics.WaveGenerator.Utilities.Parameters import parameter
 
 class ParametersEditor (tk.Toplevel):
@@ -78,7 +78,7 @@ class ParametersEditor (tk.Toplevel):
         self.output_path_lab.grid(row=0, column=0, sticky=tk.W)
         self.output_path_entry = tk.Entry(self.output_options_frame)
         self.output_path_entry.grid(row=0,column=1)
-        self.output_path_button = tk.Button(self.output_options_frame, text="Browse...")
+        self.output_path_button = tk.Button(self.output_options_frame, text="Browse...", command=self.askdirectory)
         self.output_path_button.grid(row=0, column=2)
         self.file_name_lab = tk.Label(self.output_options_frame, text="Output Filename Prefix:")
         self.file_name_lab.grid(row=1, column=0, sticky=tk.W)
@@ -110,6 +110,7 @@ class ParametersEditor (tk.Toplevel):
         self.cancel_but.grid(row=0, column=3)
 
     def asksaveasfile(self):
+        self.apply_parameters()
         filename = asksaveasfilename()
         if filename:
             f = open(filename, mode='w')
@@ -121,7 +122,7 @@ class ParametersEditor (tk.Toplevel):
         '''Extension Options'''
         self.parameters.set_parameter('map_type', self.map_type_selected)
         self.parameters.set_parameter('triangle_min', self.triangle_min_scale.get())
-        self.parameters.set_parameter('triangle_median', self.triangle_median_entry.get())
+        self.parameters.set_parameter('triangle_median', self.triangle_median_scale.get())
         self.parameters.set_parameter('fragment_length', self.fragment_length_entry.get())
         self.parameters.set_parameter('round_leading_edge', self.round_leading_edge)
         self.parameters.set_parameter('max_pet_length', self.max_pet_length_entry.get())
@@ -204,4 +205,10 @@ class ParametersEditor (tk.Toplevel):
             else:
                 self.make_wig_button.deselect()
 
+    def askdirectory(self):
+        path = askdirectory()
+        if path:
+            self.parameters.set_parameter('output_path', path)
+            self.output_path_entry.delete(0, tk.END)
+            self.output_path_entry.insert(0, self.parameters.get_parameter('output_path'))
 
