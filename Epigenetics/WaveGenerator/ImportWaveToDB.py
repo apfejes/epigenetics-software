@@ -36,12 +36,15 @@ def run(file_name):
     mongo.close()
 
 if __name__ == '__main__':
-    if len(sys.argv) < 1:
-        print"This program requires the name of the wave file to import and the database config file."
+    if len(sys.argv) < 4:
+        print ("This program requires the name of the wave file to import and the " +
+        "database config file, as well as the database name and collection name")
         print" eg. python ImportWaveToDB.py /directory/data.waves /directory/database.conf"
 
     file_name = sys.argv[1]
     conf_file = sys.argv[2]
+    database_name = sys.argv[3]
+    collection_name = sys.argv[4]
     p = Parameters.parameter(conf_file)
     run(file_name)
     print "Completed."
