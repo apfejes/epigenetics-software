@@ -6,7 +6,7 @@ Created on 2013-03-08
 
 import multiprocessing
 import math
-import numpy
+# import numpy
 from WaveGenerator.Utilities import WaveFileThread
 import os
 import Queue
@@ -31,7 +31,9 @@ class MapDecomposer(multiprocessing.Process):
         self._popen = None
         self._daemonic = True
         self.map_queue = map_queue
-        self.sigma_height_table = numpy.ndarray((max_sigma, 3 * max_sigma))
+        self.sigma_height_table = [[0 for i in range(3 * max_sigma)] for j in range(max_sigma)]
+
+        # numpy.ndarray((max_sigma, 3 * max_sigma))
 
         if (MapDecomposer.wave_queue == None):
             MapDecomposer.wave_queue = wave_queue
@@ -85,7 +87,7 @@ class MapDecomposer(multiprocessing.Process):
         for i in range(-s, s):
             if (i + mu >= 0 and i + mu < len(coverage_map)):
                 coverage_map[i + mu] -= (height * \
-                        (self.sigma_height_table[sigma][math.fabs(i)] \
+                        (self.sigma_height_table[sigma][int(math.fabs(i))] \
                          / max_ht))
         return coverage_map
 
@@ -96,7 +98,7 @@ class MapDecomposer(multiprocessing.Process):
         for i in range(-s, s):
             if (i + mu >= 0 and i + mu < len(coverage_map)):
                 coverage_map[i + mu] = (height * \
-                        (self.sigma_height_table[sigma][math.fabs(i)] \
+                        (self.sigma_height_table[sigma][int(math.fabs(i))] \
                          / max_ht))
         return coverage_map
 
@@ -127,7 +129,7 @@ class MapDecomposer(multiprocessing.Process):
         for x in xrange(-s, s):
             t = i + x
             if (t >= 0 and x < 900 and t < map_len):
-                expected = height * (self.sigma_height_table[sigma][math.fabs(x)] / base)
+                expected = height * (self.sigma_height_table[sigma][int(math.fabs(x))] / base)
                 actual = coverage_map[t]
                 if actual < expected:
                     area_over += (expected - actual)
@@ -168,7 +170,7 @@ class MapDecomposer(multiprocessing.Process):
     def get_mu(self, testing):
         start = 0
         end = 0
-        height = 0    # this is actuall the best sigma value
+        height = 0    # this is actually the best sigma value
         for t in testing:
             if t[1] > height:
                 start = t[0]
