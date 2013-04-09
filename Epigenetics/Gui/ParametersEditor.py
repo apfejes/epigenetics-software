@@ -1,3 +1,5 @@
+import sys
+import traceback
 import Tkinter as tk
 from tkFileDialog import askopenfilename, asksaveasfilename
 from Epigenetics.WaveGenerator.Utilities.Parameters import parameter
@@ -17,12 +19,12 @@ class ParametersEditor (tk.Toplevel):
         self.extension_options_frame.grid(row=0, column=0, sticky=tk.EW)
         self.map_type_lab = tk.Label(self.extension_options_frame, text="Map Type:")
         self.map_type_lab.grid(row=0, column=0, sticky=tk.W)
-        choices = ['Native Distribution',
-                   'Flat Distribution',
-                   'Triangle Distribution']
-        map_type_selected = tk.StringVar(self.parent)
-        map_type_selected.set(choices[0])
-        self.map_type_option = tk.OptionMenu(self.extension_options_frame, map_type_selected, *choices)
+        self.choices = ['Native Distribution',
+                        'Flat Distribution',
+                        'Triangle Distribution']
+        self.map_type_selected = tk.StringVar(self.parent)
+        self.map_type_selected.set(self.choices[0])
+        self.map_type_option = tk.OptionMenu(self.extension_options_frame, self.map_type_selected, *self.choices)
         self.map_type_option.grid(row=0, column=1)
 
         self.triangle_min_lab = tk.Label(self.extension_options_frame, text="Triangle Minimum:")
@@ -33,9 +35,9 @@ class ParametersEditor (tk.Toplevel):
 
         self.triangle_median_lab = tk.Label(self.extension_options_frame, text="Triangle Median:")
         self.triangle_median_lab.grid(row=2, column=0, sticky=tk.SW) 
-        self.triangle_median_entry = tk.Scale(self.extension_options_frame, from_=0, to=500, orient=tk.HORIZONTAL)
-        self.triangle_median_entry.grid(row=2, column = 1)
-        self.triangle_median_entry.set(250)
+        self.triangle_median_scale = tk.Scale(self.extension_options_frame, from_=0, to=500, orient=tk.HORIZONTAL)
+        self.triangle_median_scale.grid(row=2, column = 1)
+        self.triangle_median_scale.set(250)
 
         self.fragment_length_lab = tk.Label(self.extension_options_frame, text="Fragment Length:")
         self.fragment_length_lab.grid(row=3, column=0, sticky=tk.W)
@@ -47,9 +49,9 @@ class ParametersEditor (tk.Toplevel):
         self.max_pet_length_entry = tk.Entry(self.extension_options_frame)
         self.max_pet_length_entry.grid(row=4,column=1)
 
-        round_leading_edge = tk.IntVar(self.parent)
+        self.round_leading_edge = tk.IntVar(self.parent)
         self.round_leading_edge_button = tk.Checkbutton(self.extension_options_frame, text="Round Leading Edge",
-                                                        variable=round_leading_edge, onvalue=True, 
+                                                        variable=self.round_leading_edge, onvalue=True, 
                                                         offvalue=False)
         self.round_leading_edge_button.grid(row=5, column=1)
 
@@ -98,7 +100,7 @@ class ParametersEditor (tk.Toplevel):
         self.bottom_button_frame.grid(row=5, column=0)
         self.apply_but = tk.Button(self.bottom_button_frame, text="Apply")
         self.apply_but.grid(row=0, column=0)
-        self.load_but = tk.Button(self.bottom_button_frame, text="Load...", command=askopenfilename)
+        self.load_but = tk.Button(self.bottom_button_frame, text="Load...", command=self.askopenfile)
         self.load_but.grid(row=0, column=1)
         self.save_as_but = tk.Button(self.bottom_button_frame, text="Save...", command=self.asksaveasfile)
         self.save_as_but.grid(row=0, column=2)
@@ -134,5 +136,43 @@ class ParametersEditor (tk.Toplevel):
         self.parameters.set_parameter('number_waves', self.number_waves)
         self.parameters.set_parameter('make_wig', self.make_wig)
 
-    def read_parameter_file():
-        pass
+    def askopenfile(self):
+        filename = askopenfilename()
+        if filename:
+            try:
+                f = open(filename, 'r')
+                for line in f:
+                    if line.startswith("#"):
+                        continue
+                    else:
+                        a = line.split("=")
+                        key = a[0].strip()
+                        value = a[1].strip()
+                        print "read:", key, "->", value
+                        if self.parameters.isint(value):    # handle ints
+                            self.parameters.parameters[key] = int(value)
+                        elif self.parameters.isfloat(value):    # handle floats
+                            self.parameters.parameters[key] = float(value)
+                        elif self.parameters.isbool(value):    # handle booleans
+                            if (value.lower() == "true"):
+                                self.parameters.parameters[key] = True
+                            else:
+                                self.parameters.parameters[key] = False
+                        else:    # handle strings
+                            self.parameters.parameters[key] = value
+                f.close()
+            except:
+                print "Unexpected error in parameter reading:", sys.exc_info()[0]
+                print "Reading parameters failed."
+                print traceback.format_exc()
+            self.map_type_selected.set(self.parameters.get_parameter('map_type'))
+            self.triangle_min_scale.set(self.parameters.get_parameter('triangle_min'))
+            self.triangle_median_scale.set(self.parameters.get_parameter('triangle_median'))
+            self.fragment_length_entry.insert(0, str(self.parameters.get_parameter('fragment_length')))
+            self.round_leading_edge.set(self.parameters.get_parameter('round_leading_edge'))
+            if (self.round_leading_edge.get()):
+                self.round_leading_edge_button.select()
+            else:
+                self.round_leading_edge_button.deselect()
+            self.max_pet_length_entry.insert(0, str(self.parameters.get_parameter('max_pet_length')))
+        
