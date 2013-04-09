@@ -113,8 +113,14 @@ class ParametersEditor (tk.Toplevel):
                 f.write(key + " = " + str(value) + "\n")
             f.close()
 
-    def apply_parameters():
-        pass
+    def apply_parameters(self):
+        '''Extension Options'''
+        self.parameters.set_parameter('map_type', self.map_type_selected)
+        self.parameters.set_parameter('triangle_min', self.triangle_min_scale.get())
+        self.parameters.set_parameter('triangle_median', self.triangle_median_entry.get())
+        self.parameters.set_parameter('fragment_length', self.fragment_length_entry.get())
+        self.parameters.set_parameter('round_leading_edge', self.round_leading_edge)
+        self.parameters.set_parameter('max_pet_length', self.max_pet_length_entry.get())
 
     def read_parameter_file():
         pass
