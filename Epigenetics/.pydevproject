@@ -4,8 +4,8 @@
 <path>/Epigenetics</path>
 </pydev_pathproperty>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.7</pydev_property>
-<pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">python</pydev_property>
+<pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">/usr/bin/python</pydev_property>
 <pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
-<path>/home/afejes/Downloads/pysam-0.7.4/dist/pysam-0.7.4-py2.7-linux-x86_64.egg</path>
+<path>/home/jyeung/git/epigenetics-software/Epigenetics/library/pysam-0.7.4-py2.7-linux-x86_64.egg</path>
 </pydev_pathproperty>
 </pydev_project>
