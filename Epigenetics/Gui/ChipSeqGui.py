@@ -9,9 +9,9 @@ import tempfile
 import Tkinter as tk
 import tkFileDialog
 
-from ..WaveGenerator.TheWaveGenerator import main as wg_main
-from ..WaveGenerator.Utilities.Parameters import parameter
-from .ParametersEditor import ParametersEditor
+from Epigenetics.WaveGenerator.TheWaveGenerator import main as wg_main
+from Epigenetics.WaveGenerator.Utilities.Parameters import parameter
+from ParametersEditor import ParametersEditor
 
 class Application(tk.Tk):
     """Main Application Class"""
