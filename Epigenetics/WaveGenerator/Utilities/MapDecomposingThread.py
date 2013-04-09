@@ -7,23 +7,22 @@ Created on 2013-03-08
 import multiprocessing
 import math
 import numpy
-from Utilities import WaveFileThread, MappingItem
+from WaveGenerator.Utilities import WaveFileThread
 import os
 import Queue
-import sys
+import cProfile
+
+END_PROCESS = None
 
     # don't let the main process get too far ahead
 max_sigma = 300
-END_PROCESSES = False
 
 class MapDecomposer(multiprocessing.Process):
 
     f = None
     t = None
     PARAM = None
-    sigma_height_table = None
     print_queue = None
-    map_queue = None
     wave_queue = None
 
     def __init__(self, PARAM, wave_queue, print_queue, map_queue, name):
@@ -31,25 +30,24 @@ class MapDecomposer(multiprocessing.Process):
         self._name = name
         self._popen = None
         self._daemonic = True
+        self.map_queue = map_queue
+        self.sigma_height_table = numpy.ndarray((max_sigma, 3 * max_sigma))
 
         if (MapDecomposer.wave_queue == None):
             MapDecomposer.wave_queue = wave_queue
-        if (MapDecomposer.map_queue == None):
-            MapDecomposer.map_queue = map_queue
         if (MapDecomposer.print_queue == None):
             MapDecomposer.print_queue = print_queue
         if (MapDecomposer.PARAM == None):
             MapDecomposer.PARAM = PARAM
-        if (MapDecomposer.sigma_height_table == None):
-            MapDecomposer.sigma_height_table = numpy.ndarray((max_sigma, 3 * max_sigma))
-            '''first variable is the sigma, second is the number of spaces away 
+
+        '''first variable is the sigma, second is the number of spaces away 
             from the centre of the peak'''
-            for i in xrange(1, max_sigma):    # sigma - which can't be = to zero
-                for j in xrange(1, 3 * max_sigma):    # distance from peak
-                    MapDecomposer.sigma_height_table[i][j] = \
-                                MapDecomposer.gausian_value_at_x(i, 0, j)
-                MapDecomposer.sigma_height_table[i][0] = \
-                            MapDecomposer.gausian_value_at_peak(i)
+        for i in xrange(1, max_sigma):    # sigma - which can't be = to zero
+            for j in xrange(1, 3 * max_sigma):    # distance from peak
+                self.sigma_height_table[i][j] = \
+                            MapDecomposer.gausian_value_at_x(i, 0, j)
+            self.sigma_height_table[i][0] = \
+                        MapDecomposer.gausian_value_at_peak(i)
 
     @staticmethod
     def get_tallest_point(coverage_map):
@@ -81,66 +79,38 @@ class MapDecomposer(multiprocessing.Process):
         f = 1.0 / (sigma * math.sqrt(2.0 * math.pi))
         return f
 
-    @staticmethod
-    def subtract_gausian(coverage_map, height, sigma, mu):
+    def subtract_gausian(self, coverage_map, height, sigma, mu):
         max_ht = MapDecomposer.gausian_value_at_peak(sigma)
         s = sigma * 3
         for i in range(-s, s):
             if (i + mu >= 0 and i + mu < len(coverage_map)):
                 coverage_map[i + mu] -= (height * \
-                        (MapDecomposer.sigma_height_table[sigma][math.fabs(i)] \
+                        (self.sigma_height_table[sigma][math.fabs(i)] \
                          / max_ht))
         return coverage_map
 
-    @staticmethod
-    def coverage_from_peak(height, sigma, mu, length):
+    def coverage_from_peak(self, height, sigma, mu, length):
         coverage_map = [0] * length
         max_ht = MapDecomposer.gausian_value_at_peak(sigma)
         s = sigma * 3
         for i in range(-s, s):
             if (i + mu >= 0 and i + mu < len(coverage_map)):
                 coverage_map[i + mu] = (height * \
-                        (MapDecomposer.sigma_height_table[sigma][math.fabs(i)] \
+                        (self.sigma_height_table[sigma][math.fabs(i)] \
                          / max_ht))
         return coverage_map
 
 
-    @staticmethod
-    def best_fit_slow(coverage_map, i, height):
-        '''i is the position to test for the best fit in the coverage_map.'''
-        sigma = 1
-        while True:
-            area_over = 0
-            area_under = 0
-            s = 3 * sigma
-            for x in xrange(-s, s):
-                if (i + x >= 0 and x < 900 and i + x < len(coverage_map)):
-                    expected = height * (MapDecomposer.sigma_height_table[sigma][math.fabs(x)] / MapDecomposer.sigma_height_table[sigma][0])
-                    actual = 0
-                    if i + x >= 0:
-                        actual = coverage_map[i + x]
-                    if actual < expected:
-                        area_over += (expected - actual)
-                        area_under += actual
-                    elif actual > expected:
-                        area_under += expected
-            if (area_over > (1.0 / sigma) * area_under):
-                return sigma - 1
-            if sigma >= 299:
-                return sigma - 1
-            sigma += 1
-        return sigma - 1    # once it breaks, it has gone one sigma further than it should have, so subtract one.
 
-    @staticmethod
-    def best_fit_newton(coverage_map, i, height):
+    def best_fit_newton(self, coverage_map, i, height):
         '''i is the position to test for the best fit in the coverage_map.'''
         low_sigma = 1
         high_sigma = max_sigma - 1
-        if MapDecomposer.sigma_test(coverage_map, max_sigma - 1, i, height):    # still too high
-            sys.exit("max sigma not set high enough - halting")
+#        if MapDecomposer.sigma_test(coverage_map, max_sigma - 1, i, height):    # still too high
+#            sys.exit("max sigma not set high enough - halting")
         sigma = int((high_sigma - low_sigma) / 2.0)
         while low_sigma != high_sigma - 1:
-            if not MapDecomposer.sigma_test(coverage_map, sigma, i, height):    # still too high
+            if not self.sigma_test(coverage_map, sigma, i, height):    # still too high
                 high_sigma = sigma
             else:    # still too low
                 low_sigma = sigma
@@ -148,31 +118,70 @@ class MapDecomposer(multiprocessing.Process):
         return low_sigma
 
 
-    @staticmethod
-    def sigma_test(coverage_map, sigma, i, height):
+    def sigma_test(self, coverage_map, sigma, i, height):
         area_over = 0
         area_under = 0
         s = 3 * sigma
+        base = self.sigma_height_table[sigma][0]
+        map_len = len(coverage_map)
         for x in xrange(-s, s):
-            if (i + x >= 0 and x < 900 and i + x < len(coverage_map)):
-                expected = height * (MapDecomposer.sigma_height_table[sigma][math.fabs(x)] / MapDecomposer.sigma_height_table[sigma][0])
-                actual = 0
-                if i + x >= 0:
-                    actual = coverage_map[i + x]
+            t = i + x
+            if (t >= 0 and x < 900 and t < map_len):
+                expected = height * (self.sigma_height_table[sigma][math.fabs(x)] / base)
+                actual = coverage_map[t]
                 if actual < expected:
                     area_over += (expected - actual)
                     area_under += actual
                 elif actual > expected:
                     area_under += expected
-        if (area_over > (1.0 / sigma) * area_under):
+        if area_over > (area_under / sigma):
             return False
         if sigma >= 299:
             return False
         return True
 
+    def to_be_tested(self, sample):
+        sample.sort()
+        to_be_tested = set()
+        for i in range(len(sample) - 1):
+            if i == 0 and sample[i][1] > sample[i + 1][1]:
+                if sample[i + 1][0] - sample[i][0] > 1:
+                    t = int((sample[i + 1][0] - sample[i][0]) / 2) + sample[i][0]
+                    if t not in to_be_tested:
+                        to_be_tested.add(t)
+            elif i == len(sample) and sample[i][1] > sample[i - 1][1]:
+                if sample[i][0] - sample[i - 1][0] > 1:
+                    t = int((sample[i][0] - sample[i - 1][0]) / 2) + sample[i - 1][0]
+                    if t not in to_be_tested:
+                        to_be_tested.add(t)
+            elif sample[i][1] >= sample[i - 1][1] and sample[i][1] >= sample[i + 1][1]:
+                if sample[i + 1][0] - sample[i][0] > 1:
+                    t = int((sample[i + 1][0] - sample[i][0]) / 2) + sample[i][0]
+                    if t not in to_be_tested:
+                        to_be_tested.add(t)
+                if sample[i][0] - sample[i - 1][0] > 1:
+                    t = int((sample[i][0] - sample[i - 1][0]) / 2) + sample[i - 1][0]
+                    if t not in to_be_tested:
+                        to_be_tested.add(t)
+        return to_be_tested
 
-    @staticmethod
-    def process_map(item, filename):
+    def get_mu(self, testing):
+        start = 0
+        end = 0
+        height = 0    # this is actuall the best sigma value
+        for t in testing:
+            if t[1] > height:
+                start = t[0]
+                end = 0
+                height = t[1]
+            elif t[1] == height:
+                end = t[0]
+        if not end == 0:
+            return (int((end - start) / 2) + start, height)
+        else :
+            return (start, height)
+
+    def process_map(self, item, filename):
         '''takes in a coverage map object and begins the process of identifying
          the normal curves that best fit the map.'''
         peaks = []
@@ -188,37 +197,32 @@ class MapDecomposer(multiprocessing.Process):
             wave_number = 1
         else:
             wave_number = None
-        while cur_height >= 0.2 * highest_point and cur_height >= min_height:    # TODO: Should be replaced with percentage of maxheight.
+        # print("heights %f, %f, %f (cur, highest, min)" % (cur_height, highest_point, min_height))
+        while cur_height >= 0.2 * highest_point and cur_height >= min_height:
+
             p = v.get('position')
             if lastWave_pos == p:
                 break
             else:
                 lastWave_pos = p
-            sigma = 0
-            processed = False
-            for i in range(p - 15, p + 15):
+            width = 40    # for now, must be divisible by 10
+            tested = []
+            for i in range(p - width, p + width, 10):
                 if i > 0 and i < len(n):
-                    if (n[i] >= 0.9 * cur_height):    # find best fit widest gausian
-                        this_sigma = MapDecomposer.best_fit_newton(n, i, cur_height)
-                        if this_sigma > sigma:
-                            sigma = this_sigma
-                            mu = i
-                            processed = True
-            if not processed:
-                MapDecomposer.print_queue.put("A region was not processed")
-                MapDecomposer.print_queue.put("region start position: " + str(item.start))
-                MapDecomposer.print_queue.put("i was from p " + str(p) + ", giving " + str(p - 15) + " to " + str(p + 15))
-                MapDecomposer.print_queue.put("len(n) is  " + str(len(n)))
-                MapDecomposer.print_queue.put("height n[p] is  " + str(n[p]))
-                str_list = []
-                for i in range (p - 15, p + 15):
-                    str_list.append(str(n[i]))
-                    str_list.append(" ")
-                MapDecomposer.print_queue.put("".join(str_list))
-                return None
-
+                    this_sigma = self.best_fit_newton(n, i, cur_height)
+                    tested.append((i - (p - width), this_sigma))
+            tbt = self.to_be_tested(tested)
+            while len(tbt) > 0:
+                for t in tbt:
+                    tested.append((t, self.best_fit_newton(n, (t + (p - width)), cur_height)))
+                tbt = []
+                tbt = self.to_be_tested(tested)
+            best = self.get_mu(tested)    # returns mu and sigma.
+            mu = best[0] + (p - width)
+            sigma = best[1]
             peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, cur_height, wave_number))
-            n = MapDecomposer.subtract_gausian(n, cur_height, sigma, mu)    # subtract gausian
+            # print "appended a wave"
+            n = self.subtract_gausian(n, cur_height, sigma, mu)    # subtract gausian
             v = MapDecomposer.get_tallest_point(n)    # re-calculate tallest point
             cur_height = v.get('height')
             if number_waves:
@@ -238,28 +242,31 @@ class MapDecomposer(multiprocessing.Process):
         return "".join(string) + "last\n"
 
 
+    def run_wrapper(self, *args):
+        self.print_queue.put("profiling started")
+        cProfile.runctx("self.run(args)", globals(), locals())
+        self.print_queue.put("finished profiling")
+
     def run(self, *args):
         while True:
             try:
-                map_item = MapDecomposer.map_queue.get()    # grabs host from queue
+                map_item = self.map_queue.get(True)    # grabs map from queue\
+                # print "got an item."
+                if map_item == None:
+                    break
                 self.process_map(map_item, self.f)
-                # MapDecomposer.map_queue.task_done()
+                # print "map processed"
             except KeyboardInterrupt:
                 self.print_queue.put("ignoring Ctrl-C for worker process")
             except Queue.Empty:
-                if END_PROCESSES:
-                    self.print_queue.put("thread received signal to quit")
-                    break
-                else:
-                    continue
+                pass    # ignore this error.
+
+
 
     # def close_map_decomposer(self):
     #    '''instructions to close out the thread and end the process.'''
     #    queue.join_thread()
     #    self.end_process = True
 
-    @staticmethod
-    def add_map(map_region, chromosome, start):
-        '''populate queue with data'''
-        MapDecomposer.map_queue.put(MappingItem.Item(map_region, chromosome, start))
-        # wait on the queue until everything has been processed
+    def name(self):
+        return self.name
