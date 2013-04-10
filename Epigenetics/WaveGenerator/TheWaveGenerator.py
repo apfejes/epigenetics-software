@@ -14,7 +14,12 @@ import Queue
 import os
 import sys
 
-from Epigenetics.WaveGenerator.Utilities import *
+from random import randint
+_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
+_root_dir = os.path.dirname(_cur_dir)
+sys.path.insert(0, _root_dir)
+sys.path.insert(0, _cur_dir + os.sep + "Utilities")    # add the utilities folder here
+
 import MapDecomposingThread
 import Parameters
 import WaveFileThread
@@ -25,9 +30,6 @@ import MapMaker
 import WigFileThread
 import MappingItem
 
-from random import randint
-_root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-sys.path.insert(0, _root_dir)
 
 PARAM = None
 
@@ -56,6 +58,8 @@ def put_assigned(map_queues, item, max_threads):
     # i = min_index(map_queues, max_threads)
     try:
         map_queues[i].put(item, False)
+        if map_queues[i].qsize() > 1000:    # if Queues are backing up, just wait
+            time.sleep(1)
     except Queue.Full:    # if the queue is blocking, just pick another queue
         put_assigned(map_queues, item, max_threads)
     # print ''.join([(str(queue.qsize()) + " ") for queue in map_queues])
@@ -75,6 +79,7 @@ def main(PARAM):
     procs = []
     try:
         wave_queue = multiprocessing.Queue()
+        print_queue = multiprocessing.Queue()
         map_queues = []
         wigfile = None    # must assign variables in case of unexpected termination.
         wavefile = None    # otherwise, they are closed, but never initialized
@@ -257,7 +262,10 @@ if __name__ == "__main__":
         for arg in sys.argv:
             print arg
     # sys.argv[1] must be equal to the file name of the input file.
-    print_queue = multiprocessing.Queue()
+    print "os.curdir", os.curdir
+    print "os.path.realpath", os.path.realpath
+    print "os.path.dirname", os.path.dirname
+    print "os.path.pardir", os.path.pardir
     PARAM = create_param_obj(sys.argv[1])
     main(PARAM)
 
