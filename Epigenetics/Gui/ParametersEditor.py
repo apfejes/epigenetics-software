@@ -187,6 +187,10 @@ class ParametersEditor (tk.Toplevel):
                 print "Unexpected error in parameter reading:", sys.exc_info()[0]
                 print "Reading parameters failed."
                 print traceback.format_exc()
+            
+            '''Input Options'''
+            self.input_file_entry.delete(0, tk.END)
+            self.input_file_entry.insert(0, self.parameters.get_parameter('input_file'))
 
             '''Extension Options'''
             self.map_type_selected.set(self.parameters.get_parameter('map_type'))
