@@ -262,10 +262,6 @@ if __name__ == "__main__":
         for arg in sys.argv:
             print arg
     # sys.argv[1] must be equal to the file name of the input file.
-    print "os.curdir", os.curdir
-    print "os.path.realpath", os.path.realpath
-    print "os.path.dirname", os.path.dirname
-    print "os.path.pardir", os.path.pardir
     PARAM = create_param_obj(sys.argv[1])
     main(PARAM)
 
