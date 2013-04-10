@@ -14,8 +14,8 @@ import Queue
 import os
 import sys
 
-# from .Utilities import *
-import MapDecomposingThread
+from Epigenetics.WaveGenerator.Utilities import *
+'''import MapDecomposingThread
 import Parameters
 import WaveFileThread
 import PrintThread
@@ -23,7 +23,7 @@ import ReadAheadIteratorPET
 import LinkedList
 import MapMaker
 import WigFileThread
-import MappingItem
+import MappingItem'''
 
 from random import randint
 _root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))

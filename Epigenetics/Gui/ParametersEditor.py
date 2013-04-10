@@ -14,9 +14,19 @@ class ParametersEditor (tk.Toplevel):
         self.createWidgets()
 
     def createWidgets(self):
+        '''Input Options'''
+        self.input_options_frame = tk.LabelFrame(self, text="Input Options", padx=5, pady=5)
+        self.input_options_frame.grid(row=0, column=0, sticky=tk.EW)
+        self.input_file_lab = tk.Label(self.input_options_frame, text="Input File:")
+        self.input_file_lab.grid(row=0, column=0, sticky=tk.W)
+        self.input_file_entry = tk.Entry(self.input_options_frame)
+        self.input_file_entry.grid(row=0, column=1, sticky=tk.EW)
+        self.input_file_but = tk.Button(self.input_options_frame, text="Browse...", command=self.askinputfile)
+        self.input_file_but.grid(row=0, column=2, sticky=tk.E)
+
         '''Extension Options'''
         self.extension_options_frame = tk.LabelFrame(self, text="Extension Options", padx=5, pady=5)
-        self.extension_options_frame.grid(row=0, column=0, sticky=tk.EW)
+        self.extension_options_frame.grid(row=1, column=0, sticky=tk.EW)
         self.map_type_lab = tk.Label(self.extension_options_frame, text="Map Type:")
         self.map_type_lab.grid(row=0, column=0, sticky=tk.W)
         self.choices = ['Native',
@@ -25,7 +35,7 @@ class ParametersEditor (tk.Toplevel):
         self.map_type_selected = tk.StringVar(self)
         self.map_type_selected.set(self.choices[0])
         self.map_type_option = tk.OptionMenu(self.extension_options_frame, self.map_type_selected, *self.choices)
-        self.map_type_option.grid(row=0, column=1)
+        self.map_type_option.grid(row=0, column=1, columnspan=2)
 
         self.triangle_min_lab = tk.Label(self.extension_options_frame, text="Triangle Minimum:")
         self.triangle_min_lab.grid(row=1, column=0, sticky=tk.SW)
@@ -119,6 +129,9 @@ class ParametersEditor (tk.Toplevel):
             f.close()
 
     def apply_parameters(self):
+        '''Input Options'''
+        self.parameters.set_parameter('input_file', self.input_file_entry.get())
+
         '''Extension Options'''
         self.parameters.set_parameter('map_type', self.map_type_selected.get())
         self.parameters.set_parameter('triangle_min', self.triangle_min_scale.get())
@@ -174,6 +187,10 @@ class ParametersEditor (tk.Toplevel):
                 print "Unexpected error in parameter reading:", sys.exc_info()[0]
                 print "Reading parameters failed."
                 print traceback.format_exc()
+            
+            '''Input Options'''
+            self.input_file_entry.delete(0, tk.END)
+            self.input_file_entry.insert(0, self.parameters.get_parameter('input_file'))
 
             '''Extension Options'''
             self.map_type_selected.set(self.parameters.get_parameter('map_type'))
@@ -218,3 +235,9 @@ class ParametersEditor (tk.Toplevel):
             self.output_path_entry.delete(0, tk.END)
             self.output_path_entry.insert(0, self.parameters.get_parameter('output_path'))
 
+    def askinputfile(self):
+        filename = askopenfilename()
+        if filename:
+            self.parameters.set_parameter('input_file', filename)
+            self.input_file_entry.delete(0, tk.END)
+            self.input_file_entry.insert(0, self.parameters.get_parameter('input_file'))
