@@ -5,6 +5,9 @@ Created on 2013-03-15
 '''
 
 
+from pymongo import MongoClient
+
+
 '''
 Because sample names are the columns of the beta/expression table, 
 we iterate through rows in each column.
