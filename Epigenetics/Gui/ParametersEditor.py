@@ -129,6 +129,9 @@ class ParametersEditor (tk.Toplevel):
             f.close()
 
     def apply_parameters(self):
+        '''Input Options'''
+        self.parameters.set_parameter('input_file', self.input_file_entry.get())
+
         '''Extension Options'''
         self.parameters.set_parameter('map_type', self.map_type_selected.get())
         self.parameters.set_parameter('triangle_min', self.triangle_min_scale.get())
