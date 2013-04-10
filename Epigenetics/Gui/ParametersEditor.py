@@ -17,12 +17,12 @@ class ParametersEditor (tk.Toplevel):
         '''Input Options'''
         self.input_options_frame = tk.LabelFrame(self, text="Input Options", padx=5, pady=5)
         self.input_options_frame.grid(row=0, column=0, sticky=tk.EW)
-        self.input_options_lab = tk.Label(self.input_options_frame, text="Input File:")
-        self.input_options_lab.grid(row=0, column=0, sticky=tk.W)
-        self.input_options_entry = tk.Entry(self.input_options_frame)
-        self.input_options_entry.grid(row=0, column=1, sticky=tk.EW)
-        self.input_options_but = tk.Button(self.input_options_frame, text="Browse...", command=self.askinputfile)
-        self.input_options_but.grid(row=0, column=2, sticky=tk.E)
+        self.input_file_lab = tk.Label(self.input_options_frame, text="Input File:")
+        self.input_file_lab.grid(row=0, column=0, sticky=tk.W)
+        self.input_file_entry = tk.Entry(self.input_options_frame)
+        self.input_file_entry.grid(row=0, column=1, sticky=tk.EW)
+        self.input_file_but = tk.Button(self.input_options_frame, text="Browse...", command=self.askinputfile)
+        self.input_file_but.grid(row=0, column=2, sticky=tk.E)
 
         '''Extension Options'''
         self.extension_options_frame = tk.LabelFrame(self, text="Extension Options", padx=5, pady=5)
@@ -236,4 +236,8 @@ class ParametersEditor (tk.Toplevel):
             self.output_path_entry.insert(0, self.parameters.get_parameter('output_path'))
 
     def askinputfile(self):
-        pass
+        filename = askopenfilename()
+        if filename:
+            self.parameters.set_parameter('input_file', filename)
+            self.input_file_entry.delete(0, tk.END)
+            self.input_file_entry.insert(0, self.parameters.get_parameter('input_file'))
