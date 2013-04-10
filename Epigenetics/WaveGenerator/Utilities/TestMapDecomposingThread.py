@@ -4,7 +4,7 @@ Created on 2013-03-15
 @author: afejes
 '''
 import unittest
-from Utilities import MapDecomposingThread
+import MapDecomposingThread
 
 class Test(unittest.TestCase):
 
@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
         peak = mapdecomp.gausian_value_at_peak(sigma)
         for x in xrange(90):
             coverage_map[x] = (mapdecomp.gausian_value_at_x(sigma, mu, x) / peak) * height
-        s = mapdecomp.best_fit_slow(coverage_map, mu, height)
+        s = mapdecomp.best_fit_newton(coverage_map, mu, height)
         self.assertEqual(s, sigma, "sigma returned by best fit is incorrect.  expected "
                          + str(sigma) + " got " + str(s))
 

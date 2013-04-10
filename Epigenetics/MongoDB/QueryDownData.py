@@ -6,7 +6,7 @@ Created on 2013-03-28
 
 
 # from mongoUtilities import FilesInDirectory
-from MongoDB.mongoUtilities import ConnectToMongo, GetMongoCursor, MongoDocs, PlotBarGraph
+from mongoUtilities import ConnectToMongo, GetMongoCursor, MongoDocs, PlotBarGraph
 import pylab
 
 

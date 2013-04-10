@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
 
     def testReadAhead_onlyPet(self):
         path = os.path.dirname(os.path.abspath(__file__))
-        path = path.rsplit("/", 1)
+        path = path.rsplit("/", 2)
         readahead = ReadAheadIteratorPET.ReadAheadIteratorPET(path[0] + "/testdata/ex1.sam", 200, "r", False)
         count = 0
         chr_count = 0
@@ -57,7 +57,7 @@ class Test(unittest.TestCase):
 
     def testReadAhead_allReads(self):
         path = os.path.dirname(os.path.abspath(__file__))
-        path = path.rsplit("/", 1)
+        path = path.rsplit("/", 2)
         readahead = ReadAheadIteratorPET.ReadAheadIteratorPET(path[0] + "/testdata/ex1.sam", 200, "r", False)
         count = 0
         while readahead.isValid():
@@ -71,7 +71,7 @@ class Test(unittest.TestCase):
 
     def testPushBack(self):
         path = os.path.dirname(os.path.abspath(__file__))
-        path = path.rsplit("/", 1)
+        path = path.rsplit("/", 2)
         readahead = ReadAheadIteratorPET.ReadAheadIteratorPET(path[0] + "/testdata/ex1.sam", 200, "r", True)
         count = 0
         array_of_reads = []

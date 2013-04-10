@@ -4,16 +4,13 @@ Created on 2013-03-27
 @author: afejes
 '''
 from MongoDB.mongoUtilities import Mongo_Connector
-from Utilities import Parameters
+import Parameters
 import sys
 
 
-def run(file_name):
+def run(file_name, database_name, collection_name):
     '''simple script for reading in a wave file and inserting it into a table in a mongodb database.'''
     print "processing %s..." % file_name
-
-    database_name = 'waves'
-    collection_name = 'wave'
 
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
     print "Before insert, collection \'%s\' contains %i records" % \
@@ -36,13 +33,16 @@ def run(file_name):
     mongo.close()
 
 if __name__ == '__main__':
-    if len(sys.argv) < 1:
-        print"This program requires the name of the wave file to import and the database config file."
+    if len(sys.argv) < 4:
+        print ("This program requires the name of the wave file to import and the " +
+        "database config file, as well as the database name and collection name")
         print" eg. python ImportWaveToDB.py /directory/data.waves /directory/database.conf"
 
     file_name = sys.argv[1]
     conf_file = sys.argv[2]
+    database_name = sys.argv[3]    # waves
+    collection_name = sys.argv[4]    # wave
     p = Parameters.parameter(conf_file)
-    run(file_name)
+    run(file_name, database_name, collection_name)
     print "Completed."
 
