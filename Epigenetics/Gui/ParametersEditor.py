@@ -157,6 +157,10 @@ class ParametersEditor (tk.Toplevel):
             self.parameters.set_parameter('make_wig', False)
         elif (self.make_wig.get() == 1):
             self.parameters.set_parameter('make_wig', True)
+        if (self.round_leading_edge.get() == 0):
+            self.parameters.set_parameter('round_leading_edge', False)
+        elif (self.round_leading_edge.get() == 1):
+            self.parameters.set_parameter('round_leading_edge', True)
 
     def askopenfile(self):
         filename = askopenfilename()
