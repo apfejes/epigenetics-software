@@ -14,7 +14,7 @@ import Queue
 import os
 import sys
 
-# from .Utilities import *
+from Epigenetics.WaveGenerator.Utilities import *
 import MapDecomposingThread
 import Parameters
 import WaveFileThread
