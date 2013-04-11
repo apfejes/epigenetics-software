@@ -5,7 +5,6 @@ Created on 2013-03-05
 '''
 
 import sys
-import numpy
 import ReadModels
 
 class MapMaker():

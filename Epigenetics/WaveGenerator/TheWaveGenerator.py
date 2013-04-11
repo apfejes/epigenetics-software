@@ -20,6 +20,7 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir + os.sep + "Utilities")    # add the utilities folder here
 
+# Modules in Utilities
 import MapDecomposingThread
 import Parameters
 import WaveFileThread
@@ -58,8 +59,6 @@ def put_assigned(map_queues, item, max_threads):
     # i = min_index(map_queues, max_threads)
     try:
         map_queues[i].put(item, False)
-        if map_queues[i].qsize() > 1000:    # if Queues are backing up, just wait
-            time.sleep(1)
     except Queue.Full:    # if the queue is blocking, just pick another queue
         put_assigned(map_queues, item, max_threads)
     # print ''.join([(str(queue.qsize()) + " ") for queue in map_queues])
