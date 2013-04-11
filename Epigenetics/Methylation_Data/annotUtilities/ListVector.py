@@ -30,12 +30,11 @@ class ListVector(object):
         unlistR = robjects.r['unlist']
         self.unlist = unlistR(self.list)
     
-    def subnames(self):
+    def subname(self, index):
         namesR = robjects.r['names']
-        unlistR = robjects.r['unlist']
-        unlisted = unlistR(self.list)
-        subnames_of_list = namesR(unlisted)
-        return subnames_of_list
+        sublist = self.list.rx2(index)
+        names_of_sublist = namesR(sublist)
+        return names_of_sublist[0]
     
 
         
