@@ -32,6 +32,10 @@ class MongoConnector():
 
     def drop(self, collection_name):
         self.db.drop_database(collection_name)
+    
+    def find(self, collection_name, findQuery, returnQuery):
+        collection = self.db[collection_name]
+        return collection.find(findQuery, returnQuery)
 
     def close(self):
         self.db.connection.disconnect()
