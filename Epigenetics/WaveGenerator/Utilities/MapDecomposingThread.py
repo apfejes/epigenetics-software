@@ -87,8 +87,7 @@ class MapDecomposer(multiprocessing.Process):
         for i in range(-s, s):
             if (i + mu >= 0 and i + mu < len(coverage_map)):
                 coverage_map[i + mu] -= (height * \
-                        (self.sigma_height_table[sigma][int(math.fabs(i))] \
-                         / max_ht))
+                        (self.sigma_height_table[sigma][abs(i)] / max_ht))
         return coverage_map
 
     def coverage_from_peak(self, height, sigma, mu, length):
@@ -98,8 +97,7 @@ class MapDecomposer(multiprocessing.Process):
         for i in range(-s, s):
             if (i + mu >= 0 and i + mu < len(coverage_map)):
                 coverage_map[i + mu] = (height * \
-                        (self.sigma_height_table[sigma][int(math.fabs(i))] \
-                         / max_ht))
+                        (self.sigma_height_table[sigma][abs(i)] / max_ht))
         return coverage_map
 
 
@@ -129,7 +127,7 @@ class MapDecomposer(multiprocessing.Process):
         for x in xrange(-s, s):
             t = i + x
             if (t >= 0 and x < 900 and t < map_len):
-                expected = height * (self.sigma_height_table[sigma][int(math.fabs(x))] / base)
+                expected = height * (self.sigma_height_table[sigma][abs(x)] / base)
                 actual = coverage_map[t]
                 if actual < expected:
                     area_over += (expected - actual)

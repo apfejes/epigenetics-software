@@ -4,10 +4,20 @@ Created on 2013-03-06
 @author: dfornika
 @author: afejes
 '''
+
+
 import multiprocessing
 import tempfile
 import Tkinter as tk
 import tkFileDialog
+import os
+import sys
+
+_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
+_root_dir = os.path.dirname(_cur_dir)
+sys.path.insert(0, _root_dir)
+sys.path.insert(0, _root_dir + os.sep + "WaveGenerator")    # add the utilities folder here
+sys.path.insert(0, _cur_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
 
 from TheWaveGenerator import main as wg_main
 from Parameters import parameter
