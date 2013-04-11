@@ -11,6 +11,7 @@ import glob
 import re
 import csv
 import pandas
+import sys
 
 
 class Files(object):
@@ -35,6 +36,9 @@ class Files(object):
         self.design_fnames = glob.glob('*_pData.txt')
         self.expressions_fnames = glob.glob('*_expression.txt')
         self.annotation_fnames = glob.glob('*_fData.txt')
+        
+        self.betas_fnames_full = '{0}{1}{2}'.format(self.directory, "/", self.betas_fnames[0])
+        self.expressions_fnames_full = '{0}{1}{2}'.format(self.directory, "/", self.expressions_fnames[0])
         # 2.
         self.betas_fnames.sort()
         self.design_fnames.sort()
@@ -48,7 +52,69 @@ class Files(object):
         self.projects = projects
         self.projects.sort()
         print(str(len(projects)) + ' projects found in ' + Directory)
+        
 
+    def InsertDataToDB(self, collection, 
+                        colnamebeta = 'sample_label',
+                        rownamebeta = 'probe_id',
+                        keynamebeta = 'beta_value',
+                        keynameexprs = 'exprs_value',
+                        **optkeys):
+        '''
+        Takes beta values and expression values and inserts into mongoDB.
+        The document would contain values for beta and exprs, probe_id and 
+        sample label. 
+        '''
+        
+        fbeta = open(self.betas_fnames_full)
+        fexprs = open(self.expressions_fnames_full)
+        
+        readerbeta = csv.reader(fbeta, delimiter = '\t')
+        readerexprs = csv.reader(fexprs, delimiter = '\t')
+        
+        headerbeta = readerbeta.next()
+        headerexprs = readerexprs.next()
+        if (headerbeta == headerexprs) == False:
+            sys.exit('Headers of two files do not match, exiting...')
+        
+        count = 0
+        while True:
+            count += 1
+            
+            try:
+                row_i_beta = readerbeta.next()
+                row_i_exprs = readerexprs.next()
+            
+            except StopIteration:
+                print('Stopping, no more rows to iterate.')
+                fbeta.close()
+                fexprs.close()
+                break
+                
+            rowname_beta = row_i_beta[0]
+            rowname_exprs = row_i_exprs[0]
+            
+            if (rowname_beta == rowname_exprs) == False:
+                sys.exit('Rownames of two files not matching, exiting...')
+            
+            for i in range(0, len(row_i_beta)-1):
+                document = {}
+                document[colnamebeta] = headerbeta[i]
+                document[rownamebeta] = rowname_beta
+                document[keynamebeta] = float(row_i_beta[i+1])
+                document[keynameexprs] = float(row_i_exprs[i+1])
+                collection.insert(document)
+            
+            if count%1000 == 0:
+                print count, row_i_beta
+            
+        print('{0}{1}{2}'.format('There are ',
+                                 str(collection.count()),
+                                     ' docs in collection'))
+        
+        
+        
+        
     def InsertRowsToDB(self, file_name, collection, **optkeys):
         '''
         Inserts entire row of a tab-delimited file_name into mongo. 
@@ -81,6 +147,7 @@ class Files(object):
         print('{0}{1}{2}'.format('There are ',
                                  str(collection.count()),
                                      ' docs in collection'))
+    
     
     def InsertElementsToDB(self, file_name, collection, colname='col_name', 
                            rowname='row_name', keyname='element_name', **optkeys):
