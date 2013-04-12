@@ -4,48 +4,75 @@ Created on 2013-03-27
 @author: afejes
 '''
 from MongoDB.mongoUtilities import Mongo_Connector
-import Parameters
 import sys
 import os
 
+
+_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
+_root_dir = os.path.dirname(_cur_dir)
+sys.path.insert(0, _root_dir)
+sys.path.insert(0, _cur_dir + os.sep + "Utilities")
+from Utilities import Parameters
+
 def create_param_obj(param_file):
-    '''copy of function in The WaveGenerator - should be refactored'''
-    PARAM = None
+    '''copy of function in The WaveGenerator - should be refactored to remove redundancy!!'''
     if os.path.exists(param_file):
-        PARAM = Parameters.parameter(param_file)
+        return Parameters.parameter(param_file).parameters
     else:
         print "Could not find input parameter file"
         sys.exit()
-    return PARAM
-
-
-
 
 
 def run():
     '''simple script for reading in a wave file and inserting it into a table in a mongodb database.'''
 
     wave_data_file = raw_input('wave file to load: ')
-    cell_line = raw_input('Insert name of the cell line: ')
+    while not os.path.isfile(wave_data_file):
+        print "Unable to find file %s" % wave_data_file
+        wave_data_file = raw_input('wave file to load: ')
     wave_input_file = raw_input('parameter file used to generate waves: ')
-    database_name = raw_input('database name: ')    # waves
-    collection_name = raw_input('collection_name: ')    # wave
+    while not os.path.isfile(wave_input_file):
+        print "Unable to find file %s" % wave_input_file
+        wave_input_file = raw_input('parameter file used to generate waves: ')
+    cell_line = raw_input('Insert name of the cell line: ')
+    chip = raw_input('Name of the ChIP target : ')
 
-    print "opening connection to database..."
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
+    patient_data = str.lower(raw_input("Do you have patient data to enter for this sample [y/n]:"))
+    while not (patient_data == 'y' or patient_data == 'n' or patient_data == 'yes' or patient_data == 'no'):
+        print "response %s not understood." % patient_data
+        patient_data = str.lower(raw_input("Do you have patient data to enter for this sample [y/n]:"))
 
+    patient_dict = {}
+    if patient_data == 'y' or patient_data == 'yes':
+        print "please enter key value pairs in the form key=value, enter a blank line to end input"
+        while True:
+            line = raw_input("")
+            if len(line) == 0:
+                break
+            else:
+                st = str.split(line, "=", 1)
+                patient_dict[st[0]] = st[1]
 
+    print "Thanks - Data has been collected."
+    print "opening connection(s) to MongoDB..."
+    db_name = "human_epigenetics"
+    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
 
     print "processing %s..." % wave_input_file
-    PARAM = create_param_obj(sys.argv[1])
+    sample = create_param_obj(wave_input_file)
+    sample['cell_line'] = cell_line
+    sample['chip'] = chip
+    collection_name = "samples"
+    sample_id = mongo.insert(collection_name, sample)
 
-
+    # test if test if record with that cell line name already exists
+    # if it exists, check if information matches
+        # test if which fields are different - check if user wants to update or overwrite
+        # test if
+    collection_name = "waves"
     print "processing %s..." % wave_data_file
     print "Before insert, collection \'%s\' contains %i records" % \
                         (collection_name, mongo.count(collection_name))
-
-
-
     f = open(wave_data_file, 'r')    # open file
     for line in f:
         if line.startswith("#"):
@@ -57,17 +84,17 @@ def run():
             wave["position"] = a[1]
             wave["stddev"] = a[2]
             wave["item"] = a[3]
-            mongo.insert("wave", wave)
+            wave["sample_id"] = sample_id
+            mongo.insert("waves", wave)
     f.close()
     print "Collection \'%s\' now contains %i records" % \
                         (collection_name, mongo.count(collection_name))
     mongo.close()
 
 if __name__ == '__main__':
-    if len(sys.argv) < 5:
-        print ("This program requires the name of the wave file to import and the " +
-        "database config file, as well as the database name and collection name")
-        print" eg. python ImportWaveToDB.py /directory/data.waves /directory/database.conf"
+    if len(sys.argv) < 1:
+        print ("This program requires the name of the database config file.")
+        print" eg. python ImportWaveToDB.py /directory/database.conf"
 
     conf_file = sys.argv[1]
     p = Parameters.parameter(conf_file)
