@@ -41,13 +41,15 @@ class Annotation(object):
                            See IlluminaHumanMethylation450k.db docuemntation
                            for complete set of commands available. 
                            
+                           Example: 'IlluminaHumanMethylation450kCHRLOC' is
+                                     an R_command
+                           
                            GetProbeAnnotation is meant to be used for 
                            commands that involve mapping information to probes.
                            
         Outputs:
                 Annotation information about the probes, in a list
         '''
-        pass
         # First, define some R functions which will be used.
         mapped_probesR = robjects.r['mappedkeys']
         convert2listR = robjects.r['as.list']
@@ -63,27 +65,6 @@ class Annotation(object):
         # Remove any lists containing NAs
         list_annot_mapped = list_annot.rx(mapped_probes)
         return list_annot_mapped
-
-'''
-methylation_annotation = importr('IlluminaHumanMethylation450k.db')
-
-chrloc = robjects.r['IlluminaHumanMethylation450kCHRLOC']
-mapped_probesR = robjects.r['mappedkeys']
-mapped_probes = mapped_probesR(chrloc)
-convert2listR = robjects.r['as.list']
-list_chr = convert2listR(chrloc)
-list_chr_mapped = list_chr.rx(mapped_probes)
-
-getnamesR = robjects.r['names']
-probe_names = getnamesR(list_chr_mapped)
-
-unlistR = robjects.r['unlist']
-chr_unlisted = unlistR(list_chr_mapped)
-
-probe_chr = {}
-for i in xrange(1,6):
-    probe_chr[probe_names[i]] = chr_unlisted[i]
-'''
 
 
 
