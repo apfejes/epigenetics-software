@@ -74,18 +74,28 @@ def run():
     print "Before insert, collection \'%s\' contains %i records" % \
                         (collection_name, mongo.count(collection_name))
     f = open(wave_data_file, 'r')    # open file
+    count = 1
+    to_insert = []
     for line in f:
         if line.startswith("#"):
             continue
         else:
             a = line.split("\t")
             wave = {}
-            wave["chromosome"] = a[0]
-            wave["position"] = a[1]
+            wave["chr"] = a[0].replace("chr", "").upper()
+            wave["pos"] = int(a[1])
             wave["stddev"] = a[2]
-            wave["item"] = a[3]
+            wave["height"] = float(a[3])
             wave["sample_id"] = sample_id
-            mongo.insert("waves", wave)
+            to_insert.append(wave)
+            # mongo.insert("waves", wave)
+            if count % 100000 == 0:
+                print "%i lines processed" % count
+                mongo.insert("waves", to_insert)
+                to_insert = []
+            count += 1
+    if len(to_insert) > 0:
+        mongo.insert("waves", to_insert)
     f.close()
     print "Collection \'%s\' now contains %i records" % \
                         (collection_name, mongo.count(collection_name))
