@@ -111,9 +111,31 @@ class Files(object):
         print('{0}{1}{2}'.format('There are ',
                                  str(collection.count()),
                                      ' docs in collection'))
-        
-        
-        
+
+    def InsertAnnotation(self, file_name, collection):
+        '''
+        Inserts annotation information. Make sure file_name is an
+        annotation file. 
+        '''
+        for file_name in file_name:    # Since file_name is a list, we loop.
+            fname = '{0}{1}{2}'.format(self.directory, "/", file_name)
+            print('{0}{1}'.format('Reading from ', fname))
+            with open('{0}{1}{2}'.format(self.directory, "/", file_name), 'rb') as Data:
+                reader = csv.DictReader(Data, delimiter = '\t')
+                print('{0}{1}'.format('Inserting rows into ', collection.name))
+                for row in reader:
+                    for key in row:
+                        if key == 'CHR':
+                            pass
+                        else:
+                            try:
+                                row[key] = int(row[key])
+                            except Exception:
+                                pass
+                    collection.insert(row)
+        print('{0}{1}{2}'.format('There are ',
+                                 str(collection.count()),
+                                     ' docs in collection'))
         
     def InsertRowsToDB(self, file_name, collection, **optkeys):
         '''
@@ -136,8 +158,6 @@ class Files(object):
                 reader = csv.DictReader(Data, delimiter = '\t')
                 print('{0}{1}'.format('Inserting rows into ', collection.name))
                 for row in reader:
-                    if None in row:
-                        del row[None]    # Cannot insert entries with keys as None
                     '''
                     optkeys are key:value pairs that will be included into doc.
                     '''
