@@ -7,8 +7,6 @@ Created on 2013-03-28
 
 # from mongoUtilities import FilesInDirectory
 from mongoUtilities import ConnectToMongo, GetMongoCursor, MongoDocs, PlotBarGraph
-import pylab
-
 
 # Connect to database
 db = ConnectToMongo.ConnectToMongo('epigenetics_database')
@@ -21,10 +19,10 @@ collection = db[collname]
 # Get probe_list and retrieve data (betas) from collection
 data_collection = GetMongoCursor.Cursor(collection)
 
-# Retrieve list of probes in chromosome 21. 
+# Retrieve list of probes in chromosome 21.
 probes = data_collection.GetProbesInChromosome(21)
 probe_list = probes.keys()
-docs_betas = data_collection.GetBetasFromProbes(probe_list)   # Improve this function
+docs_betas = data_collection.GetBetasFromProbes(probe_list)    # Improve this function
 
 # Retrieve design information
 design_info = data_collection.GetDocsWithKeys('SampleLabel')    # Create cursor
@@ -61,4 +59,4 @@ PlotBarGraph.PlotBarGraph(betas_sample, 'Avg Betas Across Samples in Chromosome 
 
 
 
-# 
+#
