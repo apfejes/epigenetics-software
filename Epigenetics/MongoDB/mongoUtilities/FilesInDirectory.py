@@ -77,10 +77,10 @@ class Files(object):
         if (headerbeta == headerexprs) == False:
             sys.exit('Headers of two files do not match, exiting...')
         
+        BulkInsert = []
         count = 0
         while True:
             count += 1
-            
             try:
                 row_i_beta = readerbeta.next()
                 row_i_exprs = readerexprs.next()
@@ -103,11 +103,16 @@ class Files(object):
                 document[rownamebeta] = rowname_beta
                 document[keynamebeta] = float(row_i_beta[i+1])
                 document[keynameexprs] = float(row_i_exprs[i+1])
-                collection.insert(document)
-            
-            if count%1000 == 0:
-                print count, row_i_beta
-            
+                BulkInsert.append(document)
+                
+            if count%10000 == 0:
+                collection.insert(BulkInsert)
+                print('{0}{1}{2}'.format('There are ',
+                                         str(collection.count()),
+                                             ' docs in collection'))
+                BulkInsert = []
+        collection.insert(BulkInsert)
+        BulkInsert = []
         print('{0}{1}{2}'.format('There are ',
                                  str(collection.count()),
                                      ' docs in collection'))
@@ -132,6 +137,7 @@ class Files(object):
                                 row[key] = int(row[key])
                             except Exception:
                                 pass
+                        print key, row[key]
                     collection.insert(row)
         print('{0}{1}{2}'.format('There are ',
                                  str(collection.count()),

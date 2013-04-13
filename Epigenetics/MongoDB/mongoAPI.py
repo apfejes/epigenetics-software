@@ -10,15 +10,15 @@ from MongoDB.mongoUtilities import ConnectToMongo, FilesInDirectory
 
 
 # Connect to database
-db = ConnectToMongo.ConnectToMongo('epigenetics_database')
+db = ConnectToMongo.ConnectToMongo('annotation')
 # Set directory, grab all files in that directory.
 InputDir = '/home/jyeung/Documents/Outputs/Down'
 files = FilesInDirectory.Files(InputDir)
 # Find all projects in that directory
 projects = files.projects
 # Create a collection for inserting documents, user input.
-collection_name = raw_input('Insert collection name for inserting documents: ')
-# collection_name = 'fData'
+# collection_name = raw_input('Insert collection name for inserting documents: ')
+collection_name = 'methylation_magda'
 collection = db[collection_name]
 
 '''
@@ -28,6 +28,7 @@ Third, insert design values.
 Fourth, insert annotation information.
 '''
 
+'''
 # 1.
 files.InsertElementsToDB(files.betas_fnames,
                          collection,
@@ -44,6 +45,6 @@ files.InsertElementsToDB(files.expressions_fnames,
 files.InsertRowsToDB(files.design_fnames, collection,
                      filetype = 'design')
 
+'''
 # 4.
-files.InsertRowsToDB(files.annotation_fnames, collection,
-                     filetype = 'annotation')
+files.InsertAnnotation(files.annotation_fnames, collection)

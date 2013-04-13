@@ -20,6 +20,7 @@ sample_info = Samples.Samples(filename)
 
 columns_sample = ['SampleID', 'SampleLabel', 'Sample Group', 'Current_Age', 'Test_Date',
                    'Sample Section', 'Sample_Well', 'Sentrix Barcode']
+
 columns_patient = ['Total_BriefPraxis', 'DRM_SumofSocial', 'Handedness', 'Sex', 
                    'Level_of_Intellectual_Delay', 'DMR_SumofCognitive', 
                    'Percentage_BriefPraxis']
