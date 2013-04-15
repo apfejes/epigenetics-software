@@ -11,12 +11,14 @@ class ParametersEditor (tk.Toplevel):
         self.parameters = parameters
         self.title("Parameters Editor")
         self.config(padx = 5, pady = 5)
+        self.resizable(0, 0)
         self.createWidgets()
 
     def createWidgets(self):
         '''Input Options'''
         self.input_options_frame = tk.LabelFrame(self, text = "Input Options", padx = 5, pady = 5)
         self.input_options_frame.grid(row = 0, column = 0, sticky = tk.EW)
+        self.input_options_frame.columnconfigure(0, weight=1)
         self.input_file_lab = tk.Label(self.input_options_frame, text = "Input File:")
         self.input_file_lab.grid(row = 0, column = 0, sticky = tk.W)
         self.input_file_entry = tk.Entry(self.input_options_frame)
@@ -27,6 +29,7 @@ class ParametersEditor (tk.Toplevel):
         '''Extension Options'''
         self.extension_options_frame = tk.LabelFrame(self, text = "Extension Options", padx = 5, pady = 5)
         self.extension_options_frame.grid(row = 1, column = 0, sticky = tk.EW)
+        self.extension_options_frame.columnconfigure(0, weight=1)
         self.map_type_lab = tk.Label(self.extension_options_frame, text = "Map Type:")
         self.map_type_lab.grid(row = 0, column = 0, sticky = tk.W)
         self.choices = ['Native',
@@ -35,17 +38,18 @@ class ParametersEditor (tk.Toplevel):
         self.map_type_selected = tk.StringVar(self)
         self.map_type_selected.set(self.choices[0])
         self.map_type_option = tk.OptionMenu(self.extension_options_frame, self.map_type_selected, *self.choices)
+        self.map_type_option.config(width = 20)
         self.map_type_option.grid(row = 0, column = 1, columnspan = 2)
 
         self.triangle_min_lab = tk.Label(self.extension_options_frame, text = "Triangle Minimum:")
         self.triangle_min_lab.grid(row = 1, column = 0, sticky = tk.SW)
-        self.triangle_min_scale = tk.Scale(self.extension_options_frame, from_ = 0, to = 500, orient = tk.HORIZONTAL)
+        self.triangle_min_scale = tk.Scale(self.extension_options_frame, from_ = 0, to = 500, length = 200, orient = tk.HORIZONTAL)
         self.triangle_min_scale.grid(row = 1, column = 1)
         self.triangle_min_scale.set(200)
 
         self.triangle_median_lab = tk.Label(self.extension_options_frame, text = "Triangle Median:")
         self.triangle_median_lab.grid(row = 2, column = 0, sticky = tk.SW)
-        self.triangle_median_scale = tk.Scale(self.extension_options_frame, from_ = 0, to = 500, orient = tk.HORIZONTAL)
+        self.triangle_median_scale = tk.Scale(self.extension_options_frame, from_ = 0, to = 500, length = 200, orient = tk.HORIZONTAL)
         self.triangle_median_scale.grid(row = 2, column = 1)
         self.triangle_median_scale.set(250)
 
@@ -68,29 +72,32 @@ class ParametersEditor (tk.Toplevel):
         '''Wave Calling Options'''
         self.wave_calling_options_frame = tk.LabelFrame(self, text = "Wave Calling Options", padx = 5, pady = 5)
         self.wave_calling_options_frame.grid(row = 2, column = 0, sticky = tk.EW)
+        self.wave_calling_options_frame.columnconfigure(0, weight=1)
         self.min_height_lab = tk.Label(self.wave_calling_options_frame, text = "Minimum Height:")
-        self.min_height_lab.grid(row = 0, column = 0)
+        self.min_height_lab.grid(row = 0, column = 0, sticky = tk.W)
         self.min_height_entry = tk.Entry(self.wave_calling_options_frame)
         self.min_height_entry.grid(row = 0, column = 1)
 
         '''Runtime Configuration Options'''
         self.runtime_configuration_options_frame = tk.LabelFrame(self, text = "Run Time Configuration", padx = 5, pady = 5)
         self.runtime_configuration_options_frame.grid(row = 3, column = 0, sticky = tk.EW)
+        self.runtime_configuration_options_frame.columnconfigure(0, weight=1)
         self.processor_threads_lab = tk.Label(self.runtime_configuration_options_frame, text = "Processor Threads:")
-        self.processor_threads_lab.grid(row = 0, column = 0)
+        self.processor_threads_lab.grid(row = 0, column = 0, sticky = tk.W)
         self.processor_threads_entry = tk.Entry(self.runtime_configuration_options_frame)
-        self.processor_threads_entry.grid(row = 0, column = 1)
+        self.processor_threads_entry.grid(row = 0, column = 1, sticky=tk.EW)
 
         '''Output Options'''
         self.output_options_frame = tk.LabelFrame(self, text = "Output Options", padx = 5, pady = 5)
         self.output_options_frame.grid(row = 4, column = 0, sticky = tk.EW)
+        self.output_options_frame.columnconfigure(0, weight=1)
         self.output_path_lab = tk.Label(self.output_options_frame, text = "Output Path:")
         self.output_path_lab.grid(row = 0, column = 0, sticky = tk.W)
         self.output_path_entry = tk.Entry(self.output_options_frame)
         self.output_path_entry.grid(row = 0, column = 1)
         self.output_path_button = tk.Button(self.output_options_frame, text = "Browse...", command = self.askdirectory)
         self.output_path_button.grid(row = 0, column = 2)
-        self.file_name_lab = tk.Label(self.output_options_frame, text = "Output Filename Prefix:")
+        self.file_name_lab = tk.Label(self.output_options_frame, text = "Output Prefix:")
         self.file_name_lab.grid(row = 1, column = 0, sticky = tk.W)
         self.file_name_entry = tk.Entry(self.output_options_frame)
         self.file_name_entry.grid(row = 1, column = 1)
