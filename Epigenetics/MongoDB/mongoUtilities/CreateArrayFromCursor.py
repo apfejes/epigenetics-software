@@ -4,8 +4,6 @@ Created on 2013-04-08
 @author: jyeung
 '''
 
-
-from pymongo import MongoClient
 import numpy as np
 
 
