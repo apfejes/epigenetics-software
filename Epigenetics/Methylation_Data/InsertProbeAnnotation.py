@@ -12,7 +12,7 @@ import csv
 filename = '/home/jyeung/Documents/Outputs/Down/down_fData.txt'
 database_name = 'human_epigenetics'
 collection_name = 'annotations'
-arraytype = 'humanmethylation45_beadchip'
+arraytype = 'humanmethylation450_beadchip'
 
 mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
 
