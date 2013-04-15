@@ -5,9 +5,6 @@ Created on 2013-03-31
 '''
 
 
-from pymongo import MongoClient
-
-
 class Cursor(object):
     '''
     A class of objects that represents data retrieval from mongoDB.
@@ -25,7 +22,7 @@ class Cursor(object):
         self.collection = collection
         print('{0}{1}'.format('Currently in collection: ',
                               self.collection.name))
-    
+
     def GetProbesInChromosome(self, *chromosomes):
         '''
         This will get probe annotation data of where each probe is in the 
@@ -44,27 +41,27 @@ class Cursor(object):
         Second, search mongo within collection, get chromosome and probename
         Third, creates and returns a list of probenames in that chromosome. 
         '''
-        
+
         # 1.
-        chromosome_list = []    # Initialize list chr
-        for chr in chromosomes:
-            chromosome_list.append(str(chr))
-            
+        chromosome_list = []    # Initialize list chromosome
+        for chromosome in chromosomes:
+            chromosome_list.append(str(chromosome))
+
         # 2.
         print('{0}{1}'.format('Finding probes in chromosome(s): ',
                                  str(chromosome_list)))
-        fData = self.collection.find({'MAPINFO': {'$in': chromosome_list}}, 
+        fData = self.collection.find({'MAPINFO': {'$in': chromosome_list}},
                                 {'MAPINFO': True, 'NAME': True, '_id': False})
         print('{0}{1}'.format(fData.count(), ' annotation documents found.'))
-        
+
         # 3.
-        
+
         probe_dict = {}    # Initialize dictionary
         for dat in fData:
             probe_dict[dat['NAME']] = dat['MAPINFO']
         return(probe_dict)
-        
-    
+
+
     def GetBetasFromProbes(self, probe_list):
         '''
         From a list of probes, returns the corresponding beta values within
@@ -79,16 +76,16 @@ class Cursor(object):
         '''
         print('{0}{1}'.format('Getting cursor from probelist size of ',
                               len(probe_list)))
-        documents = self.collection.find({'$and':[{'probe_name': {'$in': probe_list}}, 
-                                                 {'beta_value': {'$exists': True}}]}, 
-                                         {'probe_name': True, 
-                                          'beta_value': True, 
+        documents = self.collection.find({'$and':[{'probe_name': {'$in': probe_list}},
+                                                 {'beta_value': {'$exists': True}}]},
+                                         {'probe_name': True,
+                                          'beta_value': True,
                                           'sample_name': True,
                                           '_id': False})
         print('{0}{1}'.format(documents.count(), ' documents found.'))
         return(documents)
-    
-    
+
+
     def GetDocsWithKeys(self, *keys):
         '''
         Get docs containing keys.
@@ -101,29 +98,19 @@ class Cursor(object):
         a pymongo.cursor.Cursor object that can be iterated to get dictionary
         containing key:value pairs
         '''
-        print('{0}{1}'.format('Finding docs containing: ', 
+        print('{0}{1}'.format('Finding docs containing: ',
                               str(keys)))
-        list = []    # Initialize
+        key_set = []    # Initialize
         for key in keys:
             dic = {}    # Initialize
             dic[key] = {'$exists': True}
-            list.append(dic)
-        query = {'$or': list} 
+            key_set.append(dic)
+        query = {'$or': key_set}
         docs = self.collection.find(query, {'_id': False})
         print('{0}{1}{2}'.format(docs.count(), ' documents retrieved with keys: ',
                               str(keys)))
         return docs
-    
-    
-    def GetDocsOneKey(self, ):
+
+
+    def GetDocsOneKey(self,):
         pass
-    
-    
-    
-            
-                
-        
-        
-    
-    
-        
