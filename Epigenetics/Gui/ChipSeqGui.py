@@ -30,7 +30,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
         self.title("Epigenetics Analysis Suite")
         self.createWidgets()
-        self.parameters = parameter('../WaveGenerator/sample_input_chipseq.input')
+        self.parameters = parameter(_root_dir + os.sep + '/WaveGenerator/sample_input_chipseq.input')
 
     def createWidgets(self):
         menu_bar = tk.Menu(self)
