@@ -36,6 +36,11 @@ class MongoConnector():
     def find(self, collection_name, findQuery, returnQuery):
         collection = self.db[collection_name]
         return collection.find(findQuery, returnQuery)
+    
+    def update(self, collection_name, queryDict, updateDict):
+        collection = self.db[collection_name]
+        return collection.update(queryDict, updateDict)
+        
 
     def close(self):
         self.db.connection.disconnect()
