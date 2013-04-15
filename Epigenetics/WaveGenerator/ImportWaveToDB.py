@@ -12,7 +12,7 @@ _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current fi
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir + os.sep + "Utilities")
-from Utilities import Parameters
+import Parameters
 
 def create_param_obj(param_file):
     '''copy of function in The WaveGenerator - should be refactored to remove redundancy!!'''
