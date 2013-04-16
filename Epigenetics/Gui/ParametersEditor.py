@@ -117,7 +117,7 @@ class ParametersEditor (tk.Toplevel):
         '''Bottom buttons (Apply, Load..., Save As..., Cancel)'''
         self.bottom_button_frame = tk.Frame(self, padx = 5, pady = 5)
         self.bottom_button_frame.grid(row = 5, column = 0)
-        self.apply_but = tk.Button(self.bottom_button_frame, text = "Apply")
+        self.apply_but = tk.Button(self.bottom_button_frame, text = "Apply", command = self.apply_parameters)
         self.apply_but.grid(row = 0, column = 0)
         self.load_but = tk.Button(self.bottom_button_frame, text = "Load...", command = self.askopenfile)
         self.load_but.grid(row = 0, column = 1)
@@ -168,6 +168,9 @@ class ParametersEditor (tk.Toplevel):
             self.parameters.set_parameter('round_leading_edge', False)
         elif (self.round_leading_edge.get() == 1):
             self.parameters.set_parameter('round_leading_edge', True)
+
+        '''Close the Parameter Editor Window'''
+        self.withdraw()
 
     def askopenfile(self):
         filename = askopenfilename()
