@@ -16,14 +16,15 @@ arraytype = 'humanmethylation450_beadchip'
 
 mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
 
+nullcount = 0
 with open(filename, 'rb') as Data:
     reader = csv.DictReader(Data, delimiter='\t')
     BulkInsert = []
     count = 0
-    nullcount = 0
     for row in reader:
-        if "cg" not in row['TargetID']:
+        if not ("cg" in row['TargetID'] or "ch" in row['TargetID'] or "rx" in row['TargetID']):
             nullcount += 1
+            print('{0}{1}'.format('Skipped row with ID name: ', row['TargetID']))
             pass
         else:
             count += 1
@@ -41,8 +42,8 @@ with open(filename, 'rb') as Data:
             if count%20000 == 0:
                 mongo.insert(collection_name, BulkInsert)
                 BulkInsert = []
-                print mongo.count(collection_name)
+                print('{0}{1}'.format('Document count in collection: ', mongo.count(collection_name)))
     mongo.insert(collection_name, BulkInsert)
     BulkInsert = []
-    print mongo.count(collection_name)
-    print(str(nullcount) + ' null rows skipped')
+    print('{0}{1}'.format('Final doc count in collection: ', mongo.count(collection_name)))
+    print('{0}{1}'.format('Total number of rows skipped: ', nullcount))
