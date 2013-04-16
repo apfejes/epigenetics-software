@@ -143,15 +143,15 @@ class ParametersEditor (tk.Toplevel):
         self.parameters.set_parameter('map_type', self.map_type_selected.get())
         self.parameters.set_parameter('triangle_min', self.triangle_min_scale.get())
         self.parameters.set_parameter('triangle_median', self.triangle_median_scale.get())
-        self.parameters.set_parameter('fragment_length', self.fragment_length_entry.get())
-        self.parameters.set_parameter('round_leading_edge', self.round_leading_edge.get())
-        self.parameters.set_parameter('max_pet_length', self.max_pet_length_entry.get())
+        self.parameters.set_parameter('fragment_length', int(self.fragment_length_entry.get()))
+        self.parameters.set_parameter('round_leading_edge', int(self.round_leading_edge.get()))
+        self.parameters.set_parameter('max_pet_length', int(self.max_pet_length_entry.get()))
 
         '''Wave Calling Options'''
-        self.parameters.set_parameter('min_height', self.min_height_entry.get())
+        self.parameters.set_parameter('min_height', int(self.min_height_entry.get()))
 
         '''Runtime Configuration Options'''
-        self.parameters.set_parameter('processor_threads', self.processor_threads_entry.get())
+        self.parameters.set_parameter('processor_threads', int(self.processor_threads_entry.get()))
 
         '''Output Options'''
         self.parameters.set_parameter('output_path', self.output_path_entry.get())
