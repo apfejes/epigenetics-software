@@ -6,7 +6,6 @@ Created on 2013-04-05
 
 # Import Python packages
 from mongoUtilities import ConnectToMongo, GetMongoCursor, CreateArrayFromCursor, PlotPCA
-import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
 from matplotlib.mlab import PCA
 import numpy as np

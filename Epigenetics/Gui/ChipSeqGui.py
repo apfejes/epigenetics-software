@@ -49,10 +49,7 @@ class Application(tk.Tk):
         run_wg_but.pack()
 
     def run_wg(self, parameters):
-        temp_paramfile = tempfile.NamedTemporaryFile(prefix = 'wavegen_', suffix = '.input', delete = False)
-        for key, value in parameters.parameters.iteritems():
-            temp_paramfile.write('%s = %s\n' % (key, str(value)))
-        wg_proc = multiprocessing.Process(target = wg_main, args = (temp_paramfile.name,))
+        wg_proc = multiprocessing.Process(target = wg_main, args = (parameters,))
         wg_proc.start()
 
     def launchParametersEditor(self):
