@@ -31,7 +31,7 @@ var articleProvider = new ArticleProvider('localhost', 27017);
 
 app.get('/', function(req, res){
     articleProvider.findAll( function(error,docs){
-	res.render('index.jade', {title: 'Blog', articles:docs});
+	res.render('index.jade', {title: 'Kobor Lab Lims', articles:docs});
     })
 });
 

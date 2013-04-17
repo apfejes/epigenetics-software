@@ -1,4 +1,4 @@
-h1 title
+h1= title
 #articles
     - each article in articles
       div.article
@@ -6,3 +6,15 @@ h1 title
         div.title 
             a(href="/blog/"+article._id)!= article.title
         div.body= article.body
+
+#links
+  h2 Things you can do
+  ul
+    li
+      a(href="/input/new_project")='Create a New Project'
+    li
+      a(href="/input/new_sample")='Create a New Sample'
+    li
+      a(href="/input/edit_sample")='Edit a sample'
+    li
+      a(href="/input/join_sample_project")='Join a sample to a project'
