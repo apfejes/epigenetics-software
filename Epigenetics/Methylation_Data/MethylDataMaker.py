@@ -18,6 +18,3 @@ collection = mongo.db[collection_name]
 InputDir = '/home/jyeung/Documents/Outputs/Down'
 files = FilesInDirectory.Files(InputDir)
 Bulk = files.InsertDataToDB(collection)
-            
-            
-    
