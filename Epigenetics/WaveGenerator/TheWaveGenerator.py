@@ -21,15 +21,15 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir + os.sep + "Utilities")    # add the utilities folder here
 
 # Modules in Utilities
-from Utilities import MapDecomposingThread
-from Utilities import Parameters
-from Utilities import WaveFileThread
-from Utilities import PrintThread
-from Utilities import ReadAheadIteratorPET
-from Utilities import LinkedList
-from Utilities import MapMaker
-from Utilities import WigFileThread
-from Utilities import MappingItem
+import MapDecomposingThread
+import Parameters
+import WaveFileThread
+import PrintThread
+import ReadAheadIteratorPET
+import LinkedList
+import MapMaker
+import WigFileThread
+import MappingItem
 
 
 PARAM = None

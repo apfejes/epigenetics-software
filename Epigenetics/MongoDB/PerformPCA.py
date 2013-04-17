@@ -6,18 +6,7 @@ Created on 2013-04-05
 
 # Import Python packages
 from mongoUtilities import ConnectToMongo, GetMongoCursor, CreateArrayFromCursor, PlotPCA
-import rpy2.robjects as robjects
-from rpy2.robjects.packages import importr
 from matplotlib.mlab import PCA
-import numpy as np
-
-
-# Import R packages
-base = importr('base')
-stats = importr('stats')
-grdevices = importr('grDevices')
-graphics = importr('graphics')
-
 
 # Connect to database
 dbname = 'epigenetics_database'
@@ -36,9 +25,9 @@ data_collection = GetMongoCursor.Cursor(collection)
 design_info = data_collection.GetDocsWithKeys('SampleLabel')
 number_of_samples = design_info.count()
 beta_cursor = data_collection.GetDocsWithKeys('beta_value').sort("sample_name", 1)
-betas_per_sample = beta_cursor.count()/number_of_samples
-array_betas = CreateArrayFromCursor.CreateArrayFromCursor(beta_cursor, 
-                                                          number_of_samples, 
+betas_per_sample = beta_cursor.count() / number_of_samples
+array_betas = CreateArrayFromCursor.CreateArrayFromCursor(beta_cursor,
+                                                          number_of_samples,
                                                           betas_per_sample,
                                                           'beta_value')
 PCA_results = PCA(array_betas)

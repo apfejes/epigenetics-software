@@ -7,6 +7,20 @@ Created on 2013-04-08
 import numpy as np
 
 
+def CreateListFromCursor(sorted_cursor):
+    '''
+    Create an array with samples on the column, sample data on the row. 
+    Input:
+    cursor: cursor that can be iterated over
+    keyname: key name from which to retrieve a value. 
+    Output:
+    An array containing values corresponding to the keyname. 
+    '''
+    doc_list = []
+    for doc in sorted_cursor:
+        doc_list.append(doc)
+    return(doc_list)
+
 def CreateArrayFromCursor(sorted_cursor, ncolumns, nrows, keyname):
     '''
     Create an array with samples on the column, sample data on the row. 

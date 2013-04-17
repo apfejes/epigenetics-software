@@ -33,6 +33,7 @@ class MongoConnector():
 
     def drop(self, collection_name):
         self.db.drop_database(collection_name)
+
     def ensure_index(self, collection_name, key):
         collection = self.db[collection_name]
         return collection.ensure_index(key)
