@@ -1,20 +1,20 @@
 h1= title
-#articles
-    - each article in articles
-      div.article
-        div.created_at= article.created_at
-        div.title 
-            a(href="/blog/"+article._id)!= article.title
-        div.body= article.body
+#projects
+    - each project in projects
+      div.project
+        div.created_at= project.created_at
+        div.proj_name 
+            a(href="/view/"+project._id)!= project.proj_name
+
 
 #links
   h2 Things you can do
   ul
     li
-      a(href="/input/new_project")='Create a New Project'
+      a(href="/input/project_new")='Create a New Project'
     li
-      a(href="/input/new_sample")='Create a New Sample'
+      a(href="/input/sample_new")='Create a New Sample'
     li
-      a(href="/input/edit_sample")='Edit a sample'
+      a(href="/input/sample_new")='Edit a sample'
     li
-      a(href="/input/join_sample_project")='Join a sample to a project'
+      a(href="/input/project_attach_sample")='Join a sample to a project'

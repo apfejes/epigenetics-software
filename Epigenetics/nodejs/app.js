@@ -30,30 +30,41 @@ var articleProvider = new ArticleProvider('localhost', 27017);
 // Routes
 
 app.get('/', function(req, res){
-    articleProvider.findAll( function(error,docs){
-	res.render('index.jade', {title: 'Kobor Lab Lims', articles:docs});
+    articleProvider.findAllProjects( function(error,docs){
+	res.render('index.jade', {title: 'Kobor Lab Lims', projects:docs});
     })
 });
 
-app.get('/blog/new', function(req, res) {
-    res.render('blog_new.jade', { locals: {
-        title: 'New Post'
-    }
-    });
+
+app.get('/input/project_new', function(req, res) {
+    res.render('project_new.jade', {title: 'New Project'}
+    );
 });
 
-app.post('/blog/new', function(req, res){
+app.post('/input/project_new', function(req, res){
     articleProvider.save({
-        title: req.param('title'),
-        body: req.param('body')
+        proj_name: req.param('proj_name'),
+        col_name: req.param('col_name'),
+        col_email: req.param('col_email'),
+        sample_count: req.param('sample_count'),
+        arrival_date: req.param('arrival_date'),
+        role: req.param('role'),
+        nanodrop1: req.param('nanodrop1'),
+        nanodrop2: req.param('nanodrop2'),
+        nanodrop3: req.param('nanodrop3'),
+        speedvac: req.param('speedvac'),
+        conc_notes: req.param('conc_notes'),
+        illumina_tracking: req.param('illumina_tracking'),
+        chip_run_date: req.param('chip_run_date')
     }, function( error, docs) {
         res.redirect('/')
     });
 });
 
-app.get('/blog/:id', function(req, res) {
-    articleProvider.findById(req.params.id, function(error, article) {
-        res.render('blog_show-final.jade',{title: article.title, article:article});
+
+app.get('/view/:id', function(req, res) {
+    articleProvider.findById(req.params.id, function(error, project) {
+        res.render('project_details.jade',{proj_name: project.proj_name, project:project});
     });
 });
 
