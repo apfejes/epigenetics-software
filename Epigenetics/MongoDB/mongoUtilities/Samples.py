@@ -20,25 +20,6 @@ class Samples(object):
         '''
         self.filename = filename
         
-    def nrows(self):
-        '''
-        Counts number of non-header rows in file. 
-        It assumes you have a header, so it will really return
-        total rows minus one (because one header)
-        '''
-        with open(self.filename, 'rb') as SampleData:
-            for i, r in enumerate(SampleData):
-                pass
-        self.nrows = i
-        return self.nrows
-    
-    def colnames(self):
-        with open(self.filename, 'rb') as SampleData:
-            reader = csv.DictReader(SampleData, delimiter='\t')
-            header = reader.fieldnames
-        self.colnames = header
-        return self.colnames
-        
     def sampledict(self, samp_columns, patient_columns):
         '''
         Creates a dictionary where index from index_sampleinfo are read
@@ -48,9 +29,9 @@ class Samples(object):
         with open(self.filename, 'rb') as SampleData:
             reader = csv.DictReader(SampleData, 
                                     delimiter='\t')
-            reader.next()    # Skip header
             mongoBulkInsert = []
             for DictRow in reader:
+                print DictRow
                 mongoDict = {}
                 patientDict = {}
                 for key, value in DictRow.iteritems():

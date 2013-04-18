@@ -10,7 +10,6 @@ import os
 import glob
 import re
 import csv
-import pandas
 import sys
 
 
@@ -22,7 +21,7 @@ class Files(object):
 
     def __init__(self, Directory):
         '''
-        Initialize by gettin filenames and projectnames and sorting them.
+        Initialize by getting filenames and projectnames and sorting them.
         '''
         self.directory = Directory
         os.chdir(Directory)
@@ -61,6 +60,9 @@ class Files(object):
                         keynameexprs = 'exprs_value',
                         **optkeys):
         '''
+        ***This code effectively replaces the old function,
+        InsertElementstoDB
+        
         Takes beta values and expression values and inserts into mongoDB.
         The document would contain values for beta and exprs, probe_id and 
         sample label. 
@@ -79,6 +81,7 @@ class Files(object):
         
         BulkInsert = []
         count = 0
+        number_of_inserts = 0
         while True:
             count += 1
             try:
@@ -87,9 +90,8 @@ class Files(object):
             
             except StopIteration:
                 print('Stopping, no more rows to iterate.')
-                fbeta.close()
-                fexprs.close()
                 break
+            
                 
             rowname_beta = row_i_beta[0]
             rowname_exprs = row_i_exprs[0]
@@ -106,19 +108,25 @@ class Files(object):
                 BulkInsert.append(document)
                 
             if count%10000 == 0:
-                collection.insert(BulkInsert)
+                number_of_inserts += collection.insert(BulkInsert)
                 print('{0}{1}{2}'.format('There are ',
                                          str(collection.count()),
                                              ' docs in collection'))
                 BulkInsert = []
-        collection.insert(BulkInsert)
+        number_of_inserts += collection.insert(BulkInsert)
         BulkInsert = []
+        fbeta.close()
+        fexprs.close()
         print('{0}{1}{2}'.format('There are ',
                                  str(collection.count()),
                                      ' docs in collection'))
+        return number_of_inserts
 
     def InsertAnnotation(self, file_name, collection):
         '''
+        ***This code effectively replaces the old function, 
+        InsertRowstoDB.
+        
         Inserts annotation information. Make sure file_name is an
         annotation file. 
         '''
@@ -145,6 +153,8 @@ class Files(object):
         
     def InsertRowsToDB(self, file_name, collection, **optkeys):
         '''
+        ***Old Code, Replaced by InsertAnnotation***
+        
         Inserts entire row of a tab-delimited file_name into mongo. 
         The tab-delimited file_name should have column names (header)
         
@@ -178,6 +188,8 @@ class Files(object):
     def InsertElementsToDB(self, file_name, collection, colname='col_name', 
                            rowname='row_name', keyname='element_name', **optkeys):
         '''
+        ***Old Code, Replaced By InsertDatatoDB***
+        
         Inserts elements of a tab-delimited file_name into mongo. 
         The tab-delimited file_name should have column names and row names. 
         
@@ -234,26 +246,6 @@ class Files(object):
         print('{0}{1}{2}'.format('There are ',
                                  str(collection.count()),
                                      ' docs in collection'))
-
-
-
-    def GetBetas(self, project_name, nrows = None):
-        filename = project_name + '_betas.txt'
-        return pandas.read_csv(filename, sep = "\t", nrows = nrows)
-
-    def GetExpressions(self, project_name, nrows = None):
-        filename = project_name + '_expression.txt'
-        return pandas.read_csv(filename, sep = "\t", nrows = nrows)
-
-    def GetDesign(self, project_name, nrows = None):
-        filename = project_name + '_pData.txt'
-        return pandas.read_csv(filename, sep = "\t", nrows = nrows)
-
-
-'''  
-    def GetAnnotation(self, nrows=None):
-        return pandas.read_csv('annotation_probes.txt', sep='\t', nrows=nrows)
-'''
 
 
 
