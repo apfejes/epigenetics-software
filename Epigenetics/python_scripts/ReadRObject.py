@@ -14,6 +14,17 @@ from rpy2.robjects.packages import importr
 def ReadRObject(rdatafile):
     '''
     Takes a methylumi object and writes beta, expression and phenoData to .txt
+    
+    Uses rpy2 library.
+    
+    robjects.r(' ') is used to talk to R. In this case, it first writes
+    a function in R called 'WriteObjectData'.
+    
+    Second, we create a python object that can call 'WriteObjectData'
+    function using robjects.r[' '].
+    
+    Third, we input variables from python into the python object, which allows
+    the R function be run with python variables.
     '''
     # Load libraries
     importr('methylumi')
@@ -38,13 +49,6 @@ def ReadRObject(rdatafile):
             ''')
     Rfunction = robjects.r['WriteRObjectData']
     Rfunction(rdatafile, outputDirectory)
-    '''
-    # Grab methylumi object from R workspace
-    Rget = robjects.r['get']
-    methylObject = Rget(Rworkspace)
-    
-    # Write methylObject to file.
-    '''
     
 if __name__ == "__main__":
     if len(sys.argv) < 2:
