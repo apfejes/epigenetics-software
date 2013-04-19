@@ -20,7 +20,7 @@ class Samples(object):
         '''
         self.filename = filename
         
-    def sampledict(self, samp_columns, patient_columns):
+    def sampledict(self, samp_columns, patient_columns, project_name):
         '''
         Creates a dictionary where index from index_sampleinfo are read
         as key:value pairs, everything else is read as a ONE key:value(list) pair
@@ -31,7 +31,6 @@ class Samples(object):
                                     delimiter='\t')
             mongoBulkInsert = []
             for DictRow in reader:
-                print DictRow
                 mongoDict = {}
                 patientDict = {}
                 for key, value in DictRow.iteritems():
@@ -42,6 +41,7 @@ class Samples(object):
                     else:
                         pass
                 mongoDict['patient'] = patientDict
+                mongoDict['project'] = project_name
                 mongoBulkInsert.append(mongoDict)
         return mongoBulkInsert
                 
