@@ -42,7 +42,7 @@ app.get('/input/project_new', function(req, res) {
 });
 
 app.post('/input/project_new', function(req, res){
-    articleProvider.save({
+    articleProvider.save('projects', {
         proj_name: req.param('proj_name'),
         col_name: req.param('col_name'),
         col_email: req.param('col_email'),
@@ -56,6 +56,20 @@ app.post('/input/project_new', function(req, res){
         conc_notes: req.param('conc_notes'),
         illumina_tracking: req.param('illumina_tracking'),
         chip_run_date: req.param('chip_run_date')
+    }, function( error, docs) {
+        res.redirect('/')
+    });
+});
+
+
+app.get('/input/sample_new', function(req, res) {
+    res.render('sample_new.jade', {title: 'New Sample'}
+    );
+});
+
+app.post('/input/sample_new', function(req, res){
+    articleProvider.save('samples', {
+        sample_name: req.param('sample_name'),
     }, function( error, docs) {
         res.redirect('/')
     });
