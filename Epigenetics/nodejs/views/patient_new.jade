@@ -3,63 +3,12 @@ h1= title
 form( method="post")
     div
         div
-            span Project Name : 
-            input(type="text", name="proj_name", id="editProjectName")
+            span Patient ID : 
+            input(type="text", name="p_ident", id="editPatientIdentifier", required)
         div
-            div
-                span Colaborator Name :
-                input(type="text", name="col_name", id="editColName")
-            div 
-                span Colaborator email :
-                input(type="email", name="col_email", id="editColEmail")
-        div
-            span Number of Samples :
-            input(type="number", name="sample_count", id="editSampleCount")
-        div
-            span Date Samples Arrived :
-            input(type="date", name="arrival_date", id="editArrivalDate")
-        div
-            //Sample type (drop down list?)
-            
-            span Project Type :
-            select(name='role') 
-                option(value='Chip-Seq') ChIP-Seq 
-                option(value='450k methylation array') 450k methylation array  
-        div
-            span "Nanodrop info" :
-            div
-                input(type="file", name="nanodrop1", id="editNanodrop1")
-            div
-                input(type="file", name="nanodrop2", id="editNanodrop2")
-            div
-                input(type="file", name="nanodrop3", id="editNanodrop3")
-            // Nanodrop info (it's tab-delimited text, example attached)
-            // This happens at least three times per sample)
-            //APF: will need to store an array of files????  
-            
-        div
-            div
-                span Speedvac'd? :
-                input(type="checkbox", name="speedvac", id="editSpeedvac")
-            div
-                span Concentration Notes:
-                textarea( name="conc_notes", rows=5, id="editConcInfo")
-            // final conc or final vol - possibly a complex field)
-            
-        div
-            span Illumina tracking info :
-            textarea( name="illumina_tracking", rows=5, id="editIlluminaInfo")
-            
-            // Meg: Illumina tracking for info (example attached) 
-            // either fields or a place where we can scan and 
-            // upload the document… not all fields are required, 
-            // but the lot numbers for reagents are very important.
-            // APF: Probably want to do this so that it opens a separate form.
-            
-        div
-            span Date of Chip Run :
-            input(type="date", name="chip_run_date", id="editChipRunDate")
-        div#editArticleSubmit
+            span Patient Notes:
+            textarea( name="conc_notes", rows=5, id="editConcInfo")
+        div#editPatientSubmit
             input(type="submit", value="Send")
 
             
