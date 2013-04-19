@@ -68,7 +68,9 @@ app.get('/view/:id', function(req, res) {
     });
 });
 
-app.post('/blog/addComment', function(req, res) {
+//This piece of code is from the tutorial - left here for now as a code example.
+
+//-app.post('/blog/addComment', function(req, res) {
     articleProvider.addCommentToArticle(req.param('_id'), {
         person: req.param('person'),
         comment: req.param('comment'),

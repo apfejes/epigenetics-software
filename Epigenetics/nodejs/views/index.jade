@@ -1,20 +1,35 @@
-h1= title
-#projects
-    - each project in projects
-      div.project
-        div.created_at= project.created_at
-        div.proj_name 
-            a(href="/view/"+project._id)!= project.proj_name
+html
+  head
+     script(type='text/javascript')
+       function viewItem(){  
+           var e = document.getElementById("things");
+           var strUser = e.options[e.selectedIndex].value;
+           window.location.href = '/view/' + strUser;
+           }
+
+  link(rel='stylesheet', href='/stylesheets/style.css', type='text/css' )
+  h1= title
+
+  #links
+    h2 Things you can do
+    a(href="/input/project_new")='Create a New Project'
+    br
+    a(href="/input/sample_new")='Create a New Sample'
+    br
+    a(href="/input/sample_new")='Edit a sample'
+    br
+    a(href="/input/project_attach_sample")='Join a sample to a project'
 
 
-#links
-  h2 Things you can do
-  ul
-    li
-      a(href="/input/project_new")='Create a New Project'
-    li
-      a(href="/input/sample_new")='Create a New Sample'
-    li
-      a(href="/input/sample_new")='Edit a sample'
-    li
-      a(href="/input/project_attach_sample")='Join a sample to a project'
+  
+  #projects
+    div.project
+      select(id='things', name='things')
+        - each project in projects 
+          option(value=project._id)=project.proj_name
+    div#button
+      input#rollButton(type="button", value="View Project", onclick="viewItem()")
+      
+    
+    //-button onClick="GetSelectedItem();">Get Selected Item</button>
+    //-a(href="/view/"+project._id)!= project.proj_name

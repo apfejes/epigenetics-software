@@ -1,7 +1,6 @@
+link(rel='stylesheet', href='/stylesheets/style.css', type='text/css' )
 h1= proj_name
 div.project
-    //div.created_at= project.created_at
-    
     div.proj_name= project.proj_name
     div.col_name= project.col_name
     div.col_email= project.col_email
@@ -15,15 +14,12 @@ div.project
     div.conc_notes= project.conc_notes
     div.illumina_tracking= project.illumina_tracking
     div.chip_run_date= project.chip_run_date
-    
-    
-    
     //- each comment in article.comments
       div.comment
         div.person= comment.person
         div.comment= comment.comment
-    //div
-      //form( method="post", action="/view/addComment")
+    //-div
+      form( method="post", action="/view/addComment")
           //input( type="hidden", name="_id", value=article._id.toHexString())
         //div
           //span Author :
