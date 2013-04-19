@@ -17,12 +17,13 @@ columns_sample = ['SampleID', 'SampleLabel', 'Sample Group', 'Current_Age', 'Tes
 columns_patient = ['Total_BriefPraxis', 'DRM_SumofSocial', 'Handedness', 'Sex', 
                    'Level_of_Intellectual_Delay', 'DMR_SumofCognitive', 
                    'Percentage_BriefPraxis']
+project_name = 'down'
 
 
 def InsertSampleInfo(filename):
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
     sample_info = Samples.Samples(filename)
-    bulkInsert = sample_info.sampledict(columns_sample, columns_patient)
+    bulkInsert = sample_info.sampledict(columns_sample, columns_patient, project_name)
     sampid = mongo.insert(collection_name, bulkInsert)
     return sampid
     
