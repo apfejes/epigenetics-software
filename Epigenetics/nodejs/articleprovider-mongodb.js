@@ -47,8 +47,8 @@ ArticleProvider.prototype.findById = function(id, callback) {
 
 
 //APF:  Modified to use the projects - saves to a project table.
-ArticleProvider.prototype.save = function(projects, callback) {
-    this.getDBData('projects',function(error, project_collection) {
+ArticleProvider.prototype.save = function(collection, projects, callback) {
+    this.getDBData(collection, function(error, project_collection) {
       if( error ) callback(error)
       else {
         if( typeof(projects.length)=="undefined")

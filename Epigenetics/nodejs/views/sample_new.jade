@@ -3,25 +3,38 @@ h1= title
 form( method="post")
     div
         div
-            span Project Name : 
-            input(type="text", name="proj_name", id="editProjectName", required)
+            span SampleName : 
+            input(type="text", name="sample_name", id="editSampleName", required)
         div
-            div
-                span Colaborator Name :
-                input(type="text", name="col_name", id="editColName")
-            div 
-                span Colaborator email :
-                input(type="email", name="col_email", id="editColEmail")
-        div
-            span Number of Samples :
-            input(type="number", name="sample_count", id="editSampleCount")
-        div
-            span Date Samples Arrived :
+            span Date Sample Arrived :
             input(type="date", name="arrival_date", id="editArrivalDate")
+        div
+            span Sentrix Barcode:
+            input(type="date", name="arrival_date", id="editArrivalDate") 
+        div
+            span Sample Label"
+            input(type="date", name="arrival_date", id="editArrivalDate")
+        div
+            span Sample_Well
+            input(type="date", name="arrival_date", id="editArrivalDate")
+        div
+            span Current_Age
+            input(type="date", name="arrival_date", id="editArrivalDate")
+        div
+            span Test_Date
+            input(type="date", name="arrival_date", id="editArrivalDate")
+        div
+            span Sample Section
+            input(type="date", name="arrival_date", id="editArrivalDate")
+        div
+            span Sample Group
+            input(type="date", name="arrival_date", id="editArrivalDate")
+
+
         div
             //Sample type (drop down list?)
             
-            span Project Type :
+            span Sample Type :
             select(name='role') 
                 option(value='Chip-Seq') ChIP-Seq 
                 option(value='450k methylation array') 450k methylation array  

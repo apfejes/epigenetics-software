@@ -1,0 +1,15 @@
+link(rel='stylesheet', href='/stylesheets/style.css', type='text/css' )
+h1= title
+form( method="post")
+    div
+        div
+            span Patient ID : 
+            input(type="text", name="p_ident", id="editPatientIdentifier", required)
+        div
+            span Patient Notes:
+            textarea( name="conc_notes", rows=5, id="editConcInfo")
+        div#editPatientSubmit
+            input(type="submit", value="Send")
+
+            
+            

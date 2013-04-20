@@ -42,7 +42,7 @@ app.get('/input/project_new', function(req, res) {
 });
 
 app.post('/input/project_new', function(req, res){
-    articleProvider.save({
+    articleProvider.save('projects', {
         proj_name: req.param('proj_name'),
         col_name: req.param('col_name'),
         col_email: req.param('col_email'),
@@ -62,13 +62,29 @@ app.post('/input/project_new', function(req, res){
 });
 
 
+app.get('/input/sample_new', function(req, res) {
+    res.render('sample_new.jade', {title: 'New Sample'}
+    );
+});
+
+app.post('/input/sample_new', function(req, res){
+    articleProvider.save('samples', {
+        sample_name: req.param('sample_name'),
+    }, function( error, docs) {
+        res.redirect('/')
+    });
+});
+
+
 app.get('/view/:id', function(req, res) {
     articleProvider.findById(req.params.id, function(error, project) {
         res.render('project_details.jade',{proj_name: project.proj_name, project:project});
     });
 });
 
-app.post('/blog/addComment', function(req, res) {
+//This piece of code is from the tutorial - left here for now as a code example.
+
+//-app.post('/blog/addComment', function(req, res) {
     articleProvider.addCommentToArticle(req.param('_id'), {
         person: req.param('person'),
         comment: req.param('comment'),
