@@ -5,15 +5,14 @@ body {
   text-stroke: 1px rgba(255,255,255,0.1);
   color: #555;
 }
-h1,
 h2 {
   margin: 0;
-  font-size: 22px;
+  font-size: 18px;
   color: #343434;
 }
 h1 {
   text-shadow: 1px 2px 2px #ddd;
-  font-size: 60px;
+  font-size: 40px;
 }
 #articles {
   text-align: left;
@@ -21,9 +20,7 @@ h1 {
   margin-right: auto;
   width: 320px;
 }
-#articles .article {
-  margin: 20px;
-}
+
 #articles .article .created_at {
   display: none;
 }
@@ -32,6 +29,63 @@ h1 {
   text-decoration: underline;
   background-color: #eee;
 }
-#articles .article .body {
-  background-color: #ffa;
+
+
+#links {
+  background-color: Linen;
+  text-align: left;
+  width: 250px;
+  float: left;
+  padding:10px 20px 10px 10px; 
 }
+#links a         {text-decoration: none; color: Gray;}
+#links a:visited {text-decoration: none; color: Gray;}
+#links a:active  {text-decoration: none; color: Gray;}
+#links a:link    {text-decoration: none; color: Gray;}
+
+#links a:hover {
+  text-decoration: underline;
+  color: Black;
+}
+
+#projectoptions {
+  //border: 1px solid red;
+  width: 500px;
+  float:left;
+  padding:0px 20px 10px 10px; 
+  margin:5px 5px 5px 5px;
+  }
+
+#projectoptions a         {text-decoration: none; color: Gray;}
+#projectoptions a:visited {text-decoration: none; color: Gray;}
+#projectoptions a:active  {text-decoration: none; color: Gray;}
+#projectoptions a:link    {text-decoration: none; color: Gray;}
+#projectoptions a:hover {
+  text-decoration: underline;
+  color: Black;
+}
+
+#projects {
+  float:left;
+  width: 500px;
+  //border: 1px solid red;
+}
+#project {
+  background-color: Linen;
+  text-align: left;
+  width: 300px;
+  float: left;
+  padding:0px 20px 10px 10px; 
+  margin:5px 5px 5px 5px;
+
+}
+
+#newinformation {
+  background-color: Linen;
+  text-align: left;
+  width: 400px;
+  float: left;
+  padding:0px 20px 10px 10px; 
+
+}
+

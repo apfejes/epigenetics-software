@@ -1,18 +1,39 @@
 link(rel='stylesheet', href='/stylesheets/style.css', type='text/css' )
 h1= proj_name
-div.project
-    div.proj_name= project.proj_name
-    div.col_name= project.col_name
-    div.col_email= project.col_email
-    div.sample_count= project.sample_count
-    div.arrival_date= project.arrival_date
-    div.role= project.role
+#project
+  #proj_name
+    H3= project.proj_name
+  #col_name
+    span Collaborator Name: #{project.col_name}
+  #col_email
+    span Collaborator Email: #{project.col_email} 
+  #sample_count
+    span Sample Count: #{project.sample_count} 
+  #arrival_date
+    span Sample Arrival Date: #{project.arrival_date} 
+  #role
+    span Project Type: Name: #{project.role}
+#projectoptions
+   a(href="/input/sample_new")='Add a sample to this project'
+   br
+   a(href="/input/sample_new")='Add a nanodrop report (also creates samples)'
+   br
+   a(href="/input/sample_new")='Create a barcode object'
+    
+
+  //span Name: #{}
     div.nanodrop1= project.nanodrop1
+  //span Name: #{}
     div.nanodrop2= project.nanodrop2
+  //span Name: #{}
     div.nanodrop3= project.nanodrop3
+  //span Name: #{}
     div.speedvac= project.speedvac
+  //span Name: #{}
     div.conc_notes= project.conc_notes
+  //span Name: #{}
     div.illumina_tracking= project.illumina_tracking
+  //span Name: #{}
     div.chip_run_date= project.chip_run_date
     //- each comment in article.comments
       div.comment

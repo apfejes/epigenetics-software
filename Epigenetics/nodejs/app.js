@@ -30,8 +30,8 @@ var articleProvider = new ArticleProvider('localhost', 27017);
 // Routes
 
 app.get('/', function(req, res){
-    articleProvider.findAllProjects( function(error,docs){
-	res.render('index.jade', {title: 'Kobor Lab Lims', projects:docs});
+    articleProvider.findAllProjects( function(error,docs1, docs2){
+      res.render('index.jade', {title: 'Kobor Lab Lims', projects:docs1, samples:docs2});
     })
 });
 
@@ -49,12 +49,6 @@ app.post('/input/project_new', function(req, res){
         sample_count: req.param('sample_count'),
         arrival_date: req.param('arrival_date'),
         role: req.param('role'),
-        nanodrop1: req.param('nanodrop1'),
-        nanodrop2: req.param('nanodrop2'),
-        nanodrop3: req.param('nanodrop3'),
-        speedvac: req.param('speedvac'),
-        conc_notes: req.param('conc_notes'),
-        illumina_tracking: req.param('illumina_tracking'),
         chip_run_date: req.param('chip_run_date')
     }, function( error, docs) {
         res.redirect('/')
@@ -84,15 +78,15 @@ app.get('/view/:id', function(req, res) {
 
 //This piece of code is from the tutorial - left here for now as a code example.
 
-//-app.post('/blog/addComment', function(req, res) {
-    articleProvider.addCommentToArticle(req.param('_id'), {
-        person: req.param('person'),
-        comment: req.param('comment'),
-        created_at: new Date()
-       } , function( error, docs) {
-           res.redirect('/blog/' + req.param('_id'))
-       });
-});
+//app.post('/blog/addComment', function(req, res) {
+//    articleProvider.addCommentToArticle(req.param('_id'), {
+//        person: req.param('person'),
+//        comment: req.param('comment'),
+//        created_at: new Date()
+//       } , function( error, docs) {
+//           res.redirect('/blog/' + req.param('_id'))
+//       });
+//});
 
 app.listen(3000);
 console.log("Express server listening on port %d in %s mode", 27017, app.settings.env);

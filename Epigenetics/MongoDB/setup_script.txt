@@ -1,0 +1,28 @@
+use lims
+db.project_status.insert([
+{"desc":"Proposed - no funding", "xlat" : "status"},
+{"desc":"Proposed - funding in place", "xlat" : "status"},
+{"desc":"Confirmed - samples not received", "xlat" : "status"},
+{"desc":"Confirmed - samples received", "xlat" : "status"},
+{"desc":"Confirmed - sample prep underway", "xlat" : "status"},
+{"desc":"Confirmed - in progress", "xlat" : "status"},
+{"desc":"Complete - data not analyzed", "xlat" : "status"},
+{"desc":"Complete - data analysis complete", "xlat" : "status"}
+])
+
+
+db.project_status.insert([
+{"desc":"Buccal", "xlat" : "sample_type"},
+{"desc":"PBMC", "xlat" : "sample_type"},
+{"desc":"Whole blood", "xlat" : "sample_type"},
+{"desc":"Blood spots", "xlat" : "sample_type"},
+{"desc":"Cultured cells", "xlat" : "sample_type"},
+{"desc":"Brain", "xlat" : "sample_type"},
+{"desc":"Saliva", "xlat" : "sample_type"},
+{"desc":"Lung - biopsy", "xlat" : "sample_type"},
+{"desc":"Lung - brushes", "xlat" : "sample_type"},
+{"desc":"Lung - BAL", "xlat" : "sample_type"},
+{"desc":"Placenta", "xlat" : "sample_type"},
+{"desc":"Nasal swab", "xlat" : "sample_type"},
+{"desc":"", "xlat" : "sample_type"}
+])

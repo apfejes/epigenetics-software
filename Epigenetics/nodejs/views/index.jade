@@ -11,24 +11,29 @@ html
   h1= title
 
   #links
-    h2 Things you can do
-    a(href="/input/project_new")='Create a New Project'
-    br
-    a(href="/input/sample_new")='Create a New Sample'
-    br
-    a(href="/input/sample_new")='Edit a sample'
-    br
-    a(href="/input/project_attach_sample")='Join a sample to a project'
-
-
+    H3 Manage your data
+    ul
+      li: a(href="/input/project_new")='Create a New Project'
+      li: a(href="/input/sample_new")='Create a New Sample'
+      li: a(href="/input/illumina_new")='Create a New Illumina Datasheet'
+      li: a(href="/input/patient_new")='Create a New Patient Datasheet'
+      
   
   #projects
-    div.project
+    H3 Manage or edit a Project
+    #projectselect
+      span Select a project :
       select(id='things', name='things')
         - each project in projects 
           option(value=project._id)=project.proj_name
-    div#button
-      input#rollButton(type="button", value="View Project", onclick="viewItem()")
+      input#rollButton(type="button", value="Edit", onclick="viewItem()")
+    H3 Manage or edit a Sample
+    #projectselect
+      span Select a project :
+      select(id='things', name='things')
+        - each sample in samples 
+          option(value=sample._id)=project.sample_name
+      input#rollButton(type="button", value="Edit", onclick="viewItem()")
       
     
     //-button onClick="GetSelectedItem();">Get Selected Item</button>
