@@ -40,7 +40,7 @@ def ReadRObject(rdatafile):
                             file=paste(workspace, "_pData.txt", sep=""), 
                             sep="\t", quote=FALSE, row.names=TRUE, col.names=TRUE)
                 write.table(exprs(methylObj), 
-                            file=paste(workspace, "_exprs.txt", sep=""), 
+                            file=paste(workspace, "_expression.txt", sep=""), 
                             sep="\t", quote=FALSE, row.names=TRUE, col.names=TRUE)
                 write.table(betas(methylObj), 
                             file=paste(workspace, "_betas.txt", sep=""), 
