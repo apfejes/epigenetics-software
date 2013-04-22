@@ -11,6 +11,7 @@ import sys
 import os
 import time
 import csv
+import random
 import pymongo
 import matplotlib.pyplot as plt
 
@@ -29,6 +30,7 @@ methylation_collection = 'methylation'
 samples_collection = 'samples'
 prefix = 'humanmethylation450_beadchip_'    # prefix + TargetID = probe id
 suspected_samples = ['DS09A M', 'DS01A M', 'DS04A F', 'DS06A M', 'DS10A M']
+number_of_random_probes = 50
 # Suspected samples are used for coloring purposes. These may be blood contaminated. 
 
 def GetProbesFromHits(probe_list_fname, skip_rows):
@@ -61,14 +63,53 @@ def GetProbesFromHits(probe_list_fname, skip_rows):
     
     cg_delta_beta_list = []
     for i in xrange(len(delta_beta)):
+        '''
         if float(delta_beta[i]) >= 0:
             above_or_below = 'greater'    # Expect beta in blood greater than beta in buccal
         elif float(delta_beta[i]) < 0:
             above_or_below = 'lesser'    # Expect beta in blood less than beta in buccal
         cg_delta_beta_tuple = (cg_no[i], above_or_below)
+        '''
+        cg_delta_beta_tuple = (cg_no[i], delta_beta[i][0:4])
         cg_delta_beta_list.append(cg_delta_beta_tuple)
     
     return {'probe_list': probe_list, 'tuple_list': cg_delta_beta_list}
+
+def GetRandomProbesFromHits(probe_list_fname, random_probes):
+    '''
+    Get a random list of probes from probe_list_fname, also get other values such as 
+    expected difference in beta values. 
+    
+    Returns two values: a list of probes and a list of 'expected beta difference'
+    between blood and buccal. This can be helpful for plotting because 
+    if the directionality of the difference between blood and buccal could
+    be informative/predictive. 
+    '''
+    probe_list = []
+    delta_beta = []
+    cg_no = []
+    count = 0
+    # Grab information regarding buccal vs. blood. 
+    with open(probe_list_fname, 'rb') as hit_file:
+        probe_reader = csv.reader(hit_file, delimiter='\t')
+        for row in probe_reader:
+            probe_list.append(row[0])    # Probe_iD
+            delta_beta.append(row[5])    # Expected beta diff btwn buccal vs blood
+            cg_no.append(row[23])    # cg_no (x-axis of the plot)
+            count += 1
+    
+    # Get 50 random probes from probe_list.
+    random_indices = random.sample(xrange(0, len(probe_list)), random_probes)
+    probe_list_subset = [probe_list[i] for i in random_indices]
+    delta_beta_subset = [delta_beta[i] for i in random_indices]
+    cg_no_subset = [cg_no[i] for i in random_indices]
+    
+    cg_delta_beta_list = []
+    for i in xrange(len(delta_beta_subset)):
+        cg_delta_beta_tuple = (cg_no_subset[i], delta_beta[i][0:4])
+        cg_delta_beta_list.append(cg_delta_beta_tuple)
+    
+    return {'probe_list': probe_list_subset, 'tuple_list': cg_delta_beta_list}
     
 def GetDataFromProbeList(probe_list):
     '''
@@ -181,18 +222,28 @@ if __name__ == "__main__":
     
     # Ask how many rows to skip, more rows you skip, the lower you go on table, meaning you're
     # selecting for less significantly differentially methylated probes. 
-    top_or_bot = raw_input('Take top significant differentially methylated probes or bottom? (top/bottom): ')
+    top_or_bot = raw_input('Take top significant differentially methylated probes or bottom? (top/bottom/random): ')
     if top_or_bot == 'top':
         skip_rows = 1
     elif top_or_bot == 'bottom':
         skip_rows = 800
+    elif top_or_bot == 'random':
+        skip_rows = 1
     else:
-        sys.exit('Only allowed most or least as inputs, exiting...')
+        sys.exit('Only allowed "top", "bottom" or "random" as inputs, exiting...')
     
     starttime = time.time()
     
     # Get dictionary containing probe_list and beta_difference between blood and buccal
-    probe_list_and_beta_diff_dic = GetProbesFromHits(probe_list_fname, skip_rows)
+    # If you're looking for a random set of probes, use the modified function. 
+    
+    if top_or_bot == 'random': 
+        probe_list_and_beta_diff_dic = GetRandomProbesFromHits(probe_list_fname, number_of_random_probes)
+    elif (top_or_bot == 'top') or (top_or_bot == 'bottom'):
+        probe_list_and_beta_diff_dic = GetProbesFromHits(probe_list_fname, skip_rows)
+    else:
+        print('Neither top, bottom, or random... dont know what to do.')
+        sys.exit()
     
     # Get dictionary containing a data dictionary and a sample list
     data_and_sample_dic = GetDataFromProbeList(probe_list_and_beta_diff_dic['probe_list'])
