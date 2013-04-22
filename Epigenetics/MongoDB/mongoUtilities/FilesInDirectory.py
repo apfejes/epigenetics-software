@@ -35,6 +35,7 @@ class Files(object):
         self.design_fnames = glob.glob('*_pData.txt')
         self.expressions_fnames = glob.glob('*_expression.txt')
         self.annotation_fnames = glob.glob('*_fData.txt')
+
         
         self.betas_fnames_full = '{0}{1}{2}'.format(self.directory, "/", self.betas_fnames[0])
         self.expressions_fnames_full = '{0}{1}{2}'.format(self.directory, "/", self.expressions_fnames[0])
@@ -108,12 +109,14 @@ class Files(object):
                 BulkInsert.append(document)
                 
             if count%10000 == 0:
-                number_of_inserts += collection.insert(BulkInsert)
+                number_of_inserts += len(BulkInsert)
+                Bulk = collection.insert(BulkInsert)
                 print('{0}{1}{2}'.format('There are ',
                                          str(collection.count()),
                                              ' docs in collection'))
                 BulkInsert = []
-        number_of_inserts += collection.insert(BulkInsert)
+        number_of_inserts += len(BulkInsert)
+        Bulk = collection.insert(BulkInsert)
         BulkInsert = []
         fbeta.close()
         fexprs.close()
