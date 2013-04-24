@@ -10,14 +10,22 @@ import sys
 
 
 database_name = 'human_epigenetics'
+# database_name = 'test'
 collection_name = 'samples'
 # filename = '/home/jyeung/Documents/Outputs/Down/down_pData.txt'
+'''
 columns_sample = ['SampleID', 'SampleLabel', 'Sample Group', 'Current_Age', 'Test_Date',
                    'Sample Section', 'Sample_Well', 'Sentrix Barcode']
 columns_patient = ['Total_BriefPraxis', 'DRM_SumofSocial', 'Handedness', 'Sex', 
                    'Level_of_Intellectual_Delay', 'DMR_SumofCognitive', 
                    'Percentage_BriefPraxis']
 project_name = 'down'
+'''
+
+columns_sample = ['sampleID', 'stimulation', 'life_stage']
+columns_patient = []
+project_name = 'kollman'
+
 
 
 def InsertSampleInfo(filename):
