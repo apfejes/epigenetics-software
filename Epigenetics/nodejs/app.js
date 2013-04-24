@@ -30,15 +30,17 @@ var articleProvider = new ArticleProvider('localhost', 27017);
 // Routes
 
 app.get('/', function(req, res){
-    articleProvider.findAllProjects( function(error,docs1, docs2){
-      res.render('index.jade', {title: 'Kobor Lab Lims', projects:docs1, samples:docs2});
+    articleProvider.findAllProjects( function(error, docs1){
+      res.render('index.jade', {title: 'Kobor Lab Lims', projects:docs1});
     })
 });
 
 
 app.get('/input/project_new', function(req, res) {
-    res.render('project_new.jade', {title: 'New Project'}
-    );
+    articleProvider.project_status( function(error, docs) {
+      if (error) console.log("app.get", error)
+      else res.render('project_new.jade', {title: 'New Project', status:docs});
+    })
 });
 
 app.post('/input/project_new', function(req, res){

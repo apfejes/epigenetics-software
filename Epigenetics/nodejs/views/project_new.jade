@@ -1,4 +1,4 @@
-link(rel='stylesheet', href='/stylesheets/style.css', type='text/css' )
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
 h1= title
 form( method="post")
   #newinformation
@@ -22,9 +22,9 @@ form( method="post")
     div
       //Sample type (drop down list?)
       span Project Type :
-      select(name='role') 
-        option(value='Chip-Seq') ChIP-Seq 
-        option(value='450k methylation array') 450k methylation array  
+      select(name='role')
+        - each st in status 
+          option(value=st.desc)=st.desc 
     div
       span Date of Chip Run :
       input(type="date", name="chip_run_date", id="editChipRunDate")

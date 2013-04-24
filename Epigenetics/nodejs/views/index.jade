@@ -7,7 +7,7 @@ html
            window.location.href = '/view/' + strUser;
            }
 
-  link(rel='stylesheet', href='/stylesheets/style.css', type='text/css' )
+  link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
   h1= title
 
   #links
@@ -28,13 +28,7 @@ html
           option(value=project._id)=project.proj_name
       input#rollButton(type="button", value="Edit", onclick="viewItem()")
     H3 Manage or edit a Sample
-    #projectselect
-      span Select a project :
-      select(id='things', name='things')
-        - each sample in samples 
-          option(value=sample._id)=project.sample_name
-      input#rollButton(type="button", value="Edit", onclick="viewItem()")
-      
+
     
     //-button onClick="GetSelectedItem();">Get Selected Item</button>
     //-a(href="/view/"+project._id)!= project.proj_name

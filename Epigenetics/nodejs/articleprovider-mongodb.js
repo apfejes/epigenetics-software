@@ -5,7 +5,7 @@ var BSON = require('mongodb').BSON;
 var ObjectID = require('mongodb').ObjectID;
 
 ArticleProvider = function(host, port) {
-  this.db= new Db('node-mongo-test', new Server(host, port, {auto_reconnect: true}, {}));
+  this.db= new Db('human_epigenetics', new Server(host, port, {auto_reconnect: true}, {}));
   this.db.open(function(){});
 };
 
@@ -16,6 +16,18 @@ ArticleProvider.prototype.getDBData= function(table_name, callback) {
     else callback(null, project_collection);
   });
 };
+
+//APF: altered function 
+
+
+ArticleProvider.prototype.getDBQuery= function(table_name, query_string, fields, callback) {
+  this.db.collection(table_name).find(query_string, fields).toArray(function(e, results) {
+    if (e) console.log("data error:", e)
+    else callback(null, results)
+  })
+};
+
+
 
 //APF: Function to return the names of all projects
 ArticleProvider.prototype.findAllProjects = function(callback) {
@@ -31,7 +43,6 @@ ArticleProvider.prototype.findAllProjects = function(callback) {
 };
 
 
-
 //this is the function that was provided in the demo code
 ArticleProvider.prototype.findById = function(id, callback) {
     this.getDBData('projects', function(error, project_collection) {
@@ -44,6 +55,16 @@ ArticleProvider.prototype.findById = function(id, callback) {
       }
     });
 };
+
+//Retrieve only the project status options
+ArticleProvider.prototype.project_status = function(callback) {
+    this.getDBQuery('xlat', {xlat: "status"}, {desc:1, _id:0}, function(error, project_status) {
+      if( error ) console.log("project-status error: ", error);
+      else callback(null, project_status)
+    });
+};
+
+
 
 
 //APF:  Modified to use the projects - saves to a project table.
