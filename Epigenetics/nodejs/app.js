@@ -59,6 +59,42 @@ app.post('/input/project_new', function(req, res){
     });
 });
 
+//------------------------------------
+//  PAYMENT INFO:
+//------------------------------------
+
+app.get('/input/payment_new/:id', function(req, res) {
+    articleProvider.transaction_type( function(error, docs) {
+      if (error) console.log("app.get.payment_new", error)
+      else res.render('payment_new.jade', {title: 'Add a Payment Transaction', trtype:docs, projectid:req.params.id});
+    })
+});
+
+app.post('/input/payment_new/:id', function(req, res){
+    articleProvider.save('transactions', {
+        type: req.param('transaction'),
+        amt: req.param('trans_amt'),
+        chip_run_date: req.param('trans_date'),
+        projectid:req.params.id
+    }, function(error, docs) {
+        articleProvider.getIDbyName(req.param('proj_name'), function(error, id) {
+          if (error) console.log("app.post.payment_new", error)
+          else { 
+            console.log("req.params.id: ", req.params.id)
+            res.redirect('/view/' + req.params.id)
+          }
+        })
+    });
+});
+
+
+//------------------------------------
+//  SAMPLE INFO:
+//------------------------------------
+
+
+
+
 
 app.get('/input/sample_new', function(req, res) {
     res.render('sample_new.jade', {title: 'New Sample'}

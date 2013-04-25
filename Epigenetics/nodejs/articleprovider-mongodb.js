@@ -62,7 +62,23 @@ ArticleProvider.prototype.project_status = function(callback) {
     });
 };
 
+//Retrieve only the transaction types options
+ArticleProvider.prototype.transaction_type = function(callback) {
+    this.getDBQuery('xlat', {xlat: "transaction_type"}, {desc:1, _id:0}, function(error, transaction) {
+      if( error ) console.log("transaction-type error: ", error);
+      else callback(null, transaction)
+    });
+};
 
+//Retrieve only the transaction types options
+ArticleProvider.prototype.getIDbyName = function(name, callback) {
+    this.getDBQuery('projects', {proj_name: name}, {_id:1}, function(error, id) {
+      if( error ) console.log("id-lookup error: ", error);
+      else callback(null, id)
+    });
+};
+
+//.substring(10,35)
 
 
 //APF:  Modified to use the projects - saves to a project table.

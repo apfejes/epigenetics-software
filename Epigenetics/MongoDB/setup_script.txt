@@ -33,3 +33,8 @@ db.xlat.insert([
 {"desc":"Post Bisulfite Conversion", "xlat" : "nanodrop_status"},
 {"desc":"Post speed vac", "xlat" : "nanodrop_status"}
 ])
+
+db.xlat.insert([
+{"desc":"Payment Received", "xlat" : "transaction_type"},
+{"desc":"Invoiced", "xlat" : "transaction_type"},
+])

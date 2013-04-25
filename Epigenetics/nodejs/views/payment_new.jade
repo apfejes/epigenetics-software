@@ -1,0 +1,22 @@
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+h1= title
+h3= projectid
+form( method="post")
+  #newinformation
+    H3 Enter your project Information:
+    div
+      span Transaction type: 
+      select(name='transaction')
+        - each tr in trtype 
+          option(value=tr.desc)=tr.desc 
+    div
+      span Transaction Amount (CAD$):
+      input(type="text", name="trans_amt", id="transact_amt", required)
+    div
+      span Transaction Date:
+      input(type="date", name="trans_date", id="transactionDate", required)
+    div#editArticleSubmit
+      input(type="submit", value="Save")
+
+            
+            

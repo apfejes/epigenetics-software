@@ -14,10 +14,10 @@ h1= proj_name
   #role
     span Project Type: Name: #{project.role}
 #projectoptions
-   a(href="/input/sample_new")='Add a sample to this project'
+   a(href="/input/sample_new/"+project._id)='Add a sample to this project'
    br
-   a(href="/input/sample_new")='Add a nanodrop report (also creates samples)'
+   a(href="/input/sample_new/"+project._id)='Add a nanodrop report (also creates samples)'
    br
-   a(href="/input/sample_new")='Create a barcode object'
+   a(href="/input/barcode_new/"+project._id)='Create a barcode object'
    br
-   a(href="/input/payment_new")='Add a payment record'
+   a(href="/input/payment_new/"+project._id)='Add a payment record'
