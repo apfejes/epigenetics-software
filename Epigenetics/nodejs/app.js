@@ -29,12 +29,19 @@ app.configure('production', function(){
 var articleProvider = new ArticleProvider('localhost', 27017);
 // Routes
 
+//------------------------------------
+//  HOME:
+//------------------------------------
+
 app.get('/', function(req, res){
     articleProvider.findAllProjects( function(error, docs1){
       res.render('index.jade', {title: 'Kobor Lab Lims', projects:docs1});
     })
 });
 
+//------------------------------------
+//  PAYMENT INFO:
+//------------------------------------
 
 app.get('/input/project_new', function(req, res) {
     articleProvider.project_status( function(error, docs) {
@@ -86,8 +93,8 @@ app.post('/input/payment_new/:id', function(req, res){
 //  SAMPLE INFO:
 //------------------------------------
 
-app.get('/input/sample_new', function(req, res) {
-    res.render('sample_new.jade', {title: 'New Sample'}
+app.get('/input/sample_new/:id', function(req, res) {
+    res.render('sample_new.jade', {title: 'New Sample', projectid:req.params.id}
     );
 });
 
