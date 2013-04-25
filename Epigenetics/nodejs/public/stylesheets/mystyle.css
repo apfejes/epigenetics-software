@@ -85,7 +85,53 @@ h1 {
   text-align: left;
   width: 400px;
   float: left;
-  padding:0px 20px 10px 10px; 
+  padding:0px 20px 10px 10px;
+  margin:5px 5px 5px 5px; 
+}
 
+#transactiondetails, #samplesdetails, #nanodropdetails, #barcodedetails{
+background-color: Gainsboro;
+  text-align: left;
+  width: 95%;
+  float: left;
+  padding:0px 20px 10px 10px;
+  margin:5px 5px 5px 5px; 
+}
+
+
+#barcodedetails a         {text-decoration: none; color: Gray;}
+#barcodedetails a:visited {text-decoration: none; color: Gray;}
+#barcodedetails a:active  {text-decoration: none; color: Gray;}
+#barcodedetails a:link    {text-decoration: none; color: Gray;}
+#barcodedetails a:hover   {
+  text-decoration: underline;
+  color: Black;
+}
+
+#nanodropdetails a         {text-decoration: none; color: Gray;}
+#nanodropdetails a:visited {text-decoration: none; color: Gray;}
+#nanodropdetails a:active  {text-decoration: none; color: Gray;}
+#nanodropdetails a:link    {text-decoration: none; color: Gray;}
+#nanodropdetails a:hover   {
+  text-decoration: underline;
+  color: Black;
+}
+
+#samplesdetails a         {text-decoration: none; color: Gray;}
+#samplesdetails a:visited {text-decoration: none; color: Gray;}
+#samplesdetails a:active  {text-decoration: none; color: Gray;}
+#samplesdetails a:link    {text-decoration: none; color: Gray;}
+#samplesdetails a:hover   {
+  text-decoration: underline;
+  color: Black;
+}
+
+#transactiondetails a         {text-decoration: none; color: Gray;}
+#transactiondetails a:visited {text-decoration: none; color: Gray;}
+#transactiondetails a:active  {text-decoration: none; color: Gray;}
+#transactiondetails a:link    {text-decoration: none; color: Gray;}
+#transactiondetails a:hover   {
+  text-decoration: underline;
+  color: Black;
 }
 

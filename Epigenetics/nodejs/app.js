@@ -46,6 +46,7 @@ app.get('/input/project_new', function(req, res) {
 app.post('/input/project_new', function(req, res){
     articleProvider.save('projects', {
         proj_name: req.param('proj_name'),
+        lab_contact: req.param('lab_contact'),
         col_name: req.param('col_name'),
         col_email: req.param('col_email'),
         sample_count: req.param('sample_count'),
@@ -53,9 +54,10 @@ app.post('/input/project_new', function(req, res){
         role: req.param('role'),
         chip_run_date: req.param('chip_run_date')
     }, function( error, docs) {
-    
- 		//TODO: should get ID, then redirect to that page.
-        res.redirect('/')
+      articleProvider.getIDbyName(req.param('proj_name'), function(error, id) {
+        if (error) console.log("app.post.project_new", error)
+        else res.redirect('/view/' + id[0]._id)
+      });
     });
 });
 
@@ -74,27 +76,15 @@ app.post('/input/payment_new/:id', function(req, res){
     articleProvider.save('transactions', {
         type: req.param('transaction'),
         amt: req.param('trans_amt'),
-        chip_run_date: req.param('trans_date'),
+        date: req.param('trans_date'),
         projectid:req.params.id
-    }, function(error, docs) {
-        articleProvider.getIDbyName(req.param('proj_name'), function(error, id) {
-          if (error) console.log("app.post.payment_new", error)
-          else { 
-            console.log("req.params.id: ", req.params.id)
-            res.redirect('/view/' + req.params.id)
-          }
-        })
-    });
+    }, res.redirect('/view/' + req.params.id));
 });
 
 
 //------------------------------------
 //  SAMPLE INFO:
 //------------------------------------
-
-
-
-
 
 app.get('/input/sample_new', function(req, res) {
     res.render('sample_new.jade', {title: 'New Sample'}
@@ -111,9 +101,12 @@ app.post('/input/sample_new', function(req, res){
 
 
 app.get('/view/:id', function(req, res) {
-    articleProvider.findById(req.params.id, function(error, project) {
-        res.render('project_details.jade',{proj_name: project.proj_name, project:project});
+  articleProvider.getTransactions(req.params.id, function(error, transactions) {
+    if (error) console.log("view/:id error: ", error)
+    else articleProvider.findById(req.params.id, function(error, project) {
+        res.render('project_details.jade',{proj_name: project.proj_name, project:project, transactions:transactions});
     });
+   });
 });
 
 app.listen(3000);

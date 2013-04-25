@@ -3,6 +3,8 @@ h1= proj_name
 #project
   #proj_name
     H3= project.proj_name
+  #lab_contact
+    span Kobor Lab Contact: #{project.lab_contact}
   #col_name
     span Collaborator Name: #{project.col_name}
   #col_email
@@ -13,11 +15,21 @@ h1= proj_name
     span Sample Arrival Date: #{project.arrival_date} 
   #role
     span Project Type: Name: #{project.role}
-#projectoptions
-   a(href="/input/sample_new/"+project._id)='Add a sample to this project'
-   br
-   a(href="/input/sample_new/"+project._id)='Add a nanodrop report (also creates samples)'
-   br
-   a(href="/input/barcode_new/"+project._id)='Create a barcode object'
-   br
-   a(href="/input/payment_new/"+project._id)='Add a payment record'
+#samplesdetails
+  H3 Samples:
+  a(href="/input/sample_new/"+project._id)='Add a sample to this project'
+#transactiondetails
+  H3 Transactions:
+  - each transaction in transactions
+      p #{transaction.type} #{transaction.amt } #{transaction.date } 
+      //#{transaction._id} #{transaction.projectid }
+  a(href="/input/payment_new/"+project._id)='Add a payment record'
+#nanodropdetails
+  H3 NanoDrop Details:
+  a(href="/input/sample_new/"+project._id)='Add a nanodrop report (also creates samples)'
+#barcodedetails
+  H3 Barcode Details:
+  a(href="/input/barcode_new/"+project._id)='Create a barcode object'
+
+  
+  

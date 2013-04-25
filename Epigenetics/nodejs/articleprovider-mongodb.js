@@ -71,15 +71,20 @@ ArticleProvider.prototype.transaction_type = function(callback) {
 };
 
 //Retrieve only the transaction types options
+ArticleProvider.prototype.getTransactions = function(id, callback) {
+    this.getDBQuery('transactions', {projectid: id}, {}, function(error, transactions) {
+      if( error ) console.log("transaction-type error: ", error);
+      else callback(null, transactions)
+    });
+};
+
+//Retrieve only the transaction types options
 ArticleProvider.prototype.getIDbyName = function(name, callback) {
     this.getDBQuery('projects', {proj_name: name}, {_id:1}, function(error, id) {
       if( error ) console.log("id-lookup error: ", error);
       else callback(null, id)
     });
 };
-
-//.substring(10,35)
-
 
 //APF:  Modified to use the projects - saves to a project table.
 ArticleProvider.prototype.save = function(collection, projects, callback) {
