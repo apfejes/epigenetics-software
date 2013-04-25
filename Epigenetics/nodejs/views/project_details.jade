@@ -19,34 +19,5 @@ h1= proj_name
    a(href="/input/sample_new")='Add a nanodrop report (also creates samples)'
    br
    a(href="/input/sample_new")='Create a barcode object'
-    
-
-  //span Name: #{}
-    div.nanodrop1= project.nanodrop1
-  //span Name: #{}
-    div.nanodrop2= project.nanodrop2
-  //span Name: #{}
-    div.nanodrop3= project.nanodrop3
-  //span Name: #{}
-    div.speedvac= project.speedvac
-  //span Name: #{}
-    div.conc_notes= project.conc_notes
-  //span Name: #{}
-    div.illumina_tracking= project.illumina_tracking
-  //span Name: #{}
-    div.chip_run_date= project.chip_run_date
-    //- each comment in article.comments
-      div.comment
-        div.person= comment.person
-        div.comment= comment.comment
-    //-div
-      form( method="post", action="/view/addComment")
-          //input( type="hidden", name="_id", value=article._id.toHexString())
-        //div
-          //span Author :
-          //input( type="text", name="person", id="addCommentPerson")
-        //div
-          //span Comment :
-          //textarea( name="comment", rows=5, id="addCommentComment")
-        //div#editArticleSubmit
-          //input(type="submit", value="Send")
+   br
+   a(href="/input/payment_new")='Add a payment record'

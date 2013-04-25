@@ -53,6 +53,8 @@ app.post('/input/project_new', function(req, res){
         role: req.param('role'),
         chip_run_date: req.param('chip_run_date')
     }, function( error, docs) {
+    
+ 		//TODO: should get ID, then redirect to that page.
         res.redirect('/')
     });
 });

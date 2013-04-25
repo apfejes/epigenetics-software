@@ -22,12 +22,10 @@ ArticleProvider.prototype.getDBData= function(table_name, callback) {
 
 ArticleProvider.prototype.getDBQuery= function(table_name, query_string, fields, callback) {
   this.db.collection(table_name).find(query_string, fields).toArray(function(e, results) {
-    if (e) console.log("data error:", e)
+    if (e) console.log("getDBQuery error:", e)
     else callback(null, results)
   })
 };
-
-
 
 //APF: Function to return the names of all projects
 ArticleProvider.prototype.findAllProjects = function(callback) {
