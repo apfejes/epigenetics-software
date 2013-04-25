@@ -1,5 +1,5 @@
-use lims
-db.project_status.insert([
+use human_epgenetics
+db.xlat.insert([
 {"desc":"Proposed - no funding", "xlat" : "status"},
 {"desc":"Proposed - funding in place", "xlat" : "status"},
 {"desc":"Confirmed - samples not received", "xlat" : "status"},
@@ -11,7 +11,7 @@ db.project_status.insert([
 ])
 
 
-db.project_status.insert([
+db.xlat.insert([
 {"desc":"Buccal", "xlat" : "sample_type"},
 {"desc":"PBMC", "xlat" : "sample_type"},
 {"desc":"Whole blood", "xlat" : "sample_type"},
@@ -25,4 +25,11 @@ db.project_status.insert([
 {"desc":"Placenta", "xlat" : "sample_type"},
 {"desc":"Nasal swab", "xlat" : "sample_type"},
 {"desc":"", "xlat" : "sample_type"}
+])
+
+db.xlat.insert([
+{"desc":"Post DNA extraction", "xlat" : "nanodrop_status"},
+{"desc":"Post Clean and Concentrate", "xlat" : "nanodrop_status"},
+{"desc":"Post Bisulfite Conversion", "xlat" : "nanodrop_status"},
+{"desc":"Post speed vac", "xlat" : "nanodrop_status"}
 ])
