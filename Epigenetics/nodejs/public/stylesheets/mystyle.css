@@ -80,6 +80,15 @@ h1 {
 
 }
 
+#project a         {text-decoration: none; padding:5px color: Gray;}
+#project a:visited {text-decoration: none; color: Gray;}
+#project a:active  {text-decoration: none; color: Gray;}
+#project a:link    {text-decoration: none; color: Gray;}
+#project a:hover   {
+  text-decoration: underline;
+  color: Black;
+}
+
 #newinformation {
   background-color: Linen;
   text-align: left;

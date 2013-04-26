@@ -9,25 +9,54 @@ ArticleProvider = function(host, port) {
   this.db.open(function(){});
 };
 
-//APF: altered function to return a complete list of projects
-ArticleProvider.prototype.getDBData= function(table_name, callback) {
-  this.db.collection(table_name, function(error, project_collection) {
+//__________________________________
+//
+//  Return all documents (find) in a collection
+//__________________________________
+
+ArticleProvider.prototype.getDBData= function(collection_name, callback) {
+  this.db.collection(collection_name, function(error, project_collection) {
     if( error ) callback(error);
     else callback(null, project_collection);
   });
 };
 
-//APF: altered function 
+//__________________________________
+//
+//  Perform a specific query (find) on a collection 
+//__________________________________
 
 
-ArticleProvider.prototype.getDBQuery= function(table_name, query_string, fields, callback) {
-  this.db.collection(table_name).find(query_string, fields).toArray(function(e, results) {
+ArticleProvider.prototype.getDBQuery= function(collection_name, query_string, fields, callback) {
+  this.db.collection(collection_name).find(query_string, fields).toArray(function(e, results) {
     if (e) console.log("getDBQuery error:", e)
     else callback(null, results)
   })
 };
 
-//APF: Function to return the names of all projects
+//__________________________________
+//
+// UPDATE API
+//__________________________________
+
+ArticleProvider.prototype.updateDB= function(collection_name, id, query_string,  callback) {
+  console.log("req.params.id -i: ", new ObjectID(id));
+  this.db.collection(collection_name).update({_id:new ObjectID(id)}, query_string, {} , function(e, results) {
+    if (e) console.log("updateDB error:", e)
+    else callback(null, results)
+  })
+};
+
+//__________________________________
+//
+// Functions for retrieval of specific information
+//__________________________________
+
+
+  //------
+  //APF: Function to return the names of all projects, used by index to list projects
+  //----- 
+  
 ArticleProvider.prototype.findAllProjects = function(callback) {
     this.getDBData('projects', function(error, project_collection) {
       if( error ) callback(error)
@@ -40,8 +69,10 @@ ArticleProvider.prototype.findAllProjects = function(callback) {
     });
 };
 
-
-//this is the function that was provided in the demo code
+  //---- 
+  //Function provided by demo tutorial code, used to return one record
+  //----
+  
 ArticleProvider.prototype.findById = function(id, callback) {
     this.getDBData('projects', function(error, project_collection) {
       if( error ) callback(error)
@@ -54,7 +85,10 @@ ArticleProvider.prototype.findById = function(id, callback) {
     });
 };
 
-//Retrieve only the project status options
+  //---- 
+  //Retrieve only the project status options
+  //---- 
+
 ArticleProvider.prototype.project_status = function(callback) {
     this.getDBQuery('xlat', {xlat: "status"}, {desc:1, _id:0}, function(error, project_status) {
       if( error ) console.log("project-status error: ", error);
@@ -62,7 +96,11 @@ ArticleProvider.prototype.project_status = function(callback) {
     });
 };
 
-//Retrieve only the transaction types options
+
+  //---- 
+  //Retrieve only the transaction types options
+  //---- 
+  
 ArticleProvider.prototype.transaction_type = function(callback) {
     this.getDBQuery('xlat', {xlat: "transaction_type"}, {desc:1, _id:0}, function(error, transaction) {
       if( error ) console.log("transaction-type error: ", error);
@@ -70,7 +108,11 @@ ArticleProvider.prototype.transaction_type = function(callback) {
     });
 };
 
-//Retrieve only the transaction types options
+
+  //---- 
+  //Retrieve only the transaction types options
+  //---- 
+  
 ArticleProvider.prototype.getTransactions = function(id, callback) {
     this.getDBQuery('transactions', {projectid: id}, {}, function(error, transactions) {
       if( error ) console.log("transaction-type error: ", error);
@@ -78,7 +120,11 @@ ArticleProvider.prototype.getTransactions = function(id, callback) {
     });
 };
 
-//Retrieve only the transaction types options
+
+  //---- 
+  //Retrieve only the transaction types options
+  //---- 
+  
 ArticleProvider.prototype.getIDbyName = function(name, callback) {
     this.getDBQuery('projects', {proj_name: name}, {_id:1}, function(error, id) {
       if( error ) console.log("id-lookup error: ", error);
@@ -86,7 +132,11 @@ ArticleProvider.prototype.getIDbyName = function(name, callback) {
     });
 };
 
-//APF:  Modified to use the projects - saves to a project table.
+//__________________________________
+//
+// SAVE FUNCTION
+//__________________________________
+
 ArticleProvider.prototype.save = function(collection, projects, callback) {
     this.getDBData(collection, function(error, project_collection) {
       if( error ) callback(error)
@@ -109,5 +159,25 @@ ArticleProvider.prototype.save = function(collection, projects, callback) {
       }
     });
 };
+
+//__________________________________
+//
+// UPDATE FUNCTION
+//__________________________________
+
+
+ArticleProvider.prototype.update = function(collection, id, project, callback) {
+    project.last_updated = new Date();
+    this.updateDB(collection, id, {$set: project}, function(error, c) {
+      if( error ) callback(error)
+      else callback(null, c);
+    });
+};
+
+//__________________________________
+//
+//  Required Exports.
+//__________________________________
+//
 
 exports.ArticleProvider = ArticleProvider;

@@ -68,6 +68,48 @@ app.post('/input/project_new', function(req, res){
     });
 });
 
+app.get('/input/project_edit/:id', function(req, res){
+  articleProvider.project_status( function(error, docs) {
+    articleProvider.findById(req.params.id, function(error, project) {
+      res.render('project_edit.jade',{title: 'Edit Project'+ project.proj_name, project:project, status:docs});
+    });
+  });
+});
+
+app.post('/input/project_edit/:id', function(req, res){
+    articleProvider.update('projects', req.params.id, {
+        proj_name: req.param('proj_name'),
+        lab_contact: req.param('lab_contact'),
+        col_name: req.param('col_name'),
+        col_email: req.param('col_email'),
+        sample_count: req.param('sample_count'),
+        arrival_date: req.param('arrival_date'),
+        role: req.param('role'),
+        chip_run_date: req.param('chip_run_date')
+    }, function( error, docs) {
+      articleProvider.getIDbyName(req.param('proj_name'), function(error, id) {
+        if (error) console.log("app.post.project_new", error)
+        else res.redirect('/view/' + req.params.id)
+      });
+    });
+});
+
+
+    //----
+    // Function for viewing a project overview
+    //----
+
+app.get('/view/:id', function(req, res) {
+  articleProvider.getTransactions(req.params.id, function(error, transactions) {
+    if (error) console.log("view/:id error: ", error)
+    else articleProvider.findById(req.params.id, function(error, project) {
+        res.render('project_details.jade',{proj_name: project.proj_name, project:project, transactions:transactions});
+    });
+   });
+});
+
+
+
 //------------------------------------
 //  PAYMENT INFO:
 //------------------------------------
@@ -116,5 +158,5 @@ app.get('/view/:id', function(req, res) {
    });
 });
 
-app.listen(3000);
+app.listen(3000, "0.0.0.0");
 console.log("Express server listening on port %d in %s mode", 27017, app.settings.env);

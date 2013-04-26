@@ -15,8 +15,11 @@ h1= proj_name
     span Sample Arrival Date: #{project.arrival_date} 
   #role
     span Project Type: Name: #{project.role}
+  br
+  a(href="/input/project_edit/"+project._id)='Edit this project description'
 #samplesdetails
   H3 Samples:
+  br
   a(href="/input/sample_new/"+project._id)='Add a sample to this project'
 #transactiondetails
   H3 Transactions:
@@ -26,9 +29,11 @@ h1= proj_name
   a(href="/input/payment_new/"+project._id)='Add a payment record'
 #nanodropdetails
   H3 NanoDrop Details:
-  a(href="/input/sample_new/"+project._id)='Add a nanodrop report (also creates samples)'
+  br
+  a(href="/input/nanodrop_new/"+project._id)='Add a nanodrop report (also creates samples)'
 #barcodedetails
   H3 Barcode Details:
+  br
   a(href="/input/barcode_new/"+project._id)='Create a barcode object'
 
   
