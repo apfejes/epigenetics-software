@@ -1,0 +1,38 @@
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+h1= title
+form( method="post")
+  #newinformation
+    H3 Enter your project Information:
+    div
+      span Project Name : 
+      input(type="text", name="proj_name", id="editProjectName", value=project.proj_name, required)
+    div
+      span Kobor lab Contact :
+      input(type="text", name="lab_contact", id="editlabContact", value=project.lab_contact)
+    div
+      div
+        span Colaborator Name :
+        input(type="text", name="col_name", id="editColName", value=project.col_name)
+      div 
+        span Colaborator email :
+        input(type="email", name="col_email", id="editColEmail", value=project.col_email)
+    div
+      span Number of Samples :
+      input(type="number", name="sample_count", id="editSampleCount", value=project.sample_count)
+    div
+      span Date Samples Arrived :
+      input(type="date", name="arrival_date", id="editArrivalDate", value=project.arrival_date)
+    div
+      //Sample type (drop down list?)
+      span Project Type :
+      select(name='role', value=project.role)
+        - each st in status 
+          option(value=st.desc)=st.desc 
+    div
+      span Date of Chip Run :
+      input(type="date", name="chip_run_date", id="editChipRunDate", value=project.chip_run_date)
+    div#editArticleSubmit
+      input(type="submit", value="Save")
+
+            
+            

@@ -40,7 +40,7 @@ app.get('/', function(req, res){
 });
 
 //------------------------------------
-//  PAYMENT INFO:
+//  PROJECT PAGES
 //------------------------------------
 
 app.get('/input/project_new', function(req, res) {
@@ -108,6 +108,15 @@ app.get('/view/:id', function(req, res) {
    });
 });
 
+app.get('/view/:id', function(req, res) {
+  articleProvider.getTransactions(req.params.id, function(error, transactions) {
+    if (error) console.log("view/:id error: ", error)
+    else articleProvider.findById(req.params.id, function(error, project) {
+        res.render('project_details.jade',{proj_name: project.proj_name, project:project, transactions:transactions});
+    });
+   });
+});
+
 
 
 //------------------------------------
@@ -148,15 +157,30 @@ app.post('/input/sample_new', function(req, res){
     });
 });
 
+//------------------------------------
+//  NANODROP INFO:
+//------------------------------------
 
-app.get('/view/:id', function(req, res) {
-  articleProvider.getTransactions(req.params.id, function(error, transactions) {
-    if (error) console.log("view/:id error: ", error)
-    else articleProvider.findById(req.params.id, function(error, project) {
-        res.render('project_details.jade',{proj_name: project.proj_name, project:project, transactions:transactions});
-    });
-   });
+app.get('/input/nanodrop_new/:id', function(req, res) {
+    res.render('nanodrop_new.jade', {title: 'Nanodrop File', projectid:req.params.id}
+    );
 });
+
+app.post('/input/nanodrop_new/:id', function(req, res){
+    
+    
+    
+    
+    articleProvider.save('samples', {
+        sample_name: req.param('sample_name'),
+    }, function( error, docs) {
+        res.redirect('/')
+    });
+});
+
+
+
+
 
 app.listen(3000, "0.0.0.0");
 console.log("Express server listening on port %d in %s mode", 27017, app.settings.env);

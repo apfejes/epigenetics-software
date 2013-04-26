@@ -4,17 +4,29 @@ h1= proj_name
   #proj_name
     H3= project.proj_name
   #lab_contact
-    span Kobor Lab Contact: #{project.lab_contact}
+    span 
+      b Kobor Lab Contact: 
+      | #{project.lab_contact}
   #col_name
-    span Collaborator Name: #{project.col_name}
+    span 
+    b Collaborator Name: 
+    | #{project.col_name}
   #col_email
-    span Collaborator Email: #{project.col_email} 
+    span  
+    b Collaborator Email: 
+    | #{project.col_email} 
   #sample_count
-    span Sample Count: #{project.sample_count} 
+    span  
+    b Sample Count: 
+    | #{project.sample_count} 
   #arrival_date
-    span Sample Arrival Date: #{project.arrival_date} 
+    span  
+    b Sample Arrival Date: 
+    | #{project.arrival_date} 
   #role
-    span Project Type: Name: #{project.role}
+    span  
+    b Project Type: Name: 
+    | #{project.role}
   br
   a(href="/input/project_edit/"+project._id)='Edit this project description'
 #samplesdetails
