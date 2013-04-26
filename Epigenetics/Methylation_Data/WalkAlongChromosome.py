@@ -40,18 +40,6 @@ control_samples = ['C4ab1 M', 'C4ab2 M', 'C5a M', 'C3a F', 'C1ab F', 'C2a M', 'C
 diseased_samples = ['DS01A M', 'DS09A M', 'DS02A F', 'DS04A F', 'DS03A F', 
                     'DS05A F', 'DS08B F', 'DS06A M', 'DS07A M', 'DS10A M']
 '''
-chromosome_list = [str(i) for i in range(1, 24)]
-chromosome_list.append('X')
-chromosome_list.append('Y')
-while True:
-    try:
-        chromosome = str(raw_input('Enter chromosome (1, 2, X, Y...): '))
-        if chromosome in chromosome_list:
-            break
-    except:
-        pass
-    print('{0}{1}'.format('Invalid chromosome, choose from: ', 
-                          chromosome_list))
 
 def CreateSampleGroups(mongo, project, feature):
     '''
@@ -281,6 +269,23 @@ def futureUnitTest():
 
 
 if __name__ == "__main__":
+    
+    '''
+    Ask user to give a chromosome.
+    '''
+    chromosome_list = [str(i) for i in range(1, 24)]
+    chromosome_list.append('X')
+    chromosome_list.append('Y')
+    while True:
+        try:
+            chromosome = str(raw_input('Enter chromosome (1, 2, X, Y...): '))
+            if chromosome in chromosome_list:
+                break
+        except:
+            pass
+        print('{0}{1}'.format('Invalid chromosome, choose from: ', 
+                              chromosome_list))
+    
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
     SampleGroups = CreateSampleGroups(mongo, project, feature)
     # control_samples = SampleGroups['unstimulated']
