@@ -6,6 +6,12 @@ var sys = require('sys')
 //
 // This file is based on a script provided at 
 // https://gist.github.com/jamescarr/467954#file-gistfile1-js
+//
+// You will need to call the function something like: 
+//    parseCsvFile('tremors.txt', function(rec){
+//      sys.puts("An tremor of magnitude " + rec.magnitude + " in " + rec.region)
+//    });
+//
 //_____________________________________________________
 
 function parseCsvFile(fileName, callback){

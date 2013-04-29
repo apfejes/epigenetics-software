@@ -1,3 +1,12 @@
+
+#logo {
+  display: block;
+  width: 100px;
+  height: 50px;
+  background-image: url("/images/ep_eyes.png");
+  //border: 1px solid red;
+}
+
 body {
   font-family: "Helvetica Neue", "Lucida Grande", "Arial";
   font-size: 13px;

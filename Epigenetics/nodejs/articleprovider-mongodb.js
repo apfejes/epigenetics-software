@@ -40,7 +40,6 @@ ArticleProvider.prototype.getDBQuery= function(collection_name, query_string, fi
 //__________________________________
 
 ArticleProvider.prototype.updateDB= function(collection_name, id, query_string,  callback) {
-  console.log("req.params.id -i: ", new ObjectID(id));
   this.db.collection(collection_name).update({_id:new ObjectID(id)}, query_string, {} , function(e, results) {
     if (e) console.log("updateDB error:", e)
     else callback(null, results)
@@ -108,7 +107,6 @@ ArticleProvider.prototype.transaction_type = function(callback) {
     });
 };
 
-
   //---- 
   //Retrieve only the transaction types options
   //---- 
@@ -137,27 +135,16 @@ ArticleProvider.prototype.getIDbyName = function(name, callback) {
 // SAVE FUNCTION
 //__________________________________
 
-ArticleProvider.prototype.save = function(collection, projects, callback) {
-    this.getDBData(collection, function(error, project_collection) {
-      if( error ) callback(error)
-      else {
-        if( typeof(projects.length)=="undefined")
-          projects = [projects];
-
-        for( var i =0;i< projects.length;i++ ) {
-          project = projects[i];
-          project.created_at = new Date();
-          if( project.comments === undefined ) project.comments = [];
-          for(var j =0;j< project.comments.length; j++) {
-            project.comments[j].created_at = new Date();
-          }
-        }
-
-        project_collection.insert(projects, function() {
-          callback(null, projects);
-        });
-      }
-    });
+ArticleProvider.prototype.save = function(collection_name, projects, callback) {
+    if( typeof(projects.length)=="undefined")
+      projects = [projects];
+    for( var i =0;i< projects.length;i++ ) {
+      project = projects[i];
+      project.created_at = new Date();
+      this.db.collection(collection_name).insert(projects, function() {
+        callback(null, projects);
+      })
+    };
 };
 
 //__________________________________
