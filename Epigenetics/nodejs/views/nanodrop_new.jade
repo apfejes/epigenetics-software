@@ -9,6 +9,7 @@ form( method="post")
       input(type="file", name="proj_name", id="editProjectName", required)
     div#editArticleSubmit
       input(type="submit", value="add to project")
+      input(type="button", value="Cancel", onClick="window.history.back(-1)")
     #div
       H3 existing files for this project:
     

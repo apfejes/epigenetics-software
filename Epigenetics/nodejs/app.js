@@ -157,6 +157,24 @@ app.post('/input/sample_new', function(req, res){
     });
 });
 
+
+//------------------------------------
+//  PLATE INFO:
+//------------------------------------
+
+app.get('/input/plate_new/:id', function(req, res) {
+    res.render('plate_new.jade', {title: 'Add a Plate', projectid:req.params.id}
+    );
+});
+
+app.post('/input/plate_new', function(req, res){
+    articleProvider.save('plates', {
+        plate_name: req.param('plate_name'),
+    }, function( error, docs) {
+        res.redirect('/')
+    });
+});
+
 //------------------------------------
 //  NANODROP INFO:
 //------------------------------------

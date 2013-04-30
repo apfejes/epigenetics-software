@@ -8,7 +8,7 @@ form( method="post")
     H3 Enter your project Information:
     div
       span Transaction type: 
-      select(name='transaction')
+      select(name='transaction', required)
         - each tr in trtype 
           option(value=tr.desc)=tr.desc 
     div
@@ -19,6 +19,6 @@ form( method="post")
       input(type="date", name="trans_date", id="transactionDate", required)
     div#editArticleSubmit
       input(type="submit", value="Save")
-
+      input(type="button", value="Cancel", onClick="window.history.back(-1)")
             
             

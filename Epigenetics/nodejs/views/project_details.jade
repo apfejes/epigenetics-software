@@ -1,10 +1,9 @@
 link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
 a(href='/')
   #logo
-h1= proj_name
 #project
   #proj_name
-    H3= project.proj_name
+    H2= project.proj_name
   #lab_contact
     span 
       b Kobor Lab Contact: 
@@ -45,10 +44,10 @@ h1= proj_name
   H3 NanoDrop Details:
   br
   a(href="/input/nanodrop_new/"+project._id)='Add a nanodrop report (also creates samples)'
-#barcodedetails
-  H3 Barcode Details:
+#platedetails
+  H3 Plates:
   br
-  a(href="/input/barcode_new/"+project._id)='Create a barcode object'
+  a(href="/input/plate_new/"+project._id)='Add a plate to this experiment'
 
   
   

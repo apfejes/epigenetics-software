@@ -17,30 +17,14 @@ body {
   color: #555;
 }
 h2 {
-  margin: 0;
-  font-size: 18px;
+  //margin: 0;
+  font-size: 24px;
   color: #343434;
 }
 h1 {
   text-shadow: 1px 2px 2px #ddd;
   font-size: 40px;
 }
-#articles {
-  text-align: left;
-  margin-left: auto;
-  margin-right: auto;
-  width: 320px;
-}
-
-#articles .article .created_at {
-  display: none;
-}
-#articles .article .title {
-  font-weight: bold;
-  text-decoration: underline;
-  background-color: #eee;
-}
-
 
 #links {
   background-color: Linen;
@@ -109,7 +93,7 @@ h1 {
   margin:5px 5px 5px 5px; 
 }
 
-#transactiondetails, #samplesdetails, #nanodropdetails, #barcodedetails{
+#transactiondetails, #samplesdetails, #nanodropdetails, #platedetails, #section{
 background-color: Gainsboro;
   text-align: left;
   width: 95%;
@@ -119,11 +103,11 @@ background-color: Gainsboro;
 }
 
 
-#barcodedetails a         {text-decoration: none; color: Gray;}
-#barcodedetails a:visited {text-decoration: none; color: Gray;}
-#barcodedetails a:active  {text-decoration: none; color: Gray;}
-#barcodedetails a:link    {text-decoration: none; color: Gray;}
-#barcodedetails a:hover   {
+#platedetails a         {text-decoration: none; color: Gray;}
+#platedetails a:visited {text-decoration: none; color: Gray;}
+#platedetails a:active  {text-decoration: none; color: Gray;}
+#platedetails a:link    {text-decoration: none; color: Gray;}
+#platedetails a:hover   {
   text-decoration: underline;
   color: Black;
 }
@@ -154,4 +138,12 @@ background-color: Gainsboro;
   text-decoration: underline;
   color: Black;
 }
+
+#section a         {text-decoration: none; color: Gray;}
+#section a:visited {text-decoration: none; color: Gray;}
+#section a:active  {text-decoration: none; color: Gray;}
+#section a:link    {text-decoration: none; color: Gray;}
+#section a:hover   {
+  text-decoration: underline;
+  color: Black;
 

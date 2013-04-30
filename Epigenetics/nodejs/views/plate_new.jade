@@ -1,0 +1,108 @@
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+a(href='/')
+  #logo
+h1= title
+form( method="post")
+  #section
+    h3 Section 1 - Quant DNA: 
+    div
+      span Operator : 
+      input(type="text", name="sec1_operator", required)
+    div
+      span Date : 
+      input(type="date", name="sec1_date")
+  #section
+    h3 Section 2 - Make MSA2/4:
+    div
+      span Operator : 
+      input(type="text", name="sec2_operator")
+    div
+      span Date : 
+      input(type="date", name="sec2_date")
+    div
+      span Hyb Oven Start/Stop : 
+      input(type="text", name="sec2_oven_start")
+      input(type="text", name="sec2_oven_stop")
+    div
+      span MSA2/4 plate barcode :
+      input(type="text", name="sec2_plate_bc")
+    div
+      span MA1 reagent :
+      input(type="text", name="sec2_MA1_1")
+      input(type="text", name="sec2_MA1_2")
+    div
+      span RMP reagent :
+      input(type="text", name="sec2_RMP_1")
+      input(type="text", name="sec2_RMP_2")
+    div
+      span MSM reagent :
+      input(type="text", name="sec2_MSM_1")
+      input(type="text", name="sec2_MSM_2")
+
+  #section
+    h3 Section 3 - Fragment MAS2/4:
+    div
+      span Operator : 
+      input(type="text", name="sec3_operator")
+    div
+      span Date : 
+      input(type="date", name="sec3_date")
+    div
+      span Vortex at 1600 rpm : 
+      input(type="checkbox", name="sec3_vortex")
+    div
+      span Heat Block (37C, 1h) Start/Stop : 
+      input(type="text", name="sec3_hb_start")
+      input(type="text", name="sec3_hb_stop")
+    div
+      span FMS reagent :
+      input(type="text", name="sec3_FMS_1")
+      input(type="text", name="sec3_FMS_2")
+  #section
+    h3 Section 4 - Precip MSA2/4:
+    div
+      span Operator : 
+      input(type="text", name="sec4_operator")
+    div
+      span Date : 
+      input(type="date", name="sec4_date")
+    div
+      span Vortex at 1600 rpm : 
+      input(type="checkbox", name="sec4_vortex")
+  #section
+    h3 Section 5 - Resuspend MSA2/4:
+  
+  #section
+    h3 Section 6 - Hyb multi Beadchip:
+  
+  #section
+    h3 Section 7 - Wash Beadchip:
+    
+    div
+      div
+        span Colaborator Name :
+        input(type="text", name="col_name", id="editColName")
+      div 
+        span Colaborator email :
+        input(type="email", name="col_email", id="editColEmail")
+    div
+      span Number of Samples :
+      input(type="number", name="sample_count", id="editSampleCount")
+    div
+      span Date Samples Arrived :
+      input(type="date", name="arrival_date", id="editArrivalDate")
+    div
+    //Sample type (drop down list?)
+            
+      span Project Type :
+        select(name='role') 
+          option(value='Chip-Seq') ChIP-Seq 
+          option(value='450k methylation array') 450k methylation array  
+    div
+      span Date of Chip Run :
+      input(type="date", name="chip_run_date", id="editChipRunDate")
+    div#editArticleSubmit
+    input(type="submit", value="Send")
+    input(type="button", value="Cancel", onClick="window.history.back(-1)")
+            
+            
