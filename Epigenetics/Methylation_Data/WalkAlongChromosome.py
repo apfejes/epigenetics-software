@@ -14,20 +14,27 @@ _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current fi
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir)
-
-from MongoDB.mongoUtilities import Mongo_Connector
+sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
+import Mongo_Connector
 from annotUtilities import plots
 
 starttime = time.time()
-database_name = 'human_epigenetics'
+# database_name = 'human_epigenetics'
+database_name = 'jake_test'
 annotation_collection = 'annotations'
 methylation_collection = 'methylation'
 sample_collection = 'samples'
 # project = 'kollman'
 # feature = 'stimulation'
-window_size = 10000   # For binning purposes
+# control_group_label = 'unstimulated'
+# diseased_group_label = 'listeria'
 project = 'down'
 feature = 'Sample Group'
+control_group_label = 'Control'
+diseased_group_label = 'DS'
+window_size = 1   # For binning purposes
+savedirectory = '/home/jyeung/Documents/Presentations/batchplots/'
+
 '''
 control_samples = ['09 Adult 3 unstim', '15 Cord 2 unstim', '13 Old 3 Unstim', 
                    '17 Cord 3 Unstim', '11 Old 2 Unstim', '07 Adult 2 Unstim']
@@ -109,7 +116,7 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, 
                   'sample_label': True}
     probes_chr = mongo.find(methylation_collection, 
                             andQuery, return_chr).sort('start_position', 1)
-                                                         
+                                                        
     position_dic = {}
     betasamp_list = []
     # prev_start_pos = None
@@ -144,7 +151,7 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, 
             elif samp in diseased_samples:
                 diseased.append(beta)
             else:
-                print('Warning: sample not in list of controls or diseased')
+                print('Warning: %s not in list of controls or diseased' %samp)
                 sys.exit()
             '''
             if samp[0] == 'C':    # Control
@@ -154,20 +161,22 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, 
             else:
                 print('Warning: neither C or D')
             '''
-        control_avg = sum(controls)/len(controls)
-        diseased_avg = sum(diseased)/len(diseased)
-        diff_avg = diseased_avg - control_avg
+        control_avg = float(sum(controls))/len(controls)
+        diseased_avg = float(sum(diseased))/len(diseased)
+        # diff_avg = diseased_avg - control_avg
+        diff_avg = abs(diseased_avg - control_avg)
         x_position.append(pos)
         y_diffavg.append(diff_avg)
     
+    
     plots.makeXYPlot(x_position, y_diffavg, 
                      '{0}{1}'.format('Position on Chr ', chromosome), 
-                     'Difference in Betas (avgDiseased - avgControls)',
+                     'Absolute Difference in Betas |avgDiseased - avgControls|',
                      '{0}{1}{2}{3}'.format('Project ', project, ': beta differences in chromosome ', 
                                            chromosome),  
                      'beta_difference', 'blue')
     print('{0}{1}'.format('Time elapsed (s): ', int((time.time() - starttime))))
-    plt.show()
+    # plt.show()
 
 def PlotBetas(mongo, project, chromosome, control_samples, diseased_samples):
     '''
@@ -270,29 +279,41 @@ def futureUnitTest():
 
 if __name__ == "__main__":
     
-    '''
-    Ask user to give a chromosome.
-    '''
-    chromosome_list = [str(i) for i in range(1, 24)]
-    chromosome_list.append('X')
-    chromosome_list.append('Y')
-    while True:
-        try:
-            chromosome = str(raw_input('Enter chromosome (1, 2, X, Y...): '))
-            if chromosome in chromosome_list:
-                break
-        except:
-            pass
-        print('{0}{1}'.format('Invalid chromosome, choose from: ', 
-                              chromosome_list))
-    
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
-    SampleGroups = CreateSampleGroups(mongo, project, feature)
-    # control_samples = SampleGroups['unstimulated']
-    # diseased_samples = SampleGroups['listeria']
-    control_samples = SampleGroups['Control']
-    diseased_samples = SampleGroups['DS']
-    # PlotBetas(mongo, project, chromosome, control_samples, diseased_samples)
-    PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, window_size)
-
+    for j in xrange(0, 2):
+        '''
+        Ask user to give a chromosome.
+        '''
+        chromosome_list = [str(i) for i in range(1, 24)]
+        chromosome_list.append('X')
+        chromosome_list.append('Y')
+        chromosome_list = ['chr%s' %i for i in chromosome_list]    # Add prefix 'chr'
+        while True:
+            try:
+                # if j == 0:
+                    # chromosome = str(21)
+                # elif j == 1:
+                    # chromosome = str(22)
+                chromosome = str(raw_input('Enter chromosome (1, 2, X, Y...): '))
+                chromosome = 'chr%s' %chromosome
+                if chromosome in chromosome_list:
+                    break
+            except:
+                pass
+            print('{0}{1}'.format('Invalid chromosome, choose from: ', 
+                                  chromosome_list))
+        
+        print('Creating mongo object...')
+        mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
+        print('Creating sample groups...')
+        SampleGroups = CreateSampleGroups(mongo, project, feature)
+        control_samples = SampleGroups[control_group_label]
+        diseased_samples = SampleGroups[diseased_group_label]
+        plt.subplot(2,1,j+1)
+        print('Plotting beta differences...')
+        PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, window_size)
+        xmin,xmax,_,_ = plt.axis()
+        plt.axis([xmin,xmax,0,1])
+        print('Done for one chromosome')
+    # plt.savefig('%s%s_chromosomewalk.png' %(savedirectory, project))
+    plt.show()
 

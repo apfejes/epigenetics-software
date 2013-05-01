@@ -8,20 +8,22 @@ Created on 2013-04-12
 import csv
 import sys
 import os
+import time
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir)
+sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
+import Mongo_Connector
 
-from MongoDB.mongoUtilities import Mongo_Connector
 
-
-# filename = '/home/jyeung/Documents/Outputs/Down/down_fData.txt'
+# filename = '/home/jyeung/Documents/Outputs/Annotations/methyl450array_annotation_from_magda.txt'    # 450 array
+# filename = '/home/jyeung/Documents/Outputs/Annotations/golden_gate_probe_info.txt'    # goldengate
 database_name = 'human_epigenetics'
-# database_name = 'test'
+# database_name = 'jake_test'
 collection_name = 'annotations'
-# arraytype = 'humanmethylation450_beadchip'
+arraytype = 'humanmethylation450_beadchip'
 
 
 def Insert450kProbeAnnotation(filename, arraytype):
@@ -50,7 +52,7 @@ def Insert450kProbeAnnotation(filename, arraytype):
     exited before count was an exact multiple of 20000. 
     '''
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
-    print('{0}{1}'.format('Current number of docs in collection: ', mongo.count(collection_name)))
+    print('Current number of docs in collection: %s' %mongo.count(collection_name))
     
     nullcount = 0
     with open(filename, 'rb') as Data:
@@ -60,17 +62,19 @@ def Insert450kProbeAnnotation(filename, arraytype):
         for row in reader:
             if not ("cg" in row['TargetID'] or "ch" in row['TargetID'] or "rx" in row['TargetID']):
                 nullcount += 1
-                print('{0}{1}'.format('Skipped row with ID name: ', row['TargetID']))
+                print('Skipped row with ID name: %s' %row['TargetID'])
                 pass
             else:
                 count += 1
                 for key in row:
                     if key == 'CHR':    # We want value of 'CHR' to be string, not int.
-                        pass
+                        row[key] = 'chr%s' %row[key]
                     else:
                         try:
                             row[key] = int(row[key])
-                        except Exception:    # Catch specific exception...
+                        except ValueError:    # For non-integers
+                            pass
+                        except TypeError:    # For NoneType
                             pass
                 row['array_type'] = arraytype
                 row['_id'] = '{0}{1}{2}'.format(arraytype, '_', row['TargetID'])
@@ -78,11 +82,11 @@ def Insert450kProbeAnnotation(filename, arraytype):
                 if count%20000 == 0:
                     mongo.insert(collection_name, BulkInsert)
                     BulkInsert = []
-                    print('{0}{1}'.format('Document count in collection: ', mongo.count(collection_name)))
+                    print('Document count in collection: %s' %mongo.count(collection_name))
         mongo.insert(collection_name, BulkInsert)
         BulkInsert = []
-        print('{0}{1}'.format('Final doc count in collection: ', mongo.count(collection_name)))
-        print('{0}{1}'.format('Total number of rows skipped: ', nullcount))
+        print('Final doc count in collection: %s' %mongo.count(collection_name))
+        print('Total number of rows skipped: %s' %nullcount)
 
 def InsertGenericProbeAnnotation(filename, arraytype, chr_col_name, id_name):
     '''
@@ -99,7 +103,8 @@ def InsertGenericProbeAnnotation(filename, arraytype, chr_col_name, id_name):
     
     '''
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
-    print('{0}{1}'.format('Current number of docs in collection: ', mongo.count(collection_name)))
+    print('Current number of docs in collection: %s' %mongo.count(collection_name))
+    # print('{0}{1}'.format('Current number of docs in collection: ', mongo.count(collection_name)))
     
     with open(filename, 'rb') as Data:
         reader = csv.DictReader(Data, delimiter='\t')
@@ -109,11 +114,14 @@ def InsertGenericProbeAnnotation(filename, arraytype, chr_col_name, id_name):
             count += 1
             for key in row:
                 if key == chr_col_name:    # We want value of 'chr_col_name' to be string, not int.
-                    pass
+                    row[key] = 'chr%s' %row[key]
+                    # pass
                 else:
                     try:
                         row[key] = int(row[key])
                     except ValueError:    # If it tries to int a string...
+                        pass
+                    except TypeError:    # For NoneType
                         pass
             row['array_type'] = arraytype
             row['_id'] = '{0}{1}{2}'.format(arraytype, '_', row[id_name])
@@ -121,10 +129,10 @@ def InsertGenericProbeAnnotation(filename, arraytype, chr_col_name, id_name):
             if count%20000 == 0:
                 mongo.insert(collection_name, BulkInsert)
                 BulkInsert = []
-                print('{0}{1}'.format('Document count in collection: ', mongo.count(collection_name)))
+                print('Document count in collection: %s' %mongo.count(collection_name))
         mongo.insert(collection_name, BulkInsert)
         BulkInsert = []
-        print('{0}{1}'.format('Final doc count in collection: ', mongo.count(collection_name)))
+        print('Final doc count in collection: %s' %mongo.count(collection_name))
 
 
 if __name__ == "__main__":
@@ -132,13 +140,24 @@ if __name__ == "__main__":
         print('Filename and arraytype must be given on the command line.')
         sys.exit()
     filename = sys.argv[1]
+    starttime = time.time()
+    
+    print('Using file: %s' %filename)
+    
     check_450k = raw_input('Are you inserting illumina 450k methylation data? (y/n): ')
+    
     if check_450k == 'y' or check_450k == 'Y':
-        print('Using arraytype: humanmethylation450_beadchip for id prefix')
+        print('Using arraytype: %s for id prefix' %arraytype)
         Insert450kProbeAnnotation(filename, arraytype)
+        
     if check_450k == 'n' or check_450k == 'N':
         print('Assuming generic annotation file, no messy entries like missing rows...')
         chr_col_name = raw_input('What is the column name of your chromosome values in the .txt file? (exact match): ')
-        arraytype = raw_input('What do you want the id prefix to be? (tip: arraytype such as 450k): ')
-        id_name = raw_input('What do you want id suffix to be? (tip: column name of id identifier in .txt file: ')
+        # chr_colname = 'Chromosome'    # For goldengate
+        arraytype = raw_input('What do you want the id prefix to be? (tip: use arraytype such as golden_gate): ')
+        # arraytype = 'goldengate_array'    # For goldengate
+        id_name = raw_input('What do you want id suffix to be? (tip: use column name of probe identifier in .txt file): ')
+        # id_name = 'cg_no'    # For goldengate
         InsertGenericProbeAnnotation(filename, arraytype, chr_col_name, id_name)
+        
+    print('Completed in %i seconds' %(time.time()-starttime))

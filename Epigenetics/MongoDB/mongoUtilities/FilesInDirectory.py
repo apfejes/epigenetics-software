@@ -36,7 +36,11 @@ class Files(object):
         self.expressions_fnames = glob.glob('*_expression.txt')
         self.annotation_fnames = glob.glob('*_fData.txt')
 
-        
+        '''
+        Concatenate directory with first beta fnames. 
+        This means if you use self.betas_fnames_full, you would 
+        only get one beta file, even if your directory contained several. 
+        '''
         self.betas_fnames_full = '{0}{1}{2}'.format(self.directory, "/", self.betas_fnames[0])
         self.expressions_fnames_full = '{0}{1}{2}'.format(self.directory, "/", self.expressions_fnames[0])
         # 2.
@@ -67,6 +71,8 @@ class Files(object):
         Takes beta values and expression values and inserts into mongoDB.
         The document would contain values for beta and exprs, probe_id and 
         sample label. 
+        
+        Used by: MethylDataMaker.py in Methylation_Data
         '''
         
         fbeta = open(self.betas_fnames_full)

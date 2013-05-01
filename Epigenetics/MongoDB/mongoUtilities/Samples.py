@@ -20,7 +20,7 @@ class Samples(object):
         '''
         self.filename = filename
         
-    def sampledict(self, samp_columns, patient_columns, project_name):
+    def sampledict(self, samp_columns, patient_columns, project_name, sample_label_identifier):
         '''
         Creates a dictionary where index from index_sampleinfo are read
         as key:value pairs, everything else is read as a ONE key:value(list) pair
@@ -38,6 +38,8 @@ class Samples(object):
                         mongoDict[key] = value
                     elif key in patient_columns:
                         patientDict[key] = value
+                    if key == sample_label_identifier:
+                        mongoDict['sample_label'] = value
                     else:
                         pass
                 mongoDict['patient'] = patientDict
