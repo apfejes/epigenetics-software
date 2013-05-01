@@ -3,7 +3,7 @@ a(href='/')
   #logo
 h1= title
 form( method="post")
-  #section
+  #section1
     h3 Section 1 - Quant DNA: 
     div
       span Operator : 
@@ -11,7 +11,7 @@ form( method="post")
     div
       span Date : 
       input(type="date", name="sec1_date")
-  #section
+  #section1
     h3 Section 2 - Make MSA2/4:
     div
       span Operator : 
@@ -38,8 +38,9 @@ form( method="post")
       span MSM reagent :
       input(type="text", name="sec2_MSM_1")
       input(type="text", name="sec2_MSM_2")
-
-  #section
+    input(type="submit", value="Save")
+    input(type="button", value="Cancel", onClick="window.history.back(-1)")
+  #section1
     h3 Section 3 - Fragment MAS2/4:
     div
       span Operator : 
@@ -58,7 +59,10 @@ form( method="post")
       span FMS reagent :
       input(type="text", name="sec3_FMS_1")
       input(type="text", name="sec3_FMS_2")
-  #section
+    input(type="submit", value="Save")
+    input(type="button", value="Cancel", onClick="window.history.back(-1)")
+    
+  #section1
     h3 Section 4 - Precip MSA2/4:
     div
       span Operator : 
@@ -69,40 +73,84 @@ form( method="post")
     div
       span Vortex at 1600 rpm : 
       input(type="checkbox", name="sec4_vortex")
-  #section
-    h3 Section 5 - Resuspend MSA2/4:
-  
-  #section
-    h3 Section 6 - Hyb multi Beadchip:
-  
-  #section
-    h3 Section 7 - Wash Beadchip:
-    
+    div 
+      span Heat Block (37C, 5m) Start/Stop : 
+      input(type="text", name="sec4_hb_start")
+      input(type="text", name="sec4_hb_stop")
+    div 
+      span Incubate (4C, 5m) Start/Stop : 
+      input(type="text", name="sec4_in_start")
+      input(type="text", name="sec4_in_stop")
+    div 
+      span Centrifuge 3000 xg (4C, 20m) Start/Stop : 
+      input(type="text", name="sec4_cen_start")
+      input(type="text", name="sec4_cen_stop")
+    div 
+      span Air Dry (22C, 1h) Start/Stop : 
+      input(type="text", name="sec4_dry_start")
+      input(type="text", name="sec4_dry_stop")
     div
-      div
-        span Colaborator Name :
-        input(type="text", name="col_name", id="editColName")
-      div 
-        span Colaborator email :
-        input(type="email", name="col_email", id="editColEmail")
+      span 2-propanol Date Opened :
+      input(type="text", name="sec4_2pol_open")
     div
-      span Number of Samples :
-      input(type="number", name="sample_count", id="editSampleCount")
-    div
-      span Date Samples Arrived :
-      input(type="date", name="arrival_date", id="editArrivalDate")
-    div
-    //Sample type (drop down list?)
-            
-      span Project Type :
-        select(name='role') 
-          option(value='Chip-Seq') ChIP-Seq 
-          option(value='450k methylation array') 450k methylation array  
-    div
-      span Date of Chip Run :
-      input(type="date", name="chip_run_date", id="editChipRunDate")
-    div#editArticleSubmit
-    input(type="submit", value="Send")
+      span PM1 Reagent :
+      input(type="text", name="sec4_PM1_1")
+      input(type="text", name="sec4_PM1_2")
+    input(type="submit", value="Save")
     input(type="button", value="Cancel", onClick="window.history.back(-1)")
-            
-            
+    
+  #section2
+    h3 Section 5 - Resuspend MSA2/4:
+    div
+      span Operator : 
+      input(type="text", name="sec5_operator")
+    div
+      span Date : 
+      input(type="date", name="sec5_date")
+    div 
+      span Hyb Oven (48C, 1h) Start/Stop : 
+      input(type="text", name="sec5_ovn_start")
+      input(type="text", name="sec5_ovn_stop")
+    div
+      span RA1 Reagent :
+      input(type="text", name="sec5_RA1")
+    input(type="submit", value="Save")
+    input(type="button", value="Cancel", onClick="window.history.back(-1)")
+    
+  #section2
+    h3 Section 6 - Hyb multi Beadchip:
+    div
+      span Operator : 
+      input(type="text", name="sec6_operator")
+    div
+      span Date : 
+      input(type="date", name="sec6_date")
+    div
+      span Vortex at 1800 rpm : 
+      input(type="checkbox", name="sec6_vortex")
+    div 
+      span Heat Block (95C, 20m) Start/Stop : 
+      input(type="text", name="sec6_hb_start")
+      input(type="text", name="sec6_hb_stop")
+    div 
+      span Hyb Oven (48C, 16-24h) Start/Stop : 
+      input(type="text", name="sec6_ovn_start")
+      input(type="text", name="sec6_ovn_stop")
+    div
+      span PB2 Reagent :
+      input(type="text", name="sec6_PB2")
+    input(type="submit", value="Save")
+    input(type="button", value="Cancel", onClick="window.history.back(-1)")
+  #section2
+    h3 Section 7 - Wash Beadchip:
+    div
+      span Operator : 
+      input(type="text", name="sec7_operator")
+    div
+      span Date : 
+      input(type="date", name="sec7_date")
+    div
+      span PB1 Reagent :
+      input(type="text", name="sec7_PB1")
+    input(type="submit", value="Save")
+    input(type="button", value="Cancel", onClick="window.history.back(-1)")

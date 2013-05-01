@@ -93,8 +93,17 @@ h1 {
   margin:5px 5px 5px 5px; 
 }
 
-#transactiondetails, #samplesdetails, #nanodropdetails, #platedetails, #section{
+#transactiondetails, #samplesdetails, #nanodropdetails, #platedetails, #section1{
 background-color: Gainsboro;
+  text-align: left;
+  width: 95%;
+  float: left;
+  padding:0px 20px 10px 10px;
+  margin:5px 5px 5px 5px; 
+}
+
+#section2{
+background-color: LightSteelBlue;
   text-align: left;
   width: 95%;
   float: left;
