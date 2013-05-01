@@ -100,22 +100,24 @@ app.post('/input/project_edit/:id', function(req, res){
     //----
 
 app.get('/view/:id', function(req, res) {
-  articleProvider.getTransactions(req.params.id, function(error, transactions) {
-    if (error) console.log("view/:id error: ", error)
-    else articleProvider.findById(req.params.id, function(error, project) {
-        res.render('project_details.jade',{proj_name: project.proj_name, project:project, transactions:transactions});
-    });
-   });
+  articleProvider.getPlates(req.params.id, function(error, plates) {
+    articleProvider.getTransactions(req.params.id, function(error, transactions) {
+      if (error) console.log("view/:id error: ", error)
+      else articleProvider.findById(req.params.id, function(error, project) {
+          res.render('project_details.jade',{proj_name: project.proj_name, project:project, transactions:transactions, plates:plates});
+      });
+     });
+  });
 });
 
-app.get('/view/:id', function(req, res) {
-  articleProvider.getTransactions(req.params.id, function(error, transactions) {
-    if (error) console.log("view/:id error: ", error)
-    else articleProvider.findById(req.params.id, function(error, project) {
-        res.render('project_details.jade',{proj_name: project.proj_name, project:project, transactions:transactions});
-    });
-   });
-});
+//app.get('/view/:id', function(req, res) {
+//  articleProvider.getTransactions(req.params.id, function(error, transactions) {
+//    if (error) console.log("view/:id error: ", error)
+//    else articleProvider.findById(req.params.id, function(error, project) {
+//        res.render('project_details.jade',{proj_name: project.proj_name, project:project, transactions:transactions});
+//    });
+//  });
+//});
 
 
 
@@ -165,6 +167,131 @@ app.post('/input/sample_new', function(req, res){
 app.get('/input/plate_new/:id', function(req, res) {
     res.render('plate_new.jade', {title: 'Add a Plate', projectid:req.params.id}
     );
+});
+
+app.post('/input/plate_new/:id', function(req, res){
+    articleProvider.save('plates', {
+        sec1_operator: req.param('sec1_operator'),
+        sec1_date: req.param('sec1_date'),
+        sec2_operator: req.param('sec2_operator'),
+        sec2_date: req.param('sec2_date'),
+        sec2_oven_start: req.param('sec2_oven_start'),
+        sec2_oven_stop: req.param('sec2_oven_stop'),
+        sec2_plate_bc: req.param('sec2_plate_bc'),
+        sec2_MA1_1: req.param('sec2_MA1_1'),
+        sec2_MA1_2: req.param('sec2_MA1_2'),
+        sec2_RMP_1: req.param('sec2_RMP_1'),
+        sec2_RMP_2: req.param('sec2_RMP_2'),
+        sec2_MSM_1: req.param('sec2_MSM_1'),
+        sec2_MSM_2: req.param('sec2_MSM_2'),
+        sec3_operator: req.param('sec3_operator'),
+        sec3_date: req.param('sec3_date'),
+        sec3_vortex: req.param('sec3_vortex'),
+        sec3_hb_start: req.param('sec3_hb_start'),
+        sec3_hb_stop: req.param('sec3_hb_stop'),
+        sec3_FMS_1: req.param('sec3_FMS_1'),
+        sec3_FMS_2: req.param('sec3_FMS_2'),
+        sec4_operator: req.param('sec4_operator'),
+        sec4_date: req.param('sec4_date'),
+        sec4_vortex: req.param('sec4_vortex'),
+        sec4_hb_start: req.param('sec4_hb_start'),
+        sec4_hb_stop: req.param('sec4_hb_stop'),
+        sec4_in_start: req.param('sec4_in_start'),
+        sec4_in_stop: req.param('sec4_in_stop'),
+        sec4_cen_start: req.param('sec4_cen_start'),
+        sec4_cen_stop: req.param('sec4_cen_stop'),
+        sec4_dry_start: req.param('sec4_dry_start'),
+        sec4_dry_stop: req.param('sec4_dry_stop'),
+        sec4_2pol_open: req.param('sec4_2pol_open'),
+        sec4_PM1_1: req.param('sec4_PM1_1'),
+        sec4_PM1_2: req.param('sec4_PM1_2'),
+        sec5_operator: req.param('sec5_operator'),
+        sec5_date: req.param('sec5_date'),
+        sec5_ovn_start: req.param('sec5_ovn_start'),
+        sec5_ovn_stop: req.param('sec5_ovn_stop'),
+        sec5_RA1: req.param('sec5_RA1'),
+        sec6_operator: req.param('sec6_operator'),
+        sec6_date: req.param('sec6_date'),
+        sec6_vortex: req.param('sec6_vortex'),
+        sec6_hb_start: req.param('sec6_hb_start'),
+        sec6_hb_stop: req.param('sec6_hb_stop'),
+        sec6_ovn_start: req.param('sec6_ovn_start'),
+        sec6_ovn_stop: req.param('sec6_ovn_stop'),
+        sec6_PB2: req.param('sec6_PB2'),
+        sec7_operator: req.param('sec7_operator'),
+        sec7_date: req.param('sec7_date'),
+        sec7_PB1: req.param('sec7_PB1'),
+        projectid:req.params.id
+    }, function( error, docs) {
+      res.redirect('/view/' + req.params.id);
+    });
+});
+
+app.post('/input/plate_edit/:id', function(req, res){
+    console.log("plateid : ", req.param('plateid'));
+    articleProvider.update('plates', req.param('plateid'), {
+        sec1_operator: req.param('sec1_operator'),
+        sec1_date: req.param('sec1_date'),
+        sec2_operator: req.param('sec2_operator'),
+        sec2_date: req.param('sec2_date'),
+        sec2_oven_start: req.param('sec2_oven_start'),
+        sec2_oven_stop: req.param('sec2_oven_stop'),
+        sec2_plate_bc: req.param('sec2_plate_bc'),
+        sec2_MA1_1: req.param('sec2_MA1_1'),
+        sec2_MA1_2: req.param('sec2_MA1_2'),
+        sec2_RMP_1: req.param('sec2_RMP_1'),
+        sec2_RMP_2: req.param('sec2_RMP_2'),
+        sec2_MSM_1: req.param('sec2_MSM_1'),
+        sec2_MSM_2: req.param('sec2_MSM_2'),
+        sec3_operator: req.param('sec3_operator'),
+        sec3_date: req.param('sec3_date'),
+        sec3_vortex: req.param('sec3_vortex'),
+        sec3_hb_start: req.param('sec3_hb_start'),
+        sec3_hb_stop: req.param('sec3_hb_stop'),
+        sec3_FMS_1: req.param('sec3_FMS_1'),
+        sec3_FMS_2: req.param('sec3_FMS_2'),
+        sec4_operator: req.param('sec4_operator'),
+        sec4_date: req.param('sec4_date'),
+        sec4_vortex: req.param('sec4_vortex'),
+        sec4_hb_start: req.param('sec4_hb_start'),
+        sec4_hb_stop: req.param('sec4_hb_stop'),
+        sec4_in_start: req.param('sec4_in_start'),
+        sec4_in_stop: req.param('sec4_in_stop'),
+        sec4_cen_start: req.param('sec4_cen_start'),
+        sec4_cen_stop: req.param('sec4_cen_stop'),
+        sec4_dry_start: req.param('sec4_dry_start'),
+        sec4_dry_stop: req.param('sec4_dry_stop'),
+        sec4_2pol_open: req.param('sec4_2pol_open'),
+        sec4_PM1_1: req.param('sec4_PM1_1'),
+        sec4_PM1_2: req.param('sec4_PM1_2'),
+        sec5_operator: req.param('sec5_operator'),
+        sec5_date: req.param('sec5_date'),
+        sec5_ovn_start: req.param('sec5_ovn_start'),
+        sec5_ovn_stop: req.param('sec5_ovn_stop'),
+        sec5_RA1: req.param('sec5_RA1'),
+        sec6_operator: req.param('sec6_operator'),
+        sec6_date: req.param('sec6_date'),
+        sec6_vortex: req.param('sec6_vortex'),
+        sec6_hb_start: req.param('sec6_hb_start'),
+        sec6_hb_stop: req.param('sec6_hb_stop'),
+        sec6_ovn_start: req.param('sec6_ovn_start'),
+        sec6_ovn_stop: req.param('sec6_ovn_stop'),
+        sec6_PB2: req.param('sec6_PB2'),
+        sec7_operator: req.param('sec7_operator'),
+        sec7_date: req.param('sec7_date'),
+        sec7_PB1: req.param('sec7_PB1')
+    }, function( error, docs) {
+      res.redirect('/view/' + req.param('projectid'));
+    });
+});
+
+
+// This function requires the Plate ID.
+
+app.get('/input/plate_edit/:id', function(req, res){
+  articleProvider.plateById(req.params.id, function(error, plate) {
+    res.render('plate_edit.jade',{title: 'Edit Plate '+ req.params.id, plate:plate});
+  });
 });
 
 app.post('/input/plate_new', function(req, res){
