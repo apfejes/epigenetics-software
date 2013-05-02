@@ -6,17 +6,24 @@ h3= projectid
 form( method="post")
   #newinformation
     H3 Enter your project Information:
-    div
-      span Transaction type: 
-      select(name='transaction', required)
-        - each tr in trtype 
-          option(value=tr.desc)=tr.desc 
-    div
-      span Transaction Amount (CAD$):
-      input(type="text", name="trans_amt", id="transact_amt", required)
-    div
-      span Transaction Date:
-      input(type="date", name="trans_date", id="transactionDate", required)
+    table
+      tr
+        td
+          b Transaction type:
+        td 
+          select(name='transaction', required)
+            - each tr in trtype 
+              option(value=tr.desc)=tr.desc
+      tr
+        td
+          b Transaction Amount (CAD$):
+        td
+          input(type="text", name="trans_amt", id="transact_amt", required)
+      tr
+        td
+          b Transaction Date:
+        td
+          input(type="date", name="trans_date", id="transactionDate", required)
     div#editArticleSubmit
       input(type="submit", value="Save")
       input(type="button", value="Cancel", onClick="window.history.back(-1)")

@@ -5,34 +5,50 @@ h1= title
 form( method="post")
   #newinformation
     H3 Enter your project Information:
-    div
-      span Project Name : 
-      input(type="text", name="proj_name", id="editProjectName", required)
-    div
-      span Kobor lab Contact :
-      input(type="text", name="lab_contact", id="editlabContact")
-    div
-      div
-        span Colaborator Name :
-        input(type="text", name="col_name", id="editColName")
-      div 
-        span Colaborator email :
-        input(type="email", name="col_email", id="editColEmail")
-    div
-      span Number of Samples :
-      input(type="number", name="sample_count", id="editSampleCount")
-    div
-      span Date Samples Arrived :
-      input(type="date", name="arrival_date", id="editArrivalDate")
-    div
-      //Sample type (drop down list?)
-      span Project Type :
-      select(name='role')
-        - each st in status 
-          option(value=st.desc)=st.desc 
-    div
-      span Date of Chip Run :
-      input(type="date", name="chip_run_date", id="editChipRunDate")
+    table
+      tr
+        td
+          b Project Name : 
+        td 
+          input(type="text", name="proj_name", id="editProjectName", required)
+      tr
+        td
+          b Kobor lab Contact :
+        td 
+          input(type="text", name="lab_contact", id="editlabContact")
+      tr
+        td
+          b Colaborator Name :
+        td
+          input(type="text", name="col_name", id="editColName")
+      tr 
+        td
+          b Colaborator email :
+        td
+          input(type="email", name="col_email", id="editColEmail")
+      tr
+        td
+          b Number of Samples :
+        td 
+          input(type="number", name="sample_count", id="editSampleCount")
+      tr
+        td
+          b Date Samples Arrived :
+        td 
+          input(type="date", name="arrival_date", id="editArrivalDate")
+      tr
+        //Sample type (drop down list?)
+        td
+          b Project Type :
+        td
+          select(name='role')
+            - each st in status 
+              option(value=st.desc)=st.desc 
+      tr
+        td
+          b Date of Chip Run :
+        td
+          input(type="date", name="chip_run_date", id="editChipRunDate")
     div#editArticleSubmit
       input(type="submit", value="Save")
       input(type="button", value="Cancel", onClick="window.history.back(-1)")
