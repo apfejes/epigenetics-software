@@ -84,6 +84,19 @@ ArticleProvider.prototype.findById = function(id, callback) {
     });
 };
 
+ArticleProvider.prototype.plateById = function(id, callback) {
+    this.getDBData('plates', function(error, project_collection) {
+      if( error ) callback(error)
+      else {
+        project_collection.findOne({_id: project_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
+          if( error ) callback(error)
+          else callback(null, result)
+        });
+      }
+    });
+};
+
+
   //---- 
   //Retrieve only the project status options
   //---- 
@@ -108,7 +121,7 @@ ArticleProvider.prototype.transaction_type = function(callback) {
 };
 
   //---- 
-  //Retrieve only the transaction types options
+  //Retrieve transaction for a project
   //---- 
   
 ArticleProvider.prototype.getTransactions = function(id, callback) {
@@ -117,6 +130,18 @@ ArticleProvider.prototype.getTransactions = function(id, callback) {
       else callback(null, transactions)
     });
 };
+
+  //---- 
+  //Retrieve plates for a project
+  //---- 
+  
+ArticleProvider.prototype.getPlates = function(id, callback) {
+    this.getDBQuery('plates', {projectid: id}, {}, function(error, transactions) {
+      if( error ) console.log("transaction-type error: ", error);
+      else callback(null, transactions)
+    });
+};
+
 
 
   //---- 
