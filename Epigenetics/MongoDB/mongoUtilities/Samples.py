@@ -25,6 +25,16 @@ class Samples(object):
         Creates a dictionary where index from index_sampleinfo are read
         as key:value pairs, everything else is read as a ONE key:value(list) pair
         where key=patientkey, value is rest. 
+        
+        **Inputs:**
+        * filename: meta data filename (example: 'down_pData.txt')
+        * samp_columns: list of column names in filename considered to be 
+          sample data (e.g.: 'SampleID', 'Sample Group')
+        * patient_columns: list of column names in filename considered to 
+          be patient data (e.g.: 'Handedness', 'IQ')
+        * project_name: name of project this meta data comes from
+        * sample_label_identifier: column name that contains the sample label. 
+          This may be one of the items in samp_columns (e.g.: 'SampleID'). 
         '''
         with open(self.filename, 'rb') as SampleData:
             reader = csv.DictReader(SampleData, 
