@@ -116,13 +116,13 @@ class Files(object):
                 
             if count%10000 == 0:
                 number_of_inserts += len(BulkInsert)
-                Bulk = collection.insert(BulkInsert)
+                collection.insert(BulkInsert)
                 print('{0}{1}{2}'.format('There are ',
                                          str(collection.count()),
                                              ' docs in collection'))
                 BulkInsert = []
         number_of_inserts += len(BulkInsert)
-        Bulk = collection.insert(BulkInsert)
+        collection.insert(BulkInsert)
         BulkInsert = []
         fbeta.close()
         fexprs.close()
@@ -130,136 +130,6 @@ class Files(object):
                                  str(collection.count()),
                                      ' docs in collection'))
         return number_of_inserts
-
-    def InsertAnnotation(self, file_name, collection):
-        '''
-        ***This code effectively replaces the old function, 
-        InsertRowstoDB.
-        
-        Inserts annotation information. Make sure file_name is an
-        annotation file. 
-        '''
-        for file_name in file_name:    # Since file_name is a list, we loop.
-            fname = '{0}{1}{2}'.format(self.directory, "/", file_name)
-            print('{0}{1}'.format('Reading from ', fname))
-            with open('{0}{1}{2}'.format(self.directory, "/", file_name), 'rb') as Data:
-                reader = csv.DictReader(Data, delimiter = '\t')
-                print('{0}{1}'.format('Inserting rows into ', collection.name))
-                for row in reader:
-                    for key in row:
-                        if key == 'CHR':
-                            pass
-                        else:
-                            try:
-                                row[key] = int(row[key])
-                            except Exception:
-                                pass
-                        print key, row[key]
-                    collection.insert(row)
-        print('{0}{1}{2}'.format('There are ',
-                                 str(collection.count()),
-                                     ' docs in collection'))
-        
-    def InsertRowsToDB(self, file_name, collection, **optkeys):
-        '''
-        ***Old Code, Replaced by InsertAnnotation***
-        
-        Inserts entire row of a tab-delimited file_name into mongo. 
-        The tab-delimited file_name should have column names (header)
-        
-        Inputs:
-                file_name: filename of tab-delimited file_name. 
-                collection: collection in which documents will be inserted.
-                optkeys: additional key:value pairs (entered as key='value')
-                        that you want to include in the document for insertion.
-        
-        Output:
-                nrows of documents inserted into collection.
-        '''
-        for file_name in file_name:    # Since file_name is a list, we loop.
-            fname = '{0}{1}{2}'.format(self.directory, "/", file_name)
-            print('{0}{1}'.format('Reading from ', fname))
-            with open('{0}{1}{2}'.format(self.directory, "/", file_name), 'rb') as Data:
-                reader = csv.DictReader(Data, delimiter = '\t')
-                print('{0}{1}'.format('Inserting rows into ', collection.name))
-                for row in reader:
-                    '''
-                    optkeys are key:value pairs that will be included into doc.
-                    '''
-                    for key, value in optkeys.iteritems():
-                        row[key] = value
-                    collection.insert(row)
-        print('{0}{1}{2}'.format('There are ',
-                                 str(collection.count()),
-                                     ' docs in collection'))
-    
-    
-    def InsertElementsToDB(self, file_name, collection, colname='col_name', 
-                           rowname='row_name', keyname='element_name', **optkeys):
-        '''
-        ***Old Code, Replaced By InsertDatatoDB***
-        
-        Inserts elements of a tab-delimited file_name into mongo. 
-        The tab-delimited file_name should have column names and row names. 
-        
-        Inputs:
-                file_name: filename of tab-delimited file_name. 
-                collection: collection in which documents will be inserted.
-                colname (e.g. 'sample_name'): generic descriptor for 
-                    column name. Will be used as name for key.
-                rowname (e.g. 'probe_name'): generic descriptor for
-                    row name. Will be used as name for key. 
-                keyname (e.g. 'beta_value', 'expression_value'): key name 
-                    for each key-value pair in the tab-delimited file_name. 
-                    If tab-delimited file_name is a table of beta values, 
-                    key should be something like 'beta_values'.
-                optkeys: additional key:value pairs (entered as key='value')
-                        that you want to include in the document for insertion.
-        
-        Output:
-                nrows of documents inserted into collection.
-        '''
-        for file_name in file_name:    # file_name is a list.
-            with open('{0}{1}{2}'.format(self.directory, "/", file_name), 'rb') as Data:
-                reader = csv.reader(Data, delimiter = '\t')
-                headers = reader.next()
-                print('{0}{1}'.format('Inserting elements into ', collection.name))
-                for row in reader:
-                    row_name = row[0]    # Separate row names from list
-                    del row[0]    # Want a list of only values, no row names
-                    for i in range(len(row)):
-                        document = {}    # Empty dictionary
-                        document[colname] = headers[i]
-                        document[rowname] = row_name
-                        document[keyname] = float(row[i])
-                        for key, value in optkeys.iteritems():
-                            document[key] = value
-                        collection.insert(document)
-                    '''
-                    for header in headers:
-                        for element in row:
-                            document = {}    # Empty dictionary
-                            document[colname] = header
-                            document[rowname] = row_name
-                            document[keyname] = float(element)
-                            for key, value in optkeys.iteritems():
-                                document[key] = value
-                            collection.insert(document)
-                            elementcount += 1
-                    
-                    rowcount += 1
-                    if rowcount%100 == 0:
-                        print(rowcount)
-                        print(elementcount)
-                    '''
-        print('{0}{1}{2}'.format('There are ',
-                                 str(collection.count()),
-                                     ' docs in collection'))
-
-
-
-
-
 
 
 
