@@ -19,21 +19,12 @@ import Mongo_Connector
 from annotUtilities import plots
 
 starttime = time.time()
-# database_name = 'human_epigenetics'
-database_name = 'jake_test'
+database_name = 'human_epigenetics'
+# database_name = 'jake_test'
 annotation_collection = 'annotations'
 methylation_collection = 'methylation'
 sample_collection = 'samples'
-# project = 'kollman'
-# feature = 'stimulation'
-# control_group_label = 'unstimulated'
-# diseased_group_label = 'listeria'
-project = 'down'
-feature = 'Sample Group'
-control_group_label = 'Control'
-diseased_group_label = 'DS'
 window_size = 1   # For binning purposes
-savedirectory = '/home/jyeung/Documents/Presentations/batchplots/'
 
 '''
 control_samples = ['09 Adult 3 unstim', '15 Cord 2 unstim', '13 Old 3 Unstim', 
@@ -114,29 +105,26 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, 
     return_chr = {'_id': False, 'beta_value': True, 
                   'start_position': True, 'end_position': True, 
                   'sample_label': True}
+    
     probes_chr = mongo.find(methylation_collection, 
                             andQuery, return_chr).sort('start_position', 1)
                                                         
     position_dic = {}
     betasamp_list = []
-    # prev_start_pos = None
     count = 0
     for doc in probes_chr:
+        if count%10000 == 0:
+            print('%s of %s documents analyzed.' %(count, probes_chr.count()))
         if count == 0:
             prev_start_pos = doc['start_position']
         if count != 0:
-            # if doc['start_position'] != prev_start_pos:
             if (doc['start_position'] - prev_start_pos) > window_size:
                 avg_position = (doc['start_position'] + prev_start_pos) / 2
-                # print doc['start_position'], prev_start_pos, avg_position
                 position_dic[avg_position] = betasamp_list
-                # position_dic[prev_start_pos] = betasamp_list
                 betasamp_list = []
                 prev_start_pos = doc['start_position']
         betasamp_list.append((doc['beta_value'], doc['sample_label']))
         count += 1
-        # prev_start_pos = doc['start_position']
-    # position_dic[prev_start_pos] = betasamp_list
     avg_position = (doc['start_position'] + prev_start_pos) / 2
     position_dic[avg_position] = betasamp_list
     
@@ -153,17 +141,8 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, 
             else:
                 print('Warning: %s not in list of controls or diseased' %samp)
                 sys.exit()
-            '''
-            if samp[0] == 'C':    # Control
-                controls.append(beta)
-            elif samp[0] == 'D':    # Down
-                diseased.append(beta)
-            else:
-                print('Warning: neither C or D')
-            '''
         control_avg = float(sum(controls))/len(controls)
         diseased_avg = float(sum(diseased))/len(diseased)
-        # diff_avg = diseased_avg - control_avg
         diff_avg = abs(diseased_avg - control_avg)
         x_position.append(pos)
         y_diffavg.append(diff_avg)
@@ -176,7 +155,6 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, 
                                            chromosome),  
                      'beta_difference', 'blue')
     print('{0}{1}'.format('Time elapsed (s): ', int((time.time() - starttime))))
-    # plt.show()
 
 def PlotBetas(mongo, project, chromosome, control_samples, diseased_samples):
     '''
@@ -212,72 +190,24 @@ def PlotBetas(mongo, project, chromosome, control_samples, diseased_samples):
         count += 1
         prev_start_pos = doc['start_position']
     position_dic[prev_start_pos] = betasamp_list
-    
-    
-    
-    '''
-    plotDict = {}
-    beta_pos = []
-    previous_sample = None
-    count = 0
-    for doc in probes_chr:
-        beta_pos.append((doc['start_position'], doc['beta_value']))
-        # beta_pos.append((doc['beta_value'], doc['start_position']))
-        if previous_sample != doc['sample_label'] and count != 0:
-            beta_pos.sort()
-            plotDict[doc['sample_label']] = beta_pos
-            beta_pos = []
-        previous_sample = doc['sample_label']
-        count += 1
-    beta_pos.sort()
-    plotDict[doc['sample_label']] = beta_pos
-    
-    for sample, tuples in plotDict.iteritems():
-        if sample in control_samples:
-            col = 'red'
-        if sample in diseased_samples:
-            col = 'blue'
-        pos_list = []
-        betas_list = []
-        for pos, betas in tuples:
-            pos_list.append(pos)
-            betas_list.append(betas)
-        plots.makeXYPlot(pos_list, betas_list, 
-                         '{0}{1}'.format('Position on Chr ', chromosome), 
-                         'Beta Value', 
-                         chromosome, 
-                         sample,
-                         col)
-    plt.show()
-    '''
-
-def futureUnitTest():
-    pass
-    '''
-    # A future unit test to see if what you get is of equal length!
-    # Code not quite completed yet, so it's commented...
-    
-    print len(position_dic.keys())
-    print probes_chr.count()/17
-    
-    poses_dic = sorted(position_dic.keys())
-    print(poses_dic)
-    
-    probes_chr.rewind()
-    count = 0
-    poses = []
-    for doc in probes_chr:
-        poses.append(doc['start_position'])
-    setpos = sorted(set(poses))
-    print setpos
-    
-    print (len(poses_dic))
-    print (len(setpos))
-    print poses_dic == setpos
-    '''
 
 
 if __name__ == "__main__":
+    
+    down_or_kollman = raw_input('Look at down or kollman project? ')
+    if down_or_kollman == 'kollman':
+        project = 'kollman'
+        feature = 'stimulation'
+        control_group_label = 'unstimulated'
+        diseased_group_label = 'listeria'
+    elif down_or_kollman == 'down':
+        project = 'down'
+        feature = 'Sample Group'
+        control_group_label = 'Control'
+        diseased_group_label = 'DS'
+    else:
+        print('Must be either down or kollman, exiting...')
+        sys.exit()
     
     for j in xrange(0, 2):
         '''
@@ -286,15 +216,11 @@ if __name__ == "__main__":
         chromosome_list = [str(i) for i in range(1, 24)]
         chromosome_list.append('X')
         chromosome_list.append('Y')
-        chromosome_list = ['chr%s' %i for i in chromosome_list]    # Add prefix 'chr'
+        # chromosome_list = ['chr%s' %i for i in chromosome_list]    # Add prefix 'chr'
         while True:
             try:
-                # if j == 0:
-                    # chromosome = str(21)
-                # elif j == 1:
-                    # chromosome = str(22)
                 chromosome = str(raw_input('Enter chromosome (1, 2, X, Y...): '))
-                chromosome = 'chr%s' %chromosome
+                # chromosome = 'chr%s' %chromosome    # Adds prefix chr
                 if chromosome in chromosome_list:
                     break
             except:
@@ -313,7 +239,6 @@ if __name__ == "__main__":
         PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, window_size)
         xmin,xmax,_,_ = plt.axis()
         plt.axis([xmin,xmax,0,1])
-        print('Done for one chromosome')
-    # plt.savefig('%s%s_chromosomewalk.png' %(savedirectory, project))
+        print('Done for %s chromosome' %(j+1))
     plt.show()
 

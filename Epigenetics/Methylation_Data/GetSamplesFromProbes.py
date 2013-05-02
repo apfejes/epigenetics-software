@@ -32,7 +32,6 @@ prefix = 'humanmethylation450_beadchip_'    # prefix + TargetID = probe id
 savedirectory = '/home/jyeung/Documents/Presentations/batchplots/'    # For plots
 
 suspected_samples = ['DS09A M', 'DS01A M', 'DS04A F', 'DS06A M', 'DS10A M']
-# suspected_samples = ['DS02A F', 'DS05A', 'DS08B F', 'DS09A M', 'DS10A M']
 control_samples = ['C1ab F', 'C2a M', 'C2c M', 'C3a F', 
                    'C4ab1 M', 'C4ab2 M', 'C5a M']
 diseased_samples = ['DS02A F', 'DS03A F', 'DS05A F', 
@@ -95,17 +94,7 @@ def GetProbesFromHits(probe_list_fname, skip_rows):
                 break
     hit_file.close()
     
-    '''
-    print cg_no
-    cg_delta_beta_list = []
-    for i in xrange(len(delta_beta)):
-        cg_delta_beta_tuple = (cg_no[i], delta_beta[i][0:4])
-        cg_delta_beta_list.append(cg_delta_beta_tuple)
-    
-    print cg_delta_beta_list
-    '''
     return probe_list
-    # return {'probe_list': probe_list, 'tuple_list': cg_delta_beta_list}
 
 def GetRandomProbesFromHits(probe_list_fname, random_probes):
     '''
@@ -123,45 +112,19 @@ def GetRandomProbesFromHits(probe_list_fname, random_probes):
     with open(probe_list_fname, 'rb') as hit_file:
         probe_reader = csv.reader(hit_file, delimiter='\t')
         for row in probe_reader:
-            # probe_name.append(row[0])    # Probe_iD for goldengate
-            # delta_beta.append(row[5])    # Expected beta diff btwn buccal vs blood
             probe_list.append(row[23])    # ProbeID for methyl450k
             count += 1
     hit_file.close()
     
     # Get 50 random probes from probe_list.
     random_indices = random.sample(xrange(0, len(probe_list)), random_probes)
-    # probe_name_subset = [probe_list[i] for i in random_indices]
-    # delta_beta_subset = [delta_beta[i] for i in random_indices]
     probe_list_subset = [probe_list[i] for i in random_indices]
     
-    '''
-    cg_delta_beta_list = []
-    for i in xrange(len(delta_beta_subset)):
-        cg_delta_beta_tuple = (cg_no_subset[i], delta_beta[i][0:4])
-        cg_delta_beta_list.append(cg_delta_beta_tuple)
-    return {'probe_list': probe_list_subset, 'tuple_list': cg_delta_beta_list}
-    '''
     return probe_list_subset
     
 def GetDataFromProbeList(probe_list):
     '''
     From a list of goldengateIDs, get data from samples. 
-    Obsolete code, probe_list is now already a cg_identifier meaning it 
-    can be used directly to find methyl450k annotations. 
-    '''
-    '''
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
-    
-    mongo.ensure_index(annotation_collection, 'probe_list')
-    # Find dummy probes from annotation collection.
-    fAnnotQuery = {'cg_no': {'$in': probe_list}}    # Find all docs in annotations collection
-    rAnnotQuery = {'cg_no': True, 'Chromosome': True}
-    print('Finding annotation information...')
-    annot_cursor = mongo.find(annotation_collection, findQuery=fAnnotQuery, 
-                              returnQuery=rAnnotQuery)
-    probe_list_dic = list(annot_cursor)
-    print('Probe list length: %s' % len(probe_list_dic))
     '''
     
     # Attach prefix to probename for searching in methylation collection
@@ -302,32 +265,10 @@ def EstimateBloodContamination(data_dict, sample_list, control_samples,
     diseased_avg = float(sum(beta_diseased))/len(beta_diseased)
     for i in xrange(0, len(beta_diseased)):
         avgdiff = beta_diseased[i] - control_avg
-        # diseased_avgdiff[diseased_samples[i]].append(avgdiff)
         diseased_avgdiff[diseased_samples[i]] = avgdiff
     probe_list.append(top_hit)
     print diseased_avgdiff
     
-    '''
-    for probe, bvals in data_dict.iteritems():
-        print probe
-        beta_control = []
-        beta_diseased = []
-        for i in xrange(0, len(sample_list)):
-            if sample_list[i] in control_samples:
-                beta_control.append(bvals[i])
-            elif sample_list[i] in diseased_samples:
-                beta_diseased.append(bvals[i])
-        control_avg = float(sum(beta_control))/len(beta_control)
-        for i in xrange(0, len(beta_diseased)):
-            avgdiff = beta_diseased[i] - control_avg
-            diseased_avgdiff[diseased_samples[i]].append(avgdiff)
-        probe_list.append(probe)
-        break   # take first probe only (best probe)
-    
-    # Make each list into an average. 
-    for samp, difflist in diseased_avgdiff.iteritems():
-        diseased_avgdiff[samp] = float(sum(difflist))/len(difflist)
-    '''
     buccal_avg = []
     blood_avg = []
     probe_count = 0
@@ -364,10 +305,6 @@ def EstimateBloodContamination(data_dict, sample_list, control_samples,
                 exper_list.append(experimental_diff)
                 mix_frac = 0
                 rel_error = 0    # Dangerous to say 0?
-                # theoretical diff (for all fractions) is always negative. If
-                # positive, will not find solution, most likely the solution 
-                # would require mix_frac < 0, meaning it is likely not 
-                # a contaminated sample. 
                 print('%s experimental diff greater than zero, ignoring' %samp)
                 break
             
@@ -400,29 +337,6 @@ def EstimateBloodContamination(data_dict, sample_list, control_samples,
         exper_list_samps.append(exper_list[0])
         samp_count += 1
         
-        '''
-        # Plot how theoretical difference changes with mix fraction
-        plt.subplot(len(diseased_samples), 1, samp_count)
-        plt.plot(mix_frac_list, theor_list, color='blue')
-        plt.ylabel('theoretical difference')
-        plt.twinx()
-        plt.plot(mix_frac_list, exper_list, color='red')
-        plt.ylabel('exper diff')
-        plt.xlabel('mix fraction')
-        plt.title(samp)
-        '''
-        
-        '''
-        # Plot how each iteration changes mix_frac and error
-        plt.subplot(len(diseased_samples), 1, samp_count)
-        plt.plot(range(0, count), mix_frac_list, color='blue')
-        plt.ylabel('mix fraction')
-        plt.twinx()
-        plt.plot(range(0, count), error_list, color='red')
-        plt.ylabel('abs error')
-        plt.title(samp)
-        '''
-        
     return sample_mix_tup
         
 def PlotSuspectedContamination(sample_mix_tup, probe):
@@ -436,9 +350,6 @@ def PlotSuspectedContamination(sample_mix_tup, probe):
     _, xmax, _, _ = plt.axis()
     plt.axis([-0.5, xmax, 0, 1])
     return samps, fracs
-    # plt.savefig('%s_down_estimated_blood_fraction.png' %savedirectory)
-    # plt.clf()
-    # plt.show()
 
 def CalculateAvgContamination(samps_list, fracs_list):
     samps = samps_list[0]    # List in each index should contain same list.
@@ -546,7 +457,6 @@ def PlotBuccalVsBlood(probe_list_fname, probes_to_plot, mix_frac):
                 buccal_avg = float(row[3])
                 blood_avg = float(row[4])
                 beta_buccal.append(buccal_avg)    # Average buccal beta val
-                # beta_blood.append(row[4])    # Average blood beta val
                 # Imagine it is a blood/buccal mixture...
                 beta_blood.append((1-mix_frac)*buccal_avg + mix_frac*blood_avg)
                 cg_no.append(row[23])    # cg_no (probeID)
@@ -560,7 +470,6 @@ def PlotBuccalVsBlood(probe_list_fname, probes_to_plot, mix_frac):
                      'buccal', 'blue')
     plots.makeXYPlot(range(len(cg_no)), beta_blood, '', 'Beta-value', None,
                      '%s blood, %s buccal' %(mix_frac, 1-mix_frac), 'red')
-    # plt.text(len(cg_no)/2, 0.95, 'center', horizontalalignment='center')
     plt.title(title, fontsize=20)
     plt.xticks(range(len(cg_no)), cg_no, size='small', rotation=45)
 
@@ -574,9 +483,12 @@ if __name__ == "__main__":
     
     starttime = time.time()
     
+    '''
     # Get dictionary containing probe_list and beta_difference between blood and buccal
     # If you're looking for a random set of probes, use the modified function. 
     # cg_no is a type of Probe ID. 
+    '''
+    
     if top_or_bot == 'random': 
         probe_list = GetRandomProbesFromHits(probe_list_fname, number_of_random_probes)
     elif (top_or_bot == 'top') or (top_or_bot == 'bottom'):
@@ -591,18 +503,16 @@ if __name__ == "__main__":
     # Now let's plot our data.
     data_dict = data_and_sample_dic['data_dictionary']
     sample_list = data_and_sample_dic['sample_list']
-    # cg_delta_beta_list = probe_list_and_beta_diff_dic['tuple_list']    # for labelling purposes
     
-    '''
-    title = 'Beta values of buccal samples, colored by PCA cluster: for %s probes \n\
-             expected to differ between buccal and blood.' % top_or_bot
-    '''
     title = 'Beta Values of Buccal Samples in Down Syndrome Study, Colored by PCA Cluster'
     
+    '''
     # Because probe_list was from goldengate, may not match all in methyl450.
     # so we readjust probe_list to make sure only the matched probes are used.
     # this is important so we can plot the probes in order from most to least
     # significant
+    '''
+    
     good_indices = []
     for i, p in enumerate(probe_list):
         if p in data_dict.keys():
@@ -639,14 +549,11 @@ if __name__ == "__main__":
                                        suspected_samples, matched_probe_list, title)
     
     # Long code to remove 'humanmethylation450_beadchip_ from keyname
-    # probes_plotted = [i[len(i)-10:len(i)] for i in data_dict.keys()]
     
     plt.subplot(2,1,1)
     mix_frac = 0.25
     PlotBuccalVsBlood(probe_list_fname, probes_plotted, mix_frac)
     print('Time elapsed: %s seconds' % int(time.time()-starttime))
-    # plt.savefig('%s_down_buccal_vs_%s_frac_blood.png' %(savedirectory, mix_frac))
-    # plt.clf()
     plt.show()
     
     

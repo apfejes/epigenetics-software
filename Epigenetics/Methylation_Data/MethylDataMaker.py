@@ -13,17 +13,25 @@ _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current fi
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir)
+sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
+import Mongo_Connector, FilesInDirectory
 
-from MongoDB.mongoUtilities import Mongo_Connector, FilesInDirectory
 
-
-# database_name = 'human_epigenetics'
-database_name = 'jake_test'
+database_name = 'human_epigenetics'
+# database_name = 'jake_test'    # For testing purposes
 collection_name = 'methylation'
 # directory = '/home/jyeung/Documents/Outputs/Down'
 
 
 def InsertMethylData(directory):
+    '''
+    From a directory, takes the betas.txt and expression.txt and inserts 
+    a document into mongo that contains beta values, expression values,
+    sample and probe ID. 
+    
+    It is recommended to run UpdateMethylData.py afterwards to include 
+    methyl450array annotations into the inserted documents. 
+    '''
     # Connect to database
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
     collection = mongo.db[collection_name]
