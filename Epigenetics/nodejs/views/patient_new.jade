@@ -3,13 +3,17 @@ a(href='/')
   #logo
 h1= title
 form( method="post")
-  div
-    div
-      span Patient ID : 
-      input(type="text", name="p_ident", id="editPatientIdentifier", required)
-    div
-      span Patient Notes:
-      textarea( name="conc_notes", rows=5, id="editConcInfo")
-    div#editPatientSubmit
-      input(type="submit", value="Send")
-      input(type="button", value="Cancel", onClick="window.history.back(-1)")
+  #newinformation
+    table
+      tr
+        td.label
+          b Patient ID : 
+        td
+          input(type="text", name="p_ident", id="editPatientIdentifier", required)
+      tr
+        td
+          b Patient Notes:
+        td
+          textarea( name="conc_notes", rows=5, id="editConcInfo")
+    input(type="submit", value="Send")
+    input(type="button", value="Cancel", onClick="window.history.back(-1)")
