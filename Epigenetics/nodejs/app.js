@@ -315,6 +315,26 @@ app.get('/input/nanodrop_new/:id', function(req, res) {
     );
 });
 
+app.post('/input/nanodrop_new/:id', function(req, res) {
+
+});
+
+
+//from http://stackoverflow.com/questions/6831918/node-js-read-a-text-file-into-an-array-each-line-an-item-in-the-array
+//var fs = require('fs');
+//var filename = process.argv[2];
+//require('readline').createInterface({
+//    input: fs.createReadStream(filename),
+//    terminal: false
+//}).on('line', function(line){
+//   console.log('Line: ' + line);
+//});
+
+
+
+
+
+
 app.post('/input/nanodrop_new/:id', function(req, res){
     
     

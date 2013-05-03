@@ -40,10 +40,10 @@ a(href='/')
   table
     - each transaction in transactions
       tr 
-        td.l 
+        td.trlabel1 
           b #{transaction.type} 
-        td.r #{transaction.amt } 
-        td #{transaction.date } 
+        td.trlabel2 #{transaction.amt } 
+        td.trdate #{transaction.date } 
       //#{transaction._id} #{transaction.projectid }
   br
   a(href="/input/payment_new/"+project._id)='Add a payment record'
