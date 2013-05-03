@@ -9,13 +9,12 @@ html
 
   link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
   a(href='/')
-  #logo
+    #logo
+    
   #links
     H3 Manage your data
     ul
       li: a(href="/input/project_new")='Create a New Project'
-      li: a(href="/input/sample_new")='Create a New Sample'
-      li: a(href="/input/illumina_new")='Create a New Illumina Datasheet'
       li: a(href="/input/patient_new")='Create a New Patient Datasheet'
       
   
@@ -29,6 +28,10 @@ html
           option(value=project._id)=project.proj_name
       input#rollButton(type="button", value="Edit", onclick="viewItem()")
 
+  #reporting
+    H3 Reporting
+    ul
+      li: a(href="/input/xxxxxx")='Projects by Status'
     
     //-button onClick="GetSelectedItem();">Get Selected Item</button>
     //-a(href="/view/"+project._id)!= project.proj_name
