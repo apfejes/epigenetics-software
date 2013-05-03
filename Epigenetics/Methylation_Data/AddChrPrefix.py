@@ -16,8 +16,8 @@ sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 
 
-# database_name = 'human_epigenetics'
-database_name = 'jake_test'
+database_name = 'human_epigenetics'
+# database_name = 'jake_test'
 arrayQuery = {'array_type': 'humanmethylation450_beadchip'}
 projQuery = {'project': {'$exists': True}}
 
@@ -57,9 +57,9 @@ if __name__ == "__main__":
     chromosome_list = [str(i) for i in range(1, 24)]
     chromosome_list.append('X')
     chromosome_list.append('Y')
-    chromosome_list = ['chr%s' %i for i in chromosome_list]    # Add prefix 'chr'
-    # print('Adding prefix chr to chromosome field in methyl450 arrays...')
-    # AddChrPrefix(annotation_name, chromosome_list, arrayQuery)
+    # chromosome_list = ['chr%s' %i for i in chromosome_list]    # Add prefix 'chr'
+    print('Adding prefix chr to chromosome field in methyl450 arrays...')
+    AddChrPrefix(annotation_name, chromosome_list, arrayQuery)
     print('Adding prefix chr to chromosome field in methylation data...')
     AddChrPrefix(methylation_name, chromosome_list, projQuery)
 
