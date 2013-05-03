@@ -227,8 +227,18 @@ app.post('/input/plate_new/:id', function(req, res){
     });
 });
 
+// This function requires the Plate ID.
+
+app.get('/input/plate_edit/:id', function(req, res){
+  articleProvider.plateById(req.params.id, function(error, plate) {
+    res.render('plate_edit.jade',{title: 'Edit Plate '+ req.params.id, plate:plate});
+  });
+});
+
+
+// This function requires the Plate ID.
+
 app.post('/input/plate_edit/:id', function(req, res){
-    console.log("plateid : ", req.param('plateid'));
     articleProvider.update('plates', req.param('plateid'), {
         sec1_operator: req.param('sec1_operator'),
         sec1_date: req.param('sec1_date'),
@@ -286,13 +296,7 @@ app.post('/input/plate_edit/:id', function(req, res){
 });
 
 
-// This function requires the Plate ID.
 
-app.get('/input/plate_edit/:id', function(req, res){
-  articleProvider.plateById(req.params.id, function(error, plate) {
-    res.render('plate_edit.jade',{title: 'Edit Plate '+ req.params.id, plate:plate});
-  });
-});
 
 app.post('/input/plate_new', function(req, res){
     articleProvider.save('plates', {

@@ -1,17 +1,17 @@
 link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
 a(href='/')
   #logo
-  h1= title
+h1= title
 form( method="post")
-  #newinformation
+  #section1
     H3 Upload a new Nanodrop file:
     #div
       input(type="file", name="proj_name", id="editProjectName", required)
     div#editArticleSubmit
       input(type="submit", value="add to project")
       input(type="button", value="Cancel", onClick="window.history.back(-1)")
-    #div
-      H3 existing files for this project:
+  #section2
+    H3 existing files for this project:
     
             
             

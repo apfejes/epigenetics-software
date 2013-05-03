@@ -3,31 +3,38 @@ a(href='/')
   #logo
 h1= title
 form( method="post")
-    div
-        div
-            span SampleName : 
-            input(type="text", name="sample_name", id="editSampleName", required)
-        div
-            span Date Sample Arrived :
-            input(type="date", name="arrival_date", id="editArrivalDate")
-        div
-            span Sentrix Barcode : 
-            input(type="text", name="arrival_date", id="editArrivalDate") 
-        div
-            span Sample Label : 
-            input(type="text", name="arrival_date", id="editArrivalDate")
-        div
-            span Sample_Well : 
-            input(type="text", name="arrival_date", id="editArrivalDate")
-        div
-            span Current_Age : 
-            input(type="text", name="arrival_date", id="editArrivalDate")
-        div
-            span Test_Date : 
-            input(type="date", name="arrival_date", id="editArrivalDate")
-        div
-            span Sample Section : 
-            input(type="text", name="arrival_date", id="editArrivalDate")
+  #newinformation
+    H3 Create a New Sample Manually
+    table
+      tr
+        td
+          b SampleName :
+        td 
+          input(type="text", name="sample_name", id="editSampleName", required)
+      tr
+        td
+          b Date Sample Arrived :
+        td
+          input(type="date", name="arrival_date", id="editArrivalDate")
+  #newinformation
+      div
+          span Sentrix Barcode : 
+          input(type="text", name="arrival_date", id="editArrivalDate") 
+      div
+          span Sample Label : 
+          input(type="text", name="arrival_date", id="editArrivalDate")
+      div
+          span Sample_Well : 
+          input(type="text", name="arrival_date", id="editArrivalDate")
+      div
+          span Current_Age : 
+          input(type="text", name="arrival_date", id="editArrivalDate")
+      div
+          span Test_Date : 
+          input(type="date", name="arrival_date", id="editArrivalDate")
+      div
+          span Sample Section : 
+          input(type="text", name="arrival_date", id="editArrivalDate")
         div
             span Sample Group : 
             input(type="text", name="arrival_date", id="editArrivalDate")

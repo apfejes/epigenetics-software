@@ -4,30 +4,31 @@ a(href='/')
 #project
   #proj_name
     H2= project.proj_name
-  #lab_contact
-    span 
-      b Kobor Lab Contact: 
-      | #{project.lab_contact}
-  #col_name
-    span 
-    b Collaborator Name: 
-    | #{project.col_name}
-  #col_email
-    span  
-    b Collaborator Email: 
-    | #{project.col_email} 
-  #sample_count
-    span  
-    b Sample Count: 
-    | #{project.sample_count} 
-  #arrival_date
-    span  
-    b Sample Arrival Date: 
-    | #{project.arrival_date} 
-  #role
-    span  
-    b Project Type: Name: 
-    | #{project.role}
+  table
+    tr
+      td#lab_contact
+        b Kobor Lab Contact: 
+      td #{project.lab_contact}
+    tr
+      td#col_name
+        b Collaborator Name: 
+      td #{project.col_name}
+    tr
+      td#col_email  
+        b Collaborator Email: 
+      td #{project.col_email} 
+    tr
+      td#sample_count  
+        b Sample Count: 
+      td #{project.sample_count} 
+    tr
+      td#arrival_date  
+        b Sample Arrival Date: 
+      td #{project.arrival_date} 
+    tr
+      td#role
+        b Project Type: Name: 
+      td #{project.role}
   br
   a(href="/input/project_edit/"+project._id)='Edit this project description'
 #samplesdetails
@@ -36,9 +37,15 @@ a(href='/')
   a(href="/input/sample_new/"+project._id)='Add a sample to this project'
 #transactiondetails
   H3 Transactions:
-  - each transaction in transactions
-      p #{transaction.type} #{transaction.amt } #{transaction.date } 
+  table
+    - each transaction in transactions
+      tr 
+        td.l 
+          b #{transaction.type} 
+        td.r #{transaction.amt } 
+        td #{transaction.date } 
       //#{transaction._id} #{transaction.projectid }
+  br
   a(href="/input/payment_new/"+project._id)='Add a payment record'
 #nanodropdetails
   H3 NanoDrop Details:
@@ -47,8 +54,8 @@ a(href='/')
 #platedetails
   H3 Plates:
   - each plate in plates
-      a(href="/input/plate_edit/"+plate._id)= plate._id 
-  br
+     p 
+       a(href="/input/plate_edit/"+plate._id)= plate._id 
   br
   a(href="/input/plate_new/"+project._id)='Add a plate to this experiment'
 

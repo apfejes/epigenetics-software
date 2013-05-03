@@ -16,10 +16,27 @@ body {
   text-stroke: 1px rgba(255,255,255,0.1);
   color: #555;
 }
+
+table, td{
+font-size: 13px;
+}
+
+.r {
+  text-align:right;
+}
+
+.l {
+  text-align:left;
+}
+
+h3 {
+  //margin: 0;
+  color: Indigo;
+}
 h2 {
   //margin: 0;
   font-size: 24px;
-  color: #343434;
+  color: Navy;
 }
 h1 {
   text-shadow: 1px 2px 2px #ddd;
