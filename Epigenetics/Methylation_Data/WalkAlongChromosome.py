@@ -216,11 +216,11 @@ if __name__ == "__main__":
         chromosome_list = [str(i) for i in range(1, 24)]
         chromosome_list.append('X')
         chromosome_list.append('Y')
-        # chromosome_list = ['chr%s' %i for i in chromosome_list]    # Add prefix 'chr'
+        chromosome_list = ['chr%s' %i for i in chromosome_list]    # Add prefix 'chr'
         while True:
             try:
                 chromosome = str(raw_input('Enter chromosome (1, 2, X, Y...): '))
-                # chromosome = 'chr%s' %chromosome    # Adds prefix chr
+                chromosome = 'chr%s' %chromosome    # Adds prefix chr
                 if chromosome in chromosome_list:
                     break
             except:
