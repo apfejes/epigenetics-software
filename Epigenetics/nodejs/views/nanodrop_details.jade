@@ -2,7 +2,7 @@ link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
 a(href='/')
   #logo
 h1= title
-form( method="post", enctype="multipart/form-data")
+form( method="post")
   #section1
     H3 Upload a new Nanodrop file:
     #div
@@ -12,10 +12,9 @@ form( method="post", enctype="multipart/form-data")
       input(type="button", value="Cancel", onClick="window.history.back(-1)")
   #section2
     H3 existing files for this project:
-//    table
-//      - each transaction in transactions
-//        tr 
-//          td.trlabel1 
-//            b #{nanodrop.filename} 
-//          td.trlabel2 #{transaction.amt } 
-//          td.trdate #{transaction.date } 
+    !{data}
+    table
+      each d in data
+        tr 
+          td.trlabel1 
+            b #{d} 

@@ -4,6 +4,7 @@
 
 var express = require('express');
 var ArticleProvider = require('./articleprovider-mongodb').ArticleProvider;
+var Tsvreader = require('./tsvreader.js').Tsvreader;
 var app = express();
 
 // Configuration
@@ -27,6 +28,8 @@ app.configure('production', function(){
 });
 
 var articleProvider = new ArticleProvider('localhost', 27017);
+var tsvreader = new Tsvreader();
+
 // Routes
 
 //------------------------------------
@@ -316,7 +319,11 @@ app.get('/input/nanodrop_new/:id', function(req, res) {
 });
 
 app.post('/input/nanodrop_new/:id', function(req, res) {
-
+    //console.log("req.files: ", req.files)
+    tsvreader.parseTsvFile(req.files, function(error, data) {
+      if (error) console.log("app.get.nanodrop_new (post)", error)
+      else res.render('nanodrop_details.jade', {title: 'Testing nanodrop reading', data:data});
+    });
 });
 
 
@@ -329,26 +336,6 @@ app.post('/input/nanodrop_new/:id', function(req, res) {
 //}).on('line', function(line){
 //   console.log('Line: ' + line);
 //});
-
-
-
-
-
-
-app.post('/input/nanodrop_new/:id', function(req, res){
-    
-    
-    
-    
-    articleProvider.save('samples', {
-        sample_name: req.param('sample_name'),
-    }, function( error, docs) {
-        res.redirect('/')
-    });
-});
-
-
-
 
 
 app.listen(3000, "0.0.0.0");
