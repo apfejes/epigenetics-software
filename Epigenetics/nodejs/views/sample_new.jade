@@ -2,85 +2,12 @@ link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
 a(href='/')
   #logo
 h1= title
-form( method="post")
-  #newinformation
-    H3 Create a New Sample Manually
-    table
-      tr
-        td
-          b SampleName :
-        td 
-          input(type="text", name="sample_name", id="editSampleName", required)
-      tr
-        td
-          b Date Sample Arrived :
-        td
-          input(type="date", name="arrival_date", id="editArrivalDate")
-  #newinformation
-      div
-          span Sentrix Barcode : 
-          input(type="text", name="arrival_date", id="editArrivalDate") 
-      div
-          span Sample Label : 
-          input(type="text", name="arrival_date", id="editArrivalDate")
-      div
-          span Sample_Well : 
-          input(type="text", name="arrival_date", id="editArrivalDate")
-      div
-          span Current_Age : 
-          input(type="text", name="arrival_date", id="editArrivalDate")
-      div
-          span Test_Date : 
-          input(type="date", name="arrival_date", id="editArrivalDate")
-      div
-          span Sample Section : 
-          input(type="text", name="arrival_date", id="editArrivalDate")
-        div
-            span Sample Group : 
-            input(type="text", name="arrival_date", id="editArrivalDate")
-        div
-            //Sample type (drop down list?)
-            span Sample Type :
-            select(name='role') 
-                option(value='Chip-Seq') ChIP-Seq 
-                option(value='450k methylation array') 450k methylation array  
-        div
-            span "Nanodrop info" :
-            div
-                input(type="file", name="nanodrop1", id="editNanodrop1")
-            div
-                input(type="file", name="nanodrop2", id="editNanodrop2")
-            div
-                input(type="file", name="nanodrop3", id="editNanodrop3")
-            // Nanodrop info (it's tab-delimited text, example attached)
-            // This happens at least three times per sample)
-            //APF: will need to store an array of files????  
-            
-        div
-            div
-                span Speedvac'd? :
-                input(type="checkbox", name="speedvac", id="editSpeedvac")
-            div
-                span Concentration Notes:
-                textarea( name="conc_notes", rows=5, id="editConcInfo")
-            // final conc or final vol - possibly a complex field)
-            
-        div
-            span Illumina tracking info :
-            textarea( name="illumina_tracking", rows=5, id="editIlluminaInfo")
-            
-            // Meg: Illumina tracking for info (example attached) 
-            // either fields or a place where we can scan and 
-            // upload the document… not all fields are required, 
-            // but the lot numbers for reagents are very important.
-            // APF: Probably want to do this so that it opens a separate form.
-            
-        div
-            span Date of Chip Run :
-            input(type="date", name="chip_run_date", id="editChipRunDate")
-        div#editArticleSubmit
-            input(type="submit", value="Send")
-            input(type="button", value="Cancel", onClick="window.history.back(-1)")
-
-            
-            
+#newinformation
+  H3 Add Sample Names to the project
+  form( method="post", enctype="multipart/form-data")
+    input(type="hidden", name="projectid", value= projectid)
+    div
+      input(type="file", name="sample_file", id="Filename", required)
+    div
+      input(type="submit", value="add to project")
+      input(type="button", value="Cancel", onClick="window.history.back(-1)")

@@ -154,12 +154,21 @@ app.get('/input/sample_new/:id', function(req, res) {
     );
 });
 
-app.post('/input/sample_new', function(req, res){
-    articleProvider.save('samples', {
-        sample_name: req.param('sample_name'),
-    }, function( error, docs) {
-        res.redirect('/')
+app.post('/input/sample_new/:id', function(req, res){
+    tsvreader.parseSimple(req.files.sample_file.path, function(error, data) {
+      if (error) console.log("app.get.sample_new (post)", error)
+      else {
+        articleProvider.saveSamples(req.param('projectid'), data, function(){
+          res.redirect('/view/' + req.param('projectid'));
+        })
+      }
     });
+
+//    articleProvider.save('samples', {
+//       sample_name: req.param('sample_name'),
+//    }, function( error, docs) {
+//        res.redirect('/')
+//    });
 });
 
 
@@ -320,9 +329,12 @@ app.get('/input/nanodrop_new/:id', function(req, res) {
 
 app.post('/input/nanodrop_new/:id', function(req, res) {
     //console.log("req.files: ", req.files)
-    tsvreader.parseTsvFile(req.files, function(error, data) {
+    tsvreader.parseTsvFile(req.files.nanodrop_file.path, function(error, data) {
       if (error) console.log("app.get.nanodrop_new (post)", error)
-      else res.render('nanodrop_details.jade', {title: 'Testing nanodrop reading', data:data});
+      else {
+        //console.log("data:", data)
+        res.render('nanodrop_details.jade', {title: 'Testing nanodrop reading', data:data});
+      }
     });
 });
 

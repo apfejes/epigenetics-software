@@ -39,8 +39,11 @@ ArticleProvider.prototype.getDBQuery= function(collection_name, query_string, fi
 // UPDATE API
 //__________________________________
 
-ArticleProvider.prototype.updateDB= function(collection_name, id, query_string,  callback) {
-  this.db.collection(collection_name).update({_id:new ObjectID(id)}, query_string, {} , function(e, results) {
+ArticleProvider.prototype.updateDB= function(collection_name, id, query_string, upsert, callback) {
+  var upsert_string
+  if (upsert == true) upsert_string = 'upsert:true'
+  else upsert_string = ''
+  this.db.collection(collection_name).update({_id:new ObjectID(id)}, query_string, {upsert_string} , function(e, results) {
     if (e) console.log("updateDB error:", e)
     else callback(null, results)
   })
@@ -160,17 +163,37 @@ ArticleProvider.prototype.getIDbyName = function(name, callback) {
 // SAVE FUNCTION
 //__________________________________
 
-ArticleProvider.prototype.save = function(collection_name, projects, callback) {
-    if( typeof(projects.length)=="undefined")
-      projects = [projects];
-    for( var i =0;i< projects.length;i++ ) {
-      project = projects[i];
-      project.created_at = new Date();
-      this.db.collection(collection_name).insert(projects, function() {
-        callback(null, projects);
+ArticleProvider.prototype.save = function(collection_name, data, callback) {
+    if( typeof(data.length)=="undefined")
+      data = [data];
+    for( var i =0;i< data.length;i++ ) {
+      data = data[i];
+      data.created_at = new Date();
+      this.db.collection(collection_name).insert(data, function() {
+        callback(null, data);
       })
     };
 };
+
+
+//__________________________________
+//
+// UPSERT FUNCTION
+//__________________________________
+
+ArticleProvider.prototype.upsert = function(collection_name, keys, data, callback) {
+    if( typeof(data.length)=="undefined")
+      data = [data];
+    for( var i =0;i< data.length;i++ ) {
+      data = data[i];
+      data.created_at = new Date();
+      this.db.collection(collection_name).update(keys, {$set : data},
+                                   {upsert:true},function(error, c) {
+                                   callback(null, data);
+      })
+    };
+};
+
 
 //__________________________________
 //
@@ -180,11 +203,33 @@ ArticleProvider.prototype.save = function(collection_name, projects, callback) {
 
 ArticleProvider.prototype.update = function(collection, id, project, callback) {
     project.last_updated = new Date();
-    this.updateDB(collection, id, {$set: project}, function(error, c) {
+    this.updateDB(collection, id, {$set: project}, false, function(error, c) {
       if( error ) callback(error)
       else callback(null, c);
     });
 };
+
+//__________________________________
+//
+// COMPLEX FUNCTIONS 
+//__________________________________
+//
+// SAVE SAMPLES
+//__________________________________
+
+ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback) {
+  var date = new Date();
+  for( var i =0;i< sampleids.length;i++ ) {
+    this.upsert('samples', {
+      projectid: project_id,
+      _id: sampleids[i]},
+      {last_updated: date}  
+      function(error, c) {
+    if( error ) callback(error)
+    else callback(null, c);
+  });
+};
+
 
 //__________________________________
 //

@@ -4,15 +4,10 @@ var sys = require('sys')
  
 //_____________________________________________________
 //
-// This file is based on a script provided at 
+// This file was derived from a script provided at 
 // https://gist.github.com/jamescarr/467954#file-gistfile1-js
 //
-// You will need to call the function something like: 
-//    parseCsvFile('tremors.txt', function(rec){
-//      sys.puts("An tremor of magnitude " + rec.magnitude + " in " + rec.region)
-//    });
-//
-//_____________________________________________________
+_________________________________________________
 
 //function parseCsvFile(fileName, callback){
 //  var stream = fs.createReadStream(fileName)
@@ -42,6 +37,13 @@ var sys = require('sys')
 //  }
 //}
 
+
+//------------------------------------------------
+//
+//  Tab Separated Values reader
+//
+//------------------------------------------------
+
 Tsvreader = function() {
   this.t= 'string'
 };
@@ -58,30 +60,70 @@ function clean(a, value) {
 
 
 
-Tsvreader.prototype.parseTsvFile = function(files, callback){
-  //console.log("files:", files)
-  //console.log("files.nanodrop_file:", files.nanodrop_file)
-  var c = new Array()
-  var stream = fs.createReadStream(files.nanodrop_file.path)
-  var iteration = 0, header = [], buffer = ""
+Tsvreader.prototype.parseTsvFile = function(path, callback){
+  var stream = fs.createReadStream(path)
+  var c = new Array(), header = [], buffer = "", refresh_header = true
+  var iteration = 0
   stream.addListener('data', function(data){
     buffer+=data.toString()
     var parts = buffer.split('\r\n')
     parts.forEach(function(d, i){
-      if(i == parts.length-1) return
-      if(iteration++ == 0 && i == 0){
+      if(parts.length-1 == 0) {
+        return
+      }
+      if(refresh_header) {         //header line
         header = d.split("\t")
-        c[0] = header
-      }else{
-         c[iteration-1] = clean(d.split("\t"), '')
+        header.forEach(function(x,j) {
+          header[j] = x.trim().replace(/[()/.]/g,"").replace(/ /g,"_")
+          if (/^\d/.test(header[j])) {
+            header[j] = "_" + header[j]
+          }
+        refresh_header = false
+        })
+      }else if (d === "") {        //blank lines - next line will be a header.
+        refresh_header = true
+      }else{                       //data line
+         c[iteration]= buildRecord(d)
+         iteration++
+
       }
     })
-    for (var i = 0; i < c.length; i++) {
-      console.log("c[%i]: %s", i, c[i])
-    }
+    
     buffer = parts[parts.length-1]
+    callback(null, c) 
   })
-  callback(null, c)
+
+  function buildRecord(str){
+    var record = {}
+    str.split("\t").forEach(function(value, index){
+      if(index <= header.length-1 && header[index] != '' && value != '')
+        record[header[index].toLowerCase()] = value.trim().replace(/"/g, '')
+    })
+    return record
+  }
 };
+
+
+Tsvreader.prototype.parseSimple = function(path, callback){
+  var stream = fs.createReadStream(path)
+  var c = new Array(), buffer = ""
+  var iteration = 0
+  stream.addListener('data', function(data){
+    buffer+=data.toString()
+    var parts = buffer.split('\r\n')
+    parts.forEach(function(d, i){
+      if(parts.length-1 == 0) {
+        return
+      }
+      if (d !== "") {        //blank lines should be ignored.
+         c[iteration]= d
+         iteration++
+      }
+    })
+    buffer = parts[parts.length-1]
+    callback(null, c) 
+  })
+};
+
 
 exports.Tsvreader = Tsvreader;
