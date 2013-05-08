@@ -105,11 +105,15 @@ app.post('/input/project_edit/:id', function(req, res){
 app.get('/view/:id', function(req, res) {
   articleProvider.getPlates(req.params.id, function(error, plates) {
     articleProvider.getTransactions(req.params.id, function(error, transactions) {
-      if (error) console.log("view/:id error: ", error)
-      else articleProvider.findById(req.params.id, function(error, project) {
-          res.render('project_details.jade',{proj_name: project.proj_name, project:project, transactions:transactions, plates:plates});
+      articleProvider.getSamples(req.params.id, function(error, samples) {
+        if (error) console.log("view/:id error: ", error)
+        else articleProvider.findById(req.params.id, function(error, project) {
+            res.render('project_details.jade',{proj_name: project.proj_name, 
+                project:project, transactions:transactions, plates:plates,
+                samples:samples});
+        });
       });
-     });
+    });
   });
 });
 
@@ -156,20 +160,27 @@ app.get('/input/sample_new/:id', function(req, res) {
 
 app.post('/input/sample_new/:id', function(req, res){
     tsvreader.parseSimple(req.files.sample_file.path, function(error, data) {
+      //console.log("data: ", data)
       if (error) console.log("app.get.sample_new (post)", error)
       else {
-        articleProvider.saveSamples(req.param('projectid'), data, function(){
+        articleProvider.saveSamples(data, req.param('projectid'),function(error, docs){
+          if (error) console.log("app.get.sample_new (post_save)", error)
+          else {
           res.redirect('/view/' + req.param('projectid'));
+          }
         })
       }
     });
-
-//    articleProvider.save('samples', {
-//       sample_name: req.param('sample_name'),
-//    }, function( error, docs) {
-//        res.redirect('/')
-//    });
 });
+
+// This function requires the Sample ID.
+
+app.get('/input/plate_edit/:id', function(req, res){
+  articleProvider.sampleById(req.params.id, function(error, plate) {
+    res.render('plate_edit.jade',{title: 'Edit Plate '+ req.params.id, plate:plate});
+  });
+});
+
 
 
 //------------------------------------

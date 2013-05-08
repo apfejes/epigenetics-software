@@ -41,9 +41,9 @@ ArticleProvider.prototype.getDBQuery= function(collection_name, query_string, fi
 
 ArticleProvider.prototype.updateDB= function(collection_name, id, query_string, upsert, callback) {
   var upsert_string
-  if (upsert == true) upsert_string = 'upsert:true'
-  else upsert_string = ''
-  this.db.collection(collection_name).update({_id:new ObjectID(id)}, query_string, {upsert_string} , function(e, results) {
+  if (upsert == true) upsert_string = '{upsert:true}'
+  else upsert_string = '{}'
+  this.db.collection(collection_name).update({_id:new ObjectID(id)}, query_string, upsert_string , function(e, results) {
     if (e) console.log("updateDB error:", e)
     else callback(null, results)
   })
@@ -88,16 +88,29 @@ ArticleProvider.prototype.findById = function(id, callback) {
 };
 
 ArticleProvider.prototype.plateById = function(id, callback) {
-    this.getDBData('plates', function(error, project_collection) {
+    this.getDBData('plates', function(error, plates_collection) {
       if( error ) callback(error)
       else {
-        project_collection.findOne({_id: project_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
+        collection.findOne({_id: project_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
           if( error ) callback(error)
           else callback(null, result)
         });
       }
     });
 };
+
+ArticleProvider.prototype.sampleById = function(id, callback) {
+    this.getDBData('samples2', function(error, sample_collection) {
+      if( error ) callback(error)
+      else {
+        sample_collection.findOne({_id: project_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
+          if( error ) callback(error)
+          else callback(null, result)
+        });
+      }
+    });
+};
+
 
 
   //---- 
@@ -142,6 +155,18 @@ ArticleProvider.prototype.getPlates = function(id, callback) {
     this.getDBQuery('plates', {projectid: id}, {}, function(error, transactions) {
       if( error ) console.log("transaction-type error: ", error);
       else callback(null, transactions)
+    });
+};
+
+  //---- 
+  //Retrieve samples for a project
+  //---- 
+  
+
+ArticleProvider.prototype.getSamples = function(id, callback) {
+    this.getDBQuery('samples2', {projectid: id}, {}, function(error, samples) {
+      if( error ) console.log("samples-type error: ", error);
+      else callback(null, samples)
     });
 };
 
@@ -218,16 +243,21 @@ ArticleProvider.prototype.update = function(collection, id, project, callback) {
 //__________________________________
 
 ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback) {
+  //console.log(project_id, "  ", sampleids);
   var date = new Date();
   for( var i =0;i< sampleids.length;i++ ) {
-    this.upsert('samples', {
-      projectid: project_id,
-      _id: sampleids[i]},
-      {last_updated: date}  
-      function(error, c) {
-    if( error ) callback(error)
-    else callback(null, c);
-  });
+    //console.log(project_id, "  ", sampleids[i])
+    this.upsert('samples2', {projectid: project_id, _id: sampleids[i]},
+      {last_updated: date},  
+      function(error) {
+        if( error ) {
+          console.log("saveSamples error: ", error);
+          callback(error)
+        } 
+      }
+    );
+  }
+  callback();
 };
 
 

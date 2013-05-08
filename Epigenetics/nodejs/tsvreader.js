@@ -7,7 +7,7 @@ var sys = require('sys')
 // This file was derived from a script provided at 
 // https://gist.github.com/jamescarr/467954#file-gistfile1-js
 //
-_________________________________________________
+//_________________________________________________
 
 //function parseCsvFile(fileName, callback){
 //  var stream = fs.createReadStream(fileName)
@@ -106,16 +106,15 @@ Tsvreader.prototype.parseTsvFile = function(path, callback){
 
 Tsvreader.prototype.parseSimple = function(path, callback){
   var stream = fs.createReadStream(path)
-  var c = new Array(), buffer = ""
-  var iteration = 0
+  var c = new Array(), buffer = "", iteration = 0
   stream.addListener('data', function(data){
     buffer+=data.toString()
-    var parts = buffer.split('\r\n')
+    var parts = buffer.split('\n')
     parts.forEach(function(d, i){
       if(parts.length-1 == 0) {
         return
       }
-      if (d !== "") {        //blank lines should be ignored.
+      if (d != "") {        //blank lines should be ignored.
          c[iteration]= d
          iteration++
       }
