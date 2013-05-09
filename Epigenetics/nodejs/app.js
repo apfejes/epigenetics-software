@@ -175,9 +175,9 @@ app.post('/input/sample_new/:id', function(req, res){
 
 // This function requires the Sample ID.
 
-app.get('/input/plate_edit/:id', function(req, res){
-  articleProvider.sampleById(req.params.id, function(error, plate) {
-    res.render('plate_edit.jade',{title: 'Edit Plate '+ req.params.id, plate:plate});
+app.get('/view/sample_edit/:id', function(req, res){
+  articleProvider.sampleById(req.params.id, function(error, sample) {
+    res.render('sample_edit.jade',{title: 'Edit Sample '+ req.params.id, sample:sample});
   });
 });
 
@@ -334,17 +334,22 @@ app.post('/input/plate_new', function(req, res){
 //------------------------------------
 
 app.get('/input/nanodrop_new/:id', function(req, res) {
-    res.render('nanodrop_new.jade', {title: 'Nanodrop File', projectid:req.params.id}
+    res.render('nanodrop_new.jade', {title: 'Add a Nanodrop File to this project', projectid:req.params.id}
     );
 });
 
 app.post('/input/nanodrop_new/:id', function(req, res) {
     //console.log("req.files: ", req.files)
-    tsvreader.parseTsvFile(req.files.nanodrop_file.path, function(error, data) {
+    tsvreader.parseNanodropFile(req.files.nanodrop_file.path, function(error, data) {
       if (error) console.log("app.get.nanodrop_new (post)", error)
       else {
-        //console.log("data:", data)
-        res.render('nanodrop_details.jade', {title: 'Testing nanodrop reading', data:data});
+        //console.log("data from Nanodrop", data._id)
+        articleProvider.saveNanodrop(data, req.param('projectid'), function(error, docs){
+          if (error) console.log("app.get.nanodrop_new (post_save)", error)
+          else {
+            res.render('nanodrop_details.jade', {title: 'Testing nanodrop reading', data:data});
+          }
+        })
       }
     });
 });
