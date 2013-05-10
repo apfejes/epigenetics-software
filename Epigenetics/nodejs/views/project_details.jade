@@ -42,7 +42,7 @@ a(href='/')
   H3 Samples:
   select(id='things', name='things')
     - each sample in samples
-      option(value=sample._id)=sample._id
+      option(value=sample.sampleid + "-" + sample.sample_num)=sample.sampleid + "-" + sample.sample_num
   input#rollButton(type="button", value="Edit", onclick="viewItem()")
   p
   a(href="/input/sample_new/"+project._id)='Add samples to this project'

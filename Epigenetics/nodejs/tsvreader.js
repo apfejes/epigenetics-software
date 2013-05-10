@@ -120,6 +120,9 @@ Tsvreader.prototype.parseSimple = function(path, callback){
       }
     })
     buffer = parts[parts.length-1]
+
+  })
+  stream.addListener('end', function (error, data) {
     callback(null, c) 
   })
 };
@@ -159,10 +162,7 @@ Tsvreader.prototype.parseNanodropFile = function(path, callback){
            rec.path = Path;
            rec.nanodropver = Sw;
            rec.firmware = Fw;
-           
            c[iteration] = rec
-           //c[iteration].mod = Mod;  //don't really care about which nanodrop module was used.
-           
            iteration++
          }
       }
@@ -170,7 +170,7 @@ Tsvreader.prototype.parseNanodropFile = function(path, callback){
     buffer = parts[parts.length-1]
   })
   stream.addListener('end', function (error, data) {
-    console.log("Calling Back with ", c.length, " parts")
+    //console.log("Calling Back with ", c.length, " parts")
     callback(null, c) 
   })
   

@@ -16,7 +16,10 @@ ArticleProvider = function(host, port) {
 
 ArticleProvider.prototype.getDBData= function(collection_name, callback) {
   this.db.collection(collection_name, function(error, project_collection) {
-    if( error ) callback(error);
+    if( error ) {
+      console.log("getDBData error:", e)
+      callback(error);
+    }
     else callback(null, project_collection);
   });
 };
@@ -83,7 +86,10 @@ ArticleProvider.prototype.findAllProjects = function(callback) {
       if( error ) callback(error)
       else {
         project_collection.find().toArray(function(error, results) {
-          if( error ) callback(error)
+          if( error ) {
+            console.log("findAllProjects error:", e)
+            callback(error)
+          }
           else callback(null, results)
         });
       }
@@ -99,8 +105,10 @@ ArticleProvider.prototype.findById = function(id, callback) {
       if( error ) callback(error)
       else {
         project_collection.findOne({_id: project_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
-          if( error ) callback(error)
-          else callback(null, result)
+          if( error ) {
+            console.log("findByID error:", e)
+            callback(error)
+          } else callback(null, result)
         });
       }
     });
@@ -111,26 +119,23 @@ ArticleProvider.prototype.plateById = function(id, callback) {
       if( error ) callback(error)
       else {
         collection.findOne({_id: project_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
-          if( error ) callback(error)
-          else callback(null, result)
+          if( error ) {
+            console.log("plateById error:", e)
+            callback(error)
+          } else callback(null, result)
         });
       }
     });
 };
 
-ArticleProvider.prototype.sampleById = function(id, callback) {
-    this.getDBData('samples', function(error, sample_collection) {
-      if( error ) callback(error)
-      else {
-        sample_collection.findOne({_id: id}, function(error, result) {
-          if( error ) callback(error)
-          else callback(null, result)
-        });
-      }
+ArticleProvider.prototype.sampleById = function(id, num, callback) {
+    this.getDBQuery('samples', {sampleid: id, sample_num:num}, {}, function(error, result) {
+      if( error ) {
+        console.log("sampleById error:", e)
+        callback(error)
+      } else callback(null, result)
     });
 };
-
-
 
   //---- 
   //Retrieve only the project status options
@@ -138,8 +143,10 @@ ArticleProvider.prototype.sampleById = function(id, callback) {
 
 ArticleProvider.prototype.project_status = function(callback) {
     this.getDBQuery('xlat', {xlat: "status"}, {desc:1, _id:0}, function(error, project_status) {
-      if( error ) console.log("project-status error: ", error);
-      else callback(null, project_status)
+      if( error ) {
+        console.log("project-status error: ", error);
+        callback(error);
+      } else callback(null, project_status)
     });
 };
 
@@ -150,8 +157,10 @@ ArticleProvider.prototype.project_status = function(callback) {
   
 ArticleProvider.prototype.transaction_type = function(callback) {
     this.getDBQuery('xlat', {xlat: "transaction_type"}, {desc:1, _id:0}, function(error, transaction) {
-      if( error ) console.log("transaction-type error: ", error);
-      else callback(null, transaction)
+      if( error ) {
+        console.log("transaction-type error: ", error);
+        callback(error);
+      } else callback(null, transaction)
     });
 };
 
@@ -161,8 +170,10 @@ ArticleProvider.prototype.transaction_type = function(callback) {
   
 ArticleProvider.prototype.getTransactions = function(id, callback) {
     this.getDBQuery('transactions', {projectid: id}, {}, function(error, transactions) {
-      if( error ) console.log("transaction-type error: ", error);
-      else callback(null, transactions)
+      if( error ) {
+        console.log("transaction-type error: ", error);
+        callback(error);
+      } else callback(null, transactions)
     });
 };
 
@@ -172,8 +183,10 @@ ArticleProvider.prototype.getTransactions = function(id, callback) {
   
 ArticleProvider.prototype.getPlates = function(id, callback) {
     this.getDBQuery('plates', {projectid: id}, {}, function(error, transactions) {
-      if( error ) console.log("transaction-type error: ", error);
-      else callback(null, transactions)
+      if( error ) {
+        console.log("transaction-type error: ", error);
+        callback(error);
+      } else callback(null, transactions)
     });
 };
 
@@ -184,8 +197,10 @@ ArticleProvider.prototype.getPlates = function(id, callback) {
 
 ArticleProvider.prototype.getSamples = function(id, callback) {
     this.getDBQuery('samples', {projectid: id}, {}, function(error, samples) {
-      if( error ) console.log("samples-type error: ", error);
-      else callback(null, samples)
+      if( error ) {
+        console.log("samples-type error: ", error);
+        callback(error);
+      } else callback(null, samples)
     });
 };
 
@@ -197,8 +212,10 @@ ArticleProvider.prototype.getSamples = function(id, callback) {
   
 ArticleProvider.prototype.getIDbyName = function(name, callback) {
     this.getDBQuery('projects', {proj_name: name}, {_id:1}, function(error, id) {
-      if( error ) console.log("id-lookup error: ", error);
-      else callback(null, id)
+      if( error ) {
+        console.log("id-lookup error: ", error);
+        callback(error);
+      } else callback(null, id)
     });
 };
 
@@ -266,7 +283,18 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
   var date = new Date();
   for( var i =0;i< sampleids.length;i++ ) {
     //console.log(project_id, "  ", sampleids[i])
-    this.upsert('samples', {projectid: project_id, _id: sampleids[i]},
+    var s_id = ""
+    var s_num = 1
+    if (sampleids[i].indexOf("-") !== -1) {
+      s_id = sampleids[i].substring(0,sampleids[i].indexOf("-"));
+      s_num = sampleids[i].substring(1 + sampleids[i].indexOf("-"));
+    } else {
+      s_id = sampleids[i];
+      s_num = 1
+    }
+    
+    //console.log("samples processed:", sampleids[i], " ", s_id, " ", s_num)
+    this.upsert('samples', {projectid: project_id, sampleid: s_id, sample_num: s_num},
       {last_updated: date},  
       function(error) {
         if( error ) {
@@ -291,6 +319,13 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, project_id, callbac
     console.log(i, ' of  ', sampleids.length)
     
     var selected= {}
+	if (sampleids[i].sample_id.indexOf("-") != -1) {
+	  selected.sampleid = sampleids[i].sample_id.substring(0,sampleids[i].sample_id.indexOf("-"))
+	  selected.sample_num = sampleids[i].sample_id.substring(sampleids[i].sample_id.indexOf("-") + 1)
+	} else {
+	  selected.sampleid = sampleids[i].sample_id
+	  selected.sample_num = 1
+	}
 	selected.projectid = project_id
 	selected.date = sampleids[i].date
 	selected.time = sampleids[i].time
@@ -304,9 +339,8 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, project_id, callbac
 	selected.path = sampleids[i].path
 	selected.nanodropver = sampleids[i].nanodropver
 	selected.firmware = sampleids[i].firmware
-	
-	console.log("query: ", {projectid: project_id, _id: sampleids[i].sample_id})
-	this.updateDBraw('samples', {projectid: project_id, _id: sampleids[i]._id}, {$set: selected}, false,
+	//console.log("query: ", {projectid: project_id, sampleid: selected.sampleid, sample_num: selected.sample_num})
+	this.updateDBraw('samples', {projectid: project_id, sampleid: selected.sampleid, sample_num: selected.sample_num}, {$set: selected}, false,
       function(error) {  //the callback function
         if( error ) {
           console.log("saveNanodrop error: ", error);

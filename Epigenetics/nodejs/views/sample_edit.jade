@@ -3,9 +3,23 @@ a(href='/')
   #logo
 h1= title
 form( method="post")
-  #section1
-    b !{sample._id}
-    | #{sample.created_at}  
-    | #{sample.last_updated}
-    | #{sample.projectid}
+#section1
+  table
+    tr
+      td Sample name
+      td sample number
+      td Created
+      td last update
+      td projectid
+    - each sample in samples
+      tr
+        td.label
+          b #{sample.sampleid}
+        td #{sample.sample_num}
+        td #{sample.created_at}  
+        td #{sample.last_updated}
+        td #{sample.projectid}
+
+
+
     
