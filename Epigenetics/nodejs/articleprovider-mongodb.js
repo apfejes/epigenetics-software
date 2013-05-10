@@ -5,7 +5,7 @@ var BSON = require('mongodb').BSON;
 var ObjectID = require('mongodb').ObjectID;
 
 ArticleProvider = function(host, port) {
-  this.db= new Db('human_epigenetics', new Server(host, port, {auto_reconnect: true}, {}), {safe:true});
+  this.db= new Db('test', new Server(host, port, {auto_reconnect: true}, {}), {safe:true});
   this.db.open(function(){});
 };
 
@@ -29,7 +29,10 @@ ArticleProvider.prototype.getDBData= function(collection_name, callback) {
 
 ArticleProvider.prototype.getDBQuery= function(collection_name, query_string, fields, callback) {
   this.db.collection(collection_name).find(query_string, fields).toArray(function(e, results) {
-    if (e) console.log("getDBQuery error:", e)
+    if (e) {
+      console.log("getDBQuery error:", e)
+      callback(e)
+    }
     else callback(null, results)
   })
 };
@@ -39,12 +42,31 @@ ArticleProvider.prototype.getDBQuery= function(collection_name, query_string, fi
 // UPDATE API
 //__________________________________
 
-ArticleProvider.prototype.updateDB= function(collection_name, id, query_string,  callback) {
-  this.db.collection(collection_name).update({_id:new ObjectID(id)}, query_string, {} , function(e, results) {
-    if (e) console.log("updateDB error:", e)
+ArticleProvider.prototype.updateDB= function(collection_name, id, query_string, upsert, callback) {
+  var upsert_string
+  if (upsert == true) upsert_string = '{upsert:true}'
+  else upsert_string = '{}'
+  this.db.collection(collection_name).update({_id:new ObjectID(id)}, query_string, upsert_string , function(e, results) {
+    if (e) { 
+      console.log("updateDB error:", e)
+      callback(e)
+    }
     else callback(null, results)
   })
 };
+
+ArticleProvider.prototype.updateDBraw= function(collection_name, update_criteria, query_string, upsert, callback) {
+  var upsert_string
+  if (upsert == true) upsert_string = '{upsert:true}'
+  else upsert_string = '{}'
+  this.db.collection(collection_name).update(update_criteria, query_string, upsert_string , function(e, results) {
+    if (e) { 
+      console.log("updateDB error:", e)
+      callback(e)
+    } else callback(null, results)
+  })
+};
+
 
 //__________________________________
 //
@@ -85,16 +107,29 @@ ArticleProvider.prototype.findById = function(id, callback) {
 };
 
 ArticleProvider.prototype.plateById = function(id, callback) {
-    this.getDBData('plates', function(error, project_collection) {
+    this.getDBData('plates', function(error, plates_collection) {
       if( error ) callback(error)
       else {
-        project_collection.findOne({_id: project_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
+        collection.findOne({_id: project_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
           if( error ) callback(error)
           else callback(null, result)
         });
       }
     });
 };
+
+ArticleProvider.prototype.sampleById = function(id, callback) {
+    this.getDBData('samples', function(error, sample_collection) {
+      if( error ) callback(error)
+      else {
+        sample_collection.findOne({_id: id}, function(error, result) {
+          if( error ) callback(error)
+          else callback(null, result)
+        });
+      }
+    });
+};
+
 
 
   //---- 
@@ -142,6 +177,18 @@ ArticleProvider.prototype.getPlates = function(id, callback) {
     });
 };
 
+  //---- 
+  //Retrieve samples for a project
+  //---- 
+  
+
+ArticleProvider.prototype.getSamples = function(id, callback) {
+    this.getDBQuery('samples', {projectid: id}, {}, function(error, samples) {
+      if( error ) console.log("samples-type error: ", error);
+      else callback(null, samples)
+    });
+};
+
 
 
   //---- 
@@ -160,17 +207,37 @@ ArticleProvider.prototype.getIDbyName = function(name, callback) {
 // SAVE FUNCTION
 //__________________________________
 
-ArticleProvider.prototype.save = function(collection_name, projects, callback) {
-    if( typeof(projects.length)=="undefined")
-      projects = [projects];
-    for( var i =0;i< projects.length;i++ ) {
-      project = projects[i];
-      project.created_at = new Date();
-      this.db.collection(collection_name).insert(projects, function() {
-        callback(null, projects);
+ArticleProvider.prototype.save = function(collection_name, data, callback) {
+    if( typeof(data.length)=="undefined")
+      data = [data];
+    for( var i =0;i< data.length;i++ ) {
+      data = data[i];
+      data.created_at = new Date();
+      this.db.collection(collection_name).insert(data, function() {
+        callback(null, data);
       })
     };
 };
+
+
+//__________________________________
+//
+// UPSERT FUNCTION
+//__________________________________
+
+ArticleProvider.prototype.upsert = function(collection_name, keys, data, callback) {
+    if( typeof(data.length)=="undefined")
+      data = [data];
+    for( var i =0;i< data.length;i++ ) {
+      data = data[i];
+      data.created_at = new Date();
+      this.db.collection(collection_name).update(keys, {$set : data},
+                                   {upsert:true},function(error, c) {
+                                   callback(null, data);
+      })
+    };
+};
+
 
 //__________________________________
 //
@@ -180,11 +247,79 @@ ArticleProvider.prototype.save = function(collection_name, projects, callback) {
 
 ArticleProvider.prototype.update = function(collection, id, project, callback) {
     project.last_updated = new Date();
-    this.updateDB(collection, id, {$set: project}, function(error, c) {
+    this.updateDB(collection, id, {$set: project}, false, function(error, c) {
       if( error ) callback(error)
       else callback(null, c);
     });
 };
+
+//__________________________________
+//
+// COMPLEX FUNCTIONS 
+//__________________________________
+//
+// SAVE SAMPLES
+//__________________________________
+
+ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback) {
+  //console.log(project_id, "  ", sampleids);
+  var date = new Date();
+  for( var i =0;i< sampleids.length;i++ ) {
+    //console.log(project_id, "  ", sampleids[i])
+    this.upsert('samples', {projectid: project_id, _id: sampleids[i]},
+      {last_updated: date},  
+      function(error) {
+        if( error ) {
+          console.log("saveSamples error: ", error);
+          callback(error)
+        } 
+      }
+    );
+  }
+  callback();
+};
+
+//__________________________________
+//
+// SAVE NANODROP
+//__________________________________
+
+ArticleProvider.prototype.saveNanodrop = function(sampleids, project_id, callback) {
+  //console.log(project_id, "  ", sampleids);
+  var date = new Date();
+  for( var i =0;i< sampleids.length;i++ ) {
+    console.log(i, ' of  ', sampleids.length)
+    
+    var selected= {}
+	selected.projectid = project_id
+	selected.date = sampleids[i].date
+	selected.time = sampleids[i].time
+	selected.conc = sampleids[i].conc
+	selected.units = sampleids[i].units
+	selected.a260 = sampleids[i].a260
+	selected.a280 = sampleids[i].a280
+	selected.a230 = sampleids[i]._2300
+	selected.na_type = sampleids[i].na_type
+	selected.mod = sampleids[i].mod
+	selected.path = sampleids[i].path
+	selected.nanodropver = sampleids[i].nanodropver
+	selected.firmware = sampleids[i].firmware
+	
+	console.log("query: ", {projectid: project_id, _id: sampleids[i].sample_id})
+	this.updateDBraw('samples', {projectid: project_id, _id: sampleids[i]._id}, {$set: selected}, false,
+      function(error) {  //the callback function
+        if( error ) {
+          console.log("saveNanodrop error: ", error);
+          callback(error)
+        } 
+      }
+    );
+  }
+  callback();
+};
+
+
+
 
 //__________________________________
 //

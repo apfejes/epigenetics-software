@@ -2,7 +2,7 @@ html
   head
      script(type='text/javascript')
        function viewItem(){  
-           var e = document.getElementById("things");
+           var e = document.getElementById("samples");
            var strUser = e.options[e.selectedIndex].value;
            window.location.href = '/view/' + strUser;
            }
@@ -23,7 +23,7 @@ html
     H3 Manage or edit a Project
     #projectselect
       span Select a project :
-      select(id='things', name='things')
+      select(id='samples', name='samples')
         - each project in projects 
           option(value=project._id)=project.proj_name
       input#rollButton(type="button", value="Edit", onclick="viewItem()")

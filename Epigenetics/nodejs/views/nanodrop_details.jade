@@ -5,16 +5,31 @@ h1= title
 form( method="post")
   #section1
     H3 Upload a new Nanodrop file:
-    #div
+    div
       input(type="file", name="nanodrop_file", id="pickNanodropFile", required)
-    div#editArticleSubmit
+    div
       input(type="submit", value="add to project")
       input(type="button", value="Cancel", onClick="window.history.back(-1)")
   #section2
     H3 existing files for this project:
-    !{data}
     table
-      each d in data
-        tr 
-          td.trlabel1 
-            b #{d} 
+      - each d in data
+        if (d.plate_id)
+          tr 
+            td 
+              b #{d.plate_id}
+            td #{d.well}
+            td #{d.sample_id}
+            td #{d.user_id}
+            td #{d.date}
+            td #{d.time}
+            td #{d.conc} #{d.units}
+            td #{d.a260}
+            td #{d.a280}
+            td #{d.conc_factor_ngul}
+        if (d.sample__id)
+          tr
+            td
+              b #{d.sample__id}:
+              #{d.curve_type}
+             

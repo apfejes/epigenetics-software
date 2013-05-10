@@ -105,11 +105,15 @@ app.post('/input/project_edit/:id', function(req, res){
 app.get('/view/:id', function(req, res) {
   articleProvider.getPlates(req.params.id, function(error, plates) {
     articleProvider.getTransactions(req.params.id, function(error, transactions) {
-      if (error) console.log("view/:id error: ", error)
-      else articleProvider.findById(req.params.id, function(error, project) {
-          res.render('project_details.jade',{proj_name: project.proj_name, project:project, transactions:transactions, plates:plates});
+      articleProvider.getSamples(req.params.id, function(error, samples) {
+        if (error) console.log("view/:id error: ", error)
+        else articleProvider.findById(req.params.id, function(error, project) {
+            res.render('project_details.jade',{proj_name: project.proj_name, 
+                project:project, transactions:transactions, plates:plates,
+                samples:samples});
+        });
       });
-     });
+    });
   });
 });
 
@@ -154,13 +158,29 @@ app.get('/input/sample_new/:id', function(req, res) {
     );
 });
 
-app.post('/input/sample_new', function(req, res){
-    articleProvider.save('samples', {
-        sample_name: req.param('sample_name'),
-    }, function( error, docs) {
-        res.redirect('/')
+app.post('/input/sample_new/:id', function(req, res){
+    tsvreader.parseSimple(req.files.sample_file.path, function(error, data) {
+      //console.log("data: ", data)
+      if (error) console.log("app.get.sample_new (post)", error)
+      else {
+        articleProvider.saveSamples(data, req.param('projectid'),function(error, docs){
+          if (error) console.log("app.get.sample_new (post_save)", error)
+          else {
+          res.redirect('/view/' + req.param('projectid'));
+          }
+        })
+      }
     });
 });
+
+// This function requires the Sample ID.
+
+app.get('/view/sample_edit/:id', function(req, res){
+  articleProvider.sampleById(req.params.id, function(error, sample) {
+    res.render('sample_edit.jade',{title: 'Edit Sample '+ req.params.id, sample:sample});
+  });
+});
+
 
 
 //------------------------------------
@@ -314,15 +334,23 @@ app.post('/input/plate_new', function(req, res){
 //------------------------------------
 
 app.get('/input/nanodrop_new/:id', function(req, res) {
-    res.render('nanodrop_new.jade', {title: 'Nanodrop File', projectid:req.params.id}
+    res.render('nanodrop_new.jade', {title: 'Add a Nanodrop File to this project', projectid:req.params.id}
     );
 });
 
 app.post('/input/nanodrop_new/:id', function(req, res) {
     //console.log("req.files: ", req.files)
-    tsvreader.parseTsvFile(req.files, function(error, data) {
+    tsvreader.parseNanodropFile(req.files.nanodrop_file.path, function(error, data) {
       if (error) console.log("app.get.nanodrop_new (post)", error)
-      else res.render('nanodrop_details.jade', {title: 'Testing nanodrop reading', data:data});
+      else {
+        //console.log("data from Nanodrop", data._id)
+        articleProvider.saveNanodrop(data, req.param('projectid'), function(error, docs){
+          if (error) console.log("app.get.nanodrop_new (post_save)", error)
+          else {
+            res.render('nanodrop_details.jade', {title: 'Testing nanodrop reading', data:data});
+          }
+        })
+      }
     });
 });
 

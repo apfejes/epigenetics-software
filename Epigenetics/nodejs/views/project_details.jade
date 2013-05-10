@@ -1,4 +1,11 @@
+head
 link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+script(type='text/javascript')
+    function viewItem(){  
+      var e = document.getElementById("things");
+      var strUser = e.options[e.selectedIndex].value;
+      window.location.href = '/view/sample_edit/' + strUser;
+    }
 a(href='/')
   #logo
 #project
@@ -33,8 +40,12 @@ a(href='/')
   a(href="/input/project_edit/"+project._id)='Edit this project description'
 #samplesdetails
   H3 Samples:
-  br
-  a(href="/input/sample_new/"+project._id)='Add a sample to this project'
+  select(id='things', name='things')
+    - each sample in samples
+      option(value=sample._id)=sample._id
+  input#rollButton(type="button", value="Edit", onclick="viewItem()")
+  p
+  a(href="/input/sample_new/"+project._id)='Add samples to this project'
 #transactiondetails
   H3 Transactions:
   table
@@ -50,7 +61,7 @@ a(href='/')
 #nanodropdetails
   H3 NanoDrop Details:
   br
-  a(href="/input/nanodrop_new/"+project._id)='Add a nanodrop report (also creates samples)'
+  a(href="/input/nanodrop_new/"+project._id)='Add a nanodrop report (requires samples be added first)'
 #platedetails
   H3 Plates:
   - each plate in plates

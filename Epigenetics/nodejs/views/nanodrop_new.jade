@@ -3,10 +3,12 @@ a(href='/')
   #logo
 h1= title
 form( method="post", enctype="multipart/form-data")
+  input(type="hidden", name="projectid", value= projectid)
   #section1
-    H3 Upload a new Nanodrop file:
+    H3 Upload a new Nanodrop (.nd8) file:
     #div
       input(type="file", name="nanodrop_file", id="pickNanodropFile", required)
+            //text/tab-separated-values  text/plain
     div#editArticleSubmit
       input(type="submit", value="add to project")
       input(type="button", value="Cancel", onClick="window.history.back(-1)")
