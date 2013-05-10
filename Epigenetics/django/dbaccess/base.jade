@@ -1,0 +1,15 @@
+!!! 5
+html
+    head
+        title
+            block title
+                | Human Epigenetics Visualization Website
+    body
+        header
+            h1 Human Epigenetics Database Access
+            nav
+                a(href!='{% url home %}') Home
+                a(href!='{% url about %}') About Me
+        #main(role='main')
+            block content
+                p Welcome to the site.

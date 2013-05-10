@@ -17,7 +17,7 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
-import Mongo_Connector
+#import Mongo_Connector
 
 
 database_name = 'human_epigenetics'
@@ -25,10 +25,15 @@ annotation_collection = 'annotations'
 methylation_collection = 'methylation'
 sample_collection = 'samples'
 
-mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
+#doesn't work yet
+#mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
+from pymongo import Connection
+mongo = Connection('kruncher.cmmt.ubc.ca', 27017, database_name)
+
 
 def index(request):
 	introduction  = "Hello world! Welcome to the Human Epigenetics database. \n This page tests the connection to our Mongo database."
 	#pull data from the epigenetics database
-		
-	return HttpResponse(introduction)
+	db= mongo[database_name]
+	return HttpResponse(db.collection_names())
+	#return HttpResponse(introduction)
