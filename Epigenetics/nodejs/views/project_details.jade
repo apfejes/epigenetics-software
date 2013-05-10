@@ -60,6 +60,13 @@ a(href='/')
   a(href="/input/payment_new/"+project._id)='Add a payment record'
 #nanodropdetails
   H3 NanoDrop Details:
+  table
+    - each nanodrop in nanodrops
+      tr 
+        td 
+          b #{nanodrop.filename} 
+        td #{nanodrop.createdAt } 
+        td #{nanodrop.lastupdate } 
   br
   a(href="/input/nanodrop_new/"+project._id)='Add a nanodrop report (requires samples be added first)'
 #platedetails

@@ -219,6 +219,21 @@ ArticleProvider.prototype.getIDbyName = function(name, callback) {
     });
 };
 
+  //---- 
+  //Retrieve only the nanodrop options
+  //---- 
+  
+ArticleProvider.prototype.getNanodrop = function(id, callback) {
+    console.log("looking up projectid:", id)
+    this.getDBQuery('nanodrop', {projectid: id}, {}, function(error, id) {
+      if( error ) {
+        console.log("nanodrop-lookup error: ", error);
+        callback(error);
+      } else callback(null, id)
+    });
+};
+
+
 //__________________________________
 //
 // SAVE FUNCTION
@@ -312,12 +327,15 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
 // SAVE NANODROP
 //__________________________________
 
-ArticleProvider.prototype.saveNanodrop = function(sampleids, project_id, callback) {
-  //console.log(project_id, "  ", sampleids);
+ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_id, callback) {
   var date = new Date();
+  this.save('nanodrop', {filename:filename,projectid:project_id, lastupdate:date}, 
+    function(error) {  //the callback function
+      if( error ) callback(error)
+    }
+  )
+  
   for( var i =0;i< sampleids.length;i++ ) {
-    console.log(i, ' of  ', sampleids.length)
-    
     var selected= {}
 	if (sampleids[i].sample_id.indexOf("-") != -1) {
 	  selected.sampleid = sampleids[i].sample_id.substring(0,sampleids[i].sample_id.indexOf("-"))
@@ -339,16 +357,15 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, project_id, callbac
 	selected.path = sampleids[i].path
 	selected.nanodropver = sampleids[i].nanodropver
 	selected.firmware = sampleids[i].firmware
+	selected.lastupdate = date
 	//console.log("query: ", {projectid: project_id, sampleid: selected.sampleid, sample_num: selected.sample_num})
 	this.updateDBraw('samples', {projectid: project_id, sampleid: selected.sampleid, sample_num: selected.sample_num}, {$set: selected}, false,
       function(error) {  //the callback function
-        if( error ) {
-          console.log("saveNanodrop error: ", error);
-          callback(error)
-        } 
+        if( error ) callback(error)
       }
     );
   }
+  
   callback();
 };
 

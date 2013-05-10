@@ -103,14 +103,18 @@ app.post('/input/project_edit/:id', function(req, res){
     //----
 
 app.get('/view/:id', function(req, res) {
-  articleProvider.getPlates(req.params.id, function(error, plates) {
-    articleProvider.getTransactions(req.params.id, function(error, transactions) {
-      articleProvider.getSamples(req.params.id, function(error, samples) {
-        if (error) console.log("view/:id error: ", error)
-        else articleProvider.findById(req.params.id, function(error, project) {
-            res.render('project_details.jade',{proj_name: project.proj_name, 
-                project:project, transactions:transactions, plates:plates,
-                samples:samples});
+
+  articleProvider.getNanodrop(req.params.id, function(error, nanodrops) {
+    console.log("nanodrops:", nanodrops)
+    articleProvider.getPlates(req.params.id, function(error, plates) {
+      articleProvider.getTransactions(req.params.id, function(error, transactions) {
+        articleProvider.getSamples(req.params.id, function(error, samples) {
+          if (error) console.log("view/:id error: ", error)
+          else articleProvider.findById(req.params.id, function(error, project) {
+              res.render('project_details.jade',{proj_name: project.proj_name, 
+                  project:project, transactions:transactions, plates:plates,
+                  samples:samples, nanodrops:nanodrops});
+          });
         });
       });
     });
@@ -344,10 +348,9 @@ app.post('/input/nanodrop_new/:id', function(req, res) {
     tsvreader.parseNanodropFile(req.files.nanodrop_file.path, function(error, data) {
       if (error) console.log("app.get.nanodrop_new (post)", error)
       else {
-        articleProvider.saveNanodrop(data, req.param('projectid'), function(error, docs){
+        articleProvider.saveNanodrop(data,req.files.nanodrop_file.name, req.param('projectid'), function(error, docs){
           if (error) console.log("app.get.nanodrop_new (post_save)", error)
           else {
-            alert("Nanodrop file successfully imported");
             res.redirect('/view/' + req.param('projectid'));
           }
         })
