@@ -3,4 +3,5 @@
 *.pyo
 *.*~
 *__pycache__*
-
+*.py.save
+*.py.save.1

@@ -1,15 +1,31 @@
 !!! 5
 html
     head
-        title
-            block title
-                | Human Epigenetics Visualization Website
+        title #{title} - Human Epigenetics Visualization Website
+        
+        style
+            h1, h2, h3 { font-size: 32px; color: #2b34e4; }
+            h2 { font-size: 18px; color: #2b34e4; }
+            h3 { font-size: 14px; }
+            footer {
+               font-family: Verdana;
+               font-size: 10px;
+               background: #eee;
+               }
+            main {
+               font-family: Verdana;
+               font-size: 14px;
+               }
+            a:hover { color: #F76F76; }
+            a { color: #f38227 }
     body
         header
             h1 Human Epigenetics Database Access
             nav
-                a(href!='{% url home %}') Home
-                a(href!='{% url about %}') About Me
-        #main(role='main')
+                a(href!='{% url 'collections' %}') Collections
+        main
             block content
-                p Welcome to the site.
+        sidebar
+            block sidebar
+        footer
+            p Running from the Kobor Lab @ the CMMT
