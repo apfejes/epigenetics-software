@@ -30,14 +30,24 @@ ArticleProvider.prototype.getDBData= function(collection_name, callback) {
 //__________________________________
 
 
-ArticleProvider.prototype.getDBQuery= function(collection_name, query_string, fields, callback) {
-  this.db.collection(collection_name).find(query_string, fields).toArray(function(e, results) {
-    if (e) {
-      console.log("getDBQuery error:", e)
-      callback(e)
-    }
-    else callback(null, results)
-  })
+ArticleProvider.prototype.getDBQuery= function(collection_name, query_string, fields, sort_field, callback) {
+  if (sort_field != null && sort_field != {}) {
+    this.db.collection(collection_name).find(query_string, fields).sort(sort_field).toArray(function(e, results) {
+      if (e) {
+        console.log("getDBQuery error:", e)
+        callback(e)
+      }
+      else callback(null, results)
+    })
+  } else {
+   this.db.collection(collection_name).find(query_string, fields).toArray(function(e, results) {
+      if (e) {
+        console.log("getDBQuery error:", e)
+        callback(e)
+      }
+      else callback(null, results)
+    })
+  }
 };
 
 //__________________________________
@@ -129,7 +139,7 @@ ArticleProvider.prototype.plateById = function(id, callback) {
 };
 
 ArticleProvider.prototype.sampleById = function(id, num, callback) {
-    this.getDBQuery('samples', {sampleid: id, sample_num:num}, {}, function(error, result) {
+    this.getDBQuery('samples', {sampleid: id, sample_num:num}, {}, {sampleid:1}, function(error, result) {
       if( error ) {
         console.log("sampleById error:", e)
         callback(error)
@@ -142,7 +152,7 @@ ArticleProvider.prototype.sampleById = function(id, num, callback) {
   //---- 
 
 ArticleProvider.prototype.project_status = function(callback) {
-    this.getDBQuery('xlat', {xlat: "status"}, {desc:1, _id:0}, function(error, project_status) {
+    this.getDBQuery('xlat', {xlat: "status"}, {desc:1, _id:0}, {}, function(error, project_status) {
       if( error ) {
         console.log("project-status error: ", error);
         callback(error);
@@ -156,7 +166,7 @@ ArticleProvider.prototype.project_status = function(callback) {
   //---- 
   
 ArticleProvider.prototype.transaction_type = function(callback) {
-    this.getDBQuery('xlat', {xlat: "transaction_type"}, {desc:1, _id:0}, function(error, transaction) {
+    this.getDBQuery('xlat', {xlat: "transaction_type"}, {desc:1, _id:0}, {}, function(error, transaction) {
       if( error ) {
         console.log("transaction-type error: ", error);
         callback(error);
@@ -169,7 +179,7 @@ ArticleProvider.prototype.transaction_type = function(callback) {
   //---- 
   
 ArticleProvider.prototype.getTransactions = function(id, callback) {
-    this.getDBQuery('transactions', {projectid: id}, {}, function(error, transactions) {
+    this.getDBQuery('transactions', {projectid: id}, {}, {}, function(error, transactions) {
       if( error ) {
         console.log("transaction-type error: ", error);
         callback(error);
@@ -182,7 +192,7 @@ ArticleProvider.prototype.getTransactions = function(id, callback) {
   //---- 
   
 ArticleProvider.prototype.getPlates = function(id, callback) {
-    this.getDBQuery('plates', {projectid: id}, {}, function(error, transactions) {
+    this.getDBQuery('plates', {projectid: id}, {}, {}, function(error, transactions) {
       if( error ) {
         console.log("transaction-type error: ", error);
         callback(error);
@@ -196,7 +206,7 @@ ArticleProvider.prototype.getPlates = function(id, callback) {
   
 
 ArticleProvider.prototype.getSamples = function(id, callback) {
-    this.getDBQuery('samples', {projectid: id}, {}, function(error, samples) {
+    this.getDBQuery('samples', {projectid: id}, {}, {sampleid:1}, function(error, samples) {
       if( error ) {
         console.log("samples-type error: ", error);
         callback(error);
@@ -211,7 +221,7 @@ ArticleProvider.prototype.getSamples = function(id, callback) {
   //---- 
   
 ArticleProvider.prototype.getIDbyName = function(name, callback) {
-    this.getDBQuery('projects', {proj_name: name}, {_id:1}, function(error, id) {
+    this.getDBQuery('projects', {proj_name: name}, {_id:1}, {}, function(error, id) {
       if( error ) {
         console.log("id-lookup error: ", error);
         callback(error);
@@ -224,8 +234,7 @@ ArticleProvider.prototype.getIDbyName = function(name, callback) {
   //---- 
   
 ArticleProvider.prototype.getNanodrop = function(id, callback) {
-    console.log("looking up projectid:", id)
-    this.getDBQuery('nanodrop', {projectid: id}, {}, function(error, id) {
+    this.getDBQuery('nanodrop', {projectid: id}, {}, {}, function(error, id) {
       if( error ) {
         console.log("nanodrop-lookup error: ", error);
         callback(error);
@@ -329,7 +338,7 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
 
 ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_id, callback) {
   var date = new Date();
-  this.save('nanodrop', {filename:filename,projectid:project_id, lastupdate:date}, 
+  this.save('nanodrop', {filename:filename,projectid:project_id, last_udated:date}, 
     function(error) {  //the callback function
       if( error ) callback(error)
     }
@@ -357,7 +366,7 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_i
 	selected.path = sampleids[i].path
 	selected.nanodropver = sampleids[i].nanodropver
 	selected.firmware = sampleids[i].firmware
-	selected.lastupdate = date
+	selected.last_updated = date
 	//console.log("query: ", {projectid: project_id, sampleid: selected.sampleid, sample_num: selected.sample_num})
 	this.updateDBraw('samples', {projectid: project_id, sampleid: selected.sampleid, sample_num: selected.sample_num}, {$set: selected}, false,
       function(error) {  //the callback function

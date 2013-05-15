@@ -5,21 +5,77 @@ h1= title
 form( method="post")
 #section1
   table
-    tr
-      td Sample name
-      td sample number
-      td Created
-      td last update
-      td projectid
     - each sample in samples
       tr
-        td.label
-          b #{sample.sampleid}
-        td #{sample.sample_num}
-        td #{sample.created_at}  
-        td #{sample.last_updated}
-        td #{sample.projectid}
-
-
-
-    
+        td
+          b Sample Name:
+        td #{sample.sampleid} - #{sample.sample_num} 
+      tr  
+        td 
+          b Sample Created:
+        td
+          !{sample.created_at}
+      tr
+        td
+          b Last Updated:
+        td
+          !{sample.last_updated}
+      tr
+        td
+          b Project ID:
+        td
+          !{sample.projectid}
+      if (sample.a230)
+        tr 
+          td 
+            b NanoDrop Information
+        tr
+          td.indent1
+            b A230: 
+          td
+            !{sample.a230}
+        tr
+          td.indent1
+            b A260: 
+          td
+            !{sample.a260}
+        tr
+          td.indent1
+            b A280:
+          td 
+            !{sample.a280}
+        tr
+          td.indent1
+            b Sample Conc.:
+          td 
+            !{sample.conc} !{sample.units}
+        tr 
+          td.indent1
+            b Nanodrop Date/Time:
+          td
+            !{sample.date} - !{sample.time}
+        tr
+          td.indent1
+            b Nanodrop Firmware:
+          td
+             !{sample.firmware}
+        tr
+          td.indent1
+            b Mod:
+          td 
+            !{sample.mod}
+        tr
+          td.indent1
+            b Sample Type:
+          td
+            !{sample.na_type}
+        tr
+          td.indent1
+            b Nanodrop Version:
+          td
+            !{sample.nanodropver}
+        tr
+          td.indent1
+            b Path:
+          td
+            !{sample.path}
