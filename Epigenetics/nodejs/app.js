@@ -195,23 +195,6 @@ app.get('/view/sample_spreadsheet/:id', function(req, res){
 
 app.get('/view/sample_spreadsheet_edit/:id', function(req, res){
   articleProvider.getSamples(req.params.id, function(error, samples) {
-    for( var i =0;i< samples.length;i++ ) {
-      s = samples[i]
-      if (s.a260) {
-        s.a260_280 = (s.a260 /s.a280).toFixed(3)
-        s.a260_230 = (s.a260 /s.a230).toFixed(3)
-      } else {
-        s.a260_280 = null
-        s.a260_230 = null
-      }
-    
-      if (samples.volume && samples.conc) {
-        samples.total_na = (samples.volume * samples.conc).toFixed(3)
-      } else {
-        samples.total_na = null
-      }
-    }
-    
     if (error) console.log("sample_spreadsheet/:id error: ", error)
     else res.render('sample_spreadsheet_edit.jade',{samples:samples});
   });
@@ -376,11 +359,15 @@ app.get('/input/nanodrop_new/:id', function(req, res) {
 
 app.post('/input/nanodrop_new/:id', function(req, res) {
     tsvreader.parseNanodropFile(req.files.nanodrop_file.path, function(error, data) {
-      if (error) console.log("app.get.nanodrop_new (post)", error)
-      else {
+      if (error) {
+        console.log("app.get.nanodrop_new (post)", error)
+        res.render('nanodrop_error.jade',{error:error});
+      } else {
         articleProvider.saveNanodrop(data,req.files.nanodrop_file.name, req.param('projectid'), function(error, docs){
-          if (error) console.log("app.get.nanodrop_new (post_save)", error)
-          else {
+          if (error) { 
+            console.log("app.get.nanodrop_new (post_save)", error)
+            res.render('nanodrop_error.jade',{error:error});
+          } else {
             res.redirect('/view/' + req.param('projectid'));
           }
         })

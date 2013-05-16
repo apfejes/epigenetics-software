@@ -132,6 +132,7 @@ Tsvreader.prototype.parseNanodropFile = function(path, callback){
   var c = new Array(), header = [], buffer = "", refresh_header = true
   var iteration = 0
   var Mod = "", Path = "", Sw = "", Fw = ""
+  var hash = {}; list =[]
   
   stream.addListener('data', function(data){
     buffer+=data.toString()
@@ -162,8 +163,18 @@ Tsvreader.prototype.parseNanodropFile = function(path, callback){
            rec.path = Path;
            rec.nanodropver = Sw;
            rec.firmware = Fw;
+           if (rec.units == 'ng/ul') {
+             rec.units = 'ng/µl';
+           }
+           
            if (rec.a260 >0 && rec.conc > 0 && rec.a280 >0) {
-             c[iteration] = rec
+             if (rec.sample_id in hash) {
+                list.push(rec.sample_id)
+               //throw new Error('Duplicate records in Nanodrop file: ' + rec.sample_id)
+             } else {
+               hash[rec.sample_id] = true
+             }
+             c[iteration] = rec;
              iteration++
            }
          }
@@ -172,8 +183,11 @@ Tsvreader.prototype.parseNanodropFile = function(path, callback){
     buffer = parts[parts.length-1]
   })
   stream.addListener('end', function (error, data) {
-    //console.log("Calling Back with ", c.length, " parts")
-    callback(null, c) 
+    if (list.length >0) {
+      callback(list)
+    } else {
+      callback(null, c)
+    } 
   })
   
 

@@ -41,8 +41,10 @@ form( method="post")
               | ---
           td.lines #{sample.a260}
           td.lines #{sample.a280}
-          td.lines #{sample.a260_280}
-          td.lines #{sample.a260_230}
+          - var a260_280 = sample.a260/sample.a280
+          td.lines !{a260_280.toFixed(3)}
+          - var a260_230 = sample.a260/sample.a230
+          td.lines !{a260_230.toFixed(3)}
           if (sample.last_cc)
             td.lines
               #{sample.last_cc}

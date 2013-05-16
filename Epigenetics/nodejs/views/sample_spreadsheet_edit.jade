@@ -36,12 +36,18 @@ form( method="post")
             else
               input(type="date", name="dna_extract_date")
           if (sample.nanodrop)
-            - var mostcurrent = sample.nanodrop[0].date
-              - for n in sample.nanodrop 
-                - if (n.date > mostcurrent) 
-                   - mostcurrent = n.date
+            - var best_date = sample.nanodrop[0].date
+            - var best_time = sample.nanodrop[0].time
+            - for n in sample.nanodrop 
+              - if (n.date > best_date) 
+                 - best_date = n.date
+                 - best_time = n.time
+              - else if (n.date == best_date)
+                - if (n.time > best_time)
+                  - best_date = n.date
+                  - best_time = n.time
             - each n in sample.nanodrop            
-              - if (n.date == mostcurrent)
+              - if (n.date == best_date  && n.time == best_time)
                  td.lines #{n.conc} #{n.units}
                  td.lines #{n.volume}
                  td.lines #{n.a260}
@@ -51,14 +57,6 @@ form( method="post")
                  - var a260_230 = n.a260/n.a230
                  td.lines !{a260_230.toFixed(3)}
                  td.lines #{n.total_na}
-               else
-                 td.lines
-                 td.lines
-                 td.lines
-                 td.lines
-                 td.lines
-                 td.lines
-                 td.lines
           else
              td.lines
              td.lines
