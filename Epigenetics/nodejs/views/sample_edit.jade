@@ -25,57 +25,64 @@ form( method="post")
           b Project ID:
         td
           !{sample.projectid}
-      if (sample.a230)
+
+      if (sample.nanodrop)
+      - each n, i in sample.nanodrop 
         tr 
-          td 
-            b NanoDrop Information
-        tr
-          td.indent1
-            b A230: 
-          td
-            !{sample.a230}
-        tr
-          td.indent1
-            b A260: 
-          td
-            !{sample.a260}
-        tr
-          td.indent1
-            b A280:
-          td 
-            !{sample.a280}
-        tr
-          td.indent1
-            b Sample Conc.:
-          td 
-            !{sample.conc} !{sample.units}
-        tr 
-          td.indent1
-            b Nanodrop Date/Time:
-          td
-            !{sample.date} - !{sample.time}
-        tr
-          td.indent1
-            b Nanodrop Firmware:
-          td
-             !{sample.firmware}
-        tr
-          td.indent1
-            b Mod:
-          td 
-            !{sample.mod}
+          td(colspan=2)
+            b NanoDrop Record # #{i+1}
+            | - !{n.date} - !{n.time}
         tr
           td.indent1
             b Sample Type:
           td
-            !{sample.na_type}
+            !{n.na_type}
         tr
           td.indent1
-            b Nanodrop Version:
+            b Sample Conc.:
+          td 
+            !{n.conc} !{n.units}
+        tr
+          td.indent1
+            b A230: 
           td
-            !{sample.nanodropver}
+            !{n.a230}
+        tr
+          td.indent1
+            b A260: 
+          td
+            !{n.a260}
+        tr
+          td.indent1
+            b A280:
+          td 
+            !{n.a280}
+        
+        tr
+          td.indent1
+            b a260/280
+          td
+            - var a = n.a260/n.a280 
+              !{a.toFixed(3)}
+        tr
+          td.indent1
+            b a260/230
+          td
+            - var a = n.a260/n.a230 
+              !{a.toFixed(3)}
         tr
           td.indent1
             b Path:
           td
-            !{sample.path}
+            !{n.path}
+        tr
+          td.indent1
+            b Nanodrop Version:
+          td
+            !{n.nanodropver}
+        tr
+          td.indent1
+            b Nanodrop Firmware:
+          td
+             !{n.firmware}
+

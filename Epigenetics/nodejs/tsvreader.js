@@ -162,8 +162,10 @@ Tsvreader.prototype.parseNanodropFile = function(path, callback){
            rec.path = Path;
            rec.nanodropver = Sw;
            rec.firmware = Fw;
-           c[iteration] = rec
-           iteration++
+           if (rec.a260 >0 && rec.conc > 0 && rec.a280 >0) {
+             c[iteration] = rec
+             iteration++
+           }
          }
       }
     })

@@ -27,6 +27,18 @@ table, td{
   border-collapse:collapse;
 }
 
+.redwlines {
+  text-align:center;
+  background-color: #E65B77;
+  border: 1px solid #aaaaaa;
+  border-spacing: 0px;
+  border-collapse:collapse;
+}
+
+.nanodropheader {
+  padding-left:1em;
+  
+}
 
 .r {
   text-align:right;

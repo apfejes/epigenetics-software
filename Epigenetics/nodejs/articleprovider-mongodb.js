@@ -55,20 +55,20 @@ ArticleProvider.prototype.getDBQuery= function(collection_name, query_string, fi
 // UPDATE API
 //__________________________________
 
-ArticleProvider.prototype.updateDB= function(collection_name, id, query_string, upsert, callback) {
+ArticleProvider.prototype.updateDBid= function(collection_name, id, query_string, upsert, callback) {
   var upsert_string
   if (upsert == true) upsert_string = '{upsert:true}'
   else upsert_string = '{}'
   this.db.collection(collection_name).update({_id:new ObjectID(id)}, query_string, upsert_string , function(e, results) {
     if (e) { 
-      console.log("updateDB error:", e)
+      console.log("updateDBid error:", e)
       callback(e)
     }
     else callback(null, results)
   })
 };
 
-ArticleProvider.prototype.updateDBraw= function(collection_name, update_criteria, query_string, upsert, callback) {
+ArticleProvider.prototype.updateDB= function(collection_name, update_criteria, query_string, upsert, callback) {
   var upsert_string
   if (upsert == true) upsert_string = '{upsert:true}'
   else upsert_string = '{}'
@@ -288,7 +288,7 @@ ArticleProvider.prototype.upsert = function(collection_name, keys, data, callbac
 
 ArticleProvider.prototype.update = function(collection, id, project, callback) {
     project.last_updated = new Date();
-    this.updateDB(collection, id, {$set: project}, false, function(error, c) {
+    this.updateDBid(collection, id, {$set: project}, false, function(error, c) {
       if( error ) callback(error)
       else callback(null, c);
     });
@@ -338,12 +338,6 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
 
 ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_id, callback) {
   var date = new Date();
-  this.save('nanodrop', {filename:filename,projectid:project_id, last_udated:date}, 
-    function(error) {  //the callback function
-      if( error ) callback(error)
-    }
-  )
-  
   for( var i =0;i< sampleids.length;i++ ) {
     var selected= {}
 	if (sampleids[i].sample_id.indexOf("-") != -1) {
@@ -367,14 +361,12 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_i
 	selected.nanodropver = sampleids[i].nanodropver
 	selected.firmware = sampleids[i].firmware
 	selected.last_updated = date
-	//console.log("query: ", {projectid: project_id, sampleid: selected.sampleid, sample_num: selected.sample_num})
-	this.updateDBraw('samples', {projectid: project_id, sampleid: selected.sampleid, sample_num: selected.sample_num}, {$set: selected}, false,
+	this.updateDB('samples', {projectid: project_id, sampleid: selected.sampleid, sample_num: selected.sample_num}, {$push: {nanodrop: selected}}, false,
       function(error) {  //the callback function
         if( error ) callback(error)
       }
     );
   }
-  
   callback();
 };
 

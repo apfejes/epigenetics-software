@@ -188,6 +188,13 @@ app.get('/view/sample_edit/:id', function(req, res){
 
 app.get('/view/sample_spreadsheet/:id', function(req, res){
   articleProvider.getSamples(req.params.id, function(error, samples) {
+    if (error) console.log("sample_spreadsheet/:id error: ", error)
+    else res.render('sample_spreadsheet.jade',{samples:samples});
+  });
+});
+
+app.get('/view/sample_spreadsheet_edit/:id', function(req, res){
+  articleProvider.getSamples(req.params.id, function(error, samples) {
     for( var i =0;i< samples.length;i++ ) {
       s = samples[i]
       if (s.a260) {
@@ -206,7 +213,7 @@ app.get('/view/sample_spreadsheet/:id', function(req, res){
     }
     
     if (error) console.log("sample_spreadsheet/:id error: ", error)
-    else res.render('sample_spreadsheet.jade',{samples:samples});
+    else res.render('sample_spreadsheet_edit.jade',{samples:samples});
   });
 });
 

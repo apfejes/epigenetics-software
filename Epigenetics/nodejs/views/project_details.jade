@@ -49,7 +49,11 @@ a(href='/')
     li 
       a(href="/input/sample_new/"+project._id)='Add samples to this project'
     li
-      a(href="/view/sample_spreadsheet/"+project._id)='Manage samples in this project'
+      a(href="/input/nanodrop_new/"+project._id)='Add a nanodrop report to this project (requires samples be added first)'
+    li
+      a(href="/view/sample_spreadsheet_edit/"+project._id)='Edit samples in this project'
+    li
+      a(href="/view/sample_spreadsheet/"+project._id)='Proceed to move samples to plates'
   
 #transactiondetails
   H3 Transactions:
@@ -64,18 +68,6 @@ a(href='/')
   ul
     li
       a(href="/input/payment_new/"+project._id)='Add a payment record'
-#nanodropdetails
-  H3 NanoDrop Details:
-  table
-    - each nanodrop in nanodrops
-      tr 
-        td 
-          b #{nanodrop.filename} 
-        td #{nanodrop.createdAt } 
-        td #{nanodrop.lastupdate } 
-  ul
-    li
-      a(href="/input/nanodrop_new/"+project._id)='Add a nanodrop report (requires samples be added first)'
 #platedetails
   H3 Plates:
   - each plate in plates

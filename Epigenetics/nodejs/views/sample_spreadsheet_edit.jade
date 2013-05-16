@@ -1,0 +1,77 @@
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+a(href='/')
+  #logo
+h1 Edit Samples
+form( method="post")
+  #section1
+    p Notes: Refreshing this page will reset the proceed flags.
+    input(type="submit", value="Proceed")
+    input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
+    table.lines
+      tr
+        td.lines SampleID
+        td.lines Flag
+        td.lines DNA Extract Date
+        td.lines conc
+        td.lines Volume (ul)
+        td.lines A260
+        td.lines A280
+        td.lines A260/A280
+        td.lines A260/A230
+        td.lines Total N.A.
+        td.lines Notes
+        td.lines Created (DMY)
+      - each sample in samples
+        tr
+          td.lines 
+            b #{sample.sampleid}-#{sample.sample_num}  
+          td.lines 
+            if (sample.proceed_flag)
+              input(type="checkbox", name="proceed_flag", value=sample.proceed_flag)
+            else
+              input(type="checkbox", name="proceed_flag", checked="checked")
+          td.lines #{sample.dna_extract_date}
+            if (sample.dna_extract_date) 
+              input(type="date", name="dna_extract_date", value =sample.dna_extract_date)
+            else
+              input(type="date", name="dna_extract_date")
+          if (sample.nanodrop)
+            - var mostcurrent = sample.nanodrop[0].date
+              - for n in sample.nanodrop 
+                - if (n.date > mostcurrent) 
+                   - mostcurrent = n.date
+            - each n in sample.nanodrop            
+              - if (n.date == mostcurrent)
+                 td.lines #{n.conc} #{n.units}
+                 td.lines #{n.volume}
+                 td.lines #{n.a260}
+                 td.lines #{n.a280}
+                 - var a260_280 = n.a260/n.a280
+                 td.lines !{a260_280.toFixed(3)}
+                 - var a260_230 = n.a260/n.a230
+                 td.lines !{a260_230.toFixed(3)}
+                 td.lines #{n.total_na}
+               else
+                 td.lines
+                 td.lines
+                 td.lines
+                 td.lines
+                 td.lines
+                 td.lines
+                 td.lines
+          else
+             td.lines
+             td.lines
+             td.lines
+             td.lines
+             td.lines
+             td.lines
+             td.lines
+          td.lines
+            if (sample.notes)
+                input(type="text", width=50, name="notes", value=sample.notes)
+              else
+                input(type="text", width=50, name="notes")
+          td.lines #{sample.created_at.getDate()}-#{sample.created_at.getMonth()}-#{sample.created_at.getFullYear()} #{sample.created_at.getHours()}:#{sample.created_at.getMinutes()} 
+    input(type="submit", value="Proceed")
+    input(type="button", value="Discard Edits", onClick="window.history.back(-1)")

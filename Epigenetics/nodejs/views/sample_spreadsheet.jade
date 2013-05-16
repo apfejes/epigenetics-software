@@ -1,7 +1,7 @@
 link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
 a(href='/')
   #logo
-h1 Edit Samples
+h1 Begin Array Process
 form( method="post")
   #section1
     p Notes: Refreshing this page will reset the proceed flags.
@@ -33,18 +33,22 @@ form( method="post")
               input(type="checkbox", name="proceed_flag", checked="checked")
           td.lines #{sample.dna_extract_date}
           td.lines #{sample.conc} #{sample.units}
-          td.lines 
-            if (sample.volume)
+          if (sample.volume)
+            td.lines
               #{sample.volume}
-            else 
-              input(type="text", size=5, name="volume")
+          else
+            td.redwlines
+              | ---
           td.lines #{sample.a260}
           td.lines #{sample.a280}
           td.lines #{sample.a260_280}
           td.lines #{sample.a260_230}
-          td.lines 
-            if (sample.last_cc)
+          if (sample.last_cc)
+            td.lines
               #{sample.last_cc}
+          else
+            td.redwlines
+              | ---
           td.lines #{sample.total_na}
               
           td.lines #{sample.notes}
