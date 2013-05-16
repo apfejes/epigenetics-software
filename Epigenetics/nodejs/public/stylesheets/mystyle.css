@@ -1,9 +1,9 @@
 
 #logo {
   display: block;
-  width: 400px;
-  height: 100px;
-  background-image: url("/images/KoborLims.png");
+  width: 1000px;
+  height:125px;
+  background-image: url("/images/KoborLims2.png");
   //border: 1px solid red;
   //padding:0px 20px 10px 10px; 
   margin:5px 5px 5px 0px;
@@ -18,8 +18,15 @@ body {
 }
 
 table, td{
-font-size: 13px;
+  font-size: 13px;
 }
+
+.lines{
+  border: 1px solid #aaaaaa;
+  border-spacing: 0px;
+  border-collapse:collapse;
+}
+
 
 .r {
   text-align:right;
@@ -35,6 +42,10 @@ font-size: 13px;
 
 .label {
   width:160px;
+}
+
+.indent1 {
+  padding-left:2em;
 }
 
 h3 {
@@ -196,4 +207,3 @@ background-color: LightSteelBlue;
 #section a:hover   {
   text-decoration: underline;
   color: Black;
-

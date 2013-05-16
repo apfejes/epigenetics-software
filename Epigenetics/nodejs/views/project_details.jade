@@ -36,16 +36,21 @@ a(href='/')
       td#role
         b Project Type: Name: 
       td #{project.role}
-  br
-  a(href="/input/project_edit/"+project._id)='Edit this project description'
+  ul
+    li
+      a(href="/input/project_edit/"+project._id)='Edit this project description'
 #samplesdetails
   H3 Samples:
   select(id='things', name='things')
     - each sample in samples
       option(value=sample.sampleid + "-" + sample.sample_num)=sample.sampleid + "-" + sample.sample_num
   input#rollButton(type="button", value="Edit", onclick="viewItem()")
-  p
-  a(href="/input/sample_new/"+project._id)='Add samples to this project'
+  ul
+    li 
+      a(href="/input/sample_new/"+project._id)='Add samples to this project'
+    li
+      a(href="/view/sample_spreadsheet/"+project._id)='Manage samples in this project'
+  
 #transactiondetails
   H3 Transactions:
   table
@@ -56,8 +61,9 @@ a(href='/')
         td.trlabel2 #{transaction.amt } 
         td.trdate #{transaction.date } 
       //#{transaction._id} #{transaction.projectid }
-  br
-  a(href="/input/payment_new/"+project._id)='Add a payment record'
+  ul
+    li
+      a(href="/input/payment_new/"+project._id)='Add a payment record'
 #nanodropdetails
   H3 NanoDrop Details:
   table
@@ -67,15 +73,17 @@ a(href='/')
           b #{nanodrop.filename} 
         td #{nanodrop.createdAt } 
         td #{nanodrop.lastupdate } 
-  br
-  a(href="/input/nanodrop_new/"+project._id)='Add a nanodrop report (requires samples be added first)'
+  ul
+    li
+      a(href="/input/nanodrop_new/"+project._id)='Add a nanodrop report (requires samples be added first)'
 #platedetails
   H3 Plates:
   - each plate in plates
      p 
        a(href="/input/plate_edit/"+plate._id)= plate._id 
-  br
-  a(href="/input/plate_new/"+project._id)='Add a plate to this experiment'
+  ul
+    li
+      a(href="/input/plate_new/"+project._id)='Add a plate to this experiment'
 
   
   

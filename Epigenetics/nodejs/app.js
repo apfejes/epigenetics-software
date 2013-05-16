@@ -105,7 +105,6 @@ app.post('/input/project_edit/:id', function(req, res){
 app.get('/view/:id', function(req, res) {
 
   articleProvider.getNanodrop(req.params.id, function(error, nanodrops) {
-    console.log("nanodrops:", nanodrops)
     articleProvider.getPlates(req.params.id, function(error, plates) {
       articleProvider.getTransactions(req.params.id, function(error, transactions) {
         articleProvider.getSamples(req.params.id, function(error, samples) {
@@ -184,6 +183,30 @@ app.get('/view/sample_edit/:id', function(req, res){
   var num = id.substring(id.indexOf("-")+1)
   articleProvider.sampleById(sam, num, function(error, samples) {
     res.render('sample_edit.jade',{title: 'Edit Sample '+ sam + '-' + num, samples:samples});
+  });
+});
+
+app.get('/view/sample_spreadsheet/:id', function(req, res){
+  articleProvider.getSamples(req.params.id, function(error, samples) {
+    for( var i =0;i< samples.length;i++ ) {
+      s = samples[i]
+      if (s.a260) {
+        s.a260_280 = (s.a260 /s.a280).toFixed(3)
+        s.a260_230 = (s.a260 /s.a230).toFixed(3)
+      } else {
+        s.a260_280 = null
+        s.a260_230 = null
+      }
+    
+      if (samples.volume && samples.conc) {
+        samples.total_na = (samples.volume * samples.conc).toFixed(3)
+      } else {
+        samples.total_na = null
+      }
+    }
+    
+    if (error) console.log("sample_spreadsheet/:id error: ", error)
+    else res.render('sample_spreadsheet.jade',{samples:samples});
   });
 });
 
