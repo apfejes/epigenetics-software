@@ -18,7 +18,7 @@ def ExonCoordinates(Exons):
     t0=time()
     for exon in Exons:
         coords = str(exon.Location).split(":")[3].split("-")
-        coords = map(int,coords)
+        coords = map(float,coords)
         Coordinates.append(coords)
     print "Query time: %.3f" % (time()-t0), "s."
     return Coordinates
