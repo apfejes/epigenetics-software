@@ -206,7 +206,7 @@ app.get('/view/sample_spreadsheet/:id', function(req, res){
     }
     
     if (error) console.log("sample_spreadsheet/:id error: ", error)
-    else res.render('sample_spreadsheet.jade',{samples:(samples.sort())});
+    else res.render('sample_spreadsheet.jade',{samples:samples});
   });
 });
 
