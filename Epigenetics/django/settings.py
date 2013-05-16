@@ -99,8 +99,9 @@ SECRET_KEY = '=f!)%_2dn439ethd_(%lx$brs%t@$ucybaox(f0)2@szv(3)!4'
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     ('pyjade.ext.django.Loader',(
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
+                                 'django.template.loaders.filesystem.Loader',
+                                 'django.template.loaders.app_directories.Loader',
+                                 'django.template.loaders.eggs.Loader',
     )),
 )
 
@@ -114,7 +115,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'mysite.urls'
+ROOT_URLCONF = 'urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'mysite.wsgi.application'
@@ -123,6 +124,8 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    "/home/sperez/epigenetics-software/Epigenetics/django/dbaccess",
+    "/home/sperez/epigenetics-software/Epigenetics/django/dbaccess/jtemplate"
 )
 
 #Disabled auth, session and admin in order to use Mongodb

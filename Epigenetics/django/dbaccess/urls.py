@@ -1,13 +1,12 @@
 from django.conf.urls import patterns, include, url
-from django.views.generic import TemplateView
-
+#from django.views.generic import TemplateView
 import views
 
+
+
 urlpatterns = patterns('',
-	url(r'^$',views.index,name='index'),
-	url(r'^collections/$', 
-		TemplateView, 
-		{'template': 'collections.jade'}, 
-		name='collections'	
-		)
-)
+#	url(r'^home$',views.index,name='index'),
+	url(r'^$', views.my_view, name='base'),
+	url(r'^collections/', views.view_collections, name='collections')
+	)
+	
