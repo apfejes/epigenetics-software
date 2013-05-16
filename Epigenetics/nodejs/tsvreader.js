@@ -128,11 +128,11 @@ Tsvreader.prototype.parseSimple = function(path, callback){
 };
 
 Tsvreader.prototype.parseNanodropFile = function(path, callback){
-  var stream = fs.createReadStream(path)
+  var stream = fs.createReadStream(path, {'bufferSize': 12 * 1024})
   var c = new Array(), header = [], buffer = "", refresh_header = true
   var iteration = 0
   var Mod = "", Path = "", Sw = "", Fw = ""
-  var hash = {}; list =[]
+  var hash = {}; list =[];
   
   stream.addListener('data', function(data){
     buffer+=data.toString()
@@ -166,17 +166,20 @@ Tsvreader.prototype.parseNanodropFile = function(path, callback){
            if (rec.units == 'ng/ul') {
              rec.units = 'ng/µl';
            }
-           
-           if (rec.a260 >0 && rec.conc > 0 && rec.a280 >0) {
+           if (rec._3500 == undefined) { // if this field is missing, the buffer broke on this record.  It will return in the next.
+             console.log(i, " Could not finish reading ", rec.sample_id, " and so dropping it")
+           } else if (rec.a260 >0 && rec.conc > 0 && rec.a280 >0) {
              if (rec.sample_id in hash) {
                 list.push(rec.sample_id)
+                //console.log(rec)
                //throw new Error('Duplicate records in Nanodrop file: ' + rec.sample_id)
              } else {
                hash[rec.sample_id] = true
+               c[iteration] = rec;
+               iteration++
              }
-             c[iteration] = rec;
-             iteration++
            }
+           rec = {}
          }
       }
     })
