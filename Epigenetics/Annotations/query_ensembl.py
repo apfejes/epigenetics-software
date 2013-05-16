@@ -8,8 +8,9 @@ and: http://pycogent.org/cookbook/accessing_databases.html
 
 '''
 
-from cogent.db.ensembl import Genome
-from ensemblfx import *
+from cogent.db.ensembl.genome import Genome
+#import the functions 
+from ensemblfx import get_Exons, ExonCoordinates
 
 #Need to declare which release of Ensemble you want to use adn the account
 Release, account = 67, None
@@ -26,6 +27,6 @@ gene = human.getGeneByStableId(StableId=GeneId)
 #Then we get the Exons
 exons = get_Exons(gene)
 
-#We get the coordinates as a list of lists.
+#We get the coordinates as a list of [Start, End] pairs.
 coordinates = ExonCoordinates(exons)
-
+exon_lengths = [pair[1]-pair[0] for pair in coordinates]

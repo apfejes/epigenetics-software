@@ -6,7 +6,7 @@ Created on 2013-05-14
 Functions for querying Ensembl.
 '''
 from time import time
-from cogent.db.ensembl import Genome
+#from cogent.db.ensembl import Genome
 
 
 def get_Exons(gene):
