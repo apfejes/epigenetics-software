@@ -350,7 +350,7 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
 // SAVE NANODROP
 //__________________________________
 
-ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_id, callback) {
+ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_id, nd_type, callback) {
   var date = new Date();
   for( var i =0;i< sampleids.length;i++ ) {
     var selected= {}
@@ -362,6 +362,7 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_i
 	  selected.sample_num = 1
 	}
 	selected.projectid = project_id
+	selected.nd_type = nd_type
 	selected.date = sampleids[i].date
 	selected.time = sampleids[i].time
 	selected.conc = sampleids[i].conc

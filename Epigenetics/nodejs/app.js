@@ -365,7 +365,7 @@ app.post('/input/nanodrop_new/:id', function(req, res) {
         console.log("app.get.nanodrop_new (post)", error)
         res.render('nanodrop_error.jade',{error:error});
       } else {
-        articleProvider.saveNanodrop(data,req.files.nanodrop_file.name, req.param('projectid'), function(error, docs){
+        articleProvider.saveNanodrop(data,req.files.nanodrop_file.name, req.param('projectid'), req.param('nd_type'), function(error, docs){
           if (error) { 
             console.log("app.get.nanodrop_new (post_save)", error)
             res.render('nanodrop_error.jade',{error:error});
