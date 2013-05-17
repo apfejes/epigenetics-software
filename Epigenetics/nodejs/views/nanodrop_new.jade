@@ -9,6 +9,9 @@ form( method="post", enctype="multipart/form-data")
     #div
       input(type="file", name="nanodrop_file", id="pickNanodropFile", required)
             //text/tab-separated-values  text/plain
+      select(name='nd_type')
+        - each st in status 
+          option(value=st.desc)=st.desc 
     div#editArticleSubmit
       input(type="submit", value="add to project")
       input(type="button", value="Cancel", onClick="window.history.back(-1)")

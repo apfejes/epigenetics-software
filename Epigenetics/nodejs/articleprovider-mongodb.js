@@ -243,6 +243,20 @@ ArticleProvider.prototype.getNanodrop = function(id, callback) {
 };
 
 
+  //---- 
+  //Retrieve only the nanodrop types options
+  //---- 
+
+ArticleProvider.prototype.nanodrop_types = function(callback) {
+    this.getDBQuery('xlat', {xlat: "nanodrop"}, {desc:1, _id:0}, {}, function(error, nanodrop_types) {
+      if( error ) {
+        console.log("nanodrop_types error: ", error);
+        callback(error);
+      } else callback(null, nanodrop_types)
+    });
+};
+
+
 //__________________________________
 //
 // SAVE FUNCTION

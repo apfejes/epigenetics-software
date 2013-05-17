@@ -353,8 +353,10 @@ app.post('/input/plate_new', function(req, res){
 //------------------------------------
 
 app.get('/input/nanodrop_new/:id', function(req, res) {
-    res.render('nanodrop_new.jade', {title: 'Add a Nanodrop File to this project', projectid:req.params.id}
+  articleProvider.nanodrop_types( function(error, docs) {
+    res.render('nanodrop_new.jade', {title: 'Add a Nanodrop File to this project', projectid:req.params.id, status:docs}
     );
+  })
 });
 
 app.post('/input/nanodrop_new/:id', function(req, res) {

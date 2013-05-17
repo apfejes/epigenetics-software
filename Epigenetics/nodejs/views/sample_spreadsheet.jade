@@ -5,7 +5,7 @@ h1 Begin Array Process
 form( method="post")
   #section1
     p Notes: Refreshing this page will reset the proceed flags.
-    input(type="submit", value="Proceed")
+    input(type="submit", value="Assign to Arrays")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
     table.lines
       tr
@@ -13,7 +13,7 @@ form( method="post")
         td.lines Flag
         td.lines DNA Extract Date
         td.lines conc
-        td.lines Volume (ul)
+        td.lines Volume (µl)
         td.lines A260
         td.lines A280
         td.lines A260/A280
@@ -55,5 +55,5 @@ form( method="post")
               
           td.lines #{sample.notes}
           td.lines #{sample.created_at.getDate()}-#{sample.created_at.getMonth()}-#{sample.created_at.getFullYear()} #{sample.created_at.getHours()}:#{sample.created_at.getMinutes()} 
-    input(type="submit", value="Proceed")
+    input(type="submit", value="Assign to Arrays")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")

@@ -4,8 +4,10 @@ a(href='/')
 h1 Edit Samples
 form( method="post")
   #section1
-    p Notes: Refreshing this page will reset the proceed flags.
-    input(type="submit", value="Proceed")
+    Span Assign volume to all samples:
+      input(type="text", name="all_volume")
+      input(type="button", value="Over write volumes", onClick="")  
+    input(type="submit", value="Save Changes")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
     table.lines
       tr
@@ -13,14 +15,14 @@ form( method="post")
         td.lines Flag
         td.lines DNA Extract Date
         td.lines conc
-        td.lines Volume (ul)
+        td.lines Volume (µl)
         td.lines A260
         td.lines A280
         td.lines A260/A280
         td.lines A260/A230
         td.lines Total N.A.
         td.lines Notes
-        td.lines Created (DMY)
+        td.lines Created (D-M-Y)
       - each sample in samples
         tr
           td.lines 
@@ -71,5 +73,5 @@ form( method="post")
               else
                 input(type="text", width=50, name="notes")
           td.lines #{sample.created_at.getDate()}-#{sample.created_at.getMonth()}-#{sample.created_at.getFullYear()} #{sample.created_at.getHours()}:#{sample.created_at.getMinutes()} 
-    input(type="submit", value="Proceed")
+    input(type="submit", value="Save Changes")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
