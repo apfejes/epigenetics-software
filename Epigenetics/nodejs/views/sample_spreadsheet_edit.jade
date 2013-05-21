@@ -1,14 +1,17 @@
 link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+
 a(href='/')
   #logo
 h1 Edit Samples
 form( method="post")
   #section1
     Span Assign volume to all samples:
-      input(type="text", name="all_volume")
-      input(type="button", value="Over write volumes", onClick="")  
-    input(type="submit", value="Save Changes")
-    input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
+      input(type="text", size="6", id="all_volume") 
+      | (µl)
+      input(type="button", value="Over-write volumes", onClick="updateVolumes()")  
+    p
+      input(type="submit", value="Save Changes")
+      input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
     table.lines
       tr
         td.lines SampleID
@@ -20,21 +23,23 @@ form( method="post")
         td.lines A280
         td.lines A260/A280
         td.lines A260/A230
-        td.lines Total N.A.
+        td.lines Total N.A. (ng)
         td.lines Notes
         td.lines Created (D-M-Y)
       - each sample in samples
         tr
           td.lines 
-            b #{sample.sampleid}-#{sample.sample_num}  
+            b #{sample.sampleid}-#{sample.sample_num}
           td.lines 
             if (sample.proceed_flag)
               input(type="checkbox", name="proceed_flag", value=sample.proceed_flag)
-            else
+            else if (sample.nanodrop)
               input(type="checkbox", name="proceed_flag", checked="checked")
+            else
+              input(type="checkbox", name="proceed_flag")
           td.lines #{sample.dna_extract_date}
             if (sample.dna_extract_date) 
-              input(type="date", name="dna_extract_date", value =sample.dna_extract_date)
+              input(type="date", name="dna_extract_date", value=sample.dna_extract_date)
             else
               input(type="date", name="dna_extract_date")
           if (sample.nanodrop)
@@ -50,18 +55,29 @@ form( method="post")
                   - best_time = n.time
             - each n in sample.nanodrop            
               - if (n.date == best_date  && n.time == best_time)
-                 td.lines #{n.conc} #{n.units}
-                 td.lines #{n.volume}
+                 td.lines
+                   input(type="text", size="5", name="conc", id="#{sample.sampleid}-#{sample.sample_num}-conc", disabled, value=n.conc  )
+                   | #{n.units} 
+                 td.lines 
+                   if (n.volume)
+                     input(type="text", size="6", name="volume", id="#{sample.sampleid}-#{sample.sample_num}-vol", value =n.volume, onchange="updateVol(this)")
+                   else  
+                     input(type="text", size="6", name="volume", id="#{sample.sampleid}-#{sample.sample_num}-vol", onchange="updateVol(this)")
                  td.lines #{n.a260}
                  td.lines #{n.a280}
                  - var a260_280 = n.a260/n.a280
                  td.lines !{a260_280.toFixed(3)}
                  - var a260_230 = n.a260/n.a230
                  td.lines !{a260_230.toFixed(3)}
-                 td.lines #{n.total_na}
+                 td.lines 
+                  if (n.total_na)
+                     input(type="text", size="6", name="total_na", id="#{sample.sampleid}-#{sample.sample_num}-totalna", value =n.total_na, disabled)
+                   else  
+                     input(type="text", size="6", name="total_na", id="#{sample.sampleid}-#{sample.sample_num}-totalna", disabled)
           else
              td.lines
              td.lines
+               input(type="text", size="6", name="volume")
              td.lines
              td.lines
              td.lines
@@ -69,9 +85,37 @@ form( method="post")
              td.lines
           td.lines
             if (sample.notes)
-                input(type="text", width=50, name="notes", value=sample.notes)
-              else
-                input(type="text", width=50, name="notes")
+              input(type="text", size=30, name="notes", value=sample.notes)
+            else
+              input(type="text", size=30, name="notes")
           td.lines #{sample.created_at.getDate()}-#{sample.created_at.getMonth()}-#{sample.created_at.getFullYear()} #{sample.created_at.getHours()}:#{sample.created_at.getMinutes()} 
     input(type="submit", value="Save Changes")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
+script(type='text/javascript')
+    function updateVolumes(){  
+      var e = document.getElementById("all_volume").value;
+      var c = document.getElementsByName("conc");
+      var v = document.getElementsByName("volume");
+      var t = document.getElementsByName("total_na");
+      for (var i = 0; i < c.length; i++) {
+        if (c[i] != 0) {
+          v[i].value = e;
+          t[i].value= (c[i].value * v[i].value).toFixed(2);
+        }
+      }
+    }
+    function updateVol(obj){  
+      var i = obj.id;
+      console.log(i);
+      var id = obj.id.substring(0, obj.id.lastIndexOf("-"));
+      console.log(id);
+      var v = document.getElementById(obj.id).value;      
+      console.log(v);
+      var c = document.getElementById(id+"-conc");
+      console.log(c);
+      var t = document.getElementById(id+"-totalna");
+      console.log(t);
+      if (c != 0) {
+        t.value= (c.value * v).toFixed(2);
+      }
+    }
