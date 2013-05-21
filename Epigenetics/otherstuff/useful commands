@@ -1,0 +1,5 @@
+Mongo:
+ 
+replicating tables between database instances:
+
+db.xlat.find().forEach(function(d){ db.getSiblingDB('test')['xlat'].insert(d); });

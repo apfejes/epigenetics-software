@@ -248,7 +248,7 @@ ArticleProvider.prototype.getNanodrop = function(id, callback) {
   //---- 
 
 ArticleProvider.prototype.nanodrop_types = function(callback) {
-    this.getDBQuery('xlat', {xlat: "nanodrop"}, {desc:1, _id:0}, {}, function(error, nanodrop_types) {
+    this.getDBQuery('xlat', {xlat: "nanodrop_type"}, {desc:1, _id:0}, {}, function(error, nanodrop_types) {
       if( error ) {
         console.log("nanodrop_types error: ", error);
         callback(error);
