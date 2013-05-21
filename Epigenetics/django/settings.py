@@ -105,6 +105,11 @@ TEMPLATE_LOADERS = (
     )),
 )
 
+import mimetypes
+mimetypes.add_type("image/svg+xml", ".svg", True)
+
+
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     #'django.contrib.sessions.middleware.SessionMiddleware',
@@ -124,8 +129,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/home/sperez/epigenetics-software/Epigenetics/django/dbaccess",
-    "/home/sperez/epigenetics-software/Epigenetics/django/dbaccess/jtemplate"
+    "/home/sperez/epigenetics-software/epigenetics-software/Epigenetics/django/dbaccess/"
 )
 
 #Disabled auth, session and admin in order to use Mongodb
