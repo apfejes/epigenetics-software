@@ -18,11 +18,13 @@ human = Genome(Species='human', Release=Release, account=account)
 ensembl_coord=True
 
 #We want the coordinates of the exons of the Huntington gene
-Huntingtons = 'ENSG00000197386'
-GeneId = Huntingtons
 
+GeneId = 'ENSG00000197386'
 #First we grab the gene from Ensembl
 gene = human.getGeneByStableId(StableId=GeneId)
+name  =  gene.Description.split(" ")[0].capitalize()
+l = str(gene.Location).split(":")
+location = "Chr "+l[2]+": "+l[3]
 
 #Then we get the Exons
 exons = get_Exons(gene)
