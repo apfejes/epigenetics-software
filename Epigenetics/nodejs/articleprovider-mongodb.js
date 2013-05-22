@@ -354,14 +354,6 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_i
   var date = new Date();
   for( var i =0;i< sampleids.length;i++ ) {
     var selected= {}
-	if (sampleids[i].sample_id.indexOf("-") != -1) {
-	  selected.sampleid = sampleids[i].sample_id.substring(0,sampleids[i].sample_id.indexOf("-"))
-	  selected.sample_num = sampleids[i].sample_id.substring(sampleids[i].sample_id.indexOf("-") + 1)
-	} else {
-	  selected.sampleid = sampleids[i].sample_id
-	  selected.sample_num = 1
-	}
-	selected.projectid = project_id
 	selected.nd_type = nd_type
 	selected.date = sampleids[i].date
 	selected.time = sampleids[i].time
@@ -385,6 +377,50 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_i
   callback();
 };
 
+//__________________________________
+//
+// SAVE SPREADSHEET
+//__________________________________
+
+ArticleProvider.prototype.process_sample_spreadsheet = function(collection, project_id, body, callback) {
+  var date = new Date();
+  var selected= {};
+  var last_key = ""
+  for (key in body) {
+    var sample_key = key.substring(0, b);
+    if (sample_key == last_key) {
+      if (body[key] != '') {
+        selected[key.substring(key.lastIndexOf("-")+1)] = body[key];
+      }
+    } else {
+      // save record
+      var find = {}
+      find['sampleid'] = selected['sampleid']
+      find['sample_num'] = selected['sample_num']
+      find['nanodrop.date'] = selected['date']
+      find['nanodrop.time'] = selected['time']
+      var set = {}
+      console.log("selected: ", selected);
+      
+      //create query:
+        
+      
+      //reset variables
+      selected = {};
+      last_key = sample_key;
+      var a = key.indexOf("-");
+      var b = key.lastIndexOf("-");
+      selected['sampleid'] = key.substring(0, a);
+      selected['sample_num'] = key.substring(a+1, b);
+      if (body[key] != '') {
+        selected[key.substring(b+1)] = body[key];
+      } 
+    }
+  }
+  // save record
+  console.log("selected: ", selected);    
+  callback();
+};
 
 
 

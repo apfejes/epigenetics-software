@@ -200,6 +200,16 @@ app.get('/view/sample_spreadsheet_edit/:id', function(req, res){
   });
 });
 
+app.post('/view/sample_spreadsheet_edit/:id', function(req, res){
+  //console.log("request body", req.body);
+  articleProvider.process_sample_spreadsheet('samples', req.params.id, req.body, function( error, docs) {
+    articleProvider.getIDbyName(req.param('proj_name'), function(error, id) {
+      if (error) console.log("app.post.project_new", error)
+      else res.redirect('/view/' + req.params.id)
+    });
+  });
+});
+
 
 
 //------------------------------------
