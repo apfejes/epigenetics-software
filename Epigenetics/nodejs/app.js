@@ -182,7 +182,7 @@ app.get('/view/sample_edit/:id', function(req, res){
   var sam = id.substring(0, id.indexOf("-"))
   var num = id.substring(id.indexOf("-")+1)
   articleProvider.sampleById(sam, num, function(error, samples) {
-    res.render('sample_edit.jade',{title: 'Edit Sample '+ sam + '-' + num, samples:samples});
+    res.render('sample_edit.jade',{title: 'View Sample Details: '+ sam + '-' + num, samples:samples});
   });
 });
 

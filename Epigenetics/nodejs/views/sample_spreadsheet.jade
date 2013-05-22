@@ -4,7 +4,9 @@ a(href='/')
 h1 Begin Array Process
 form( method="post")
   #section1
-    p Notes: Refreshing this page will reset the proceed flags.
+    b Notes: 
+    | Refreshing this page will reset the proceed flags to the last values stored in the database.
+    br
     input(type="submit", value="Assign to Arrays")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
     table.lines
@@ -26,8 +28,8 @@ form( method="post")
           td.lines 
             b #{sample.sampleid}-#{sample.sample_num}
           td.lines 
-            if (sample.proceed_flag)
-              input(type="checkbox", name="proceed_flag", checked=sample.proceed_flag)
+            if (sample.proceed_flag == "checked")
+              input(type="checkbox", name="proceed_flag", checked="checked")
             else
               input(type="checkbox", name="proceed_flag")
           td.lines #{sample.dna_extract_date}
@@ -70,10 +72,10 @@ form( method="post")
                         !{total_na} ng
                   else
                     td.redwlines  
-                    input(type="text", size="6", class="total_na", name="#{sample.sampleid}-#{sample.sample_num}-totalna", id="#{sample.sampleid}-#{sample.sample_num}-totalna", disabled)
+                      | ---
           else
-            td.lines
-            td.lines
+            td.redwlines
+            td.redwlines
             td.lines
             td.lines
             td.lines

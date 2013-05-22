@@ -8,14 +8,17 @@ form( method="post")
     Span Assign volume to all samples:
       input(type="text", size="6", id="all_volume") 
       | (µl)
-      input(type="button", value="Over-write volumes", onClick="updateVolumes()")  
+      input(type="button", value="Over-write volumes", onClick="updateVolumes()")
+    br
+    Span Check proceed for all samples with Total N.A.:
+      input(type="button", value="Check Proceed Flag", onClick="checkBoxes()")
     p
       input(type="submit", value="Save Changes")
       input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
     table.lines
       tr
         td.lines SampleID
-        td.lines Flag
+        td.lines Proceed
         td.lines DNA Extract Date
         td.lines conc
         td.lines Volume (µl)
@@ -31,12 +34,10 @@ form( method="post")
           td.lines 
             b #{sample.sampleid}-#{sample.sample_num}
           td.lines 
-            if (sample.proceed_flag)
-              input(type="checkbox", name="#{sample.sampleid}-#{sample.sample_num}-proceed_flag", checked=sample.proceed_flag)
-            else if (sample.nanodrop)
-              input(type="checkbox", name="#{sample.sampleid}-#{sample.sample_num}-proceed_flag", checked="checked")
+            if (sample.proceed_flag == "checked")
+              input(type="checkbox", class="proceed", name="#{sample.sampleid}-#{sample.sample_num}-proceed_flag", id="#{sample.sampleid}-#{sample.sample_num}-proceed_flag", checked="checked")
             else
-              input(type="checkbox", name="#{sample.sampleid}-#{sample.sample_num}-proceed_flag")
+              input(type="checkbox", class="proceed", name="#{sample.sampleid}-#{sample.sample_num}-proceed_flag", id="#{sample.sampleid}-#{sample.sample_num}-proceed_flag")
           td.lines #{sample.dna_extract_date}
             if (sample.dna_extract_date) 
               input(type="date", name="#{sample.sampleid}-#{sample.sample_num}-dna_extract_date", value=sample.dna_extract_date)
@@ -114,5 +115,17 @@ script(type='text/javascript')
       var t = document.getElementById(id+"-totalna");
       if (c != 0) {
         t.value= (c.value * v).toFixed(2);
+      }
+    }
+    function checkBoxes(){  
+      var c = document.getElementsByClassName("proceed");
+      for (var i = 0; i < c.length; i++) {
+        var id = c[i].name.substring(0, c[i].name.lastIndexOf("-"));
+        console.log(id)
+        var t = document.getElementById(id+"-totalna");
+        var p = document.getElementById(id+"-proceed_flag");
+        if (t!= null && t.value != null && t.value != '') {
+          p.checked = "checked"
+        }
       }
     }

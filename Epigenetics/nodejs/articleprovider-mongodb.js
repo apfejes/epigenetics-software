@@ -365,6 +365,7 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_i
 	  s_num = 1
 	}
 	var selected= {}
+	selected.nd_type = nd_type
 	selected.date = sampleids[i].date
 	selected.time = sampleids[i].time
 	selected.conc = sampleids[i].conc
@@ -396,17 +397,25 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_i
 //__________________________________
 
 ArticleProvider.prototype.process_sample_spreadsheet = function(collection, project_id, body, callback) {
+  //console.log(body)
+  
   var date = new Date();
   var selected= {};
   var last_key = ""
   var e = ""
   for (key in body) {
-    var sample_key = key.substring(0, b);
+    var sample_key = key.substring(0, key.lastIndexOf("-"));
+    if (last_key == "") { 
+      last_key = sample_key;
+      selected['sampleid'] = key.substring(0, key.indexOf("-"));
+      selected['sample_num'] = key.substring(key.indexOf("-")+1, key.lastIndexOf("-"));
+    }
     if (sample_key == last_key) {
-      if (body[key] != '') {
-        selected[key.substring(key.lastIndexOf("-")+1)] = body[key];
-      }
+      console.log("same sk:", sample_key, " lk:", last_key)
+      selected[key.substring(key.lastIndexOf("-")+1)] = body[key];
+     // console.log(key, " ", body[key])
     } else {
+      console.log("diff sk:", sample_key, " lk:", last_key)
       // save record - split into the find component and the save component.
       var find = {}
       find['sampleid'] = selected['sampleid']
@@ -414,12 +423,21 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
       find['nanodrop.date'] = selected['date']
       find['nanodrop.time'] = selected['time']
       var set = {}
-      if (selected['proceed_flag'])    {  set['proceed_flag'] = selected['proceed_flag']  }
-      if (selected['vol'])             {  set['nanodrop.0.vol'] = selected['vol']  }
-      if (selected['dna_extract_date']){  set['nanodrop.0.dna_extract_date'] = selected['dna_extract_date']  }
-      if (selected['notes'])           {  set['notes'] = selected['notes']  }
-      //create query:
       
+      //console.log(key, " ", body[key])
+      if (selected['proceed_flag'] == "on") { 
+        selected['proceed_flag'] = "checked"
+      }
+      set['proceed_flag'] = selected['proceed_flag']
+      set['nanodrop.0.vol'] = selected['vol']
+      set['nanodrop.0.dna_extract_date'] = selected['dna_extract_date']
+      set['notes'] = selected['notes']
+      //create query:
+      console.log("find[sampleid]:", find['sampleid'])
+      if (find['sampleid'] == "EMVB0101F") {
+        console.log("find:", find)
+        console.log("set:", set)
+      }
       this.updateDB('samples', find, {$set: set}, false, function(error) {  //the callback function
         if( error ) {
           console.log(error);
@@ -433,9 +451,8 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
       var b = key.lastIndexOf("-");
       selected['sampleid'] = key.substring(0, a);
       selected['sample_num'] = key.substring(a+1, b);
-      if (body[key] != '') {
-        selected[key.substring(b+1)] = body[key];
-      } 
+      selected[key.substring(b+1)] = body[key]; 
+      //console.log(key, " ", body[key])
     }
   }
   // save record

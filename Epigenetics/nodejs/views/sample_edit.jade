@@ -30,7 +30,7 @@ form( method="post")
         - each n, i in sample.nanodrop 
           tr 
             td(colspan=2)
-              b NanoDrop Record # #{i+1}
+              b NanoDrop Record # #{i+1} (#{n.nd_type}) 
               | - !{n.date} - !{n.time}
           tr
             td.indent1
@@ -42,6 +42,18 @@ form( method="post")
               b Sample Conc.:
             td 
               !{n.conc} !{n.units}
+          if (n.vol)
+            tr
+              td.indent1
+                b Volume:
+              td 
+                !{n.vol} µl
+            tr
+              td.indent1
+                b Total N.A.:
+              td
+                - var total_na = (n.conc*n.vol).toFixed(2)  
+                !{total_na} ng
           tr
             td.indent1
               b A230: 
