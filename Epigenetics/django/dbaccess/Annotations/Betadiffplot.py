@@ -1,13 +1,12 @@
 '''
-Created on 2013-04-16
+Created on 2013-05-20
 
-@author: jyeung
+@author: sperez
+Edited from "WalkAlongChromosome.py"  written by jyeung
 '''
-
 
 import sys
 import os
-import matplotlib.pyplot as plt
 import time
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
@@ -16,7 +15,6 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
-from annotUtilities import plots
 
 starttime = time.time()
 database_name = 'human_epigenetics'
@@ -26,12 +24,6 @@ methylation_collection = 'methylation'
 sample_collection = 'samples'
 window_size = 1   # For binning purposes
 
-'''
-control_samples = ['09 Adult 3 unstim', '15 Cord 2 unstim', '13 Old 3 Unstim', 
-                   '17 Cord 3 Unstim', '11 Old 2 Unstim', '07 Adult 2 Unstim']
-diseased_samples = ['10 Adult 3 Lm', '08 Adult 2 Lm', '14 Old 3 Lm', 
-                    '12 Old 2 Lm', '16 Cord 2 Lm', '18 Cord 3 Lm']
-'''
 '''
 project = 'down'
 control_samples = ['C4ab1 M', 'C4ab2 M', 'C5a M', 'C3a F', 'C1ab F', 'C2a M', 'C2c M']
@@ -148,7 +140,7 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, 
         y_diffavg.append(diff_avg)
     
     
-    plots.makeXYPlot(x_position, y_diffavg, 
+    makeXYPlot(x_position, y_diffavg, 
                      '{0}{1}'.format('Position on Chr ', chromosome), 
                      'Absolute Difference in Betas |avgDiseased - avgControls|',
                      '{0}{1}{2}{3}'.format('Project ', project, ': beta differences in chromosome ', 
@@ -192,53 +184,65 @@ def PlotBetas(mongo, project, chromosome, control_samples, diseased_samples):
     position_dic[prev_start_pos] = betasamp_list
 
 
+
+from svgwrite.drawing import Drawing
+from svgwrite.path import Path
+
+
+def makelinepath(X,Y):
+    smooth = False
+    offset =  X[0]
+    invertby = max(Y)
+    
+    print smooth, X[0], offset, invertby
+    X = [round(float(item-offset)/20000,3)+20 for item in X]
+    
+    Y = [round((invertby-item)*1000,2)+20 for item in Y]
+    
+    d = "M"+str(X[0])+","+str(Y[0])+" "+str(X[1])+","+str(Y[1])
+    if smooth: d = d +"S"
+    
+    for i in range(2,len(X)):
+        d=d+(" "+str(X[i])+","+str(Y[i]))
+    print "The path:", d
+    return d, str(X[-1]), str(max(Y))
+
+def makeXYPlot(x, y, xLabel, yLabel, title, sampLabel=None, color='blue'):
+    """ Make a plot from a list of x, list of y. 
+    xLabel, yLabel = the labels for the x and y axis respectively
+    title = the top title for the plot
+    sampLabel=sample labels
+    """
+
+    #Drawing a methylation plot
+    #d is the list of coordinates with commands such as
+    #M for "move to' to initiate curve and S for smooth curve
+    d, length, height = makelinepath(x,y)
+    gene = Drawing("SVGs/betadiffchr21.svg", size=(str(float(length)+10) + "mm", str(float(height)+10)+ "mm"), viewBox=("0 0 "+str(float(length)+10)+" "+str(float(height)+10)), preserveAspectRatio="xMinYMin meet")
+    
+    gene.add(Path(stroke = "blue", fill = "none", d = d))
+    
+    gene.save()
+    print "The methylation data is ready to be viewed." 
+    
+    
+
 if __name__ == "__main__":
-    
-    down_or_kollman = raw_input('Look at down or kollman project? ')
-    if down_or_kollman == 'kollman':
-        project = 'kollman'
-        feature = 'stimulation'
-        control_group_label = 'unstimulated'
-        diseased_group_label = 'listeria'
-    elif down_or_kollman == 'down':
-        project = 'down'
-        feature = 'Sample Group'
-        control_group_label = 'Control'
-        diseased_group_label = 'DS'
-    else:
-        print('Must be either down or kollman, exiting...')
-        sys.exit()
-    
-    for j in xrange(0, 2):
-        '''
-        Ask user to give a chromosome.
-        '''
-        chromosome_list = [str(i) for i in range(1, 24)]
-        chromosome_list.append('X')
-        chromosome_list.append('Y')
-        chromosome_list = ['chr%s' %i for i in chromosome_list]    # Add prefix 'chr'
-        while True:
-            try:
-                chromosome = str(raw_input('Enter chromosome (1, 2, X, Y...): '))
-                chromosome = 'chr%s' %chromosome    # Adds prefix chr
-                if chromosome in chromosome_list:
-                    break
-            except:
-                pass
-            print('{0}{1}'.format('Invalid chromosome, choose from: ', 
-                                  chromosome_list))
-        
-        print('Creating mongo object...')
-        mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
-        print('Creating sample groups...')
-        SampleGroups = CreateSampleGroups(mongo, project, feature)
-        control_samples = SampleGroups[control_group_label]
-        diseased_samples = SampleGroups[diseased_group_label]
-        plt.subplot(2,1,j+1)
-        print('Plotting beta differences...')
-        PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, window_size)
-        xmin,xmax,_,_ = plt.axis()
-        plt.axis([xmin,xmax,0,1])
-        print('Done for %s chromosome' %(j+1))
-    plt.show()
+    project = 'down'
+    feature = 'Sample Group'
+    control_group_label = 'Control'
+    diseased_group_label = 'DS'
+
+    #Choose which chromosome to print and format it as "chr#"
+    chromosome = "chr21"
+
+    print('Creating mongo object...')
+    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
+    print('Creating sample groups...')
+    SampleGroups = CreateSampleGroups(mongo, project, feature)
+    control_samples = SampleGroups[control_group_label]
+    diseased_samples = SampleGroups[diseased_group_label]
+    print('Plotting beta differences...')
+    PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, window_size)
+    print('Done for %s chromosome' %chromosome)
 
