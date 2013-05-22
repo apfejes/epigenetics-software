@@ -32,7 +32,7 @@ form( method="post")
             b #{sample.sampleid}-#{sample.sample_num}
           td.lines 
             if (sample.proceed_flag)
-              input(type="checkbox", name="#{sample.sampleid}-#{sample.sample_num}-proceed_flag", value=sample.proceed_flag)
+              input(type="checkbox", name="#{sample.sampleid}-#{sample.sample_num}-proceed_flag", checked=sample.proceed_flag)
             else if (sample.nanodrop)
               input(type="checkbox", name="#{sample.sampleid}-#{sample.sample_num}-proceed_flag", checked="checked")
             else
@@ -61,8 +61,8 @@ form( method="post")
                    input(type="text", size="5", class="conc", name="#{sample.sampleid}-#{sample.sample_num}-conc", id="#{sample.sampleid}-#{sample.sample_num}-conc", disabled, value=n.conc  )
                    | #{n.units} 
                  td.lines 
-                   if (n.volume)
-                     input(type="text", size="6", class="volume", name="#{sample.sampleid}-#{sample.sample_num}-vol", id="#{sample.sampleid}-#{sample.sample_num}-vol", value =n.volume, onchange="updateVol(this)")
+                   if (n.vol)
+                     input(type="text", size="6", class="volume", name="#{sample.sampleid}-#{sample.sample_num}-vol", id="#{sample.sampleid}-#{sample.sample_num}-vol", value =n.vol, onchange="updateVol(this)")
                    else  
                      input(type="text", size="6", class="volume", name="#{sample.sampleid}-#{sample.sample_num}-vol", id="#{sample.sampleid}-#{sample.sample_num}-vol", onchange="updateVol(this)")
                  td.lines #{n.a260}
@@ -72,8 +72,9 @@ form( method="post")
                  - var a260_230 = n.a260/n.a230
                  td.lines !{a260_230.toFixed(3)}
                  td.lines 
-                  if (n.total_na)
-                    input(type="text", size="6", class="total_na", name="#{sample.sampleid}-#{sample.sample_num}-totalna", id="#{sample.sampleid}-#{sample.sample_num}-totalna", value =n.total_na, disabled)
+                  if (n.vol)
+                    - var total_na = (n.conc*n.vol).toFixed(2) 
+                    input(type="text", size="6", class="total_na", name="#{sample.sampleid}-#{sample.sample_num}-totalna", id="#{sample.sampleid}-#{sample.sample_num}-totalna", value =total_na, disabled)
                   else  
                     input(type="text", size="6", class="total_na", name="#{sample.sampleid}-#{sample.sample_num}-totalna", id="#{sample.sampleid}-#{sample.sample_num}-totalna", disabled)
           else

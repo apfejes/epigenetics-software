@@ -353,12 +353,13 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
 ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_id, nd_type, callback) {
   var date = new Date();
   for( var i =0;i< sampleids.length;i++ ) {
-    var s_id = ''
-    var s_num = ''
-    
-	if (sampleids[i].sample_id.indexOf("-") != -1) {
-	  s_id = sampleids[i].sample_id.substring(0,sampleids[i].sample_id.indexOf("-"))
-	  s_num = sampleids[i].sample_id.substring(sampleids[i].sample_id.indexOf("-") + 1)
+    var s_id = '';
+    var s_num = '';
+    var key = sampleids[i].sample_id;
+    var key_i = key.indexOf("-");
+	if (key_i != -1) {
+	  s_id = key.substring(0,key_i)
+	  s_num = key.substring(key_i + 1)
 	} else {
 	  s_id = sampleids[i].sample_id
 	  s_num = 1
@@ -406,7 +407,7 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
         selected[key.substring(key.lastIndexOf("-")+1)] = body[key];
       }
     } else {
-      // save record
+      // save record - split into the find component and the save component.
       var find = {}
       find['sampleid'] = selected['sampleid']
       find['sample_num'] = selected['sample_num']
@@ -417,9 +418,6 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
       if (selected['vol'])             {  set['nanodrop.0.vol'] = selected['vol']  }
       if (selected['dna_extract_date']){  set['nanodrop.0.dna_extract_date'] = selected['dna_extract_date']  }
       if (selected['notes'])           {  set['notes'] = selected['notes']  }
-      console.log("selected: ", selected);
-      console.log("find: ", find);
-      console.log("set: ", set);
       //create query:
       
       this.updateDB('samples', find, {$set: set}, false, function(error) {  //the callback function
@@ -428,9 +426,7 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
           e = error;
         }
       });
-      
-      
-      //reset variables
+      //reset variables  for next key id.
       selected = {};
       last_key = sample_key;
       var a = key.indexOf("-");
