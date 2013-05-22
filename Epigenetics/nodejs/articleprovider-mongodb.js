@@ -353,8 +353,17 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
 ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_id, nd_type, callback) {
   var date = new Date();
   for( var i =0;i< sampleids.length;i++ ) {
-    var selected= {}
-	selected.nd_type = nd_type
+    var s_id = ''
+    var s_num = ''
+    
+	if (sampleids[i].sample_id.indexOf("-") != -1) {
+	  s_id = sampleids[i].sample_id.substring(0,sampleids[i].sample_id.indexOf("-"))
+	  s_num = sampleids[i].sample_id.substring(sampleids[i].sample_id.indexOf("-") + 1)
+	} else {
+	  s_id = sampleids[i].sample_id
+	  s_num = 1
+	}
+	var selected= {}
 	selected.date = sampleids[i].date
 	selected.time = sampleids[i].time
 	selected.conc = sampleids[i].conc
@@ -368,9 +377,12 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_i
 	selected.nanodropver = sampleids[i].nanodropver
 	selected.firmware = sampleids[i].firmware
 	selected.last_updated = date
-	this.updateDB('samples', {projectid: project_id, sampleid: selected.sampleid, sample_num: selected.sample_num}, {$push: {nanodrop: selected}}, false,
+	this.updateDB('samples', {projectid: project_id, sampleid: s_id, sample_num: s_num}, {$push: {nanodrop: selected}}, false,
       function(error) {  //the callback function
-        if( error ) callback(error)
+        if( error ) {
+          console.log("UpdateDB for Nanodrop error: ", error)
+          callback(error)
+        }
       }
     );
   }
@@ -386,6 +398,7 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
   var date = new Date();
   var selected= {};
   var last_key = ""
+  var e = ""
   for (key in body) {
     var sample_key = key.substring(0, b);
     if (sample_key == last_key) {
@@ -400,10 +413,22 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
       find['nanodrop.date'] = selected['date']
       find['nanodrop.time'] = selected['time']
       var set = {}
+      if (selected['proceed_flag'])    {  set['proceed_flag'] = selected['proceed_flag']  }
+      if (selected['vol'])             {  set['nanodrop.0.vol'] = selected['vol']  }
+      if (selected['dna_extract_date']){  set['nanodrop.0.dna_extract_date'] = selected['dna_extract_date']  }
+      if (selected['notes'])           {  set['notes'] = selected['notes']  }
       console.log("selected: ", selected);
-      
+      console.log("find: ", find);
+      console.log("set: ", set);
       //create query:
-        
+      
+      this.updateDB('samples', find, {$set: set}, false, function(error) {  //the callback function
+        if( error ) {
+          console.log(error);
+          e = error;
+        }
+      });
+      
       
       //reset variables
       selected = {};
@@ -419,7 +444,7 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
   }
   // save record
   console.log("selected: ", selected);    
-  callback();
+  callback(e);
 };
 
 
