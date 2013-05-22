@@ -52,3 +52,7 @@ def view_svg(request):
 	with open("dbaccess/Annotations/SVGs/gene.svg","rb") as f:
 		return HttpResponse(f.read(), mimetype = "image/svg+xml")
 	
+def send_svg(request):
+	from Annotations import showgene
+	return HttpResponse(showgene.svgcode())
+

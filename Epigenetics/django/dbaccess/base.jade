@@ -24,9 +24,12 @@ html
             nav
                 a(href!='{% url 'collections' %}') Collections
         main
-             block content
+             //block content
+                //image
+                    //|<embed src="gene.svg" type="image/svg+xml"/>
+            block content
                 image
-                    |<embed src="gene.svg" type="image/svg+xml"/>
+                    embed(src!='{% url 'svgcode' %}', scrolling = 'no', width='1000', height = '250')
         sidebar
             block sidebar
         footer

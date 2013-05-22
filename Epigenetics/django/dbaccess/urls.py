@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import patterns, url
 #from django.views.generic import TemplateView
 import views
 
@@ -9,5 +9,6 @@ urlpatterns = patterns('',
 	url(r'^$', views.my_view, name='base'),
 	url(r'^collections/', views.view_collections, name='collections'),
 	url(r'^gene.svg/$', views.view_svg, name='gene'),
+	url(r'^svgcode/$', views.send_svg, name='svgcode'),	
 	)
 	
