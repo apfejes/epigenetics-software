@@ -35,6 +35,15 @@ table, td{
   border-collapse:collapse;
 }
 
+.greenwlines {
+  text-align:center;
+  background-color: #4DFF4D;
+  border: 1px solid #aaaaaa;
+  border-spacing: 0px;
+  border-collapse:collapse;
+}
+
+
 .nanodropheader {
   padding-left:1em;
   

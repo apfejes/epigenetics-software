@@ -18,41 +18,67 @@ form( method="post")
         td.lines A280
         td.lines A260/A280
         td.lines A260/A230
-        td.lines Last Conc
-        td.lines Total N.A.
+        td.lines Total N.A. (ng)
         td.lines Notes
-        td.lines Created (DMY)
+        td.lines Created (D-M-Y)
       - each sample in samples
         tr
           td.lines 
-            b #{sample.sampleid}-#{sample.sample_num}  
+            b #{sample.sampleid}-#{sample.sample_num}
           td.lines 
             if (sample.proceed_flag)
-              input(type="checkbox", name="proceed_flag", value=sample.proceed_flag)
+              input(type="checkbox", name="proceed_flag", checked=sample.proceed_flag)
             else
-              input(type="checkbox", name="proceed_flag", checked="checked")
+              input(type="checkbox", name="proceed_flag")
           td.lines #{sample.dna_extract_date}
-          td.lines #{sample.conc} #{sample.units}
-          if (sample.volume)
-            td.lines
-              #{sample.volume}
+          if (sample.nanodrop)
+            - var best_date = sample.nanodrop[0].date
+            - var best_time = sample.nanodrop[0].time
+            - for n in sample.nanodrop 
+              - if (n.date > best_date) 
+                 - best_date = n.date
+                 - best_time = n.time
+              - else if (n.date == best_date)
+                - if (n.time > best_time)
+                  - best_date = n.date
+                  - best_time = n.time
+            - each n in sample.nanodrop            
+              - if (n.date == best_date  && n.time == best_time)
+                  input(type="hidden", name="#{sample.sampleid}-#{sample.sample_num}-date", value = n.date)
+                  input(type="hidden", name="#{sample.sampleid}-#{sample.sample_num}-time", value = n.time)
+                  td.lines
+                    !{n.conc} #{n.units} 
+                  if (n.vol)
+                    td.lines
+                      !{n.vol}
+                  else 
+                    td.redwlines  
+                      | ---
+                  td.lines #{n.a260}
+                  td.lines #{n.a280}
+                  - var a260_280 = n.a260/n.a280
+                  td.lines !{a260_280.toFixed(3)}
+                  - var a260_230 = n.a260/n.a230
+                  td.lines !{a260_230.toFixed(3)}
+                  if (n.vol)
+                    - var total_na = (n.conc*n.vol).toFixed(2) 
+                    - if (total_na < 750)  
+                      td.redwlines
+                        !{total_na} ng
+                    - else
+                      td.greenwlines 
+                        !{total_na} ng
+                  else
+                    td.redwlines  
+                    input(type="text", size="6", class="total_na", name="#{sample.sampleid}-#{sample.sample_num}-totalna", id="#{sample.sampleid}-#{sample.sample_num}-totalna", disabled)
           else
-            td.redwlines
-              | ---
-          td.lines #{sample.a260}
-          td.lines #{sample.a280}
-          - var a260_280 = sample.a260/sample.a280
-          td.lines !{a260_280.toFixed(3)}
-          - var a260_230 = sample.a260/sample.a230
-          td.lines !{a260_230.toFixed(3)}
-          if (sample.last_cc)
             td.lines
-              #{sample.last_cc}
-          else
+            td.lines
+            td.lines
+            td.lines
+            td.lines
+            td.lines
             td.redwlines
-              | ---
-          td.lines #{sample.total_na}
-              
           td.lines #{sample.notes}
           td.lines #{sample.created_at.getDate()}-#{sample.created_at.getMonth()}-#{sample.created_at.getFullYear()} #{sample.created_at.getHours()}:#{sample.created_at.getMinutes()} 
     input(type="submit", value="Assign to Arrays")

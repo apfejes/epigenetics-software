@@ -439,7 +439,24 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
     }
   }
   // save record
-  console.log("selected: ", selected);    
+  var find = {}
+  find['sampleid'] = selected['sampleid']
+  find['sample_num'] = selected['sample_num']
+  find['nanodrop.date'] = selected['date']
+  find['nanodrop.time'] = selected['time']
+  var set = {}
+  if (selected['proceed_flag'])    {  set['proceed_flag'] = selected['proceed_flag']  }
+  if (selected['vol'])             {  set['nanodrop.0.vol'] = selected['vol']  }
+  if (selected['dna_extract_date']){  set['nanodrop.0.dna_extract_date'] = selected['dna_extract_date']  }
+  if (selected['notes'])           {  set['notes'] = selected['notes']  }
+  //create query:
+  
+  this.updateDB('samples', find, {$set: set}, false, function(error) {  //the callback function
+    if( error ) {
+      console.log(error);
+      e = error;
+    }
+  }); 
   callback(e);
 };
 
