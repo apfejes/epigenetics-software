@@ -80,7 +80,7 @@ def CreateSampleGroups(mongo, project, feature):
     return sample_groups
 
                
-def PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, window_size):
+def PlotBetaDiff(mongo, project, chromosome, control_samples, window_size):
     '''
     We plot differences in betas between controls and diseased. Only works for two groups. 
     '''
@@ -92,8 +92,11 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, 
     
     query_project = {'project': project}
     query_chr = {'CHR': chromosome}
+    query_start = {'start_position' :"$lt:3245678"}
+#    query_end = {'end_position':{$gt:3076407}}
+#    andQuery = {'$and': [query_chr, query_project, query_start, query_end]}
     andQuery = {'$and': [query_chr, query_project]}
-    
+        
     return_chr = {'_id': False, 'beta_value': True, 
                   'start_position': True, 'end_position': True, 
                   'sample_label': True}
@@ -101,6 +104,8 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, 
     probes_chr = mongo.find(methylation_collection, 
                             andQuery, return_chr).sort('start_position', 1)
                                                         
+    start = 3245676
+    end =  3076407
     position_dic = {}
     betasamp_list = []
     count = 0
@@ -124,20 +129,19 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, 
     y_diffavg = []
     for pos, tup_list in sorted(position_dic.iteritems()):
         controls = []
-        diseased = []
+#        diseased = []
         for beta, samp in tup_list:
             if samp in control_samples:
                 controls.append(beta)
-            elif samp in diseased_samples:
-                diseased.append(beta)
-            else:
-                print('Warning: %s not in list of controls or diseased' %samp)
-                sys.exit()
+#            elif samp in diseased_samples:
+#                diseased.append(beta)
+#            else:
+#                print('Warning: %s not in list of controls or diseased' %samp)
         control_avg = float(sum(controls))/len(controls)
-        diseased_avg = float(sum(diseased))/len(diseased)
-        diff_avg = abs(diseased_avg - control_avg)
+#        diseased_avg = float(sum(diseased))/len(diseased)
+#        diff_avg = abs(diseased_avg - control_avg)
         x_position.append(pos)
-        y_diffavg.append(diff_avg)
+        y_diffavg.append(control_avg)
     
     
     makeXYPlot(x_position, y_diffavg, 
@@ -218,7 +222,7 @@ def makeXYPlot(x, y, xLabel, yLabel, title, sampLabel=None, color='blue'):
     #d is the list of coordinates with commands such as
     #M for "move to' to initiate curve and S for smooth curve
     d, length, height = makelinepath(x,y)
-    gene = Drawing("SVGs/betadiffchr21.svg", size=(str(float(length)+10) + "mm", str(float(height)+10)+ "mm"), viewBox=("0 0 "+str(float(length)+10)+" "+str(float(height)+10)), preserveAspectRatio="xMinYMin meet")
+    gene = Drawing("SVGs/methylchr4.svg", size=(str(float(length)+10) + "mm", str(float(height)+10)+ "mm"), viewBox=("0 0 "+str(float(length)+10)+" "+str(float(height)+10)), preserveAspectRatio="xMinYMin meet")
     
     gene.add(Path(stroke = "blue", fill = "none", d = d))
     
@@ -241,8 +245,7 @@ if __name__ == "__main__":
     print('Creating sample groups...')
     SampleGroups = CreateSampleGroups(mongo, project, feature)
     control_samples = SampleGroups[control_group_label]
-    diseased_samples = SampleGroups[diseased_group_label]
     print('Plotting beta differences...')
-    PlotBetaDiff(mongo, project, chromosome, control_samples, diseased_samples, window_size)
+    PlotBetaDiff(mongo, project, chromosome, control_samples, window_size)
     print('Done for %s chromosome' %chromosome)
 
