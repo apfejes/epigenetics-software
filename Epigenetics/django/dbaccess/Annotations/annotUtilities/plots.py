@@ -21,8 +21,7 @@ def makelinepath(X,Y):
         d=d+(" "+str(X[i])+","+str(Y[i]))
     return d
 
-if __name__ == "__main__":
-#def makeXYPlot(x, y, xLabel, yLabel, title, sampLabel=None, color='blue'):
+def makeXYPlot(x, y, xLabel, yLabel, title, sampLabel=None, color='blue'):
     """ Make a plot from a list of x, list of y. 
     xLabel, yLabel = the labels for the x and y axis respectively
     title = the top title for the plot

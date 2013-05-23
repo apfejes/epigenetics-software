@@ -8,6 +8,7 @@ Edited from "WalkAlongChromosome.py"  written by jyeung
 import sys
 import os
 import time
+import numpy as np
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
@@ -16,9 +17,10 @@ sys.path.insert(0, _cur_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 
+print sys.path 
+
 starttime = time.time()
 database_name = 'human_epigenetics'
-# database_name = 'jake_test'
 annotation_collection = 'annotations'
 methylation_collection = 'methylation'
 sample_collection = 'samples'
@@ -80,7 +82,7 @@ def CreateSampleGroups(mongo, project, feature):
     return sample_groups
 
                
-def PlotBetaDiff(mongo, project, chromosome, control_samples, window_size):
+def PlotBeta(mongo, project, chromosome, control_samples,diseased_samples, window_size):
     '''
     We plot differences in betas between controls and diseased. Only works for two groups. 
     '''
@@ -90,28 +92,30 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, window_size):
     mongo.ensure_index(methylation_collection, 'sample_label')
     mongo.ensure_index(methylation_collection, 'start_position')
     
-    query_project = {'project': project}
-    query_chr = {'CHR': chromosome}
-    query_start = {'start_position' :"$lt:3245678"}
-#    query_end = {'end_position':{$gt:3076407}}
-#    andQuery = {'$and': [query_chr, query_project, query_start, query_end]}
-    andQuery = {'$and': [query_chr, query_project]}
-        
+    endgene = 3245676
+    startgene =  3076407
+    
+    query = {"CHR":"chr4","project":"kollman","start_position":{"$lte":endgene},"end_position":{"$gte":startgene}}
+    
     return_chr = {'_id': False, 'beta_value': True, 
                   'start_position': True, 'end_position': True, 
                   'sample_label': True}
     
-    probes_chr = mongo.find(methylation_collection, 
-                            andQuery, return_chr).sort('start_position', 1)
-                                                        
-    start = 3245676
-    end =  3076407
+    probes_chr = mongo.find(methylation_collection,query,
+                                return_chr).sort('start_position', 1)
+    if probes_chr.count()== 0:
+        print "WARNING: Query return zero probes. Exiting..."
+        sys.exit()
+        
+    print "Conducting query:", query
+    print "Found %i probes. Extracting position and beta values..." %probes_chr.count()
+
     position_dic = {}
     betasamp_list = []
     count = 0
     for doc in probes_chr:
-        if count%10000 == 0:
-            print('%s of %s documents analyzed.' %(count, probes_chr.count()))
+#        if count%100 == 0:
+#            print('%s of %s documents analyzed.' %(count, probes_chr.count()))
         if count == 0:
             prev_start_pos = doc['start_position']
         if count != 0:
@@ -122,28 +126,23 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, window_size):
                 prev_start_pos = doc['start_position']
         betasamp_list.append((doc['beta_value'], doc['sample_label']))
         count += 1
+    print('%s of %s documents analyzed.' %(count, probes_chr.count()))
     avg_position = (doc['start_position'] + prev_start_pos) / 2
     position_dic[avg_position] = betasamp_list
     
     x_position = []
     y_diffavg = []
     for pos, tup_list in sorted(position_dic.iteritems()):
-        controls = []
-#        diseased = []
+        beta_values = []
         for beta, samp in tup_list:
-            if samp in control_samples:
-                controls.append(beta)
-#            elif samp in diseased_samples:
-#                diseased.append(beta)
-#            else:
-#                print('Warning: %s not in list of controls or diseased' %samp)
-        control_avg = float(sum(controls))/len(controls)
-#        diseased_avg = float(sum(diseased))/len(diseased)
-#        diff_avg = abs(diseased_avg - control_avg)
+            if samp not in diseased_samples:
+                beta_values.append(beta)
+        data_avg = np.mean(beta_values)
         x_position.append(pos)
-        y_diffavg.append(control_avg)
+        y_diffavg.append(data_avg)
+        
     
-    
+    print "Making plot..."
     makeXYPlot(x_position, y_diffavg, 
                      '{0}{1}'.format('Position on Chr ', chromosome), 
                      'Absolute Difference in Betas |avgDiseased - avgControls|',
@@ -151,41 +150,6 @@ def PlotBetaDiff(mongo, project, chromosome, control_samples, window_size):
                                            chromosome),  
                      'beta_difference', 'blue')
     print('{0}{1}'.format('Time elapsed (s): ', int((time.time() - starttime))))
-
-def PlotBetas(mongo, project, chromosome, control_samples, diseased_samples):
-    '''
-    Plot betas for all groups, regardless of numbers in groups since you input a 
-    dictionary with arbitrary number of key:value pairs. 
-    '''
-    
-    mongo.ensure_index(methylation_collection, 'CHR')
-    mongo.ensure_index(methylation_collection, 'annotation_id')
-    mongo.ensure_index(methylation_collection, 'sample_label')
-    mongo.ensure_index(methylation_collection, 'start_position')
-    
-    query_project = {'project': project}
-    query_chr = {'CHR': chromosome}
-    andQuery = {'$and': [query_chr, query_project]}
-    
-    return_chr = {'_id': False, 'beta_value': True, 
-                  'start_position': True, 'end_position': True, 
-                  'sample_label': True}
-    probes_chr = mongo.find(methylation_collection, 
-                            andQuery, return_chr).sort('sample_label', 1)
-                                                    
-    position_dic = {}
-    betasamp_list = []
-    prev_start_pos = None
-    count = 0
-    for doc in probes_chr:
-        if count != 0:
-            if doc['start_position'] != prev_start_pos:
-                position_dic[prev_start_pos] = betasamp_list
-                betasamp_list = []
-        betasamp_list.append((doc['beta_value'], doc['sample_label']))
-        count += 1
-        prev_start_pos = doc['start_position']
-    position_dic[prev_start_pos] = betasamp_list
 
 
 
@@ -198,7 +162,7 @@ def makelinepath(X,Y):
     offset =  X[0]
     invertby = max(Y)
     
-    print smooth, X[0], offset, invertby
+    #print smooth, X[0], offset, invertby
     X = [round(float(item-offset)/20000,3)+20 for item in X]
     
     Y = [round((invertby-item)*1000,2)+20 for item in Y]
@@ -208,7 +172,7 @@ def makelinepath(X,Y):
     
     for i in range(2,len(X)):
         d=d+(" "+str(X[i])+","+str(Y[i]))
-    print "The path:", d
+    #print "The path:", d
     return d, str(X[-1]), str(max(Y))
 
 def makeXYPlot(x, y, xLabel, yLabel, title, sampLabel=None, color='blue'):
@@ -238,14 +202,14 @@ if __name__ == "__main__":
     diseased_group_label = 'DS'
 
     #Choose which chromosome to print and format it as "chr#"
-    chromosome = "chr21"
+    chromosome = "chr4"
 
     print('Creating mongo object...')
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
     print('Creating sample groups...')
     SampleGroups = CreateSampleGroups(mongo, project, feature)
     control_samples = SampleGroups[control_group_label]
-    print('Plotting beta differences...')
-    PlotBetaDiff(mongo, project, chromosome, control_samples, window_size)
+    diseased_samples = SampleGroups[diseased_group_label]
+    PlotBeta(mongo, project, chromosome, control_samples,diseased_samples, window_size)
     print('Done for %s chromosome' %chromosome)
 
