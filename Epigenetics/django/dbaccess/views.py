@@ -42,15 +42,14 @@ def my_view(request):
 def view_collections(request):
 	return render(request, 'collections.jade')
 
-
 def collections(request):
 	db= mongo[database_name]
-	return db.collection_names()
-#	return HttpResponse(db.collection_names())
+#   return db.collection_names()
+	return HttpResponse(db.collection_names())
 
-def view_svg(request):
-	with open("dbaccess/Annotations/SVGs/gene.svg","rb") as f:
-		return HttpResponse(f.read(), mimetype = "image/svg+xml")
+#def view_svg(request):
+#	with open("dbaccess/Annotations/SVGs/gene.svg","rb") as f:
+#		return HttpResponse(f.read(), mimetype = "image/svg+xml")
 	
 def send_svg(request):
 	from Annotations import showgene

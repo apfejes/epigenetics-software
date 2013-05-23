@@ -182,7 +182,7 @@ app.get('/view/sample_edit/:id', function(req, res){
   var sam = id.substring(0, id.indexOf("-"))
   var num = id.substring(id.indexOf("-")+1)
   articleProvider.sampleById(sam, num, function(error, samples) {
-    res.render('sample_edit.jade',{title: 'Edit Sample '+ sam + '-' + num, samples:samples});
+    res.render('sample_edit.jade',{title: 'View Sample Details: '+ sam + '-' + num, samples:samples});
   });
 });
 
@@ -197,6 +197,16 @@ app.get('/view/sample_spreadsheet_edit/:id', function(req, res){
   articleProvider.getSamples(req.params.id, function(error, samples) {
     if (error) console.log("sample_spreadsheet/:id error: ", error)
     else res.render('sample_spreadsheet_edit.jade',{samples:samples});
+  });
+});
+
+app.post('/view/sample_spreadsheet_edit/:id', function(req, res){
+  //console.log("request body", req.body);
+  articleProvider.process_sample_spreadsheet('samples', req.params.id, req.body, function( error, docs) {
+    articleProvider.getIDbyName(req.param('proj_name'), function(error, id) {
+      if (error) console.log("app.post.project_new", error)
+      else res.redirect('/view/' + req.params.id)
+    });
   });
 });
 

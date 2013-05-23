@@ -9,7 +9,9 @@ form( method="post", enctype="multipart/form-data")
     #div
       input(type="file", name="nanodrop_file", id="pickNanodropFile", required)
             //text/tab-separated-values  text/plain
-      select(name='nd_type')
+    #div
+      | Please select an Identifier for this Nanodrop import:
+      select(name='nd_type', required)
         - each st in status 
           option(value=st.desc)=st.desc 
     div#editArticleSubmit

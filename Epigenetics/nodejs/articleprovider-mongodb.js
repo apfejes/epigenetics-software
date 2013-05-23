@@ -248,7 +248,7 @@ ArticleProvider.prototype.getNanodrop = function(id, callback) {
   //---- 
 
 ArticleProvider.prototype.nanodrop_types = function(callback) {
-    this.getDBQuery('xlat', {xlat: "nanodrop"}, {desc:1, _id:0}, {}, function(error, nanodrop_types) {
+    this.getDBQuery('xlat', {xlat: "nanodrop_type"}, {desc:1, _id:0}, {}, function(error, nanodrop_types) {
       if( error ) {
         console.log("nanodrop_types error: ", error);
         callback(error);
@@ -353,15 +353,18 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
 ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_id, nd_type, callback) {
   var date = new Date();
   for( var i =0;i< sampleids.length;i++ ) {
-    var selected= {}
-	if (sampleids[i].sample_id.indexOf("-") != -1) {
-	  selected.sampleid = sampleids[i].sample_id.substring(0,sampleids[i].sample_id.indexOf("-"))
-	  selected.sample_num = sampleids[i].sample_id.substring(sampleids[i].sample_id.indexOf("-") + 1)
+    var s_id = '';
+    var s_num = '';
+    var key = sampleids[i].sample_id;
+    var key_i = key.indexOf("-");
+	if (key_i != -1) {
+	  s_id = key.substring(0,key_i)
+	  s_num = key.substring(key_i + 1)
 	} else {
-	  selected.sampleid = sampleids[i].sample_id
-	  selected.sample_num = 1
+	  s_id = sampleids[i].sample_id
+	  s_num = 1
 	}
-	selected.projectid = project_id
+	var selected= {}
 	selected.nd_type = nd_type
 	selected.date = sampleids[i].date
 	selected.time = sampleids[i].time
@@ -376,15 +379,103 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_i
 	selected.nanodropver = sampleids[i].nanodropver
 	selected.firmware = sampleids[i].firmware
 	selected.last_updated = date
-	this.updateDB('samples', {projectid: project_id, sampleid: selected.sampleid, sample_num: selected.sample_num}, {$push: {nanodrop: selected}}, false,
+	this.updateDB('samples', {projectid: project_id, sampleid: s_id, sample_num: s_num}, {$push: {nanodrop: selected}}, false,
       function(error) {  //the callback function
-        if( error ) callback(error)
+        if( error ) {
+          console.log("UpdateDB for Nanodrop error: ", error)
+          callback(error)
+        }
       }
     );
   }
   callback();
 };
 
+//__________________________________
+//
+// SAVE SPREADSHEET
+//__________________________________
+
+ArticleProvider.prototype.process_sample_spreadsheet = function(collection, project_id, body, callback) {
+  //console.log(body)
+  
+  var date = new Date();
+  var selected= {};
+  var last_key = ""
+  var e = ""
+  for (key in body) {
+    var sample_key = key.substring(0, key.lastIndexOf("-"));
+    if (last_key == "") { 
+      last_key = sample_key;
+      selected['sampleid'] = key.substring(0, key.indexOf("-"));
+      selected['sample_num'] = key.substring(key.indexOf("-")+1, key.lastIndexOf("-"));
+    }
+    if (sample_key == last_key) {
+      console.log("same sk:", sample_key, " lk:", last_key)
+      selected[key.substring(key.lastIndexOf("-")+1)] = body[key];
+     // console.log(key, " ", body[key])
+    } else {
+      console.log("diff sk:", sample_key, " lk:", last_key)
+      // save record - split into the find component and the save component.
+      var find = {}
+      find['sampleid'] = selected['sampleid']
+      find['sample_num'] = selected['sample_num']
+      find['nanodrop.date'] = selected['date']
+      find['nanodrop.time'] = selected['time']
+      var set = {}
+      
+      //console.log(key, " ", body[key])
+      if (selected['proceed_flag'] == "on") { 
+        selected['proceed_flag'] = "checked"
+      }
+      set['proceed_flag'] = selected['proceed_flag']
+      set['nanodrop.0.vol'] = selected['vol']
+      set['nanodrop.0.dna_extract_date'] = selected['dna_extract_date']
+      set['notes'] = selected['notes']
+      //create query:
+      console.log("find[sampleid]:", find['sampleid'])
+      if (find['sampleid'] == "EMVB0101F") {
+        console.log("find:", find)
+        console.log("set:", set)
+      }
+      this.updateDB('samples', find, {$set: set}, false, function(error) {  //the callback function
+        if( error ) {
+          console.log(error);
+          e = error;
+        }
+      });
+      //reset variables  for next key id.
+      selected = {};
+      last_key = sample_key;
+      var a = key.indexOf("-");
+      var b = key.lastIndexOf("-");
+      selected['sampleid'] = key.substring(0, a);
+      selected['sample_num'] = key.substring(a+1, b);
+      selected[key.substring(b+1)] = body[key]; 
+      //console.log(key, " ", body[key])
+    }
+  }
+  // save record
+  var find = {}
+  find['sampleid'] = selected['sampleid']
+  find['sample_num'] = selected['sample_num']
+  find['nanodrop.date'] = selected['date']
+  find['nanodrop.time'] = selected['time']
+  var set = {}
+  if (selected['proceed_flag'])    {  set['proceed_flag'] = selected['proceed_flag']  }
+  if (selected['vol'])             {  set['nanodrop.0.vol'] = selected['vol']  }
+  if (selected['dna_extract_date']){  set['nanodrop.0.dna_extract_date'] = selected['dna_extract_date']  }
+  if (selected['notes'])           {  set['notes'] = selected['notes']  }
+  //create query:
+  
+  this.updateDB('samples', find, {$set: set}, false, function(error) {  //the callback function
+    if( error ) {
+      console.log(error);
+      e = error;
+    }
+  }); 
+  callback(e);
+};
 
 
 
