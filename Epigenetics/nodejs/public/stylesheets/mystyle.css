@@ -33,6 +33,7 @@ table, td{
   border: 1px solid #aaaaaa;
   border-spacing: 0px;
   border-collapse:collapse;
+  width:20px;
 }
 
 .greenwlines {
@@ -41,7 +42,27 @@ table, td{
   border: 1px solid #aaaaaa;
   border-spacing: 0px;
   border-collapse:collapse;
+  width:20px;
 }
+
+.whitewlines {
+  text-align:center;
+  background-color: #ffffff;
+  border: 1px solid #aaaaaa;
+  border-spacing: 0px;
+  border-collapse:collapse;
+  width:20px;
+}
+
+.blackwlines {
+  text-align:center;
+  background-color: #000000;
+  border: 1px solid #aaaaaa;
+  border-spacing: 0px;
+  border-collapse:collapse;
+  width:20px;
+}
+
 
 
 .nanodropheader {

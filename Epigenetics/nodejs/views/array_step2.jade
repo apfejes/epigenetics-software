@@ -1,0 +1,108 @@
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+a(href='/')
+  #logo
+h1 Second Step - Manually place replicates
+form( method="post")
+  #project
+    input(type="hidden", name="step", value = 2)
+    input(type="hidden", id ="data", name="data", value = data)
+    input(type="hidden", id ="layout", name="layout", value = layout)
+    input(type="hidden", id ="list", name="list", value = list)
+    div
+      p Please assign the manually selected replicates to cells.
+    table
+      tr  
+        td
+          |      
+        - for (var h = 1; h <=6; h++) {
+          td
+            !{h}
+        -}
+        td 
+          | 
+        - for (var h = 7; h <=12; h++) {
+          td
+            !{h}
+        -}
+        
+        
+      - for (var i =1; i <= 8; i++) {
+        tr
+          td
+            !{i}
+          - for (var j = 1; j <=6; j++) {
+            - var a = i + "-" + j
+            - var n = i + "-" + j + "-cell"
+            - if (layout[a]) {
+              td.whitewlines
+            - } else { 
+              td.greenwlines(id =a+"-td", class = "all_td")
+                input(type="checkbox", name=n, id=n, class = "all_check")
+            -} 
+          - }
+          td
+            |  -
+          - for (var j = 7; j <=12; j++) {
+            - var a = i + "-" + j
+            - var n = i + "-" + j + "-cell"
+            - if (layout[a]) {
+              td.whitewlines
+            - } else {
+              td.greenwlines(id =a+"-td", class = "all_td")
+                input(type="checkbox", name=n, id=n, class = "all_check")
+            -}
+          - }
+      - }
+      
+    - for (var item in list) {
+      - for (var l = 1; l <= list[item]; l++) { 
+        !{item} Replicate !{l}: 
+        select(name="#{item}-#{l}-assign", class="replicates", onChange="updateArray(this)")
+          - for (var m = 1; m <= 8; m++) { 
+            - for (var n = 1; n <= 12; n++) {
+              - if (!layout[m + "-"+ n])
+                option(value=m + "-"  + n)=m +"-" + n
+            - }
+          -}
+        br
+      -}
+    -}
+      
+   
+    div
+      input(type="submit", value="Next")
+      input(type="button", value="Back", onClick="window.history.back(-1)")
+script(type='text/javascript')
+    var filled = {};
+    
+    
+    function updateArray(obj){  
+      var id = obj.value;
+      if (filled[id]) {
+        alert("this space is already taken")
+      } else {
+        filled[id] = "taken"
+      }
+      filled = {}
+      var u = document.getElementsByClassName("all_check");
+      for (var i = 0; i < u.length; i++) {
+        u[i].checked = false
+      }
+      var v = document.getElementsByClassName("redwlines");
+      for (var i = 0; i < v.length; i++) { 
+        console.log(v[i])
+        v[i].className = "greenwlines"
+      }
+      var t = document.getElementsByClassName("replicates");
+      for (var i = 0; i < t.length; i++) {
+        if (t[i]) {
+          var g = t[i].value;
+          filled[g] = "taken";
+          
+          var u = document.getElementById(g+"-cell");
+          u.checked = true
+          var v = document.getElementById(g+"-td");
+          v.className ="redwlines"
+        }
+      }
+    }

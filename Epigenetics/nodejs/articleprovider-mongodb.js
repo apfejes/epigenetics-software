@@ -411,11 +411,8 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
       selected['sample_num'] = key.substring(key.indexOf("-")+1, key.lastIndexOf("-"));
     }
     if (sample_key == last_key) {
-      console.log("same sk:", sample_key, " lk:", last_key)
       selected[key.substring(key.lastIndexOf("-")+1)] = body[key];
-     // console.log(key, " ", body[key])
     } else {
-      console.log("diff sk:", sample_key, " lk:", last_key)
       // save record - split into the find component and the save component.
       var find = {}
       find['sampleid'] = selected['sampleid']
@@ -433,11 +430,6 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
       set['nanodrop.0.dna_extract_date'] = selected['dna_extract_date']
       set['notes'] = selected['notes']
       //create query:
-      console.log("find[sampleid]:", find['sampleid'])
-      if (find['sampleid'] == "EMVB0101F") {
-        console.log("find:", find)
-        console.log("set:", set)
-      }
       this.updateDB('samples', find, {$set: set}, false, function(error) {  //the callback function
         if( error ) {
           console.log(error);
@@ -476,6 +468,108 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
   }); 
   callback(e);
 };
+
+
+
+
+
+
+
+
+
+//__________________________________
+//
+// Process Array
+//__________________________________
+
+ArticleProvider.prototype.process_Array = function(body, callback) {
+  //console.log(body)
+  var collection = []
+  var selected = {};
+  var last_key = ""
+  var e = ""
+  for (key in body) {
+    var sample_key = key.substring(0, key.lastIndexOf("-"));
+    if (last_key == "") { 
+      last_key = sample_key;
+      selected['sampleid'] = key.substring(0, key.indexOf("-"));
+      selected['sample_num'] = key.substring(key.indexOf("-")+1, key.lastIndexOf("-"));
+    }
+    if (sample_key == last_key) {
+      selected[key.substring(key.lastIndexOf("-")+1)] = body[key];
+    } else {
+      // move to collection
+      collection.push(selected)
+      //reset variables  for next key id.
+      selected = {};
+      last_key = sample_key;
+      var a = key.indexOf("-");
+      var b = key.lastIndexOf("-");
+      selected['sampleid'] = key.substring(0, a);
+      selected['sample_num'] = key.substring(a+1, b);
+      selected[key.substring(b+1)] = body[key]; 
+      //console.log(key, " ", body[key])
+    }
+  }
+  // save record
+  collection.push(selected)
+  callback(e, collection);
+};
+
+
+//__________________________________
+//
+//  Count Proceed Flags
+//__________________________________
+//
+
+ArticleProvider.prototype.count_proceed_flags = function(body, callback) {
+  
+  count = 0;
+  for (key in body) {
+    var type = key.substring(key.lastIndexOf("-")+1)
+    if (type == "proceed_flag") {
+      if (body[key] == "on" || body[key] =="checked") {
+        count++
+      }
+    }
+  }
+  callback(count)
+}
+
+//__________________________________
+//
+//  reserve_array
+//__________________________________
+//
+
+ArticleProvider.prototype.reserve_array = function(body, callback) {
+  var tiles = {}
+  for (key in body) {
+    if (key.indexOf("-cell", key.length-5) != -1) {  //ends with -cell
+      tiles[key.substring(0,key.lastIndexOf("-"))] = "reserved"
+    }
+  }
+  callback(tiles)
+}
+
+//__________________________________
+//
+//  parse_manual
+//__________________________________
+//
+ArticleProvider.prototype.parse_manual = function(data, callback) {
+  
+  var list = {}
+  for (rec in data) {
+    console.log("rec;", data[rec])
+    if (data[rec].rep_type == 3) {  // manually placed
+      list[data[rec].sampleid + "-" + data[rec].sample_num] = data[rec].rep
+    }
+  }
+  callback(list)
+}
+
 
 
 

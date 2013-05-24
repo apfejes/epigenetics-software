@@ -3,6 +3,7 @@ a(href='/')
   #logo
 h1 Begin Array Process
 form( method="post")
+  input(type="hidden", name="step", value = 0)
   #section1
     b Notes: 
     | Refreshing this page will reset the proceed flags to the last values stored in the database.
@@ -12,7 +13,8 @@ form( method="post")
     table.lines
       tr
         td.lines SampleID
-        td.lines Flag
+        td.lines Place on Array
+        td.lines Replicates
         td.lines DNA Extract Date
         td.lines conc
         td.lines Volume (µl)
@@ -23,15 +25,23 @@ form( method="post")
         td.lines Total N.A. (ng)
         td.lines Notes
         td.lines Created (D-M-Y)
+        td.lines Previous Plates
       - each sample in samples
         tr
           td.lines 
             b #{sample.sampleid}-#{sample.sample_num}
           td.lines 
             if (sample.proceed_flag == "checked")
-              input(type="checkbox", name="proceed_flag", checked="checked")
+              input(type="checkbox", name="#{sample.sampleid}-#{sample.sample_num}-proceed_flag", checked="checked")
             else
-              input(type="checkbox", name="proceed_flag")
+              input(type="checkbox", name="#{sample.sampleid}-#{sample.sample_num}-proceed_flag")
+          td.lines
+            input(type="number", name="#{sample.sampleid}-#{sample.sample_num}-rep", value =1, min=1, max=8 , size="3")
+            select(id="a", name="#{sample.sampleid}-#{sample.sample_num}-rep_type")
+              option(value=0)="Randomly placed"
+              option(value=1)="Inter-chip"
+              option(value=2)="Intra-chip"
+              option(value=3)="Manually placed"
           td.lines #{sample.dna_extract_date}
           if (sample.nanodrop)
             - var best_date = sample.nanodrop[0].date
@@ -81,7 +91,12 @@ form( method="post")
             td.lines
             td.lines
             td.redwlines
+
           td.lines #{sample.notes}
-          td.lines #{sample.created_at.getDate()}-#{sample.created_at.getMonth()}-#{sample.created_at.getFullYear()} #{sample.created_at.getHours()}:#{sample.created_at.getMinutes()} 
+          td.lines #{sample.created_at.getDate()}-#{sample.created_at.getMonth()}-#{sample.created_at.getFullYear()} #{sample.created_at.getHours()}:#{sample.created_at.getMinutes()}
+          td.lines
+            if (sample.plates)
+              - for plate in sample.plates
+                a(href="/view/plate/"+plate)=plate
     input(type="submit", value="Assign to Arrays")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")

@@ -3,13 +3,20 @@ a(href='/')
   #logo
 h1= title
 form( method="post")
-#section1
+#project
   table
     - each sample in samples
       tr
         td
+          
+      tr
+        td
           b Sample Name:
-        td #{sample.sampleid} - #{sample.sample_num} 
+        td #{sample.sampleid} - #{sample.sample_num}
+      tr
+        td
+        td  
+          a(href="/view/sample_merge/"+sample.sampleid)='(Merge Sample)'
       tr  
         td 
           b Sample Created:
