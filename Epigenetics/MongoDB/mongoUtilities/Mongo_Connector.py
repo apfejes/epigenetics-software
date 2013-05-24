@@ -48,5 +48,9 @@ class MongoConnector():
 
     def close(self):
         self.db.connection.disconnect()
+        
+    def distinct(self, collection_name, field):
+        collection = self.db[collection_name]
+        return collection.distinct(field)
 
 

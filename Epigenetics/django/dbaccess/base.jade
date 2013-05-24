@@ -24,10 +24,9 @@ html
             nav
                 a(href!='{% url 'collections' %}') Collections
         main
-             block content
+            block content
+                intro
                 image
-                    |<embed src="gene.svg" type="image/svg+xml"/>
-        sidebar
-            block sidebar
+                    embed(src!='{% url 'svgcode' %}', scrolling = 'no', width='1800', height = '180')
         footer
             p Running from the Kobor Lab @ the CMMT

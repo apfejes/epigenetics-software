@@ -25,10 +25,10 @@ length = (coordinates[-1][1]-coordinates[0][0])
 
 
 #We draw the gene
-gene = Drawing("SVGs/gene.svg", debug=True)#, size=('200mm', '150mm'), viewBox=('0 0 200 150'))
 height = 70
 x,y = 30,30
 position = (x,y)
+gene = Drawing("SVGs/gene.svg", debug=True)#, size=('200mm', '150mm'), viewBox=('0 0 200 150'))
 gene.add(Rect(insert=position, size = (length,height), fill="dodgerblue"))
 
 #We add the exons
@@ -45,5 +45,9 @@ gene.add(Text("Intron", insert = (40,130), fill="dodgerblue"))
 gene.add(Text("Exon", insert = (40,150), fill="slateblue"))
 
 
-gene.save()
+def svgcode():
+    return gene.tostring()
+
+#Uncomment below to create the .svg file
+#gene.save()
 print "The", name, "gene is ready to be viewed." 
