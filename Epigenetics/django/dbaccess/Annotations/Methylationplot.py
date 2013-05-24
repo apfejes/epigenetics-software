@@ -6,18 +6,9 @@ Edited from "WalkAlongChromosome.py"  written by jyeung
 '''
 
 import sys
-import os
 import time
 import numpy as np
-
-_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
-_root_dir = os.path.dirname(_cur_dir)
-sys.path.insert(0, _root_dir)
-sys.path.insert(0, _cur_dir)
-sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
-
-print sys.path 
 
 starttime = time.time()
 database_name = 'human_epigenetics'
@@ -26,12 +17,6 @@ methylation_collection = 'methylation'
 sample_collection = 'samples'
 window_size = 1   # For binning purposes
 
-'''
-project = 'down'
-control_samples = ['C4ab1 M', 'C4ab2 M', 'C5a M', 'C3a F', 'C1ab F', 'C2a M', 'C2c M']
-diseased_samples = ['DS01A M', 'DS09A M', 'DS02A F', 'DS04A F', 'DS03A F', 
-                    'DS05A F', 'DS08B F', 'DS06A M', 'DS07A M', 'DS10A M']
-'''
 
 def CreateSampleGroups(mongo, project, feature):
     '''

@@ -48,5 +48,6 @@ gene.add(Text("Exon", insert = (40,150), fill="slateblue"))
 def svgcode():
     return gene.tostring()
 
+#Uncomment below to create the .svg file
 #gene.save()
 print "The", name, "gene is ready to be viewed." 
