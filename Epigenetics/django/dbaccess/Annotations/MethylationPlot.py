@@ -197,4 +197,3 @@ if __name__ == "__main__":
     diseased_samples = SampleGroups[diseased_group_label]
     PlotBeta(mongo, project, chromosome, control_samples,diseased_samples, window_size)
     print('Done for %s chromosome' %chromosome)
-
