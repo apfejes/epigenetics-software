@@ -222,7 +222,7 @@ app.post('/view/sample_spreadsheet/:id', function(req, res){
         }
         //console.log("layout: step 2", layout);
         articleProvider.parse_inter_chip(JSON.parse(req.param('data')), function(inter_chip_list) {
-          articleProvider.parse_inter_chip(JSON.parse(req.param('data')), function(intra_chip_list) {
+          articleProvider.parse_intra_chip(JSON.parse(req.param('data')), function(intra_chip_list) {
             articleProvider.parse_random(JSON.parse(req.param('data')), function(random_list) {
               articleProvider.assign_to_chips(layout, inter_chip_list, intra_chip_list, random_list, function(assigned) {
                 console.log("assigned: step 3", assigned);

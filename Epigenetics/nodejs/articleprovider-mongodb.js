@@ -603,7 +603,7 @@ ArticleProvider.prototype.parse_intra_chip = function(data, callback) {
 ArticleProvider.prototype.parse_random = function(data, callback) {
   var list = {}
   for (rec in data) {
-    if (data[rec].rep_type == 0) {  // intra chip
+    if (data[rec].rep_type == 0) {  // random chip
       list[data[rec].sampleid + "-" + data[rec].sample_num] = data[rec].rep
     }
   }
@@ -613,7 +613,7 @@ ArticleProvider.prototype.parse_random = function(data, callback) {
 
 ArticleProvider.prototype.assign_to_chips = function(layout, inter, intra, random, callback) {
   var unassigned = {}
-  var intra = {}
+  console.log("running assign to chip.")
   for (var i =1; i <= 8; i++) {
     for (var j =1; j <= 12; j++) {
       var k = i + "-" + j;
@@ -622,8 +622,15 @@ ArticleProvider.prototype.assign_to_chips = function(layout, inter, intra, rando
       }
     }
   }
+  console.log("inter ", inter)
   for (i in inter) {
     console.log("i:", i)
+  }
+  for (j in intra) {
+    console.log("j:", j)
+  }
+  for (k in random) {
+    console.log("k:", k)
   }
   callback(layout)
 }
