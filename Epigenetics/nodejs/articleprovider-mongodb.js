@@ -539,7 +539,7 @@ ArticleProvider.prototype.count_proceed_flags = function(body, callback) {
 
 //__________________________________
 //
-//  reserve_array
+//  reserve/manual_array
 //__________________________________
 //
 
@@ -553,16 +553,26 @@ ArticleProvider.prototype.reserve_array = function(body, callback) {
   callback(tiles)
 }
 
+ArticleProvider.prototype.manual_array = function(body, callback) {
+  var tiles = {}
+  for (key in body) {
+    if (key.indexOf("-assign", key.length-7) != -1) {  //ends with -assign
+      var k = key.substring(0,key.lastIndexOf("-"))
+      tiles[body[key]] = key.substring(0,key.lastIndexOf("-")) 
+    }
+  }
+  callback(tiles)
+}
+
 //__________________________________
 //
-//  parse_manual
+//  parse_manual/interchip
 //__________________________________
 //
 ArticleProvider.prototype.parse_manual = function(data, callback) {
   
   var list = {}
   for (rec in data) {
-    console.log("rec;", data[rec])
     if (data[rec].rep_type == 3) {  // manually placed
       list[data[rec].sampleid + "-" + data[rec].sample_num] = data[rec].rep
     }
@@ -570,7 +580,53 @@ ArticleProvider.prototype.parse_manual = function(data, callback) {
   callback(list)
 }
 
+ArticleProvider.prototype.parse_inter_chip = function(data, callback) {
+  var list = {}
+  for (rec in data) {
+    if (data[rec].rep_type == 1) {  // inter chip
+      list[data[rec].sampleid + "-" + data[rec].sample_num] = data[rec].rep
+    }
+  }
+  callback(list)
+}
 
+ArticleProvider.prototype.parse_intra_chip = function(data, callback) {
+  var list = {}
+  for (rec in data) {
+    if (data[rec].rep_type == 2) {  // intra chip
+      list[data[rec].sampleid + "-" + data[rec].sample_num] = data[rec].rep
+    }
+  }
+  callback(list)
+}
+
+ArticleProvider.prototype.parse_random = function(data, callback) {
+  var list = {}
+  for (rec in data) {
+    if (data[rec].rep_type == 0) {  // intra chip
+      list[data[rec].sampleid + "-" + data[rec].sample_num] = data[rec].rep
+    }
+  }
+  callback(list)
+}
+
+
+ArticleProvider.prototype.assign_to_chips = function(layout, inter, intra, random, callback) {
+  var unassigned = {}
+  var intra = {}
+  for (var i =1; i <= 8; i++) {
+    for (var j =1; j <= 12; j++) {
+      var k = i + "-" + j;
+      if (!layout[k]) {
+        unassigned[k] = "free"
+      }
+    }
+  }
+  for (i in inter) {
+    console.log("i:", i)
+  }
+  callback(layout)
+}
 
 
 //__________________________________

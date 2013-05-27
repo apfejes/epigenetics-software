@@ -203,25 +203,39 @@ app.post('/view/sample_spreadsheet/:id', function(req, res){
       break;
     case '1':
       //console.log("dataset:", JSON.parse(req.param('data')))
-      articleProvider.parse_manual(JSON.parse(req.param('data')), function(list) {
-        if (Object.keys(list).length >= 1) {
-          articleProvider.reserve_array(req.body, function(layout) {
-            console.log("layout:", layout)
-            res.render('array_step2.jade',{list:list, layout:layout, data:req.param('data')});
-          });
-        } else { 
-          console.log("list is unpopulated")
-          //drop to switch case 2, because there are no manual ones to do.
-        }
+      articleProvider.reserve_array(req.body, function(layout) {
+        articleProvider.parse_manual(JSON.parse(req.param('data')), function(list) {  //number of manual entries to process.
+          if (Object.keys(list).length >= 1) {
+            console.log("layout step 1:", layout)
+            res.render('array_step2.jade',{list:list, layout:layout, layout_store:JSON.stringify(layout), data:req.param('data')});
+          } else { 
+            res.render('array_step3.jade',{data:JSON.stringify(req.param('data')), step1:JSON.stringify(req.body)});
+          }
+        });
       });
       break;
     case '2':
-    
-      res.render('array_step3.jade',{data:JSON.stringify(req.param('data')), step1:JSON.stringify(req.body)});
+      articleProvider.manual_array(req.body, function(layout) {
+        var old_layout = JSON.parse(req.param('layout_store'));
+        for (var attrname in old_layout) {
+          layout[attrname] = old_layout[attrname];
+        }
+        //console.log("layout: step 2", layout);
+        articleProvider.parse_inter_chip(JSON.parse(req.param('data')), function(inter_chip_list) {
+          articleProvider.parse_inter_chip(JSON.parse(req.param('data')), function(intra_chip_list) {
+            articleProvider.parse_random(JSON.parse(req.param('data')), function(random_list) {
+              articleProvider.assign_to_chips(layout, inter_chip_list, intra_chip_list, random_list, function(assigned) {
+                console.log("assigned: step 3", assigned);
+                res.render('array_step3.jade',{assigned:assigned});
+              })
+            })
+          })
+        })
+      });
       break;
     default:
       //error
-      res.render('array_step1.jade',{body:req.body});
+      res.render('array_step5.jade',{body:req.body});
       
   }
 });
