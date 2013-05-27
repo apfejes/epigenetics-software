@@ -15,14 +15,10 @@ from svgwrite.path import Path
 '''
 STILL NEED TO IMPLEMENT:
     1.
-        endgene = 3245676
-        startgene =  3076407
-        query = {"CHR":"chr4","project":"kollman","start_position":{"$lte":endgene},"end_position":{"$gte":startgene}}
-    2.
         more query options
-    3.
+    2.
         more graph options
-    4.
+    3.
         sample type option
 '''
 
@@ -41,13 +37,17 @@ class MongoCurious():
     def query(self,
                 chromosome=None,
                 start = None,
-                end = None):
+                end = None,
+                sampletype = None,
+                project = None):
         '''Registers query inputs'''
         if chromosome == None:
             raise ValueError("Please specificy a chromosome.")
         self.chromosome = chromosome
         self.start = start
         self.end = end
+        self.sampletype = sampletype
+        self.project = project
         return self
     
     
@@ -55,21 +55,16 @@ class MongoCurious():
         '''Checks that query inputs are valid'''
         t0 = time()
         self.mongo.ensure_index(self.collection, 'CHR')
-        
-        Chromosomes = self.mongo.distinct(self.collection, "CHR")
-        if self.chromosome not in Chromosomes:
-            raise ValueError("Invalid chromosome name. Please choose from the following possible inputs:", Chromosomes.encode("utf-8"))
+        print "Checking validity of query inputs..."
+        if self.chromosome != None:
+            Chromosomes = self.mongo.distinct(self.collection, "CHR")
+            if self.chromosome not in Chromosomes:
+                raise ValueError("Invalid chromosome name. Please choose from the following possible inputs:", Chromosomes.encode("utf-8"))
             
-        if self.start != None:
-            Starts = self.mongo.distinct(self.collection, "start_position")
-            if self.start not in [min(Starts),max(Starts)]:
-                raise ValueError("Invalid starting position. Please choose between:", min(Starts),"and", max(Starts))
-        
-        if self.end != None:
-            Ends = self.mongo.distinct(self.collection, "end_position")
-            if self.end not in [min(Ends),max(Ends)]:
-                raise ValueError("Invalid ending position. Please choose between:", min(Ends),"and", max(Ends))
-
+        if self.project != None:
+            Projects = self.mongo.distinct(self.collection, "project")
+            if self.project not in Projects:
+                raise ValueError("Invalid project. Please choose from the following:", Projects)
         print "Input check done in %i seconds." %round(time()-t0,1)
         return None
         
@@ -78,14 +73,20 @@ class MongoCurious():
         '''Finds probes corresponding to query'''
         self.mongo.ensure_index(self.collection, 'start_position') #for speed? to be tested...
         
-        if self.start == None and self.end == None:
-            query = {"CHR":self.chromosome}
-        elif self.start == None: 
-            query = {"CHR":self.chromosome, "end_position":{"$gte":self.start}}
-        elif self.end == None: 
-            query = {"CHR":self.chromosome, "start_position":{"$lte":self.end}}
-        else: 
-            query = {"CHR":self.chromosome, "start_position":{"$lte":self.end}, "end_position":{"$gte":self.start}}
+        #Preparing the different features of the query
+        if self.chromosome != None:
+            query_chr = {"CHR":self.chromosome}
+        else: query_chr = {}
+        
+        if self.start != None:
+            query_start =  {"start_position":{"$lte":self.end}}
+        else: query_start = {}
+        
+        if self.end != None:
+            query_end = {"end_position":{"$gte":self.start}}
+        else: query_end = {}
+        
+        query = dict(query_chr.items() + query_start.items() + query_end.items())
             
         return_chr = {'_id': False, 'beta_value': True, 
                       'start_position': True, 'end_position': True, 
@@ -96,7 +97,7 @@ class MongoCurious():
         if probes.count()== 0:
             print "WARNING: The following query return zero probes!"
             print "---> Find(", query, ")"
-            print "Exiting..."
+            print " use the checkquery() function to validate the inputs of your query."
             sys.exit()
             
         print "Conducting query: Find(", query, ")"
@@ -105,7 +106,57 @@ class MongoCurious():
         self.count= self.probes.count()
         return self.probes
         
+    
+    def createsamplegroups(self, project, sampletype):
+        '''
+        Separate samples into 'groups' according to a particular feature.
+        Example: feature = diseased/control, sex, tissue type...
         
+        Returns a dictionary of key:value pairs where key is the name of the 
+        feature (e.g. diseased/control) and value is a list of sample labels
+        that are in that feature group. 
+        '''
+        sample_collection = 'samples'
+        self.mongo.ensure_index(sample_collection, project)    # For speed
+        self.mongo.ensure_index(sample_collection, sampletype)
+        
+        findQuery = {'project': project}
+        returnQuery = {sampletype: True, '_id': False, 'sample_label': True}
+        
+        
+        samples = self.mongo.find(sample_collection, 
+                            findQuery, returnQuery).sort(sampletype, 1)
+        sample_groups = {}
+        sample_labels_list = []
+        previous_group = None
+        count = 0
+        for doc in samples:
+            '''
+            For each doc, keep track of previous group feature (e.g. whether
+            previous doc was diseased or control). Since it is ordered by 
+            the feature, it will go through all of samples of one feature 
+            before moving on to the other. We use this as an indicator that
+            all samples in that group have been iterated.
+            
+            We keep extending a list, sample_label_list, to add sample_labels
+            for all the samples within one group. 
+            
+            When all samples in that group have been iterated (the if statement),
+            then we create a key:value pair in the dictionary, sample_groups, where
+            key is the feature (e.g. diseased or control) and value is sample_label_list.
+            
+            Empty sample_label_list and keep doing this for all feature groups. 
+            '''
+            if (doc[sampletype] != previous_group) and (count > 0):
+                sample_groups[previous_group] = sample_labels_list
+                sample_labels_list = []
+            sample_labels_list.append(doc['sample_label'])
+            previous_group = doc[sampletype]
+            count += 1
+        sample_groups[previous_group] = sample_labels_list  # Do once more after exiting loop
+        return sample_groups
+    
+    
     def collectbetas(self, 
                      window_size =1, 
                      sample_type = None):
@@ -178,7 +229,7 @@ class MongoCurious():
         print "Making svg file \"%s\"" %filename
         gene = self.makedrawing(filename=filename,color=color)
         gene.save
-        return None
+        return gene
     
     
     def svgtostring(self, color="blue"):
@@ -191,10 +242,10 @@ class MongoCurious():
 
 #Example of how to use the class
 methylation= MongoCurious()
-print methylation.database, methylation.collection
-methylation.query(chromosome = "chr3")
+endgene = 3245676
+startgene =  3076407
+methylation.query(chromosome = "chr3", start = startgene, end = endgene, project = "down")
 methylation.findprobes()
-methylation.count
 methylation.collectbetas()
-string = methylation.svgtostring()
-print string
+svg = methylation.svg(filename = "test.svg", color = "green")
+svg.save()
