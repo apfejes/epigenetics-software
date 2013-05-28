@@ -64,6 +64,15 @@ table, td{
 }
 
 
+.bluewlines {
+  text-align:center;
+  background-color: #5CADFF;
+  border: 1px solid #aaaaaa;
+  border-spacing: 0px;
+  border-collapse:collapse;
+  width:20px;
+}
+
 
 .nanodropheader {
   padding-left:1em;

@@ -610,8 +610,23 @@ ArticleProvider.prototype.parse_random = function(data, callback) {
   callback(list)
 }
 
+//__________________________________
+//
+//  ASSIGN SAMPLES TO CHIPS!
+//__________________________________
+//
+
 
 ArticleProvider.prototype.assign_to_chips = function(layout, inter, intra, random, callback) {
+  var assigned = {}
+  for (l in layout) {
+    var sample = layout[l]
+    if (sample.lastIndexOf("-") != sample.indexOf("-")) {
+      assigned[l] = sample.substring(0,sample.lastIndexOf("-"))
+    } else {
+      assigned[l] = layout[l]
+    }
+  }
   var unassigned = {}
   console.log("running assign to chip.")
   for (var i =1; i <= 8; i++) {
@@ -622,17 +637,85 @@ ArticleProvider.prototype.assign_to_chips = function(layout, inter, intra, rando
       }
     }
   }
-  console.log("inter ", inter)
-  for (i in inter) {
-    console.log("i:", i)
+  for (i in inter) {  //max of inter[i] is set at 8 in sheet
+    var r = [1,2,3,4,5,6,7,8] //generate list of chips for each
+    r.sort(function() {return 0.5 - Math.random()})  //randomize order 
+    for (var q = 1; q<= inter[i]; q++) {  //how many are we spreading across chips
+      var n = r.pop()
+      var s = []
+      for (u in unassigned) {  //get free cells.
+        if (u.substring(0, u.indexOf("-")) == n && unassigned[u] == "free") {
+          s.push(u)
+          unassigned[u] == "not-free"
+        }
+      }
+      //if s.length == 0.....  must deal with this.
+      s.sort(function() {return 0.5 - Math.random()})  //randomize order
+      var cell = s.pop()
+      assigned[cell] = i;
+    }
   }
-  for (j in intra) {
-    console.log("j:", j)
+  var intra_counts = []
+  for (var i = 1; i <= 4; i++) {  //refresh list of free cells.
+    for (var j =0; j < 2; j++) {
+      count = 0;
+      console.log("chip numbers: i + j (cn)", i, " ", j, " ",(((2*i)-1)+j))
+      for (var n = (2 * i); n <= (2*i)+1; n++) {
+        for (var m = (6*j)+1; m <= (6*j)+6; m++) {
+          var k = n + "-" + m;
+          if (!layout[k]) {
+            unassigned[k] = "free"
+            count++;
+          }
+        }
+      }
+      intra_counts[(((2*i)-1)+j)] = count;  // don't use chip zero - it doesn't exist..
+    }
   }
+  console.log("intra_counts: ", intra_counts);
+  var r = [1,2,3,4,5,6,7,8] //generate list of chips to test
+  for (i in intra) {
+    r.sort(function() {return 0.5 - Math.random()}) //randomize placement order
+    var n = r.pop()  //chip number
+    while (r.length > 0 && intra_counts[n] < intra[i]) {  //if there aren't enough open spaces, and there are other chips to try, try again
+      n = r.pop()
+    }
+    if (r.length == 0) {
+      console.log("FAILURE couldn't fit intra on plate.")
+    } else {
+      var s = []
+      for (u in unassigned) {  //get free cells.
+        var u_maj = u.substring(0, u.indexOf("-"))
+        var u_min = u.substring(u.indexOf("-")+1)
+        console.log(u, "=u, maj, min: ", u_maj, " ", u_min)
+        if (n%2==1) {
+          if ((u_maj == n || u_maj == n+1) && (u_min <7) && unassigned[u] == "free") {
+            s.push(u)
+          }
+        } else { //even number chip.
+          if ((u_maj == n || u_maj == n-1) && (u_min > 6) && unassigned[u] == "free") {
+            s.push(u)
+          }
+        }
+      }
+      //if s.length == 0.....  must deal with this.
+      s.sort(function() {return 0.5 - Math.random()})  //randomize order
+      console.log("s: ", s, " for chip n:", n)
+      for (var t = 1; t <= intra[i]; t++) {
+        var cell = s.pop()
+        assigned[cell] = "intra"+i;
+        unassigned[cell] == "not-free"
+      }
+      intra_counts[n] = intra_counts[n] - intra[t]
+    }
+  }
+  
+  //console.log("layout: intra assigned: ", layout);
+  
   for (k in random) {
-    console.log("k:", k)
+    //console.log("k:", k)
   }
-  callback(layout)
+  callback(assigned)
 }
 
 

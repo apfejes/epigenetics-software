@@ -6,9 +6,12 @@ form( method="post")
   input(type="hidden", name="step", value = 0)
   #section1
     b Notes: 
-    | Refreshing this page will reset the proceed flags to the last values stored in the database.
+    ol
+      li Refreshing this page will reset the proceed flags to the last values stored in the database.
+      li Up to 96 samples may be placed on a plate.  If you select more than 96 samples (including replicates), the remaining will not be assigned to plates.  
+      li Samples assigned to plates will have the "place on array" flag unchecked to fascilitate further plate assignments.
     br
-    input(type="submit", value="Assign to Arrays")
+    input(type="submit", value="Assign to New Array")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
     table.lines
       tr

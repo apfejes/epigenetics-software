@@ -9,6 +9,10 @@ form( method="post")
     input(type="hidden", id ="layout", name="layout_store", value = layout_store)
     input(type="hidden", id ="list", name="list", value = list)
     div
+      | White spaces were previously reserved
+      br
+      | Red spaces were manually assigned
+      br
       p Please assign the manually selected replicates to cells.
     table
       tr  
@@ -53,18 +57,24 @@ form( method="post")
             -}
           - }
       - }
-      
-    - for (var item in list) {
-      - for (var l = 1; l <= list[item]; l++) { 
-        !{item} Replicate !{l}: 
-        select(name="#{item}-#{l}-assign", class="replicates", onChange="updateArray(this)")
-          - for (var m = 1; m <= 8; m++) { 
-            - for (var n = 1; n <= 12; n++) {
-              - if (!layout[m + "-"+ n])
-                option(value=m + "-"  + n)=m +"-" + n
-            - }
-          -}
-        br
+    
+    
+    
+    - if (Object.keys(list).length ==0) {
+      p No Manually assigned elements selected.  Press Next to continue.
+    - } else {
+      - for (var item in list) {
+        - for (var l = 1; l <= list[item]; l++) { 
+          !{item} Replicate !{l}: 
+          select(name="#{item}-#{l}-assign", class="replicates", onChange="updateArray(this)")
+            - for (var m = 1; m <= 8; m++) { 
+              - for (var n = 1; n <= 12; n++) {
+                - if (!layout[m + "-"+ n])
+                  option(value=m + "-"  + n)=m +"-" + n
+              - }
+            -}
+          br
+        -}
       -}
     -}
       
