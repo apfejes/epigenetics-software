@@ -77,19 +77,27 @@ class MongoCurious():
         self.mongo.ensure_index(self.collection, 'start_position') #for speed? to be tested...
         
         #Preparing the different features of the query
-        query_chr, query_start, query_end, query_samplabel = {}, {}, {}, {}
-        if self.chromosome != None: query_chr = {"CHR":self.chromosome}
-        if self.start != None: query_start =  {"start_position":{"$lte":self.end}}
-        if self.end != None: query_end = {"end_position":{"$gte":self.start}}
-        if self.sample_label != None: query_samplabel = {"sample_label":self.sample_label}
-        
-        query = dict(query_chr.items() + query_start.items() + query_end.items() + query_samplabel.items())
-            
-        return_chr = {'_id': False, 'beta_value': True, 
-                      'start_position': True, 'end_position': True, 
-                      'sample_label': True}
-                      
-        probes = self.mongo.find(self.collection,query,return_chr).sort('start_position', 1)
+        if self.collection == "methylation":
+            query_chr, query_start, query_end, query_samplabel = {}, {}, {}, {}
+            if self.chromosome != None: query_chr = {"CHR":self.chromosome}
+            if self.start != None: query_start =  {"start_position":{"$lte":self.end}}
+            if self.end != None: query_end = {"end_position":{"$gte":self.start}}
+            if self.sample_label != None: query_samplabel = {"sample_label":self.sample_label}
+            query = dict(query_chr.items() + query_start.items() + query_end.items() + query_samplabel.items())
+            return_chr = {'_id': False, 'beta_value': True, 
+                          'start_position': True, 'end_position': True, 
+                          'sample_label': True}
+            probes = self.mongo.find(self.collection,query,return_chr).sort('start_position', 1)
+        if self.collection == "waves":
+            query_chr, query_pos, = {}, {}
+            if self.chromosome != None: query_chr = {"CHR":self.chromosome}
+            if self.start != None and self.end != None: 
+                query_pos =  {"pos":{"$lte":self.end, "$gte":self.start}}
+            query = dict(query_chr.items() + query_pos.items())
+            return_chr = {'_id': False, 'pos': True, 
+                          'height': True, 'stdev': True, 
+                          'sample_id': False}
+            probes = self.mongo.find(self.collection,query,return_chr).sort('pos', 1)
         
         if probes.count()== 0:
             print "    WARNING: The following query return zero probes!"
@@ -202,6 +210,7 @@ class MongoCurious():
                     beta_values.append(beta)
                 elif samp in self.sample_groups:
                     beta_values.append(beta)
+                else: break
                 data_avg = np.mean(beta_values)
                 x_position.append(pos)
                 y_avg.append(data_avg)            
@@ -212,6 +221,9 @@ class MongoCurious():
         return None
         
         
+    def getwaves(self):
+        
+        return None
     def makedrawing(self, 
                     filename="plot.svg", 
                     color = "blue"):

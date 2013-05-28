@@ -17,7 +17,7 @@ for chromosome in chromosomes:
             m.query(chromosome = chromosome, project = project, sampletype = sampletype)
             m.findprobes()
             m.collectbetas()
-            svg = m.svg(filename = "test.svg", color = "green")
+            #svg = m.svg(filename = "test.svg", color = "green")
             print "Passed test %i" %i
             i+=1
             
