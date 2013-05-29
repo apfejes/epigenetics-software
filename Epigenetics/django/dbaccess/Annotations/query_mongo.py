@@ -7,9 +7,10 @@ Created on 2013-05-23
 import Mongo_Connector
 from time import time
 import sys
-import numpy as np
+from numpy import log, mean
 from svgwrite.drawing import Drawing
 from svgwrite.path import Path
+from math import sqrt
 
 
 '''
@@ -25,7 +26,7 @@ class MongoCurious():
     def __init__(self,
                 database='human_epigenetics',
                 collection='methylation'):
-        '''Connects to database and puts index on the collection'''
+        '''Connects to database'''
         mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database)
         self.database = database
         self.collection = collection
@@ -43,14 +44,21 @@ class MongoCurious():
         '''Registers query inputs'''
         if chromosome == None:
             raise ValueError("Please specificy a chromosome.")
-        self.chromosome = chromosome
+        if isinstance(chromosome, basestring):
+            self.chromosome = chromosome
+        elif isinstance(chromosome, int):
+            if self.collection == "methylation":
+                self.chromosome = "CHR" + str(chromosome)
+            if self.collection == "waves":
+                self.chromosome = str(chromosome)
         self.start = start
         self.end = end
         self.sample_label = sample_label
         self.exprs_value = exprs_value
         self.project = project
         self.sampletype = sampletype
-        self.sample_groups = self.creategroups()
+        if self.collection == "methylation":
+            self.sample_groups = self.creategroups()
         return self
     
     
@@ -90,13 +98,13 @@ class MongoCurious():
             probes = self.mongo.find(self.collection,query,return_chr).sort('start_position', 1)
         if self.collection == "waves":
             query_chr, query_pos, = {}, {}
-            if self.chromosome != None: query_chr = {"CHR":self.chromosome}
+            if self.chromosome != None: query_chr = {"chr":self.chromosome}
             if self.start != None and self.end != None: 
-                query_pos =  {"pos":{"$lte":self.end, "$gte":self.start}}
+                query_pos =  {"pos":{"$lte":self.end+500, "$gte":self.start-500}} #extend the region for query to find peaks with tails in region
             query = dict(query_chr.items() + query_pos.items())
             return_chr = {'_id': False, 'pos': True, 
-                          'height': True, 'stdev': True, 
-                          'sample_id': False}
+                          'height': True, 'stddev': True, 
+                          'sample_id': True}
             probes = self.mongo.find(self.collection,query,return_chr).sort('pos', 1)
         
         if probes.count()== 0:
@@ -211,7 +219,7 @@ class MongoCurious():
                 elif samp in self.sample_groups:
                     beta_values.append(beta)
                 else: break
-                data_avg = np.mean(beta_values)
+                data_avg = mean(beta_values)
                 x_position.append(pos)
                 y_avg.append(data_avg)            
         
@@ -221,9 +229,33 @@ class MongoCurious():
         return None
         
         
-    def getwaves(self):
-        
+    def getwaves(self,tail = 1):
+        count = 0
+        #This dict will store the position as keys and height and standard deviation as values.
+        waves = {}
+        #"tail" is min height of a tail to be included in the plot for a peak which doesn't have its center in the region
+        for doc in self.probes:
+            if isinstance(doc['stddev'], basestring): int()
+            pos, height, stddev = doc['pos'],doc['height'],int(doc['stddev'])
+            if self.start <= pos <= self.end:
+                waves[pos] = [height,stddev]
+                count +=1
+            else:
+                dist_to_region = min(abs(pos-self.end), abs(self.start-pos))
+                dist_from_peak_to_tail = sqrt((-2)*stddev*stddev*log(tail/height))
+                print "        ", pos, height, stddev
+                print "        tail distance", dist_from_peak_to_tail
+                print "        dist to region", dist_to_region
+                if dist_from_peak_to_tail-dist_to_region >=0:
+                    waves[pos] = [height,stddev]
+                    count +=1
+                else: print "         Not included:    ", pos, height, stddev, 
+        print "\n%i peaks were found in region." %count
+        self.waves = waves
+        print waves
         return None
+
+
     def makedrawing(self, 
                     filename="plot.svg", 
                     color = "blue"):
