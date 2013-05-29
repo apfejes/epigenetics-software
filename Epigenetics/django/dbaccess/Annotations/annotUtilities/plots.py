@@ -46,7 +46,7 @@ def makeXYPlot(x, y, xLabel, yLabel, title, sampLabel=None, color='blue'):
     #d is the list of coordinates with commands such as
     #M for "move to' to initiate curve and S for smooth curve
     d = makesmoothpath(x,y)
-    gene.add(Path(stroke = "blue", fill = "none", d = d))
+    gene.add(Path(stroke = color, fill = "none", d = d))
     
     gene.save()
     print "The methylation data is ready to be viewed." 
