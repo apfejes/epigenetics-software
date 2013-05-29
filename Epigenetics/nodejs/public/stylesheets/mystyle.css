@@ -73,6 +73,14 @@ table, td{
   width:20px;
 }
 
+.greywlines {
+  text-align:center;
+  background-color: #B2B2B2;
+  border: 1px solid #aaaaaa;
+  border-spacing: 0px;
+  border-collapse:collapse;
+  width:20px;
+}
 
 .nanodropheader {
   padding-left:1em;

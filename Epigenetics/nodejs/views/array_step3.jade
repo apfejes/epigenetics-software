@@ -1,0 +1,116 @@
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+a(href='/')
+  #logo
+h1 Third Step - Completed
+form( method="post")
+  #project
+    - var translate = {1:"A",2:"B",3:"C",4:"D",5:"E",6:"F",7:"G",8:"H"};
+    input(type="hidden", name="step", value = 2)
+    input(type="hidden", id ="assigned", name="assigned", value = assigned)
+    div
+      | White spaces were previously reserved
+      br
+      | Red spaces were manually assigned
+      br
+      | Grey spaces are blocked because insufficient samples were selected. 
+      br
+      | Blue spaces were assigned automatically
+      p Assigned positions on cells.  You can go back one page to re-generate a different layout, or accept the current layout and write it to the database.
+      
+    table
+      tr  
+        td
+          |      
+        - for (var h = 1; h <=6; h++) {
+          td
+            !{h}
+        -}
+        td 
+          | 
+        - for (var h = 7; h <=12; h++) {
+          td
+            !{h}
+        -}
+        
+        
+      - for (var i =1; i <= 8; i++) {
+        tr
+          td
+            !{translate[i]}
+          - for (var j = 1; j <=6; j++) {
+            - var a = i + "-" + j
+            - var n = i + "-" + j + "-cell"
+            - if (assigned[a]=="reserved") {
+              td.whitewlines
+            - } else if (layout[a]) {
+              td.redwlines
+                | !{assigned[a]}
+            - } else if (chips < (1 + Math.ceil(i/2))) {
+              td.greywlines
+            - } else if (assigned[a]) {
+              td.bluewlines 
+                | !{assigned[a]}
+            - } else { 
+              td.greenwlines(id =a+"-td", class = "all_td")
+                input(type="checkbox", name=n, id=n, class = "all_check")
+            -} 
+          - }
+          td
+            |  -
+          - for (var j = 7; j <=12; j++) {
+            - var a = i + "-" + j
+            - var n = i + "-" + j + "-cell"
+            - if (assigned[a] == "reserved") {
+              td.whitewlines
+            - } else if (layout[a]) {
+              td.redwlines
+                | !{assigned[a]}
+            - } else if (chips < (4 + Math.ceil(i/2)))  {
+              td.greywlines
+            - } else if (assigned[a]) {
+              td.bluewlines 
+                | !{assigned[a]}
+            - } else {
+              td.greenwlines(id =a+"-td", class = "all_td")
+            -}
+          - }
+      - }
+      
+   
+    div
+      input(type="submit", value="Accept Positions")
+      input(type="button", value="Back", onClick="window.history.back(-1)")
+script(type='text/javascript')
+    var filled = {};
+    
+    
+    function updateArray(obj){  
+      var id = obj.value;
+      if (filled[id]) {
+        alert("this space is already taken")
+      } else {
+        filled[id] = "taken"
+      }
+      filled = {}
+      var u = document.getElementsByClassName("all_check");
+      for (var i = 0; i < u.length; i++) {
+        u[i].checked = false
+      }
+      var v = document.getElementsByClassName("redwlines");
+      for (var i = 0; i < v.length; i++) { 
+        console.log(v[i])
+        v[i].className = "greenwlines"
+      }
+      var t = document.getElementsByClassName("replicates");
+      for (var i = 0; i < t.length; i++) {
+        if (t[i]) {
+          var g = t[i].value;
+          filled[g] = "taken";
+          
+          var u = document.getElementById(g+"-cell");
+          u.checked = true
+          var v = document.getElementById(g+"-td");
+          v.className ="redwlines"
+        }
+      }
+    }

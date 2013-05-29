@@ -2,86 +2,100 @@ link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
 a(href='/')
   #logo
 h1 Second Step - Manually place replicates
+- var samples = Object.keys(layout).length + count
+- var chips = Math.ceil(samples/12)
 form( method="post")
   #project
-    input(type="hidden", name="step", value = 2)
-    input(type="hidden", id ="data", name="data", value = data)
-    input(type="hidden", id ="layout", name="layout_store", value = layout_store)
-    input(type="hidden", id ="list", name="list", value = list)
-    div
-      | White spaces were previously reserved
-      br
-      | Red spaces were manually assigned
-      br
-      p Please assign the manually selected replicates to cells.
-    table
-      tr  
-        td
-          |      
-        - for (var h = 1; h <=6; h++) {
+    - if (samples%chips !=0 ) {
+      H3 The number of samples to plate (!{samples}) is not divisible by 12 (including reserved spaces).  Please change the number of reserved spaces, or alter the number of samples.
+      input(type="button", value="Back", onClick="window.history.back(-1)")
+    -} else {
+      input(type="hidden", name="step", value = 2)
+      input(type="hidden", id ="data", name="data", value = data)
+      input(type="hidden", id ="layout", name="layout_store", value = layout_store)
+      input(type="hidden", id ="list", name="list", value = list)
+      input(type="hidden", id ="chips", name="chips", value=chips)
+      input(type="hidden", id ="samples", name="samples", value=samples)
+      div
+        H4 Based on the number of samples and reserved spaces, you have chosen to use !{chips} chips.
+        | White spaces were previously reserved 
+        br
+        | Red spaces were manually assigned 
+        br
+        | Grey spaces are blocked because insufficient samples were selected. 
+        br
+        p Please assign the manually selected replicates to cells.
+      table
+        tr  
           td
-            !{h}
-        -}
-        td 
-          | 
-        - for (var h = 7; h <=12; h++) {
-          td
-            !{h}
-        -}
-        
-        
-      - for (var i =1; i <= 8; i++) {
-        tr
-          td
-            !{i}
-          - for (var j = 1; j <=6; j++) {
-            - var a = i + "-" + j
-            - var n = i + "-" + j + "-cell"
-            - if (layout[a]) {
-              td.whitewlines
-            - } else { 
-              td.greenwlines(id =a+"-td", class = "all_td")
-                input(type="checkbox", name=n, id=n, class = "all_check")
-            -} 
-          - }
-          td
-            |  -
-          - for (var j = 7; j <=12; j++) {
-            - var a = i + "-" + j
-            - var n = i + "-" + j + "-cell"
-            - if (layout[a]) {
-              td.whitewlines
-            - } else {
-              td.greenwlines(id =a+"-td", class = "all_td")
-                input(type="checkbox", name=n, id=n, class = "all_check")
-            -}
-          - }
-      - }
+            |      
+          - for (var h = 1; h <=6; h++) {
+            td
+              !{h})
+          -}
+          td 
+            | 
+          - for (var h = 7; h <=12; h++) {
+            td
+              !{h}
+          -}
+          
+        - for (var i =1; i <= 8; i++) {
+          tr
+            td
+              !{i}
+            - for (var j = 1; j <=6; j++) {
+              - var a = i + "-" + j
+              - var n = i + "-" + j + "-cell"
+              - if (layout[a]) {
+                td.whitewlines
+              - } else if (chips < (1 + Math.ceil(i/2))) {
+                td.greywlines(id =a+"-td", class = "all_td")
+              - } else { 
+                td.greenwlines(id =a+"-td", class = "all_td")
+                  input(type="checkbox", name=n, id=n, class = "all_check")
+              -} 
+            - }
+            td
+              |  -
+            - for (var j = 7; j <=12; j++) {
+              - var a = i + "-" + j
+              - var n = i + "-" + j + "-cell"
+              - if (layout[a]) {
+                td.whitewlines
+              - } else if (chips < (4 + Math.ceil(i/2)))  {
+                td.greywlines(id =a+"-td", class = "all_td")
+              - } else {
+                td.greenwlines(id =a+"-td", class = "all_td")
+                  input(type="checkbox", name=n, id=n, class = "all_check")
+              -}
+            - }
+        - }
+
     
-    
-    
-    - if (Object.keys(list).length ==0) {
-      p No Manually assigned elements selected.  Press Next to continue.
-    - } else {
-      - for (var item in list) {
-        - for (var l = 1; l <= list[item]; l++) { 
-          !{item} Replicate !{l}: 
-          select(name="#{item}-#{l}-assign", class="replicates", onChange="updateArray(this)")
-            - for (var m = 1; m <= 8; m++) { 
-              - for (var n = 1; n <= 12; n++) {
-                - if (!layout[m + "-"+ n])
-                  option(value=m + "-"  + n)=m +"-" + n
-              - }
-            -}
-          br
+      - if (Object.keys(list).length ==0) {
+        p No Manually assigned elements selected.  Press Next to continue.
+      - } else {
+        - for (var item in list) {
+          - for (var l = 1; l <= list[item]; l++) { 
+            !{item} Replicate !{l}: 
+            select(name="#{item}-#{l}-assign", class="replicates", onChange="updateArray(this)")
+              - for (var m = 1; m <= 8; m++) { 
+                - for (var n = 1; n <= 12; n++) {
+                  - if (!layout[m + "-"+ n] && (chips >= ((Math.floor((n-1)/6)*4) + Math.ceil(m/2))))
+                    option(value=m + "-"  + n)=m +"-" + n
+                - }
+              -}
+            br
+          -}
         -}
       -}
-    -}
-      
+       
    
-    div
-      input(type="submit", value="Next")
-      input(type="button", value="Back", onClick="window.history.back(-1)")
+      div
+        input(type="submit", value="Next")
+        input(type="button", value="Back", onClick="window.history.back(-1)")
+    -}
 script(type='text/javascript')
     var filled = {};
     
