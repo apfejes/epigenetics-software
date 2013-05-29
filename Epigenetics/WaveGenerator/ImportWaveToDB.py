@@ -82,9 +82,9 @@ def run():
         else:
             a = line.split("\t")
             wave = {}
-            wave["chr"] = a[0].replace("chr", "").upper()
+            wave["chr"] = "chr" + a[0].replace("chr", "").upper()
             wave["pos"] = int(a[1])
-            wave["stddev"] = a[2]
+            wave["stddev"] = int(a[2])
             wave["height"] = float(a[3])
             wave["sample_id"] = sample_id
             to_insert.append(wave)

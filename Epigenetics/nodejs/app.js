@@ -231,7 +231,7 @@ app.post('/view/sample_spreadsheet/:id', function(req, res){
       break;
     case '3':
       articleProvider.savePlacement(req.param('assigned'), function(plateid) {
-        res.redirect('/input/plate_edit/" + plateid'))
+        res.redirect('/input/plate_edit/" + plateid');
       });
       break;
     default:
