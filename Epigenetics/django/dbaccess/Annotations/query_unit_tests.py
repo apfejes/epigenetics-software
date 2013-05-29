@@ -2,7 +2,7 @@ import query_mongo
 MongoCurious = query_mongo.MongoCurious
 
 #Example of how to use the class
-m= MongoCurious()
+m= MongoCurious(collection = "methylation")
 chromosomes = [21,"X"]
 chromosomes = ["chr"+str(c) for c in chromosomes]
 types = ["control","unstimulated", "boom", "listeria", "DS", "Control"]
@@ -20,4 +20,3 @@ for chromosome in chromosomes:
             #svg = m.svg(filename = "test.svg", color = "green")
             print "Passed test %i" %i
             i+=1
-            
