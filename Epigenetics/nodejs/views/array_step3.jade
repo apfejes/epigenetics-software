@@ -5,7 +5,7 @@ h1 Third Step - Completed
 form( method="post")
   #project
     - var translate = {1:"A",2:"B",3:"C",4:"D",5:"E",6:"F",7:"G",8:"H"};
-    input(type="hidden", name="step", value = 2)
+    input(type="hidden", name="step", value = 3)
     input(type="hidden", id ="assigned", name="assigned", value = assigned)
     div
       | White spaces were previously reserved
@@ -74,18 +74,7 @@ form( method="post")
             -}
           - }
       - }
-      
-   
-    div
-      table
-        - for (var z in assigned)
-          tr
-            td.tablethin
-              !{translate[z.substring(0,z.indexOf("-"))]}
-            td
-              !{z.substring(z.indexOf("-")+1)}
-            td
-              !{assigned[z]}
+
     div
       input(type="submit", value="Accept Positions")
       input(type="button", value="Back", onClick="window.history.back(-1)")

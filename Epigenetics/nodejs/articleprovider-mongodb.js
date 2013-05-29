@@ -317,10 +317,8 @@ ArticleProvider.prototype.update = function(collection, id, project, callback) {
 //__________________________________
 
 ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback) {
-  //console.log(project_id, "  ", sampleids);
   var date = new Date();
   for( var i =0;i< sampleids.length;i++ ) {
-    //console.log(project_id, "  ", sampleids[i])
     var s_id = ""
     var s_num = 1
     if (sampleids[i].indexOf("-") !== -1) {
@@ -330,8 +328,6 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
       s_id = sampleids[i];
       s_num = 1
     }
-    
-    //console.log("samples processed:", sampleids[i], " ", s_id, " ", s_num)
     this.upsert('samples', {projectid: project_id, sampleid: s_id, sample_num: s_num},
       {last_updated: date},  
       function(error) {
@@ -397,8 +393,6 @@ ArticleProvider.prototype.saveNanodrop = function(sampleids, filename, project_i
 //__________________________________
 
 ArticleProvider.prototype.process_sample_spreadsheet = function(collection, project_id, body, callback) {
-  //console.log(body)
-  
   var date = new Date();
   var selected= {};
   var last_key = ""
@@ -420,8 +414,6 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
       find['nanodrop.date'] = selected['date']
       find['nanodrop.time'] = selected['time']
       var set = {}
-      
-      //console.log(key, " ", body[key])
       if (selected['proceed_flag'] == "on") { 
         selected['proceed_flag'] = "checked"
       }
@@ -444,7 +436,6 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
       selected['sampleid'] = key.substring(0, a);
       selected['sample_num'] = key.substring(a+1, b);
       selected[key.substring(b+1)] = body[key]; 
-      //console.log(key, " ", body[key])
     }
   }
   // save record
@@ -483,7 +474,6 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
 //__________________________________
 
 ArticleProvider.prototype.process_Array = function(body, callback) {
-  //console.log(body)
   var collection = []
   var selected = {};
   var last_key = ""
@@ -508,7 +498,6 @@ ArticleProvider.prototype.process_Array = function(body, callback) {
       selected['sampleid'] = key.substring(0, a);
       selected['sample_num'] = key.substring(a+1, b);
       selected[key.substring(b+1)] = body[key]; 
-      //console.log(key, " ", body[key])
     }
   }
   // save record
@@ -648,7 +637,6 @@ ArticleProvider.prototype.assign_to_chips = function(chips, layout, inter, intra
       }
     }
   }
-  console.log("running...")
   for (i in inter) {  //max of inter[i] is set at 8 in sheet
     var r = []
     for (x = 1; x  <= chips; x++) {
@@ -678,13 +666,8 @@ ArticleProvider.prototype.assign_to_chips = function(chips, layout, inter, intra
       s.sort(function() {return 0.5 - Math.random()})  //randomize order
       //if s.length == 0.....  TODO: must deal with this.
       var cell = s.pop()
-      if (assigned[cell]) {
-        console.log("attempting to put a value in occupied assigned cell:", cell)
-      } else {
-        assigned[cell] = i;  //write it to the list of assigned cells
-        unassigned[cell] == "not-free"
-        console.log("placing value in assigned cell:", cell, " for ", i)
-      }
+      assigned[cell] = i;  //write it to the list of assigned cells
+      unassigned[cell] == "not-free"
     }
   }
   
@@ -727,7 +710,6 @@ ArticleProvider.prototype.assign_to_chips = function(chips, layout, inter, intra
   for (i in intra) {
     var n = r.pop()  //get a chip number
     while (r.length > 0 && intra_counts[n] < intra[i]) {  //if there aren't enough open spaces, and there are other chips to try, try again
-      console.log("discarded chip ", n, " as intra_counts[", n, "] = ", intra_counts[n], " and intra[", i, "] = ", intra[i])
       n = r.pop()
     }
     if (r.length == 0) {
@@ -751,11 +733,7 @@ ArticleProvider.prototype.assign_to_chips = function(chips, layout, inter, intra
       s.sort(function() {return 0.5 - Math.random()})  //randomize order
       for (var t = 1; t <= intra[i]; t++) {
         var cell = s.pop()
-        if (assigned[cell]) {
-          console.log("writing into ano otherwise already occupied cell! - intra")
-        } 
         assigned[cell] = i;
-
       }
       intra_counts[n] = intra_counts[n] - intra[t]
     }
