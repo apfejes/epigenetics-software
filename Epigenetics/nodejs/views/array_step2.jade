@@ -5,9 +5,11 @@ h1 Second Step - Manually place replicates
 - var reserved = Object.keys(layout).length
 - var samples = reserved + count
 - var chips = Math.ceil(samples/12)
+- if (chips > 8) { chips = 8;} 
+
 form(name = "replicate_assignment", method="post")
   #project
-    - if (samples%chips !=0 ) {
+    - if (samples < 96 && samples%chips !=0 ) {
       H3 The number of samples to plate (!{samples}) is not divisible by 12 (including reserved spaces).  Please change the number of reserved spaces, or alter the number of samples.
       input(type="button", value="Back", onClick="window.history.back(-1)")
     -} else {

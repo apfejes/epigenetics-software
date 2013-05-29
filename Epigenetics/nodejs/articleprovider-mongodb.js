@@ -83,6 +83,22 @@ ArticleProvider.prototype.updateDB= function(collection_name, update_criteria, q
 
 //__________________________________
 //
+// INSERT API
+//__________________________________
+
+
+ArticleProvider.prototype.insertDB= function(collection_name, insert_criteria, callback) {
+  this.db.collection(collection_name).insert(insert_criteria, function(e, results) {
+    if (e) { 
+      console.log("insertDB error:", e)
+      callback(e)
+    } else callback(null, results)
+  })
+};
+
+
+//__________________________________
+//
 // Functions for retrieval of specific information
 //__________________________________
 
@@ -259,24 +275,6 @@ ArticleProvider.prototype.nanodrop_types = function(callback) {
 
 //__________________________________
 //
-// SAVE FUNCTION
-//__________________________________
-
-ArticleProvider.prototype.save = function(collection_name, data, callback) {
-    if( typeof(data.length)=="undefined")
-      data = [data];
-    for( var i =0;i< data.length;i++ ) {
-      data = data[i];
-      data.created_at = new Date();
-      this.db.collection(collection_name).insert(data, function() {
-        callback(null, data);
-      })
-    };
-};
-
-
-//__________________________________
-//
 // UPSERT FUNCTION
 //__________________________________
 
@@ -340,6 +338,29 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
   }
   callback();
 };
+
+
+//__________________________________
+//
+// SAVE Placement on plate
+//__________________________________
+
+ArticleProvider.prototype.savePlacement = function(assignments, project_id, callback) {
+  var date = new Date();
+  
+  this.insertDB('plates', {"projectid":project_id, "assignments":JSON.parse(assignments)}, function(error, results) { 
+    if( error ) {
+      console.log("UpdateDB for Nanodrop error: ", error)
+      callback(error)
+    } else{
+        console.log("newPlate:", results[0]._id)
+      callback(results[0]._id);
+    }
+  });
+};
+
+
+
 
 //__________________________________
 //

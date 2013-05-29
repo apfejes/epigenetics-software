@@ -222,7 +222,7 @@ app.post('/view/sample_spreadsheet/:id', function(req, res){
           articleProvider.parse_intra_chip(JSON.parse(req.param('data')), function(intra_chip_list) {
             articleProvider.parse_random(JSON.parse(req.param('data')), function(random_list) {
               articleProvider.assign_to_chips(req.param('chips'), layout, inter_chip_list, intra_chip_list, random_list, function(assigned) {
-                res.render('array_step3.jade',{chips:req.param('chips'), layout:layout, assigned:assigned});
+                res.render('array_step3.jade',{chips:req.param('chips'), layout:layout, assigned:assigned, assigned_store:JSON.stringify(assigned)});
               })
             })
           })
@@ -230,7 +230,8 @@ app.post('/view/sample_spreadsheet/:id', function(req, res){
       });
       break;
     case '3':
-      articleProvider.savePlacement(req.param('assigned'), function(plateid) {
+      console.log("assigned_store:",req.param('assigned_store')) 
+      articleProvider.savePlacement(req.param('assigned_store'), req.params.id, function(plateid) {
         res.redirect('/input/plate_edit/" + plateid');
       });
       break;
