@@ -2,14 +2,16 @@ link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
 a(href='/')
   #logo
 h1 Second Step - Manually place replicates
-- var samples = Object.keys(layout).length + count
+- var reserved = Object.keys(layout).length
+- var samples = reserved + count
 - var chips = Math.ceil(samples/12)
-form( method="post")
+form(name = "replicate_assignment", method="post")
   #project
     - if (samples%chips !=0 ) {
       H3 The number of samples to plate (!{samples}) is not divisible by 12 (including reserved spaces).  Please change the number of reserved spaces, or alter the number of samples.
       input(type="button", value="Back", onClick="window.history.back(-1)")
     -} else {
+      - var translate = {1:"A",2:"B",3:"C",4:"D",5:"E",6:"F",7:"G",8:"H"};
       input(type="hidden", name="step", value = 2)
       input(type="hidden", id ="data", name="data", value = data)
       input(type="hidden", id ="layout", name="layout_store", value = layout_store)
@@ -17,7 +19,7 @@ form( method="post")
       input(type="hidden", id ="chips", name="chips", value=chips)
       input(type="hidden", id ="samples", name="samples", value=samples)
       div
-        H4 Based on the number of samples and reserved spaces, you have chosen to use !{chips} chips.
+        H4 Based on the number of samples (!{count}) and reserved spaces (!{reserved}), you have chosen to use !{chips} chips.
         | White spaces were previously reserved 
         br
         | Red spaces were manually assigned 
@@ -43,7 +45,7 @@ form( method="post")
         - for (var i =1; i <= 8; i++) {
           tr
             td
-              !{i}
+              !{translate[i]}
             - for (var j = 1; j <=6; j++) {
               - var a = i + "-" + j
               - var n = i + "-" + j + "-cell"
@@ -83,7 +85,7 @@ form( method="post")
               - for (var m = 1; m <= 8; m++) { 
                 - for (var n = 1; n <= 12; n++) {
                   - if (!layout[m + "-"+ n] && (chips >= ((Math.floor((n-1)/6)*4) + Math.ceil(m/2))))
-                    option(value=m + "-"  + n)=m +"-" + n
+                    option(value=m + "-"  + n)=translate[m] +"-" + n
                 - }
               -}
             br
@@ -93,7 +95,7 @@ form( method="post")
        
    
       div
-        input(type="submit", value="Next")
+        input(type="submit", value="Next", onClick="validation('replicate_assignment');return false;")
         input(type="button", value="Back", onClick="window.history.back(-1)")
     -}
 script(type='text/javascript')
@@ -130,3 +132,22 @@ script(type='text/javascript')
         }
       }
     }
+    function validation(obj) {
+      var occupied = []
+      var t = document.getElementsByClassName("replicates");
+        for (var i = 0; i < t.length; i++) {
+          if (t[i]) {
+            var g = t[i].value;
+            console.log("g = ", g)
+            
+            if (occupied[g]) {
+              alert("Some replicates occur at duplicate positions.  Please fix this before proceeding.")
+              return false
+            } else {
+              occupied[g] = "taken"
+            }
+          }
+        }
+      replicate_assignment.submit();
+    }
+    

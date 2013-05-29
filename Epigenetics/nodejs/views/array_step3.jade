@@ -52,7 +52,6 @@ form( method="post")
                 | !{assigned[a]}
             - } else { 
               td.greenwlines(id =a+"-td", class = "all_td")
-                input(type="checkbox", name=n, id=n, class = "all_check")
             -} 
           - }
           td
@@ -77,6 +76,16 @@ form( method="post")
       - }
       
    
+    div
+      table
+        - for (var z in assigned)
+          tr
+            td.tablethin
+              !{translate[z.substring(0,z.indexOf("-"))]}
+            td
+              !{z.substring(z.indexOf("-")+1)}
+            td
+              !{assigned[z]}
     div
       input(type="submit", value="Accept Positions")
       input(type="button", value="Back", onClick="window.history.back(-1)")

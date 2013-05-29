@@ -648,6 +648,7 @@ ArticleProvider.prototype.assign_to_chips = function(chips, layout, inter, intra
       }
     }
   }
+  console.log("running...")
   for (i in inter) {  //max of inter[i] is set at 8 in sheet
     var r = []
     for (x = 1; x  <= chips; x++) {
@@ -665,25 +666,32 @@ ArticleProvider.prototype.assign_to_chips = function(chips, layout, inter, intra
         if (n > 4) {  //second half of the array, chips 5-8
           if ((t == (2*n)-8 || t == ((2*n)-9)) && v > 6) {
             s.push(u)
-            unassigned[u] == "not-free"
+            
           }
         } else { //on first half of the array, chips 1-4
           if ((t == (2*n) || t == ((2*n)-1)) && v < 7) { 
             s.push(u)
-            unassigned[u] == "not-free"
           }
         }
       }
+      
       s.sort(function() {return 0.5 - Math.random()})  //randomize order
       //if s.length == 0.....  TODO: must deal with this.
       var cell = s.pop()
-      assigned[cell] = i;  //write it to the list of assigned cells
+      if (assigned[cell]) {
+        console.log("attempting to put a value in occupied assigned cell:", cell)
+      } else {
+        assigned[cell] = i;  //write it to the list of assigned cells
+        unassigned[cell] == "not-free"
+        console.log("placing value in assigned cell:", cell, " for ", i)
+      }
     }
   }
   
     //refresh free cells per chip
     
   var intra_counts = []
+  var unassigned = []
   for (var i = 1; i <= chips; i++) {
     var count = 0
     if (i < 5) {  //chips 1-4
@@ -743,8 +751,11 @@ ArticleProvider.prototype.assign_to_chips = function(chips, layout, inter, intra
       s.sort(function() {return 0.5 - Math.random()})  //randomize order
       for (var t = 1; t <= intra[i]; t++) {
         var cell = s.pop()
-        assigned[cell] = "intra "+i;
-        unassigned[cell] == "not-free"
+        if (assigned[cell]) {
+          console.log("writing into ano otherwise already occupied cell! - intra")
+        } 
+        assigned[cell] = i;
+
       }
       intra_counts[n] = intra_counts[n] - intra[t]
     }
