@@ -243,20 +243,33 @@ class MongoCurious():
             else:
                 dist_to_region = min(abs(pos-self.end), abs(self.start-pos))
                 dist_from_peak_to_tail = sqrt((-2)*stddev*stddev*log(tail/height))
-                print "        ", pos, height, stddev
-                print "        tail distance", dist_from_peak_to_tail
-                print "        dist to region", dist_to_region
+                #print "        ", pos, height, stddev
+                #print "        tail distance", dist_from_peak_to_tail
+                #print "        dist to region", dist_to_region
                 if dist_from_peak_to_tail-dist_to_region >=0:
                     waves[pos] = [height,stddev]
                     count +=1
-                else: print "         Not included:    ", pos, height, stddev, 
+                #else: print "         Not included:    ", pos, height, stddev, 
         print "\n%i peaks were found in region." %count
         self.waves = waves
-        print waves
         return None
 
-
-    def makedrawing(self, 
+    def svg(self, filename = "gene.svg", color="blue"):
+        print "    Making svg file \"%s\"" %filename
+        if self.collection == "methylation":
+            gene = self.drawgene(filename=filename,color=color)
+        if self.collection == "waves":
+            gene = self.drawpeaks(filename=filename,color=color)
+        gene.save
+        return gene
+    
+    
+    def svgtostring(self, color="blue"):
+        print "Making svg string..."
+        gene = self.drawgene(color=color)
+        return gene.tostring()
+    
+    def drawgene(self, 
                     filename="plot.svg", 
                     color = "blue"):
         '''Make svg drawing. This function is not to b called directly, only by svg() and svgtostring() '''
@@ -282,17 +295,26 @@ class MongoCurious():
         gene.add(Path(stroke = color, fill = "none", d = d))
         return gene
         
-        
-    def svg(self, filename = "plot.svg", color="blue"):
-        print "    Making svg file \"%s\"" %filename
-        gene = self.makedrawing(filename=filename,color=color)
-        gene.save
-        return gene
-    
-    
-    def svgtostring(self, color="blue"):
-        print "Making svg string..."
-        gene = self.makedrawing(color=color)
-        return gene.tostring()
+    def drawpeaks(self, filename = "peaks.svg", color="purple"):
+        '''Make svg drawing for peaks'''
+        print self.waves
+        for pos, [height,stddev] in self.waves.iteritems():
+            print pos, height, stddev
+#         offset =  X[0]
+#         X = [round(float(item-offset)/20000,3)+20 for item in X]
+#         Y = [round((invertby-item)*1000,2)+20 for item in Y]
+#         
+#         #d is the list of coordinates with commands such as
+#         #M for "move to' to initiate curve and S for smooth curve
+#         d = "M"+str(X[0])+","+str(Y[0])+" "+str(X[1])+","+str(Y[1])
+#         if smooth: d = d +"S"
+#         for i in range(2,len(X)):
+#             d=d+(" "+str(X[i])+","+str(Y[i]))
+#             
+#         length, height = str(X[-1]), str(max(Y))
+#         
+#         gene = Drawing("SVGs/"+filename, size=(str(float(length)+10) + "mm", str(float(height)+10)+ "mm"), viewBox=("0 0 "+str(float(length)+10)+" "+str(float(height)+10)), preserveAspectRatio="xMinYMin meet")
+#         gene.add(Path(stroke = color, fill = "none", d = d))
+        return None
 
 
