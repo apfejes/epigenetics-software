@@ -14,13 +14,13 @@ form( method="post")
         td
           |      
         - for (var h = 1; h <=6; h++) {
-          td
+          td.center
             !{h}
         -}
         td 
           | 
         - for (var h = 7; h <=12; h++) {
-          td
+          td.center
             !{h}
         -}
         
@@ -42,7 +42,6 @@ form( method="post")
               input(type="checkbox", name=a)
           - }
       - }
-   
     div
       input(type="submit", value="Next")
       input(type="button", value="Back", onClick="window.history.back(-1)")

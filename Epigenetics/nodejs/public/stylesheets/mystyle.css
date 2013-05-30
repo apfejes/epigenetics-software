@@ -27,6 +27,10 @@ table, td{
 
 }
 
+.center {
+  text-align:center;
+}
+
 .lines{
   border: 1px solid #aaaaaa;
   border-spacing: 0px;

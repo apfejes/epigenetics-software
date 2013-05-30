@@ -70,12 +70,15 @@ a(href='/')
       a(href="/input/payment_new/"+project._id)='Add a payment record'
 #platedetails
   H3 Plates:
-  - each plate in plates
-     p 
-       a(href="/input/plate_edit/"+plate._id)= plate._id 
   ul
-    li
-      a(href="/input/plate_new/"+project._id)='Add a plate to this experiment'
+    - each plate in plates
+      li
+        - if (plate.barcode) {
+          a(href="/input/plate_edit/"+plate._id)= plate.barcode
+        - } else { 
+          a(href="/input/plate_edit/"+plate._id)= plate._id 
+        - }
+
 
   
   

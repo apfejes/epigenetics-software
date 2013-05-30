@@ -5,6 +5,67 @@ h1= title
 form( method="post")
   input(type="hidden", name="plateid", value= plate._id)
   input(type="hidden", name="projectid", value= plate.projectid)
+  - var translate = {1:"A",2:"B",3:"C",4:"D",5:"E",6:"F",7:"G",8:"H"};
+  #project
+    table
+      tr  
+        td
+          |      
+        - for (var h = 1; h <=6; h++) {
+          td.center
+            !{h}
+        -}
+        td 
+          | 
+        - for (var h = 7; h <=12; h++) {
+          td.center
+            !{h}
+        -}
+        
+        
+      - for (var i =1; i <= 8; i++) {
+        tr
+          td
+            !{translate[i]}
+          - for (var j = 1; j <=6; j++) {
+            - var a = i + "-" + j
+            - var n = i + "-" + j + "-cell"
+            - if (plate[a]=="reserved") {
+              td.whitewlines
+                | Reserved
+            - } else if (plate[a]) {
+              td.bluewlines 
+                | !{plate[a]}
+            - } else { 
+              td.greywlines 
+            - } 
+          - }
+          td
+            |  -
+          - for (var j = 7; j <=12; j++) {
+            - var a = i + "-" + j
+            - var n = i + "-" + j + "-cell"
+            - if (plate[a]=="reserved") {
+              td.whitewlines
+                | Reserved
+            - } else if (plate[a]) {
+              td.bluewlines 
+                | !{plate[a]}
+            - } else { 
+              td.greywlines 
+            - } 
+          - }
+      - }
+    ul
+      li
+        a(href="/input/plate_spreadsheet/"+plate._id)="See spreadsheet for this plate"
+   
+  
+  #section1
+    h3 Section 0 - Barcode
+    b Assign a barcode to this plate : 
+    input(type="text", name="sec0_barcode", value=plate.sec0_barcode)
+  
   #section1
     h3 Section 1 - Quant DNA: 
     table
@@ -12,7 +73,7 @@ form( method="post")
         td.label
           b Operator : 
         td
-          input(type="text", name="sec1_operator", value=plate.sec1_operator, required)
+          input(type="text", name="sec1_operator", value=plate.sec1_operator)
       tr
         td
           b Date :
@@ -65,6 +126,16 @@ form( method="post")
           input(type="text", name="sec2_MSM_1", value=plate.sec2_MSM_1)
         td
           input(type="text", name="sec2_MSM_2", value=plate.sec2_MSM_2)
+      tr
+        td
+          b H
+            sub 2
+          b O reagent :
+        td
+          input(type="text", name="sec2_H20", value=plate.sec2_H20)
+        td
+
+          
     input(type="submit", value="Save")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
   #section1

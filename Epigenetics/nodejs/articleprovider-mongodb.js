@@ -144,7 +144,7 @@ ArticleProvider.prototype.plateById = function(id, callback) {
     this.getDBData('plates', function(error, plates_collection) {
       if( error ) callback(error)
       else {
-        collection.findOne({_id: project_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
+        plates_collection.findOne({_id: plates_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
           if( error ) {
             console.log("plateById error:", e)
             callback(error)
@@ -347,14 +347,45 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
 
 ArticleProvider.prototype.savePlacement = function(assignments, project_id, callback) {
   var date = new Date();
-  
-  this.insertDB('plates', {"projectid":project_id, "assignments":JSON.parse(assignments)}, function(error, results) { 
+  var o = JSON.parse(assignments)
+  var plateid = 0 
+  o["projectid"]= project_id
+  this.insertDB('plates', o, function(error, results) { 
     if( error ) {
       console.log("UpdateDB for Nanodrop error: ", error)
       callback(error)
     } else{
-        console.log("newPlate:", results[0]._id)
+      plateid = results[0]._id
+      console.log("newPlate:", plateid)
+      for (key in o) {
+        if (key != "projectid") {
+          sampleid = key.substring(0, key.indexOf("-"))
+          sample_num = key.substring(key.indexOf("-")+1)
+          this.updateDB('samples', {projectid: project_id, sampleid: s_id, sample_num: s_num}, {$set: {proceed_flag: null}, $push: {plates:plateid}}, false,
+            function(error, c) {
+              if ( error ) { 
+                console.log("Error in updating samples assigned to plate")
+                callback(error)
+              }
+            }
+          );
+          this.updateDB('projects', {projectid: project_id}, {$push: {plates:plateid}}, false,
+            function(error, c) {
+              if ( error ) { 
+                console.log("Error in updating plates assigned to project")
+                callback(error)
+              }
+            }
+          );
+        } else {
+          //just ignore this.  we don't need to process the projectid line.
+        }
+      }
       callback(results[0]._id);
+      
+      
+      
+      
     }
   });
 };

@@ -340,6 +340,7 @@ app.get('/input/plate_edit/:id', function(req, res){
 
 app.post('/input/plate_edit/:id', function(req, res){
     articleProvider.update('plates', req.param('plateid'), {
+        sec0_barcode: req.param('sec0_barcode'),
         sec1_operator: req.param('sec1_operator'),
         sec1_date: req.param('sec1_date'),
         sec2_operator: req.param('sec2_operator'),

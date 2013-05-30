@@ -100,6 +100,8 @@ form( method="post")
           td.lines
             if (sample.plates)
               - for plate in sample.plates
-                a(href="/view/plate/"+plate)=plate
+                ul
+                  li
+                    a(href="/input/plate_edit/"+plate)=plate
     input(type="submit", value="Assign to Arrays")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")

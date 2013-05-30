@@ -28,6 +28,7 @@ form( method="post")
         td.lines A260/A230
         td.lines Total N.A. (ng)
         td.lines Notes
+        td.lines Plates
         td.lines Created (D-M-Y)
       - each sample in samples
         tr
@@ -91,6 +92,12 @@ form( method="post")
               input(type="text", size=30, name="#{sample.sampleid}-#{sample.sample_num}-notes", value=sample.notes)
             else
               input(type="text", size=30, name="#{sample.sampleid}-#{sample.sample_num}-notes")
+          td.lines
+            if (sample.plates)
+              - for plate in sample.plates
+                ul
+                  li
+                    a(href="/input/plate_edit/"+plate)=plate
           td.lines #{sample.created_at.getDate()}-#{sample.created_at.getMonth()}-#{sample.created_at.getFullYear()} #{sample.created_at.getHours()}:#{sample.created_at.getMinutes()} 
     input(type="submit", value="Save Changes")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
