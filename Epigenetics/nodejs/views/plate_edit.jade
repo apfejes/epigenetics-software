@@ -32,7 +32,7 @@ form( method="post")
             - var n = i + "-" + j + "-cell"
             - if (plate[a]=="reserved") {
               td.whitewlines
-                | Reserved
+                a(href="/input/edit_reserved/"+plate._id + "-" + a)="Reserved"
             - } else if (plate[a]) {
               td.bluewlines 
                 | !{plate[a]}
@@ -47,7 +47,7 @@ form( method="post")
             - var n = i + "-" + j + "-cell"
             - if (plate[a]=="reserved") {
               td.whitewlines
-                | Reserved
+                a(href="/input/edit_reserved/"+plate._id + "-" + a)="Reserved"
             - } else if (plate[a]) {
               td.bluewlines 
                 | !{plate[a]}
