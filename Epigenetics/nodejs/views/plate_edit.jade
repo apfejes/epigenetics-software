@@ -1,7 +1,12 @@
 link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
 a(href='/')
   #logo
-h1= title
+- if (plate.barcode) {
+  h1 !{title} - !{plate.barcode}
+- } else {
+  h1= title
+- }
+  
 form( method="post")
   input(type="hidden", name="plateid", value= plate._id)
   input(type="hidden", name="projectid", value= plate.projectid)
@@ -64,7 +69,7 @@ form( method="post")
   #section1
     h3 Section 0 - Barcode
     b Assign a barcode to this plate : 
-    input(type="text", name="sec0_barcode", value=plate.sec0_barcode)
+    input(type="text", name="barcode", value=plate.barcode)
   
   #section1
     h3 Section 1 - Quant DNA: 

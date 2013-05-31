@@ -23,7 +23,8 @@ a(href='/')
     tr
       td#col_email  
         b Collaborator Email: 
-      td #{project.col_email} 
+      td 
+        a(href="mailto:" + project.col_email)=project.col_email 
     tr
       td#sample_count  
         b Sample Count: 
@@ -34,7 +35,7 @@ a(href='/')
       td #{project.arrival_date} 
     tr
       td#role
-        b Project Type: Name: 
+        b Project Type: 
       td #{project.role}
   ul
     li
