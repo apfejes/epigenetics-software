@@ -833,6 +833,9 @@ ArticleProvider.prototype.assign_to_chips = function(chips, layout, inter, intra
 
   for (k in random) {
     var n = unassigned.pop()
+    if (n == undefined) {
+       break;
+    }
     assigned[n] = k
   }
   callback(assigned)
