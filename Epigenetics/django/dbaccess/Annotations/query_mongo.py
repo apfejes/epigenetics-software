@@ -15,8 +15,6 @@ from svgwrite.path import Path
 from math import sqrt,exp
 from query_class import MongoQuery
 
-
-
 '''
 STILL NEED TO IMPLEMENT:
     1.
@@ -26,17 +24,18 @@ STILL NEED TO IMPLEMENT:
 '''
 
 class MongoCurious():
-    '''A class to simplify plotting methylation from a mongo database'''
+    '''A class to simplify plotting methylation and chipseq data from a mongo database'''
     def __init__(self,
-                database='human_epigenetics',
-                collection='methylation'):
+                database = None,
+                collection = None):
         '''Connects to database'''
-        mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database)
+        if database == None:
+            raise ValueError("Please specify a database.")
+        self.mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database)
+        if collection == None:
+            raise ValueError("Please specify a collection.")
         self.database = database
         self.collection = collection
-        self.mongo = mongo
-        self.Query = MongoQuery()
-        
     
     def query(self,
                 chromosome=None,
@@ -44,29 +43,36 @@ class MongoCurious():
                 end = None,
                 sample_label = None,
                 exprs_value = None,
-                sampletype = None,
+                sample_type = None,
                 project = "All"):
-        '''Registers query inputs'''
+        '''Stores query inputs and parameters as an instance of MongoQuery'''
+        Query = MongoQuery()
+        Query['database']=self.database
+        Query['collection']=self.collection
         if chromosome == None:
             raise ValueError("Please specificy a chromosome.")
         if isinstance(chromosome, basestring):
+            Query['chromosome'] = chromosome
             self.chromosome = chromosome
-        elif isinstance(chromosome, int):
-            if self.collection == "methylation":
-                self.chromosome = "CHR" + str(chromosome)
-            if self.collection == "waves":
-                self.chromosome = str(chromosome)
+        #elif isinstance(chromosome, int):
+        #    if self.collection == "methylation":
+        #        self.Query['chromosome'] = "CHR" + str(chromosome)
+        #    if self.collection == "waves":
+        #        self.Query['chromosome'] = str(chromosome)
+        Query['start'] = start
         self.start = start
+        Query['end'] = end
         self.end = end
+        Query['sample label'] = sample_label
         self.sample_label = sample_label
-        self.exprs_value = exprs_value
+        Query['project'] = project
         self.project = project
-        self.sampletype = sampletype
+        Query['sample type'] = sample_type
+        self.sample_type = sample_type
         if self.collection == "methylation":
             self.sample_groups = self.creategroups()
-        return self
-    
-    
+        return Query
+
     def checkquery(self):
         '''Checks that query inputs are valid'''
         t0 = time()
@@ -129,32 +135,32 @@ class MongoCurious():
         '''
         Separate samples into 'groups' according to a particular feature.
         Example: feature = diseased/control.
-        samplegroup is a list of sample labels with the desired sampletype
+        samplegroup is a list of sample labels with the desired sample_type
         '''
         print "    Creating sample groups..."
         if self.project == "down":
-            if self.sampletype not in ["Control", "DS"]: self.sampletype = str(raw_input("Please specify a sample type: \"Control\" or \"DS\"?"))
+            if self.sample_type not in ["Control", "DS"]: self.sample_type = str(raw_input("Please specify a sample type: \"Control\" or \"DS\"?"))
             feature = 'Sample Group'
-            samplegroup = self.sample_dict(project = self.project, feature = feature)[self.sampletype]
+            samplegroup = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
         if self.project == "kollman":
-            if self.sampletype not in ["unstimulated", "listeria"]: self.sampletype = str(raw_input("Please specify a sample type: \"unstimulated\" or \"listeria\"?"))
+            if self.sample_type not in ["unstimulated", "listeria"]: self.sample_type = str(raw_input("Please specify a sample type: \"unstimulated\" or \"listeria\"?"))
             feature = 'stimulation'
-            samplegroup = self.sample_dict(project = self.project, feature = feature)[self.sampletype]
+            samplegroup = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
         if self.project == "All":
-            print "l",self.sampletype, "l"
-            if self.sampletype != "control" or self.sampletype != None:
-                print "The sample type \"",self.sampletype, "\" is invalid."
-                self.sampletype = str(raw_input("Please specify a sample type: \"control\" or \"disease\"?"))
-            if self.sampletype == "control" or self.sampletype == None:
+            print "l",self.sample_type, "l"
+            if self.sample_type != "control" or self.sample_type != None:
+                print "The sample type \"",self.sample_type, "\" is invalid."
+                self.sample_type = str(raw_input("Please specify a sample type: \"control\" or \"disease\"?"))
+            if self.sample_type == "control" or self.sample_type == None:
                 samplegroup  = self.sample_dict(project = "kollman", feature = "stimulation")["unstimulated"]
                 samplegroup.append(self.sample_dict(project = "down", feature = "Sample Group")["Control"])
                 samplegroup.append(self.sample_dict(project = "kollman", feature = "stimulation", nottype = ["unstimulated", "listeria"]))
                 samplegroup.append( self.sample_dict(project = "down", feature = "Sample Group", nottype = ["Control", "DS"]))
-            if self.sampletype == "disease": 
+            if self.sample_type == "disease": 
                 samplegroup  = self.sample_dict(project = "kollman", feature = "stimulation")["listeria"]
                 samplegroup.append(self.sample_dict(project = "down", feature = "Sample Group")["DS"])
         
-        print "    The sample labels with sample type", self.sampletype, " are:", samplegroup
+        print "    The sample labels with sample type", self.sample_type, " are:", samplegroup
         return samplegroup
         
     def sample_dict(self, project, feature, nottype = None):
@@ -219,7 +225,7 @@ class MongoCurious():
         for pos, tup_list in sorted(position_dic.iteritems()):
             beta_values = []
             for beta, samp in tup_list:
-                if self.sampletype == None:
+                if self.sample_type == None:
                     beta_values.append(beta)
                 elif samp in self.sample_groups:
                     beta_values.append(beta)
@@ -261,26 +267,27 @@ class MongoCurious():
         return None
         
     def compare(self):
+        '''NOT RUNNING ATM'''
         self.finddocs()
         self.waves2 = self.getwaves()
         return None
         
-    def svg(self, filename = "plot.svg", color = "white"):
+    def svg(self, filename = "plot.svg", color = None):
         print "    Making svg file \"%s\"" %filename
         if self.collection == "methylation":
             if filename == "plot.svg": filename = "gene.svg"
-            if color == "white": color = "indigo"
+            if color == None: color = "indigo"
             drawing = self.drawgene(filename=filename,color=color)
         if self.collection == "waves":
             if filename == "plot.svg": filename = "peaks.svg"
-            if color == "white": color = "indigo"
+            if color == None: color = "indigo"
             drawing = self.drawpeaks(filename=filename,color=color)
         drawing.save()
         self.drawing = drawing
         return drawing
     
     
-    def svgtostring(self, color="blue"):
+    def svgtostring(self, color=None):
         print "Making svg string..."
         #if self.drawing != None: return self.drawing.tostring()
         if self.collection == "methylation":
@@ -328,13 +335,12 @@ class MongoCurious():
         '''
         waves = self.waves
         colors = {'indigo':'slateblue', 'red':'orange'}
-        if self.waves2:
-            waves2 = self.waves2
-            color = 'red'
-            fillcolor = colors['red']
-        else:
-            color = 'indigo'
-            fillcolor = colors['indigo']
+        color = 'indigo'
+        fillcolor = colors['indigo']
+        #if self.waves2:
+        #    waves2 = self.waves2
+        #    color = 'red'
+        #    fillcolor = colors['red']
         tail = self.tail
         start = self.start
         offset = start
@@ -421,4 +427,3 @@ class MongoCurious():
         peaks.add(y_axis)
         
         return peaks
-

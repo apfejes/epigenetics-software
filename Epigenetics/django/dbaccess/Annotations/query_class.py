@@ -15,7 +15,6 @@ class MongoQuery():
                             "start" : None, "end" : None,
                             "sample label" : None, "project" : None,
                             "docs" : None, "waves" : None}
-        
         self._data = fixed_dictionary
         
     def __setitem__(self, key, value):
@@ -26,24 +25,19 @@ class MongoQuery():
     def __getitem__(self, key):
         return self._data[key]
 
+#    def database(self):
+#        return self._data['database']
+    
+    
 
     def __str__(self):
         # FORMAT ME!
         output = "This query has the following elements: \n 	"
-        output += self._data.__str__()
+        #output += self._data.__str__()
         lines = 0
         for key, value in self._data.iteritems():
-            if lines%3==0 and lines > 0: output += "\n	"
-            output += key + " : " + format(value) + ", "
-            lines +=1
+            if value != None:
+                if lines%2==0 and lines > 0: output += "\n    "
+                output += key + " : " + format(value) + ", "
+                lines +=1
         return output
-    
-    
-k = MongoQuery()
-k['database'] = "hello"
-k['collection'] = "world"
-k["sample"]=9
-k["start"]=1000
-k["end"]=12
-k["chromosome"]="chr4"
-print k
