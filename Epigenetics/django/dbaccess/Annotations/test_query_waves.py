@@ -10,9 +10,17 @@ Example of how to use the class MongoCurious to plot ChipSeq peaks from db.waves
 MC = MongoCurious(database ="human_epigenetics", collection = "waves")
 
 query1 = MC.query(chromosome = "chr4", start = 28800, end = 37000)
+print query1
 MC.finddocs()
 MC.getwaves()
-MC.svg(filename = "test_peak.svg", color='indigo')
+query2 = MC.query(chromosome = "chr2", start = 1000, end = 40000)
+print query2
+MC.finddocs()
+MC.getwaves()
+print query1
+print query2
+#MC.svg(filename = "test_peak.svg", color='indigo')
+
 
 '''
 #Choose a region to query

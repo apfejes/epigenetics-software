@@ -71,7 +71,8 @@ class MongoCurious():
         self.sample_type = sample_type
         if self.collection == "methylation":
             self.sample_groups = self.creategroups()
-        return Query
+        self.Query = Query
+        return self.Query
 
     def checkquery(self):
         '''Checks that query inputs are valid'''
@@ -124,11 +125,12 @@ class MongoCurious():
             print "     use the checkquery() function to validate the inputs of your query."
             sys.exit()
             
-        print "    Conducting query: Find(", query, ")"
-        print "    Found %i probes or documents." %docs.count()
+        print " Conducting query: Find(", query, ")"
+        print " Found %i probes or documents." %docs.count()
         self.docs = docs
         self.count= self.docs.count()
-        return self.docs
+        self.Query['cursor']=self.docs
+        return None
         
     
     def creategroups(self):
@@ -262,8 +264,9 @@ class MongoCurious():
                     waves[pos] = [height,stddev]
                     count +=1
                 #else: print "         Not included:    ", pos, height, stddev, 
-        print "\n    Only %i peaks were found in region." %count
+        print " Only %i peaks were found in region." %count
         self.waves = waves
+        self.Query['waves'] = waves
         return None
         
     def compare(self):
@@ -273,7 +276,7 @@ class MongoCurious():
         return None
         
     def svg(self, filename = "plot.svg", color = None):
-        print "    Making svg file \"%s\"" %filename
+        print " Making svg file \"%s\"\n" %filename
         if self.collection == "methylation":
             if filename == "plot.svg": filename = "gene.svg"
             if color == None: color = "indigo"
@@ -396,7 +399,7 @@ class MongoCurious():
             d = "M"+str(X[0])+","+str(Y[0])+" "+str(X[1])+","+str(Y[1])
             for i in range(2,len(X)):
                 d=d+(" "+str(X[i])+","+str(Y[i]))
-            print "    " , d
+            #print "    " , d
             peaks.add(Path(stroke = color, stroke_width = 0.1, stroke_linecap = 'round', stroke_opacity = 0.8, fill = "slateblue",fill_opacity = 0.5, d = d))
         
         
