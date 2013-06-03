@@ -13,6 +13,7 @@ from svgwrite.text import Text
 from svgwrite.shapes import Rect
 from svgwrite.path import Path
 from math import sqrt,exp
+from query_class import MongoQuery
 
 
 
@@ -34,6 +35,7 @@ class MongoCurious():
         self.database = database
         self.collection = collection
         self.mongo = mongo
+        self.Query = MongoQuery()
         
     
     def query(self,
@@ -257,7 +259,12 @@ class MongoCurious():
         print "\n    Only %i peaks were found in region." %count
         self.waves = waves
         return None
-
+        
+    def compare(self):
+        self.finddocs()
+        self.waves2 = self.getwaves()
+        return None
+        
     def svg(self, filename = "plot.svg", color = "white"):
         print "    Making svg file \"%s\"" %filename
         if self.collection == "methylation":
@@ -319,7 +326,15 @@ class MongoCurious():
             + add y-tics
             + plot 2 queries!
         '''
-
+        waves = self.waves
+        colors = {'indigo':'slateblue', 'red':'orange'}
+        if self.waves2:
+            waves2 = self.waves2
+            color = 'red'
+            fillcolor = colors['red']
+        else:
+            color = 'indigo'
+            fillcolor = colors['indigo']
         tail = self.tail
         start = self.start
         offset = start
