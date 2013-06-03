@@ -38,9 +38,12 @@ class MongoConnector():
         collection = self.db[collection_name]
         return collection.ensure_index(key)
 
-    def find(self, collection_name, findQuery = None, returnQuery = None):
+    def find(self, collection_name, findQuery = None, returnQuery = None, sortField = None):
         collection = self.db[collection_name]
-        return collection.find(findQuery, returnQuery)
+        if sortField != None:
+            return collection.find(findQuery, returnQuery).sort(sortField, 1)
+        else:
+            return collection.find(findQuery, returnQuery)
 
     def update(self, collection_name, queryDict, updateDict, multiOpt = True):
         collection = self.db[collection_name]
@@ -48,7 +51,7 @@ class MongoConnector():
 
     def close(self):
         self.db.connection.disconnect()
-        
+
     def distinct(self, collection_name, field):
         collection = self.db[collection_name]
         return collection.distinct(field)
