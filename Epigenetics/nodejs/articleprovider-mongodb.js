@@ -146,7 +146,7 @@ ArticleProvider.prototype.plateById = function(id, callback) {
       else {
         plates_collection.findOne({_id: ObjectID.createFromHexString(id)}, function(error, result) {
           if( error ) {
-            console.log("plateById error:", e)
+            console.log("plateById error:", error)
             callback(error)
           } else callback(null, result)
         });
@@ -155,9 +155,9 @@ ArticleProvider.prototype.plateById = function(id, callback) {
 };
 
 ArticleProvider.prototype.sampleByPlateId = function(id, callback) {
-    this.getDBQuery('samples', {plateid: id}, {}, {sampleid:1}, function(error, result) {
+    this.getDBQuery('samples', {plates: ObjectID.createFromHexString(id)}, {}, {sampleid:1}, function(error, result) {
       if( error ) {
-        console.log("sampleById error:", e)
+        console.log("sampleById error:", error)
         callback(error)
       } else callback(null, result)
     });

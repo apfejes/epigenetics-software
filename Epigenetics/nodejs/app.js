@@ -330,9 +330,11 @@ app.post('/input/plate_edit/:id', function(req, res){
 // This function requires the Plate ID.
 
 app.get('/input/plate_spreadsheet/:id', function(req, res){
-  articleProvider.plateById(req.params.id, function(error, plate) {
+  articleProvider.plateById(req.params.id, function(error, plates) {
     articleProvider.sampleByPlateId(req.params.id, function(error, samples) {
-      res.render('plate_spreadsheet.jade',{title: 'Edit Plate', plate:plate});
+      console.log("samples:", samples)
+      
+      res.render('plate_spreadsheet.jade',{title: 'Edit Plate', samples:samples, plates:plates});
     });
   });
 });
