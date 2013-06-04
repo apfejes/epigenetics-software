@@ -40,3 +40,5 @@ class MongoQuery():
 
     def __repr__(self):
         return "This is an instance of MongoQuery: stores query parameters and data."
+        
+        
