@@ -18,7 +18,7 @@ class MyClass(object):
 
     @staticmethod
     def ks_test(mean1, sigma1, mean2, sigma2):
-
+        sigma1, sigma2, mean1, mean2 = float(sigma1), float(sigma2), float(mean1), float(mean2)
         # Check the pekas actually overlap...
         start1 = mean1 - (4 * sigma1)
         end1 = mean1 + (4 * sigma1)
@@ -29,7 +29,7 @@ class MyClass(object):
         end = min(end1, end2)
 
         if start > end:
-            return (0, 0)
+            return (0.0, 0.0)
 
         # Calculate the point of max distance between CDFs
         a, b, c, d = sigma1, sigma2, mean1, mean2
@@ -53,3 +53,6 @@ class MyClass(object):
         Constructor
         '''
         pass
+
+sigma1, sigma2, mean1, mean2 = 3.0, 6.0, 5.0, 3.0
+print MyClass(1).ks_test(mean1, sigma1, mean2, sigma2)
