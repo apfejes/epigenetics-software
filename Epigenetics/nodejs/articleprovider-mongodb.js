@@ -59,7 +59,7 @@ ArticleProvider.prototype.updateDBid= function(collection_name, id, query_string
   var upsert_string
   if (upsert == true) upsert_string = '{upsert:true}'
   else upsert_string = '{}'
-  this.db.collection(collection_name).update({_id:new ObjectID(id)}, query_string, upsert_string , function(e, results) {
+  this.db.collection(collection_name).update({_id:ObjectID.createFromHexString(id)}, query_string, upsert_string , function(e, results) {
     if (e) { 
       console.log("updateDBid error:", e)
       callback(e)
@@ -130,7 +130,7 @@ ArticleProvider.prototype.findById = function(id, callback) {
     this.getDBData('projects', function(error, project_collection) {
       if( error ) callback(error)
       else {
-        project_collection.findOne({_id: project_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
+        project_collection.findOne({_id: ObjectID.createFromHexString(id)}, function(error, result) {
           if( error ) {
             console.log("findByID error:", e)
             callback(error)
@@ -144,15 +144,26 @@ ArticleProvider.prototype.plateById = function(id, callback) {
     this.getDBData('plates', function(error, plates_collection) {
       if( error ) callback(error)
       else {
-        plates_collection.findOne({_id: plates_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
+        plates_collection.findOne({_id: ObjectID.createFromHexString(id)}, function(error, result) {
           if( error ) {
-            console.log("plateById error:", e)
+            console.log("plateById error:", error)
             callback(error)
           } else callback(null, result)
         });
       }
     });
 };
+
+ArticleProvider.prototype.sampleByPlateId = function(id, callback) {
+    this.getDBQuery('samples', {plates: ObjectID.createFromHexString(id)}, {}, {sampleid:1}, function(error, result) {
+      if( error ) {
+        console.log("sampleById error:", error)
+        callback(error)
+      } else callback(null, result)
+    });
+};
+
+
 
 ArticleProvider.prototype.sampleById = function(id, num, callback) {
     this.getDBQuery('samples', {sampleid: id, sample_num:num}, {}, {sampleid:1}, function(error, result) {
@@ -349,7 +360,8 @@ ArticleProvider.prototype.savePlacement = function(assignments, project_id, call
   var date = new Date();
   var o = JSON.parse(assignments)
   var plateid = 0 
-  o["projectid"]= project_id
+  //var that = this
+  o['projectid']= project_id
   this.insertDB('plates', o, function(error, results) { 
     if( error ) {
       console.log("UpdateDB for Nanodrop error: ", error)
@@ -358,36 +370,36 @@ ArticleProvider.prototype.savePlacement = function(assignments, project_id, call
       plateid = results[0]._id
       console.log("newPlate:", plateid)
       for (key in o) {
-        if (key != "projectid") {
-          sampleid = key.substring(0, key.indexOf("-"))
-          sample_num = key.substring(key.indexOf("-")+1)
+        var value = o[key]
+        console.log("key : ",key, " - ", value)
+        if (key != "projectid" && key != "_id") {
+          s_id = value.substring(0, value.indexOf("-"))
+          s_num = value.substring(value.indexOf("-")+1)
+          console.log("running update on projectid : ", project_id, " sampleid: ", s_id, " sample number:", s_num) 
           this.updateDB('samples', {projectid: project_id, sampleid: s_id, sample_num: s_num}, {$set: {proceed_flag: null}, $push: {plates:plateid}}, false,
             function(error, c) {
               if ( error ) { 
                 console.log("Error in updating samples assigned to plate")
                 callback(error)
-              }
+              } 
             }
           );
-          this.updateDB('projects', {projectid: project_id}, {$push: {plates:plateid}}, false,
-            function(error, c) {
-              if ( error ) { 
-                console.log("Error in updating plates assigned to project")
-                callback(error)
-              }
-            }
-          );
+          
         } else {
           //just ignore this.  we don't need to process the projectid line.
         }
       }
+      this.updateDB('projects', {_id: ObjectID.createFromHexString(project_id)}, {$push: {plates:plateid}}, false,
+            function(error, c) {
+              if ( error ) { 
+                console.log("Error in updating plates assigned to project")
+                callback(error)
+              } 
+            }
+          );
       callback(results[0]._id);
-      
-      
-      
-      
     }
-  });
+  }.bind(this));
 };
 
 
@@ -821,6 +833,9 @@ ArticleProvider.prototype.assign_to_chips = function(chips, layout, inter, intra
 
   for (k in random) {
     var n = unassigned.pop()
+    if (n == undefined) {
+       break;
+    }
     assigned[n] = k
   }
   callback(assigned)
