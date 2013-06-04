@@ -19,7 +19,7 @@ class MyClass(object):
     @staticmethod
     def ks_test(mean1, sigma1, mean2, sigma2):
         sigma1, sigma2, mean1, mean2 = float(sigma1), float(sigma2), float(mean1), float(mean2)
-        # Check the pekas actually overlap...
+        # Check the peaks actually overlap...
         start1 = mean1 - (4 * sigma1)
         end1 = mean1 + (4 * sigma1)
         start2 = mean2 - (4 * sigma2)
@@ -39,12 +39,16 @@ class MyClass(object):
         b4 = b2 * b2
         c2 = c * c
         d2 = d * d
-        x = (a2 * d + sqrt(a4 * (-b2) * log(b / a) + a2 * b4 * log(b / a) + a2 * b2 * c2 - 2 * a2 * b2 * c * d + a2 * b2 * d2) - b2 * c) / (a2 - b2)
+        if a == b:
+            x = (c + d) / 2
+        else: x = (a2 * d + sqrt(a4 * (-b2) * log(b / a) + a2 * b4 * log(b / a) + a2 * b2 * c2 - 2 * a2 * b2 * c * d + a2 * b2 * d2) - b2 * c) / (a2 - b2)
+
         # Find the max distance
         def phi(x):
             return (1.0 + erf(x / sqrt(2.0))) / 2.0
 
         y = fabs(phi((x - c) / a) - phi((x - d) / b))
+
         return (x, y)
 
 
@@ -54,5 +58,5 @@ class MyClass(object):
         '''
         pass
 
-sigma1, sigma2, mean1, mean2 = 3.0, 6.0, 5.0, 3.0
-print MyClass(1).ks_test(mean1, sigma1, mean2, sigma2)
+# sigma1, sigma2, mean1, mean2 = 6.0, 6.0, 5.0, 3.0
+# print MyClass(1).ks_test(mean1, sigma1, mean2, sigma2)
