@@ -125,7 +125,7 @@ class MongoCurious():
             print "     use the checkquery() function to validate the inputs of your query."
             sys.exit()
             
-        print " Conducting query: Find(", query, ")"
+        print "\n Conducting query: Find(", query, ")"
         print " Found %i probes or documents." %docs.count()
         self.docs = docs
         self.count= self.docs.count()
@@ -269,38 +269,27 @@ class MongoCurious():
         self.Query['waves'] = waves
         return None
         
-    def compare(self):
-        '''NOT RUNNING ATM'''
-        self.finddocs()
-        self.waves2 = self.getwaves()
-        return None
+#    def compare(self):
+#        '''NOT RUNNING ATM'''
+#        self.finddocs()
+#        self.waves2 = self.getwaves()
+#        return None
         
-    def svg(self, filename = "plot.svg", color = None):
-        print " Making svg file \"%s\"\n" %filename
+    def svg(self, filename = None, color = None, to_string = False):
         if self.collection == "methylation":
-            if filename == "plot.svg": filename = "gene.svg"
             if color == None: color = "indigo"
             drawing = self.drawgene(filename=filename,color=color)
         if self.collection == "waves":
-            if filename == "plot.svg": filename = "peaks.svg"
             if color == None: color = "indigo"
             drawing = self.drawpeaks(filename=filename,color=color)
-        drawing.save()
-        self.drawing = drawing
-        return drawing
-    
-    
-    def svgtostring(self, color=None):
-        print "Making svg string..."
-        #if self.drawing != None: return self.drawing.tostring()
-        if self.collection == "methylation":
-            if color == None: color = "indigo"
-            drawing = self.drawgene(color=color)
-        if self.collection == "waves":
-            if color == None: color = "indigo"
-            drawing = self.drawpeaks(color=color)
-        return drawing.tostring()
-    
+        
+        if filename == None or to_string:
+            return drawing.tostring()
+        if filename and not to_string: 
+            print " Making svg file \"%s\"\n" %filename
+            drawing.save()
+            return None
+            
     def drawgene(self, 
                     filename, 
                     color):
@@ -383,11 +372,11 @@ class MongoCurious():
             X,Y=makegaussian(start, end, margin, length, pos,tail,offset,float(height), stddev)
             X = [round((x-offset+pos)*scale_x,2)+20 for x in X]
             for x in X:
-                if x <(margin+0.1):
+                if x <(margin+0.5):
                     X.insert(0,margin)
                     Y.insert(0,tail)
                     break
-                if x >(margin+length-0.1):
+                if x >(margin+length-0.5):
                     X.append(margin+length)
                     Y.append(tail)
                     break
