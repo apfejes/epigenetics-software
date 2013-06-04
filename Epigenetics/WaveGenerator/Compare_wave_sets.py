@@ -37,6 +37,9 @@ class WavePair():
     def get_j(self):
         return self.j
 
+    def to_string(self):
+        return str(self.pos1) + " " + str(self.pos2) + " " + str(self.stddev1) + " " + str(self.stddev2)
+
     def type(self):
         return "Wavepair"
 
@@ -123,13 +126,42 @@ def run():
             #    print list1[j]
         # figure out which peaks are same between the two samples.
         both = []
-        for i in range(len(waves1)):
-            for j in range(len(waves2)):
-                p = stats.ks_test(waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev'])
-                print "p = ", p
-                both.append(WavePair(i, j, p, waves1[i]['pos'], waves2[j]['pos'], waves1[i]['stddev'], waves2[j]['stddev']))
+
+        i = 0
+        j = 0
+        max_i = len(waves1)
+        max_j = len(waves2)
+        while (i < max_i and j < max_j):
+            pos_i = waves1[i]['pos']
+            sdv_i = waves1[i]['stddev']
+            jt = j
+            while jt >= 0 and waves2[jt]['pos'] > (pos_i - 4 * sdv_i) :
+                print "jt - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[jt]['pos'], waves2[jt]['stddev']
+                p = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
+                if (p[0] != 0 and p[1] != 0):
+                    both.append(WavePair(i, jt, p, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev']))
+                jt -= 1
+            while j < max_j and waves2[j]['pos'] < (pos_i + 4 * sdv_i):
+                print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
+                p = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
+                if (p[0] != 0 and p[1] != 0):
+                    both.append(WavePair(i, j, p, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev']))
+                j += 1
+            i += 1
+            print "i %s and max_i %s", i, max_i
+
+
+        # for i in range(len(waves1)):
+            # for j in range(len(waves2)):
+#
+                # p = stats.ks_test(waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev'])
+                # if (p[0] != 0 and p[1] != 0):
+                    # print "p = ", p
+                    # print "waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
+                    # both.append(WavePair(i, j, p, waves1[i]['pos'], waves2[j]['pos'], waves1[i]['stddev'], waves2[j]['stddev']))
         for i in range(len(both)):
-            print "found at %i", both[i].pos
+            print "found at %s" % both[i].to_string()
+
 
 
         # get the waves for that chromosome

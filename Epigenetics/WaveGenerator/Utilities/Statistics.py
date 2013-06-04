@@ -31,6 +31,13 @@ class MyClass(object):
         if start > end:
             return (0.0, 0.0)
 
+        if mean1 > mean2:
+            mean1 = mean1 - mean2
+            mean2 = 0
+        else:
+            mean2 = mean2 - mean1
+            mean1 = 0
+
         # Calculate the point of max distance between CDFs
         a, b, c, d = sigma1, sigma2, mean1, mean2
         a2 = a * a
@@ -39,12 +46,14 @@ class MyClass(object):
         b4 = b2 * b2
         c2 = c * c
         d2 = d * d
-
-        term = a4 * (-b2) * log(b / a) + a2 * b4 * log(b / a) + a2 * b2 * c2 - 2 * a2 * b2 * c * d + a2 * b2 * d2
+        print "(b/a) %f" % (b / a)
+        print "log(b/a) %f" % log(b / a)
+        term = (a4 * (-b2) * log(b / a)) + (a2 * b4 * log(b / a)) + (a2 * b2 * c2) - (2 * a2 * b2 * c * d) + (a2 * b2 * d2)
 
         if a == b:
             x = (c + d) / 2
         elif a > b:
+
                 x = (a2 * d + sqrt(term) - b2 * c) / (a2 - b2)
         elif b > a:
                 x = (a2 * d - sqrt(term) - b2 * c) / (a2 - b2)
