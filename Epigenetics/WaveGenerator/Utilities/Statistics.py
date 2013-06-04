@@ -16,7 +16,8 @@ class MyClass(object):
     classdocs
     '''
 
-    def ks_test(self, mean1, sigma1, mean2, sigma2):
+    @staticmethod
+    def ks_test(mean1, sigma1, mean2, sigma2):
 
         # Check the pekas actually overlap...
         start1 = mean1 - (4 * sigma1)

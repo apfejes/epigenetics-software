@@ -7,6 +7,7 @@ Created on 2013-04-15
 
 import sys
 import os
+# from bson.objectid import ObjectId
 
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
@@ -15,7 +16,29 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir + os.sep + "Utilities")
 import Parameters
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
-import Mongo_Connector, common_utilities, CreateArrayFromCursor
+import Mongo_Connector, common_utilities
+from WaveGenerator.Utilities.Statistics import MyClass as stats
+
+class WavePair():
+    # i, j, p, pos1, pos2, stddev1, stddev2
+
+    def __init__(self, i, j, p, pos1, pos2, stddev1, stddev2):
+        self.i = i
+        self.j = j
+        self.p = p
+        self.pos1 = pos1
+        self.pos2 = pos2
+        self.stddev1 = stddev1
+        self.stddev2 = stddev2
+
+    def get_i(self):
+        return self.i
+
+    def get_j(self):
+        return self.j
+
+    def type(self):
+        return "Wavepair"
 
 
 def run():
@@ -85,16 +108,41 @@ def run():
     print "control ids", id_r
     for chromosome in chromosomes:    # for each chromosome
         print "chromosome %s" % chromosome
-        waves = []
+        waves1 = None
+        waves2 = None
         for i in id_s:
-            cursor = mongo.find("waves", {"sample_id": i})
-            list1 = CreateArrayFromCursor.CreateListFromCursor(cursor)
+            print "i %s" % i
+            cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, "pos")
+            waves1 = CreateListFromCursor(cursor)
+        for i in id_r:
+            print "i %s" % i
+            cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, "pos")
+            waves2 = CreateListFromCursor(cursor)
+            # print "list1.length", len(list1)
+            # for j in range(len(list1)):
+            #    print list1[j]
+        # figure out which peaks are same between the two samples.
+        both = []
+        for i in range(len(waves1)):
+            for j in range(len(waves2)):
+                p = stats.ks_test(waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev'])
+                print "p = ", p
+                both.append(WavePair(i, j, p, waves1[i]['pos'], waves2[j]['pos'], waves1[i]['stddev'], waves2[j]['stddev']))
+        for i in range(len(both)):
+            print "found at %i", both[i].pos
+
 
         # get the waves for that chromosome
         # normalize the heights
         # filter out from control
         # return waves that are unique to sample
 
+
+def CreateListFromCursor(cursor):
+    list = []
+    for record in cursor:
+        list.append(record)
+    return list
 
 
 
