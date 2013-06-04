@@ -27,7 +27,7 @@ class MongoQuery():
 
     def __str__(self):
         # FORMAT ME!
-        output = "This query has the following elements: {\n    "
+        output = "\nThis query has the following elements: {\n    "
         #output += self._data.__str__()
         lines = 0
         for key, value in self._data.iteritems():
@@ -35,5 +35,8 @@ class MongoQuery():
                 if lines%2==0 and lines > 0: output += "\n    "
                 output += key + " : " + format(value) + ", "
                 lines +=1
-        output += "\n    } \n\n"
+        output += "\n    }"
         return output
+
+    def __repr__(self):
+        return "This is an instance of MongoQuery: stores query parameters and data."
