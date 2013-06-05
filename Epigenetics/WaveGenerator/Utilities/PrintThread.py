@@ -10,6 +10,8 @@ import sys
 import traceback
 import Queue
 import exceptions
+import os
+import time
 END_PROCESSES = False
 
 
@@ -20,18 +22,33 @@ class StringWriter(threading.Thread):
     consistently clean output.'''
 
 
-    def __init__(self, queue_var):
+    def __init__(self, queue_var, output_path = None, file_name = None, supress_print = False, thread = False):
         threading.Thread.__init__(self)
         global queue
         queue = queue_var
+        self.supress_print = supress_print
+        if file_name != None:
+            self.printout = True
+            path = os.path.dirname(os.path.abspath(__file__))
+            path = path.rsplit("/", 1)
+            self.f = open(output_path + '/' + file_name, 'w')
+        else:
+            self.printout = False
+        if thread:
+            self.setDaemon(True)
+            self.start()
+
 
     @staticmethod
     def type():
         return "PrintThread.StringWriter"
 
-    @staticmethod
-    def process_string(string):
-        print string
+    def process_string(self, string):
+        if (self.printout):
+            self.f.write(string)
+            self.f.write("\n")
+        if (not self.supress_print):
+            print string
 
     def run(self):
         # global queue
@@ -61,13 +78,5 @@ class StringWriter(threading.Thread):
             #        break
             #    else:
             #        continue'''
-
-
-    def start_print_writer(self):
-        # spawn a pool of threads, and pass them queue instance
-        global queue
-        self.t = StringWriter(queue)
-        self.t.setDaemon(True)
-        self.t.start()
 
 

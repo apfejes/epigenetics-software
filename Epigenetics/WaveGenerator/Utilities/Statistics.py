@@ -46,8 +46,8 @@ class MyClass(object):
         b4 = b2 * b2
         c2 = c * c
         d2 = d * d
-        print "(b/a) %f" % (b / a)
-        print "log(b/a) %f" % log(b / a)
+        # print "(b/a) %f" % (b / a)
+        # print "log(b/a) %f" % log(b / a)
         term = (a4 * (-b2) * log(b / a)) + (a2 * b4 * log(b / a)) + (a2 * b2 * c2) - (2 * a2 * b2 * c * d) + (a2 * b2 * d2)
 
         if a == b:
@@ -61,7 +61,7 @@ class MyClass(object):
         # Find the max distance
         def phi(x):
             return (1.0 + erf(x / sqrt(2.0))) / 2.0
-        print "        ", phi((x - c) / a), phi((x - d) / b), "B"
+        # print "        ", phi((x - c) / a), phi((x - d) / b), "B"
         y = fabs(phi((x - c) / a) - phi((x - d) / b))
 
         return (x, y)
