@@ -418,7 +418,9 @@ class MongoCurious():
         while((scale_tics * 10) < end - start):
             scale_tics *= 10;
         xtics = [i for i in range(start, end + 1) if i % (scale_tics) == 0]
-        if len(xtics) < 4: xtics += [i for i in range(start, end + 1) if i % (scale_tics / 2) == 0 and i not in xtics]
+        while len(xtics) < 4:
+            scale_tics /= 2
+            xtics += [i for i in range(start, end + 1) if i % (scale_tics) == 0 and i not in xtics]
         for tic in xtics:
             tic_x = (margin + (tic - offset) * scale_x)
             tic_y = width + margin * 2
