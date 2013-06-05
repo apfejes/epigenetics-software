@@ -386,11 +386,11 @@ class MongoCurious():
             X, Y = makegaussian(start, end, margin, length, pos, tail, offset, float(height), stddev)
             X = [round((x - offset + pos) * scale_x, 2) + 20 for x in X]
             for x in X:
-                if x < (margin + 0.5):
+                if x < (margin + 1):
                     X.insert(0, margin)
                     Y.insert(0, tail)
                     break
-                if x > (margin + length - 0.5):
+                if x > (margin + length - 1):
                     X.append(margin + length)
                     Y.append(tail)
                     break
