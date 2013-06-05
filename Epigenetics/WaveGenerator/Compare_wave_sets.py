@@ -199,7 +199,7 @@ def run():
             print '(WWW) poly_lsq: Iteration limit reached, result not reliable!'
         coeff = fit.beta[::-1]
         err = fit.sd_beta[::-1]
-        print "coeff %s err %s" % coeff, err
+        print "coeff %s err %s" % (coeff, err)
         # normalize the heights
         # filter out from control
         # return waves that are unique to sample
