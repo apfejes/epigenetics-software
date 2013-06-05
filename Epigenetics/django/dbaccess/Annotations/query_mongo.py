@@ -23,6 +23,25 @@ STILL NEED TO IMPLEMENT:
         more graph options
 '''
 
+def makegaussian(start, end, margin, length, pos, tail, offset, height, stddev):
+    X = []
+    endpts = int((sqrt((-2) * stddev * stddev * log(tail / height))))
+    for i in range (-stddev, stddev, 3):
+        X.append(float(i))
+    for i in range (-endpts, -stddev, 5):
+        X.append(float(i))
+    for i in range (stddev, endpts, 5):
+        X.append(float(i))
+    if (endpts) not in X: X.append(endpts)
+    X.sort()
+    X = [float(x) for x in X]
+    X = [x for x in X if 0 <= (x + pos - offset) < (end - start)]
+    stddev = float(stddev)
+    Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
+
+    return X, Y
+
+
 class MongoCurious():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
     def __init__(self,
@@ -41,9 +60,8 @@ class MongoCurious():
                 chromosome = None,
                 start = None,
                 end = None,
-                sample_label = None,
-                exprs_value = None,
                 sample_type = None,
+                sample_label = None,
                 project = "All"):
         '''Stores query inputs and parameters as an instance of MongoQuery'''
         Query = MongoQuery()
@@ -55,7 +73,7 @@ class MongoCurious():
             Query['chromosome'] = chromosome
             self.chromosome = chromosome
         elif isinstance(chromosome, int):
-                Query['chromosome'] = "chr" + str(chromosome)
+                Query['chromosome'] = 'chr' + str(chromosome)
                 self.chromosome = chromosome
         Query['start'] = start
         self.start = start
@@ -69,17 +87,17 @@ class MongoCurious():
         self.sample_type = sample_type
         if self.project:
             self.sample_groups = self.creategroups()
-            Query['sample groups'] = self.sample._groups
+            Query['sample groups'] = self.sample_groups
         self.Query = Query
         return self.Query
 
     def checkquery(self):
         '''Checks that query inputs are valid'''
         t0 = time()
-        self.mongo.ensure_index(self.collection, 'CHR')
+        self.mongo.ensure_index(self.collection, 'chr')
         print "Checking validity of query inputs..."
         if self.chromosome != None:
-            Chromosomes = self.mongo.distinct(self.collection, "CHR")
+            Chromosomes = self.mongo.distinct(self.collection, 'chr')
             if self.chromosome not in Chromosomes:
                 raise ValueError("Invalid chromosome name. Please choose from the following possible inputs:",
                                  Chromosomes.encode("utf-8"))
@@ -99,7 +117,7 @@ class MongoCurious():
         # Preparing the different features of the query
         if self.collection == "methylation":
             query_chr, query_start, query_end, query_samplabel = {}, {}, {}, {}
-            if self.chromosome != None: query_chr = {"CHR":self.chromosome}
+            if self.chromosome != None: query_chr = {'chr':self.chromosome}
             if self.start != None: query_start = {"start_position":{"$lte":self.end}}
             if self.end != None: query_end = {"end_position":{"$gte":self.start}}
             if self.sample_label != None: query_samplabel = {"sample_label":self.sample_label}
@@ -107,16 +125,18 @@ class MongoCurious():
             return_chr = {'_id': False, 'beta_value': True,
                           'start_position': True, 'end_position': True,
                           'sample_label': True}
+            print "\n Conducting query: Find(", query, ")"
             docs = self.mongo.find(self.collection, query, return_chr).sort('start_position', 1)
         if self.collection == "waves":
             query_chr, query_pos, = {}, {}
-            if self.chromosome != None: query_chr = {"chr":self.chromosome}
+            if self.chromosome != None: query_chr = {'chr':self.chromosome}
             if self.start != None and self.end != None:
                 query_pos = {"pos":{"$lte":self.end + 500, "$gte":self.start - 500}}    # extend the region of query
             query = dict(query_chr.items() + query_pos.items())
             return_chr = {'_id': False, 'pos': True,
                           'height': True, 'stddev': True,
                           'sample_id': True}
+            print "\n Conducting query: Find(", query, ")"
             docs = self.mongo.find(self.collection, query, return_chr).sort('pos', 1)
 
         if docs.count() == 0:
@@ -125,7 +145,6 @@ class MongoCurious():
             print "     use the checkquery() function to validate the inputs of your query."
             sys.exit()
 
-        print "\n Conducting query: Find(", query, ")"
         print " Found %i probes or documents." % docs.count()
         self.docs = docs
         self.count = self.docs.count()
@@ -235,7 +254,7 @@ class MongoCurious():
                     beta_values.append(beta)
                 elif samp in self.sample_groups:
                     beta_values.append(beta)
-                else: break
+                else: continue
                 data_avg = mean(beta_values)
                 x_position.append(pos)
                 y_avg.append(data_avg)
@@ -349,29 +368,10 @@ class MongoCurious():
         width = 60.0
         margin = 20.0
         scale_x = length / (end - start)
-        waves = self.waves
         peaks = Drawing("SVGs/" + filename,
         		size = (str(length) + "mm " , str(width) + "mm"),
         		viewBox = ("0 0 " + str(length + margin + 30) + " " + str(width + margin + 30)),
         		preserveAspectRatio = "xMinYMin meet")
-
-        def makegaussian(start, end, margin, length, pos, tail, offset, height, stddev):
-            X = []
-            endpts = int((sqrt((-2) * stddev * stddev * log(tail / height))))
-            for i in range (-stddev, stddev, 3):
-                X.append(float(i))
-            for i in range (-endpts, -stddev, 5):
-                X.append(float(i))
-            for i in range (stddev, endpts, 5):
-                X.append(float(i))
-            if (endpts) not in X: X.append(endpts)
-            X.sort()
-            X = [float(x) for x in X]
-            X = [x for x in X if 0 <= (x + pos - offset) < (end - start)]
-            stddev = float(stddev)
-            Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
-
-            return X, Y
 
         heights = []
         for pos, [height, stddev] in sorted(waves.iteritems()):
@@ -402,7 +402,7 @@ class MongoCurious():
             # print "    " , d
             peaks.add(Path(stroke = color, stroke_width = 0.1,
             		stroke_linecap = 'round', stroke_opacity = 0.8,
-            		fill = "slateblue", fill_opacity = 0.5, d = d))
+            		fill = fillcolor, fill_opacity = 0.5, d = d))
 
 
         peaks.add(Text("Chipseq Peaks", insert = (margin, margin - 10.0),
