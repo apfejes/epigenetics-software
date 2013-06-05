@@ -65,3 +65,10 @@ class MyClass(object):
         pass
 
 
+# for i in range (0, 40, 5):
+#    for j in range (10, 100, 10):
+#
+#       print " ", j, i
+#        x, y = MyClass(1).ks_test(mean1, sigma1, mean2, sigma2)
+#        print "    ", x, y
+
