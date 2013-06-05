@@ -14,8 +14,8 @@ class MongoQuery():
                             "sample type":None, "chromosome":None,
                             "start" : None, "end" : None,
                             "sample label" : None, "sample groups" : None,
-                            "project" : None,
-                            "cursor" : None, "waves" : None}
+                            "project" : None, "cursor" : None, "waves" : None,
+                            "sample id": None}
         self._data = fixed_dictionary
 
     def __setitem__(self, key, value):

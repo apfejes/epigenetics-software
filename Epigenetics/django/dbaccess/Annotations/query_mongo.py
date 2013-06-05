@@ -62,7 +62,8 @@ class MongoCurious():
                 end = None,
                 sample_type = None,
                 sample_label = None,
-                project = "All"):
+                sample_id = None,
+                project = None):
         '''Stores query inputs and parameters as an instance of MongoQuery'''
         Query = MongoQuery()
         Query['database'] = self.database
@@ -85,6 +86,8 @@ class MongoCurious():
         self.project = project
         Query['sample type'] = sample_type
         self.sample_type = sample_type
+        Query['sample id'] = sample_id
+        self.sample_id = sample_id
         if self.project:
             self.sample_groups = self.creategroups()
             Query['sample groups'] = self.sample_groups
@@ -137,7 +140,7 @@ class MongoCurious():
                           'height': True, 'stddev': True,
                           'sample_id': True}
             print "\n Conducting query: Find(", query, ")"
-            docs = self.mongo.find(self.collection, query, return_chr).sort('pos', 1)
+            docs = self.mongo.find(self.collection, query, return_chr).sort('_id', 1)
 
         if docs.count() == 0:
             print "    WARNING: The following query return zero probes or documents!"
@@ -170,7 +173,6 @@ class MongoCurious():
             feature = 'stimulation'
             samplegroup = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
         if self.project == "All":
-            print "l", self.sample_type, "l"
             if self.sample_type != "control" or self.sample_type != None:
                 print "The sample type \"", self.sample_type, "\" is invalid."
                 self.sample_type = str(raw_input("Please specify a sample type: \"control\" or \"disease\"?"))
@@ -268,15 +270,15 @@ class MongoCurious():
     def getwaves(self, tail = 1):
         count = 0
         self.tail = tail
-        # This dict will store the position as keys and height and standard deviation as values.
+        # This dict will store the position as keys and the tuple (height, std dev, sample id) as a value.
         waves = {}
         # "tail" is min height of a tail to be included in the plot for a peak
         # which doesn't have its center in the region
         for doc in self.docs:
-            if isinstance(doc['stddev'], basestring): int()
-            pos, height, stddev = doc['pos'], doc['height'], int(doc['stddev'])
+#            if isinstance(doc['stddev'], basestring): int()
+            pos, height, stddev, sample_id = doc['pos'], doc['height'], int(doc['stddev']), doc['sample_id']
             if self.start <= pos <= self.end:
-                waves[pos] = [height, stddev]
+                waves[pos] = [height, stddev, sample_id]
                 count += 1
             else:
                 dist_to_region = min(abs(pos - self.end), abs(self.start - pos))
@@ -285,7 +287,7 @@ class MongoCurious():
                 # print "        tail distance", dist_from_peak_to_tail
                 # print "        dist to region", dist_to_region
                 if dist_from_peak_to_tail - dist_to_region >= 0:
-                    waves[pos] = [height, stddev]
+                    waves[pos] = [height, stddev, sample_id]
                     count += 1
                 # else: print "         Not included:    ", pos, height, stddev,
         print " Only %i peaks were found in region." % count
@@ -353,13 +355,10 @@ class MongoCurious():
             + plot 2 queries!
         '''
         waves = self.waves
-        colors = {'indigo':'slateblue', 'red':'orange'}
-        color = 'indigo'
-        fillcolor = colors['indigo']
-        # if self.waves2:
-        #    waves2 = self.waves2
-        #    color = 'red'
-        #    fillcolor = colors['red']
+        colors = [('indigo', 'slateblue'), ('red', 'orange'),
+                  ('green', 'limegreen'), ('orange', 'yellow')]
+        (color, fillcolor) = colors[0]
+
         tail = self.tail
         start = self.start
         offset = start
@@ -368,17 +367,21 @@ class MongoCurious():
         width = 60.0
         margin = 20.0
         scale_x = length / (end - start)
+
         peaks = Drawing("SVGs/" + filename,
         		size = (str(length) + "mm " , str(width) + "mm"),
         		viewBox = ("0 0 " + str(length + margin + 30) + " " + str(width + margin + 30)),
         		preserveAspectRatio = "xMinYMin meet")
 
         heights = []
-        for pos, [height, stddev] in sorted(waves.iteritems()):
+        for pos, [height, stddev, sample_id] in sorted(waves.iteritems()):
             heights.append(height)
         maxh = max(heights)
         scale_y = (width + margin) * 0.8 / maxh
-        for pos, [height, stddev] in sorted(waves.iteritems()):
+
+        sample_count = 0
+        samples_color = {}
+        for pos, [height, stddev, sample_id] in sorted(waves.iteritems()):
             print "Peak", pos, height, stddev
             X, Y = makegaussian(start, end, margin, length, pos, tail, offset, float(height), stddev)
             X = [round((x - offset + pos) * scale_x, 2) + 20 for x in X]
@@ -399,10 +402,14 @@ class MongoCurious():
             d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
             for i in range(2, len(X)):
                 d = d + (" " + str(X[i]) + "," + str(Y[i]))
-            # print "    " , d
-            peaks.add(Path(stroke = color, stroke_width = 0.1,
+
+            if sample_id not in samples_color :
+                sample_count += 1
+                samples_color[sample_id] = colors[sample_count - 1]
+
+            peaks.add(Path(stroke = samples_color[sample_id][0], stroke_width = 0.1,
             		stroke_linecap = 'round', stroke_opacity = 0.8,
-            		fill = fillcolor, fill_opacity = 0.5, d = d))
+            		fill = samples_color[sample_id][1], fill_opacity = 0.5, d = d))
 
 
         peaks.add(Text("Chipseq Peaks", insert = (margin, margin - 10.0),
