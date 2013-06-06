@@ -6,7 +6,8 @@
 <path>/Epigenetics</path>
 <path>/Epigenetics/WaveGenerator</path>
 <path>/Epigenetics/MongoDB</path>
-<path>/Epigenetics/WaveGenerator/Utilities</path>
 <path>/Epigenetics/MongoDB/mongoUtilities</path>
+<path>/Epigenetics/Illustration</path>
+<path>/Epigenetics/WaveGenerator/Utilities</path>
 </pydev_pathproperty>
 </pydev_project>

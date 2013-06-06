@@ -19,10 +19,13 @@ _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current fi
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir + os.sep + "Utilities")
+
 import Parameters
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector, common_utilities
-from WaveGenerator.Utilities.Statistics import MyClass as stats
+import WaveGenerator.Utilities.Statistics as stats
+sys.path.insert(0, _cur_dir + os.sep + "Illustration")
+import Illustration
 
 class WavePair():
     # i, j, p, pos1, pos2, stddev1, stddev2
@@ -209,6 +212,10 @@ def run():
     err = fit2.sd_beta[::-1]
     print "ODR - explicit fit: coeff %s err %s" % (coeff, err)
         # normalize the heights
+
+    bp = Illustration.boxplot()
+
+
         # filter out from control
         # return waves that are unique to sample
     if print_thread == None or not print_thread.is_alive():
