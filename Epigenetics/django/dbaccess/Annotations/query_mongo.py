@@ -140,7 +140,7 @@ class MongoCurious():
                           'height': True, 'stddev': True,
                           'sample_id': True}
             print "\n Conducting query: Find(", query, ")"
-            docs = self.mongo.find(self.collection, query, return_chr).sort('_id', 1)
+            docs = self.mongo.find(self.collection, query, return_chr).sort('height', -1)
 
         if docs.count() == 0:
             print "    WARNING: The following query return zero probes or documents!"
@@ -270,15 +270,15 @@ class MongoCurious():
     def getwaves(self, tail = 1):
         count = 0
         self.tail = tail
-        # This dict will store the position as keys and the tuple (height, std dev, sample id) as a value.
-        waves = {}
+        # This list will store the tuple (pos,height, std dev, sample id) as a value.
+        waves = []
         # "tail" is min height of a tail to be included in the plot for a peak
         # which doesn't have its center in the region
         for doc in self.docs:
 #            if isinstance(doc['stddev'], basestring): int()
             pos, height, stddev, sample_id = doc['pos'], doc['height'], int(doc['stddev']), doc['sample_id']
             if self.start <= pos <= self.end:
-                waves[pos] = [height, stddev, sample_id]
+                waves.append((pos, height, stddev, sample_id))
                 count += 1
             else:
                 dist_to_region = min(abs(pos - self.end), abs(self.start - pos))
@@ -287,19 +287,13 @@ class MongoCurious():
                 # print "        tail distance", dist_from_peak_to_tail
                 # print "        dist to region", dist_to_region
                 if dist_from_peak_to_tail - dist_to_region >= 0:
-                    waves[pos] = [height, stddev, sample_id]
+                    waves.append((pos, height, stddev, sample_id))
                     count += 1
                 # else: print "         Not included:    ", pos, height, stddev,
         print " Only %i peaks were found in region." % count
         self.waves = waves
         self.Query['waves'] = waves
         return None
-
-#    def compare(self):
-#        '''NOT RUNNING ATM'''
-#        self.finddocs()
-#        self.waves2 = self.getwaves()
-#        return None
 
     def svg(self, filename = None, color = None, to_string = False):
         if self.collection == "methylation":
@@ -357,7 +351,6 @@ class MongoCurious():
         waves = self.waves
         colors = [('indigo', 'slateblue'), ('red', 'orange'),
                   ('green', 'limegreen'), ('orange', 'yellow')]
-        (color, fillcolor) = colors[0]
 
         tail = self.tail
         start = self.start
@@ -374,14 +367,14 @@ class MongoCurious():
         		preserveAspectRatio = "xMinYMin meet")
 
         heights = []
-        for pos, [height, stddev, sample_id] in sorted(waves.iteritems()):
+        for (pos, height, stddev, sample_id) in waves:
             heights.append(height)
         maxh = max(heights)
         scale_y = (width + margin) * 0.8 / maxh
 
         sample_count = 0
         samples_color = {}
-        for pos, [height, stddev, sample_id] in sorted(waves.iteritems()):
+        for (pos, height, stddev, sample_id) in waves:
             print "Peak", pos, height, stddev
             X, Y = makegaussian(start, end, margin, length, pos, tail, offset, float(height), stddev)
             X = [round((x - offset + pos) * scale_x, 2) + 20 for x in X]
