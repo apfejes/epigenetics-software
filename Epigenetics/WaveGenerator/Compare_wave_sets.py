@@ -23,9 +23,9 @@ sys.path.insert(0, _cur_dir + os.sep + "Utilities")
 import Parameters
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector, common_utilities
-import WaveGenerator.Utilities.Statistics as stats
+from WaveGenerator.Utilities.Statistics import Kolmogorov_Smirnov as stats
 sys.path.insert(0, _cur_dir + os.sep + "Illustration")
-import Illustration
+import Illustration.BoxPlot as boxplot
 
 class WavePair():
     # i, j, p, pos1, pos2, stddev1, stddev2
@@ -191,7 +191,7 @@ def run():
 
     # NORMALIZATION
     linear = odr.Model(f)
-    mydata = odr.Data(y, x)
+    mydata = odr.Data(x, y)
     myodr = odr.ODR(mydata, linear, [1])
     myodr.set_job(fit_type = 2)    # do a linear model, then use that to figure out the non-linear model - initial first guess.
 
@@ -213,8 +213,11 @@ def run():
     print "ODR - explicit fit: coeff %s err %s" % (coeff, err)
         # normalize the heights
 
-    bp = Illustration.boxplot()
-
+    bp = boxplot.BoxPlot("/home/afejes/temp/test_plot.svg", 1200, 600)
+    bp.add_and_zip_data(x, y)
+    bp.scale_data()
+    bp.build()
+    bp.save()
 
         # filter out from control
         # return waves that are unique to sample
