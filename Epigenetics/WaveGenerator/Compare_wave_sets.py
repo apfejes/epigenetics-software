@@ -128,8 +128,10 @@ def run():
 
     id_s = map(util.get_sample_id_from_name, samples)
     id_r = map(util.get_sample_id_from_name, controls)
-    print "sample ids", id_s
-    print "control ids", id_r
+    # print "sample ids", id_s
+    # print "control ids", id_r
+    x = []
+    y = []
     for chromosome in chromosomes:    # for each chromosome
         print "chromosome %s" % chromosome
         waves1 = None
@@ -178,28 +180,34 @@ def run():
             i += 1
             # print "i %s and max_i %s", i, max_i
 
-        x = []
-        y = []
+
         for b in both:
             x.append(b.get_ht1())
             y.append(b.get_ht2())
             pass
 
-        # NORMALIZATION
-        linear = odr.Model(f)
-        mydata = odr.Data(x, y)
-        myodr = odr.ODR(mydata, linear, [1])
-        myodr.set_job(fit_type = 2)    # do a linear model, then use that to figure out the non-linear model - initial first guess.
+    # NORMALIZATION
+    linear = odr.Model(f)
+    mydata = odr.Data(y, x)
+    myodr = odr.ODR(mydata, linear, [1])
+    myodr.set_job(fit_type = 2)    # do a linear model, then use that to figure out the non-linear model - initial first guess.
 
-        # myodr.run(fit_type = 0)
-        myodr.set_iprint(final = 2)
-        fit = myodr.run()
-        fit.pprint()
-        if fit.stopreason[0] == 'Iteration limit reached':
-            print '(WWW) poly_lsq: Iteration limit reached, result not reliable!'
-        coeff = fit.beta[::-1]
-        err = fit.sd_beta[::-1]
-        print "coeff %s err %s" % (coeff, err)
+    # myodr.set_iprint(final = 2)
+    fit = myodr.run()
+    coeff = fit.beta[::-1]
+    err = fit.sd_beta[::-1]
+    print "linear - least squares : coeff %s err %s" % (coeff, err)
+    myodr = odr.ODR(mydata, linear, coeff)
+    myodr.set_job(fit_type = 0)
+
+
+    fit2 = myodr.run()
+    # fit.pprint()
+    if fit2.stopreason[0] == 'Iteration limit reached':
+        print '(WWW) poly_lsq: Iteration limit reached, result not reliable!'
+    coeff = fit2.beta[::-1]
+    err = fit2.sd_beta[::-1]
+    print "ODR - explicit fit: coeff %s err %s" % (coeff, err)
         # normalize the heights
         # filter out from control
         # return waves that are unique to sample
