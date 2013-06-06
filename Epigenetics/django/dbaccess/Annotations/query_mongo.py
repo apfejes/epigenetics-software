@@ -12,6 +12,7 @@ from svgwrite.drawing import Drawing
 from svgwrite.text import Text
 from svgwrite.shapes import Rect
 from svgwrite.path import Path
+from svgwrite.filters import Filter
 from math import sqrt, exp
 from query_class import MongoQuery
 
@@ -362,20 +363,24 @@ class MongoCurious():
         scale_x = length / (end - start)
 
         peaks = Drawing("SVGs/" + filename,
-        		size = (str(length) + "mm " , str(width) + "mm"),
-        		viewBox = ("0 0 " + str(length + margin + 30) + " " + str(width + margin + 30)),
-        		preserveAspectRatio = "xMinYMin meet")
+                        size = (str(length) + "mm " , str(width) + "mm"),
+                        viewBox = ("0 0 " + str(length + margin + 30) + " " + str(width + margin + 30)),
+                        preserveAspectRatio = "xMinYMin meet")
+        colorfilter = peaks.defs.add(peaks.filter(start = (margin, margin), size = (width, length), filterUnits = "userSpaceOnUse"))
+
+        colorblend = colorfilter.feComposite()
 
         heights = []
         for (pos, height, stddev, sample_id) in waves:
             heights.append(height)
         maxh = max(heights)
         scale_y = (width + margin) * 0.8 / maxh
+        offset_y = (width + margin) * 0.8 + margin
 
         sample_count = 0
         samples_color = {}
         for (pos, height, stddev, sample_id) in waves:
-            print "Peak", pos, height, stddev
+            print "  Peak", pos, height, stddev
             X, Y = makegaussian(start, end, margin, length, pos, tail, offset, float(height), stddev)
             X = [round((x - offset + pos) * scale_x, 2) + 20 for x in X]
             for x in X:
@@ -389,7 +394,7 @@ class MongoCurious():
                     break
             # Scale Y and inverse the coordinates
             Y = [round(y * scale_y, 2) for y in Y]
-            Y = [((width + margin) * 0.8 + margin - y) for y in Y]
+            Y = [(offset_y - y) for y in Y]
             # d is the list of coordinates with commands such as
             # M for "move to' to initiate curve and S for smooth curve
             d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
@@ -400,9 +405,13 @@ class MongoCurious():
                 sample_count += 1
                 samples_color[sample_id] = colors[sample_count - 1]
 
-            peaks.add(Path(stroke = samples_color[sample_id][0], stroke_width = 0.1,
-            		stroke_linecap = 'round', stroke_opacity = 0.8,
-            		fill = samples_color[sample_id][1], fill_opacity = 0.5, d = d))
+
+            peak = (Path(stroke = samples_color[sample_id][0], stroke_width = 0.1,
+                           stroke_linecap = 'round', stroke_opacity = 0.8,
+                           fill = samples_color[sample_id][1], fill_opacity = 0.5, d = d))
+
+            peaks.add(peak)
+            # peaks.add(colorblend)
 
 
         peaks.add(Text("Chipseq Peaks", insert = (margin, margin - 10.0),
@@ -422,13 +431,43 @@ class MongoCurious():
             peaks.add(ticline)
             peaks.add(ticmarker)
 
-#         Add y tics
-#          ytics = [i for i in range(1, int(max(heights))) if i%4 ==0]
-#          ytics.append(0)
-#          for tic in ytics:
-#              ticline = Rect(insert=(margin-5-1,margin-8+tic), size = (2,0.1), fill="midnightblue")
-#              peaks.add(ticline)
+#         # Add y tics
+#         ytics = [-i for i in range(-int(offset_y), -int(offset_y - maxh * scale_y) + 1, 8)]
+#         print len(ytics), ytics
+#         # while len(ytics) < 4:
+#         #    scale_tics /= 2
+#         #    ytics += [i for i in range(0, int(max(heights)) + 1) if i % (scale_tics) == 0 and i not in ytics]
 #
+#         print ytics
+#         for tic in ytics:
+#             ticline = Rect(insert = (margin - 5 - 1, tic), size = (2, 0.1), fill = "midnightblue")
+#             ticmarker = (Text(str(round((tic - offset_y) / scale_y, 1)), insert = (margin - 18, tic + 1), fill = "midnightblue", font_size = "3"))
+#             peaks.add(ticline)
+#             peaks.add(ticmarker)
+
+
+
+        # Add ytics the proper way
+        scale_tics = 60
+        ytics = [i for i in range(0, int(maxh) + 1, scale_tics)]
+        print len(ytics), ytics
+        while len(ytics) < 4:
+            scale_tics /= 2
+            ytics += [i for i in range(0, int(maxh) + 1, scale_tics) if i not in ytics]
+        ytics = [round(offset_y - y * scale_y, 3) for y in ytics]
+        for tic in ytics:
+            ticline = Rect(insert = (margin - 5 - 1, tic), size = (2, 0.1), fill = "midnightblue")
+            tic_x = margin - 13
+            tic_y = tic + 1
+            label = str(int(round((offset_y - tic) / scale_y)))
+            if len(label) == 1:
+                tic_x = tic_x + 3
+            if len(label) == 2:
+                tic_x = tic_x + 2
+            ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = "3"))
+            peaks.add(ticline)
+            peaks.add(ticmarker)
+
         x_axis = Rect(insert = (margin - 5, width + margin * 2 - 5),
         		size = ((end - start) * scale_x + 10, 0.1),
         		fill = "midnightblue")
@@ -438,4 +477,5 @@ class MongoCurious():
         peaks.add(x_axis)
         peaks.add(y_axis)
 
+        # feComposite in="SourceGraphic" in2="BackgroundImage" operator="over" result="comp"/
         return peaks
