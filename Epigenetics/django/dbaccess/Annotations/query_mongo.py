@@ -12,9 +12,9 @@ from svgwrite.drawing import Drawing
 from svgwrite.text import Text
 from svgwrite.shapes import Rect
 from svgwrite.path import Path
-from svgwrite.filters import Filter
-from math import sqrt, exp
-import query_class.MongoQuery as MongoQuery
+# from svgwrite.filters import Filter
+from math import sqrt, exp, fabs
+from query_class import MongoQuery
 
 '''
 STILL NEED TO IMPLEMENT:
@@ -423,11 +423,18 @@ class MongoCurious():
         while len(xtics) < 4:
             scale_tics /= 2
             xtics += [i for i in range(start, end + 1) if i % (scale_tics) == 0 and i not in xtics]
+        xtics.sort()
+        spacing = fabs((margin + (xtics[1] - offset) * scale_x) - (margin + (xtics[0] - offset) * scale_x)) / 4
         for tic in xtics:
             tic_x = (margin + (tic - offset) * scale_x)
             tic_y = width + margin * 2
+            print tic_x, tic_x + spacing
             ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = "3"))
             ticline = Rect(insert = (tic_x, width + margin * 2 - 5 - 1), size = (0.1, 2), fill = "midnightblue")
+            for i in range (1, 4):
+                if tic_x - spacing * i > margin - 5:
+                    ticline2 = Rect(insert = (tic_x - spacing * i, width + margin * 2 - 5 - 1), size = (0.1, 1), fill = "midnightblue")
+                    peaks.add(ticline2)
             peaks.add(ticline)
             peaks.add(ticmarker)
 
@@ -438,8 +445,11 @@ class MongoCurious():
             scale_tics /= 2
             ytics += [i for i in range(0, int(maxh) + 1, scale_tics) if i not in ytics]
         ytics = [round(offset_y - y * scale_y, 3) for y in ytics]
+        print ytics
+        spacing = (ytics[0] - ytics[1]) / 2
         for tic in ytics:
             ticline = Rect(insert = (margin - 5 - 1, tic), size = (2, 0.1), fill = "midnightblue")
+            ticline2 = Rect(insert = (margin - 5, tic + spacing), size = (1, 0.1), fill = "midnightblue")
             tic_x = margin - 13
             tic_y = tic + 1
             label = str(int(round((offset_y - tic) / scale_y)))
@@ -449,6 +459,7 @@ class MongoCurious():
                 tic_x = tic_x + 2
             ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = "3"))
             peaks.add(ticline)
+            peaks.add(ticline2)
             peaks.add(ticmarker)
 
         x_axis = Rect(insert = (margin - 5, width + margin * 2 - 5),
