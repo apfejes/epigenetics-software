@@ -314,7 +314,7 @@ class MongoCurious():
     def drawgene(self,
                     filename,
                     color):
-        '''Make svg drawing. This function is not to b called directly, only by svg() and svgtostring() '''
+        '''Make svg drawing. This function is not to be called directly, only by svg() and svgtostring() '''
         X, Y = self.positions, self.betas
 
         smooth = False
@@ -366,9 +366,9 @@ class MongoCurious():
                         size = (str(length) + "mm " , str(width) + "mm"),
                         viewBox = ("0 0 " + str(length + margin + 30) + " " + str(width + margin + 30)),
                         preserveAspectRatio = "xMinYMin meet")
-        colorfilter = peaks.defs.add(peaks.filter(start = (margin, margin), size = (width, length), filterUnits = "userSpaceOnUse"))
+#        colorfilter = peaks.defs.add(peaks.filter(start = (margin, margin), size = (width, length), filterUnits = "userSpaceOnUse"))
 
-        colorblend = colorfilter.feComposite()
+#        colorblend = colorfilter.feComposite()
 
         heights = []
         for (pos, height, stddev, sample_id) in waves:
@@ -431,26 +431,9 @@ class MongoCurious():
             peaks.add(ticline)
             peaks.add(ticmarker)
 
-#         # Add y tics
-#         ytics = [-i for i in range(-int(offset_y), -int(offset_y - maxh * scale_y) + 1, 8)]
-#         print len(ytics), ytics
-#         # while len(ytics) < 4:
-#         #    scale_tics /= 2
-#         #    ytics += [i for i in range(0, int(max(heights)) + 1) if i % (scale_tics) == 0 and i not in ytics]
-#
-#         print ytics
-#         for tic in ytics:
-#             ticline = Rect(insert = (margin - 5 - 1, tic), size = (2, 0.1), fill = "midnightblue")
-#             ticmarker = (Text(str(round((tic - offset_y) / scale_y, 1)), insert = (margin - 18, tic + 1), fill = "midnightblue", font_size = "3"))
-#             peaks.add(ticline)
-#             peaks.add(ticmarker)
-
-
-
-        # Add ytics the proper way
+        # Add ytics
         scale_tics = 60
         ytics = [i for i in range(0, int(maxh) + 1, scale_tics)]
-        print len(ytics), ytics
         while len(ytics) < 4:
             scale_tics /= 2
             ytics += [i for i in range(0, int(maxh) + 1, scale_tics) if i not in ytics]
@@ -479,3 +462,5 @@ class MongoCurious():
 
         # feComposite in="SourceGraphic" in2="BackgroundImage" operator="over" result="comp"/
         return peaks
+
+
