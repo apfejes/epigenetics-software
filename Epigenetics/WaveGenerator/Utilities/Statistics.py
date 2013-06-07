@@ -11,6 +11,9 @@ where x is the position of the max distance between two CDFs
 '''
 from math import sqrt, log, erf, fabs
 
+def phi(x):
+        return (1.0 + erf(x / sqrt(2.0))) / 2.0
+
 class MyClass(object):
     '''
     classdocs
@@ -57,14 +60,9 @@ class MyClass(object):
                 x = (a2 * d + sqrt(term) - b2 * c) / (a2 - b2)
         elif b > a:
                 x = (a2 * d - sqrt(term) - b2 * c) / (a2 - b2)
+        # Return the max distance
+        return fabs(phi((x - c) / a) - phi((x - d) / b))
 
-        # Find the max distance
-        def phi(x):
-            return (1.0 + erf(x / sqrt(2.0))) / 2.0
-        # print "        ", phi((x - c) / a), phi((x - d) / b), "B"
-        y = fabs(phi((x - c) / a) - phi((x - d) / b))
-
-        return (x, y)
 
 
     def __init__(self, params):

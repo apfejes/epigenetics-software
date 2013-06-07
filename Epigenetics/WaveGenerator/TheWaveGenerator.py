@@ -88,7 +88,6 @@ def main(PARAM):
 
         '''launch thread to read and process the print queue'''
         print_thread = PrintThread.StringWriter(print_queue)
-        print_thread.start_print_writer()
         print_queue.put("Print queue and thread have started")
 
         current_chromosome = None

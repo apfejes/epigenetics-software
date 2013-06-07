@@ -10,7 +10,7 @@ from query_mongo import MongoCurious
 # Tell the database which collection you want to query from
 m = MongoCurious(database = "human_epigenetics", collection = "waves")
 # Query the database
-# query1 = m.query(chromosome = "chr4", start = 28800, end = 37000)
+
 query1 = m.query(chromosome = "chrY", start = 59001000, end = 59004000)
 # Extract the probes or documents relevant to that region
 m.finddocs()
@@ -18,6 +18,7 @@ m.finddocs()
 m.getwaves()
 # Make the svg file called "peaks.svg" in the /SVGs folder
 m.svg(filename = "test_peak.svg", color = 'indigo')
+
 
 
 query1 = m.query(chromosome = "chrY", start = 59001100, end = 59002000)
@@ -44,3 +45,4 @@ m.svg(filename = "test_peak3.svg", color = 'indigo')
 #
 # print query1
 # print query2
+

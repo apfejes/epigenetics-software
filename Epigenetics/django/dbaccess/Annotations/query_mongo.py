@@ -14,7 +14,7 @@ from svgwrite.shapes import Rect
 from svgwrite.path import Path
 from svgwrite.filters import Filter
 from math import sqrt, exp
-from query_class import MongoQuery
+import query_class.MongoQuery as MongoQuery
 
 '''
 STILL NEED TO IMPLEMENT:
@@ -148,7 +148,6 @@ class MongoCurious():
             print "    ---> Find(", query, ")"
             print "     use the checkquery() function to validate the inputs of your query."
             sys.exit()
-
         print " Found %i probes or documents." % docs.count()
         self.docs = docs
         self.count = self.docs.count()
@@ -369,6 +368,7 @@ class MongoCurious():
 #        colorfilter = peaks.defs.add(peaks.filter(start = (margin, margin), size = (width, length), filterUnits = "userSpaceOnUse"))
 
 #        colorblend = colorfilter.feComposite()
+
 
         heights = []
         for (pos, height, stddev, sample_id) in waves:

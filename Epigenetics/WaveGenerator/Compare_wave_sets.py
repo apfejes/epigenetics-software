@@ -10,6 +10,8 @@ import os
 import PrintThread
 import multiprocessing
 import time
+import scipy.odr as odr
+
 # from bson.objectid import ObjectId
 
 
@@ -17,10 +19,13 @@ _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current fi
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir + os.sep + "Utilities")
+
 import Parameters
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector, common_utilities
-from WaveGenerator.Utilities.Statistics import MyClass as stats
+from WaveGenerator.Utilities.Statistics import Kolmogorov_Smirnov as stats
+sys.path.insert(0, _cur_dir + os.sep + "Illustration")
+import Illustration.BoxPlot as boxplot
 
 class WavePair():
     # i, j, p, pos1, pos2, stddev1, stddev2
@@ -43,10 +48,17 @@ class WavePair():
     def get_j(self):
         return self.j
 
+    def get_ht1(self):
+        return self.ht1
+
+    def get_ht2(self):
+        return self.ht2
+
     def to_string(self):
         return str(self.chromosome) + " " + str(self.pos1) + " " + \
-            str(self.pos2) + " " + str(self.stddev1) + " " + str(self.stddev2) + \
-            str(self.ht1) + " " + str(self.ht2)
+            str(self.pos2) + " " + str(self.stddev1) + " " + \
+            str(self.stddev2) + " " + str(self.ht1) + " " + \
+            str(self.ht2) + " " + str(self.p)
 
     def type(self):
         return "Wavepair"
@@ -119,8 +131,10 @@ def run():
 
     id_s = map(util.get_sample_id_from_name, samples)
     id_r = map(util.get_sample_id_from_name, controls)
-    print "sample ids", id_s
-    print "control ids", id_r
+    # print "sample ids", id_s
+    # print "control ids", id_r
+    x = []
+    y = []
     for chromosome in chromosomes:    # for each chromosome
         print "chromosome %s" % chromosome
         waves1 = None
@@ -147,42 +161,64 @@ def run():
             pos_i = waves1[i]['pos']
             sdv_i = waves1[i]['stddev']
             ht_i = waves1[i]['height']
-            jt = j
+            jt = j - 1
             while jt >= 0 and waves2[jt]['pos'] > (pos_i - 4 * sdv_i) :
                 # print "jt - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[jt]['pos'], waves2[jt]['stddev']
                 p = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
-                if (p[0] != 0 and p[1] != 0):
+                if (p != 0):
                     w = WavePair(chromosome, i, jt, p, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
-                    print_queue.put(w.to_string())
-                    # both.append(w)
+                    if p < 0.1:
+                        print_queue.put(w.to_string())
+                    both.append(w)
                 jt -= 1
             while j < max_j and waves2[j]['pos'] < (pos_i + 4 * sdv_i):
                 # print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
                 p = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
-                if (p[0] != 0 and p[1] != 0):
+                if (p != 0):
                     w = WavePair(chromosome, i, j, p, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
-                    print_queue.put(w.to_string())
-                    # both.append(w)
+                    if p < 0.1:
+                        print_queue.put(w.to_string())
+                    both.append(w)
                 j += 1
             i += 1
             # print "i %s and max_i %s", i, max_i
 
 
-        # for i in range(len(waves1)):
-            # for j in range(len(waves2)):
-#
-                # p = stats.ks_test(waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev'])
-                # if (p[0] != 0 and p[1] != 0):
-                    # print "p = ", p
-                    # print "waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
-                    # both.append(WavePair(i, j, p, waves1[i]['pos'], waves2[j]['pos'], waves1[i]['stddev'], waves2[j]['stddev']))
-        for i in range(len(both)):
-            print "found at %s" % both[i].to_string()
+        for b in both:
+            x.append(b.get_ht1())
+            y.append(b.get_ht2())
+            pass
+
+    # NORMALIZATION
+    linear = odr.Model(f)
+    mydata = odr.Data(x, y)
+    myodr = odr.ODR(mydata, linear, [1])
+    myodr.set_job(fit_type = 2)    # do a linear model, then use that to figure out the non-linear model - initial first guess.
+
+    # myodr.set_iprint(final = 2)
+    fit = myodr.run()
+    coeff = fit.beta[::-1]
+    err = fit.sd_beta[::-1]
+    print "linear - least squares : coeff %s err %s" % (coeff, err)
+    myodr = odr.ODR(mydata, linear, coeff)
+    myodr.set_job(fit_type = 0)
 
 
-
-        # get the waves for that chromosome
+    fit2 = myodr.run()
+    # fit.pprint()
+    if fit2.stopreason[0] == 'Iteration limit reached':
+        print '(WWW) poly_lsq: Iteration limit reached, result not reliable!'
+    coeff = fit2.beta[::-1]
+    err = fit2.sd_beta[::-1]
+    print "ODR - explicit fit: coeff %s err %s" % (coeff, err)
         # normalize the heights
+
+    bp = boxplot.BoxPlot("/home/afejes/temp/test_plot.svg", 1200, 600)
+    bp.add_and_zip_data(x, y)
+    bp.scale_data()
+    bp.build()
+    bp.save()
+
         # filter out from control
         # return waves that are unique to sample
     if print_thread == None or not print_thread.is_alive():
@@ -201,6 +237,17 @@ def CreateListFromCursor(cursor):
         list.append(record)
     return list
 
+
+
+# derived from http://docs.scipy.org/doc/scipy-dev/reference/odr.html
+
+def f(B, x):
+    '''Linear function y = m*x + b'''
+    # B is a vector of the parameters.
+    # x is an array of the current x values.
+    # x is in the same format as the x passed to Data or RealData.
+    # Return an array in the same format as y passed to Data or RealData.
+    return B[0] * x
 
 
 if __name__ == '__main__':
