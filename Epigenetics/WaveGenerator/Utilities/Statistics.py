@@ -14,7 +14,7 @@ from math import sqrt, log, erf, fabs
 def phi(x):
         return (1.0 + erf(x / sqrt(2.0))) / 2.0
 
-class MyClass(object):
+class Kolmogorov_Smirnov(object):
     '''
     classdocs
     '''

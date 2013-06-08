@@ -1,7 +1,7 @@
 # from svgwrite.shapes import Rect
 from svgwrite.shapes import Line
 from svgwrite.shapes import Circle
-# from svgwrite.text import Text
+from svgwrite.text import Text
 from svgwrite.drawing import Drawing
 
 
@@ -66,8 +66,8 @@ class BoxPlot(object):
                             size = (self.width + self.margin_left + self.margin_right, self.height + self.margin_top + self.margin_bottom),
                             # viewBox = ("0 0 " + str(float(length) + 10) + " " + str(float(width) + 10)),
                             preserveAspectRatio = "xMinYMin meet")    # , size=('200mm', '150mm'), viewBox=('0 0 200 150'))
-        self.plot.add(Line(start = (self.margin_left, self.margin_top), end = (self.margin_left, self.margin_top + self.height)))
-        self.plot.add(Line(start = (self.margin_left, self.margin_top + self.height), end = (self.margin_left + self.width, self.margin_top + self.height)))
+        self.plot.add(Line(start = (self.margin_left - 4, self.margin_top), end = (self.margin_left - 4, self.margin_top + self.height), stroke_width = 0.5, stroke = "black"))
+        self.plot.add(Line(start = (self.margin_left, self.margin_top + self.height + 4), end = (self.margin_left + self.width, self.margin_top + self.height + 4), stroke_width = 0.5, stroke = "black"))
 
     def add_and_zip_data(self, x, y):
         self.data = zip(x, y)
@@ -75,24 +75,51 @@ class BoxPlot(object):
     def add_data(self, x):
         self.data = x
 
-    def scale_data(self):
-        max_x = self.data[0][0]
-        max_y = self.data[0][1]
+    def add_regression(self, slope):
+
+        self.max_min()
+        x = self.max_x
+        y = slope * x
+        print "x %f y %f" % (x, y)
+
+        if y > self.max_y:
+            y = self.max_y
+            x = y / slope
+            print "x %f y %f" % (x, y)
+
+
+        self.plot.add(Line(start = (self.margin_left, self.margin_top + self.height),
+                           end = (self.x_to_printx(x), self.y_to_printy(y)),
+                                  stroke_width = 1, stroke = "black"))
+
+    def x_to_printx(self, x):
+        return self.margin_left + ((float(x) / self.max_x) * self.width)
+
+    def y_to_printy(self, y):
+        return (self.margin_top + self.height) - ((float(y) / self.max_y) * self.height)
+
+
+    def max_min(self):
+        self.max_x = self.data[0][0]
+        self.max_y = self.data[0][1]
         for x, y in self.data:
             if x > self.max_x:
                 self.max_x = x
             if y > self.max_y:
                 self.max_y = y
-        print "max x y : %f %f" % (max_x, max_y)
+        print "max x y : %f %f" % (self.max_x, self.max_y)
 
 
     def build(self):
+        self.max_min()
         for x, y in self.data:
             self.plot.add(Circle(center = (self.margin_left + ((x / self.max_x) * self.width),
                                           (self.margin_top + self.height) - ((y / self.max_y) * self.height)),
                                  r = 2, stroke_width = 0.1, stroke_linecap = 'round',
-                                 stroke_opacity = 0.8, fill = "dodgerblue",
-                                 fill_opacity = 0.5))
+                                 stroke_opacity = 0.5, fill = "dodgerblue",
+                                 fill_opacity = 0.3))
+        self.plot.add(Text(self.max_x, insert = (self.margin_left + self.width - 50, self.margin_top + self.height + 20.0),
+                fill = "midnightblue", font_size = "15"))
         self.data = None
 
 

@@ -185,8 +185,9 @@ def run():
 
 
         for b in both:
-            x.append(b.get_ht1())
-            y.append(b.get_ht2())
+            if b.p < 0.05 and b.get_ht2 > 20:
+                x.append(b.get_ht1())
+                y.append(b.get_ht2())
             pass
 
     # NORMALIZATION
@@ -215,7 +216,7 @@ def run():
 
     bp = boxplot.BoxPlot("/home/afejes/temp/test_plot.svg", 1200, 600)
     bp.add_and_zip_data(x, y)
-    bp.scale_data()
+    bp.add_regression(coeff)
     bp.build()
     bp.save()
 
