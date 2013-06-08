@@ -16,15 +16,7 @@ from svgwrite.path import Path
 from math import sqrt, exp, fabs
 from query_class import MongoQuery
 
-'''
-STILL NEED TO IMPLEMENT:
-    1.
-        more query options
-    2.
-        more graph options
-'''
-
-def makegaussian(start, end, margin, length, pos, tail, offset, height, stddev):
+def makegaussian(self, start, end, margin, length, pos, tail, offset, height, stddev):
     X = []
     endpts = int((sqrt((-2) * stddev * stddev * log(tail / height))))
     for i in range (-stddev, stddev, 3):
@@ -41,7 +33,6 @@ def makegaussian(start, end, margin, length, pos, tail, offset, height, stddev):
     Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
 
     return X, Y
-
 
 class MongoCurious():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
@@ -69,6 +60,8 @@ class MongoCurious():
         Query = MongoQuery()
         Query['database'] = self.database
         Query['collection'] = self.collection
+        Query['project'] = project
+        self.project = project
         if chromosome == None:
             raise ValueError("Please specificy a chromosome.")
         if isinstance(chromosome, basestring):
@@ -77,21 +70,20 @@ class MongoCurious():
         elif isinstance(chromosome, int):
                 Query['chromosome'] = 'chr' + str(chromosome)
                 self.chromosome = chromosome
+        if self.project:
+            self.sample_groups = self.creategroups()
+            Query['sample groups'] = self.sample_groups
         Query['start'] = start
         self.start = start
         Query['end'] = end
         self.end = end
         Query['sample label'] = sample_label
         self.sample_label = sample_label
-        Query['project'] = project
-        self.project = project
         Query['sample type'] = sample_type
         self.sample_type = sample_type
         Query['sample id'] = sample_id
         self.sample_id = sample_id
-        if self.project:
-            self.sample_groups = self.creategroups()
-            Query['sample groups'] = self.sample_groups
+
         self.Query = Query
         return self.Query
 
@@ -118,7 +110,7 @@ class MongoCurious():
         '''Finds probes or documents corresponding to query'''
         self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
 
-        # Preparing the different features of the query
+        # Preparing the different parameters of the query depending on the collection chosen
         if self.collection == "methylation":
             query_chr, query_start, query_end, query_samplabel = {}, {}, {}, {}
             if self.chromosome != None: query_chr = {'chr':self.chromosome}
@@ -130,17 +122,21 @@ class MongoCurious():
                           'start_position': True, 'end_position': True,
                           'sample_label': True}
             print "\n Conducting query: Find(", query, ")"
+            # Get probes corresponding to query and sort by starting positions for beta value binning
             docs = self.mongo.find(self.collection, query, return_chr).sort('start_position', 1)
+
         if self.collection == "waves":
             query_chr, query_pos, = {}, {}
             if self.chromosome != None: query_chr = {'chr':self.chromosome}
             if self.start != None and self.end != None:
-                query_pos = {"pos":{"$lte":self.end + 500, "$gte":self.start - 500}}    # extend the region of query
+                extension = 500    # extend the region of query to catch peaks with tails in the region
+                query_pos = {"pos":{"$lte":self.end + extension, "$gte":self.start - extension}}
             query = dict(query_chr.items() + query_pos.items())
             return_chr = {'_id': False, 'pos': True,
                           'height': True, 'stddev': True,
                           'sample_id': True}
             print "\n Conducting query: Find(", query, ")"
+            # Get documents corresponding to query and sort by inverse peak height for plotting purposes
             docs = self.mongo.find(self.collection, query, return_chr).sort('height', -1)
 
         if docs.count() == 0:
@@ -148,6 +144,7 @@ class MongoCurious():
             print "    ---> Find(", query, ")"
             print "     use the checkquery() function to validate the inputs of your query."
             sys.exit()
+
         print " Found %i probes or documents." % docs.count()
         self.docs = docs
         self.count = self.docs.count()
@@ -157,9 +154,9 @@ class MongoCurious():
 
     def creategroups(self):
         '''
-        Separate samples into 'groups' according to a particular feature.
-        Example: feature = diseased/control.
-        samplegroup is a list of sample labels with the desired sample_type
+        Separate samples into 'groups' according to a particular feature and sample_type like disease
+        or control.
+        samplegroup is a list of sample labels with the desired sample_type of that feature.
         '''
         print "    Creating sample groups..."
         if self.project == "down":
@@ -192,19 +189,19 @@ class MongoCurious():
 
     def sample_dict(self, project, feature, nottype = None):
         '''
-        For a particular feature (for example, if a sample is a control sample or not) return a dictionary
-        tructured as {sample label: featuretype}
+        For a particular feature (for example, disease in Down Syndrome experiments) return a dictionary
+        structured as {sample label: sample_type} where sample_type is "control" or "diseased
         '''
-        print "    ", feature, project
+
         print "    Appending labels for project", project, "and", feature
         self.mongo.ensure_index("samples", project)    # For speed
         self.mongo.ensure_index("samples", feature)
+
         if nottype != None:
             add_query = {feature:{"$ne":nottype[0], "$ne":nottype[1]}}
             findQuery = dict({'project': project}.items() + add_query.items())
         else: findQuery = {'project': project}
         returnQuery = {feature: True, '_id': False, 'sample_label': True}
-
 
         samples = self.mongo.find("samples",
                              findQuery, returnQuery).sort(feature, 1)
@@ -267,9 +264,9 @@ class MongoCurious():
         return None
 
 
-    def getwaves(self, tail = 1):
+    def getwaves(self):
         count = 0
-        self.tail = tail
+        tail = 1
         # This list will store the tuple (pos,height, std dev, sample id) as a value.
         waves = []
         # "tail" is min height of a tail to be included in the plot for a peak
@@ -277,20 +274,18 @@ class MongoCurious():
         for doc in self.docs:
 #            if isinstance(doc['stddev'], basestring): int()
             pos, height, stddev, sample_id = doc['pos'], doc['height'], int(doc['stddev']), doc['sample_id']
+            # append all peaks with a center in the region
             if self.start <= pos <= self.end:
                 waves.append((pos, height, stddev, sample_id))
                 count += 1
             else:
                 dist_to_region = min(abs(pos - self.end), abs(self.start - pos))
                 dist_from_peak_to_tail = sqrt((-2) * stddev * stddev * log(tail / height))
-                # print "        ", pos, height, stddev
-                # print "        tail distance", dist_from_peak_to_tail
-                # print "        dist to region", dist_to_region
                 if dist_from_peak_to_tail - dist_to_region >= 0:
                     waves.append((pos, height, stddev, sample_id))
                     count += 1
                 # else: print "         Not included:    ", pos, height, stddev,
-        print " Only %i peaks were found in region." % count
+        print " Only %i peaks were found to occur in region." % count
         self.waves = waves
         self.Query['waves'] = waves
         return None
@@ -312,30 +307,36 @@ class MongoCurious():
 
     def drawgene(self,
                     filename,
-                    color):
-        '''Make svg drawing. This function is not to be called directly, only by svg() and svgtostring() '''
+                    color, smooth = False):
+        '''Make svg drawing. This function is not to be called directly, only by svg() '''
         X, Y = self.positions, self.betas
 
-        smooth = False
         offset = X[0]
         invertby = max(Y)
 
-        X = [round(float(item - offset) / 20000, 3) + 20 for item in X]
-        Y = [round((invertby - item) * 1000, 2) + 20 for item in Y]
+        scale_x = 1 / 20000
+        scale_y = 1000
+        margin = 20.0
 
-        # d is the list of coordinates with commands such as
-        # M for "move to' to initiate curve and S for smooth curve
+        # scale the variables
+        X = [round(float(item - offset) * scale_x, 3) + margin for item in X]
+        Y = [round((invertby - item) * scale_y, 2) + margin for item in Y]
+
+        length, width = str(X[-1]), str(max(Y))
+
+        # create drawing
+        gene = Drawing("SVGs/" + filename,
+                size = (str(float(length)) + "mm", str(float(width)) + "mm"),
+                viewBox = ("0 0 " + str(float(length) + margin) + " " + str(float(width) + margin)),
+                preserveAspectRatio = "xMinYMin meet")
+
+
+        # d contains the coordinates that make up the path
         d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
         if smooth: d = d + "S"
         for i in range(2, len(X)):
             d = d + (" " + str(X[i]) + "," + str(Y[i]))
 
-        length, width = str(X[-1]), str(max(Y))
-
-        gene = Drawing("SVGs/" + filename,
-        		size = (str(float(length) + 10) + "mm", str(float(width) + 10) + "mm"),
-        		viewBox = ("0 0 " + str(float(length) + 10) + " " + str(float(width) + 10)),
-        		preserveAspectRatio = "xMinYMin meet")
         gene.add(Path(stroke = color, fill = "none", d = d))
         return gene
 
@@ -352,7 +353,7 @@ class MongoCurious():
         colors = [('indigo', 'slateblue'), ('red', 'orange'),
                   ('green', 'limegreen'), ('orange', 'yellow')]
 
-        tail = self.tail
+        tail = 1
         start = self.start
         offset = start
         end = self.end
