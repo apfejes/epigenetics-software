@@ -10,7 +10,7 @@ from svgwrite.path import Path
 
 from math import exp, sqrt, fabs, log
 
-class ChipSeqPlot(object):
+class ChipseqPlot(object):
     '''
     classdocs
     '''
@@ -32,7 +32,7 @@ class ChipSeqPlot(object):
         self.margin = 20.0
 
         # create drawing
-        self.peaks = Drawing("SVGs/" + filename,
+        self.peaks = Drawing(filename,
                         size = (str(self.length) + "mm " , str(self.width) + "mm"),
                         viewBox = ("0 0 " + str(self.length + self.margin + 30) + " " + str(self.width + self.margin + 30)),
                         preserveAspectRatio = "xMinYMin meet")
@@ -41,7 +41,7 @@ class ChipSeqPlot(object):
         length, end, start, width, margin = self.length, self.end, self.start, self. width, self.margin
         waves = self.waves
         offset = start
-        scale_x = length / (end - start)
+        self.scale_x = length / (end - start)
         tail = 1
 
         # create path objects for each peak
@@ -49,13 +49,15 @@ class ChipSeqPlot(object):
         for (pos, height, stddev, sample_id) in waves:
             heights.append(height)
         maxh = max(heights)
+        self.maxh = maxh
         scale_y = (width + margin) * 0.8 / maxh
         offset_y = (width + margin) * 0.8 + margin
+        self.scale_y, self.offset_y = scale_y, offset_y
 
         sample_count = 0
         samples_color = {}
         for (pos, height, stddev, sample_id) in waves:
-            print "  Peak", pos, height, stddev
+            print "    Peak", pos, height, stddev
             X, Y = self.makegaussian(start, end, margin, length, pos, tail, offset, float(height), stddev)
             X = [round((x - offset + pos) * self.scale_x, 2) + 20 for x in X]
             for x in X:
@@ -88,12 +90,27 @@ class ChipSeqPlot(object):
             self.peaks.add(peak)
             # peaks.add(colorblend)
 
+    def save(self):
+        self.peaks.save()
+        self.plot = None
 
-        self.peaks.add(Text("Chipseq Peaks", insert = (margin, margin - 10.0),
+    def to_string(self):
+        return self.peaks.tostring()
+        self.peaks = None
+
+    def add_legends(self):
+        ''' Add title, axis, tic marks and labels '''
+
+        self.peaks.add(Text("Chipseq Peaks", insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5"))
+        self.add_xtics()
+        self.add_ytics()
+        self.add_axis()
 
-
-    def makegaussian(self, start, end, margin, length, pos, tail, offset, height, stddev):
+    def makegaussian(self, start,
+                     end, margin, length,
+                     pos, tail, offset,
+                     height, stddev):
         X = []
         endpts = int((sqrt((-2) * stddev * stddev * log(tail / height))))
         for i in range (-stddev, stddev, 3):
@@ -110,8 +127,6 @@ class ChipSeqPlot(object):
         Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
 
         return X, Y
-
-
 
     def add_xtics(self):
         end, start, width, margin = self.end, self.start, self. width, self.margin
@@ -130,7 +145,6 @@ class ChipSeqPlot(object):
         for tic in xtics:
             tic_x = (margin + (tic - offset) * scale_x)
             tic_y = width + margin * 2
-            print tic_x, tic_x + spacing
             ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = "3"))
             ticline = Rect(insert = (tic_x, width + margin * 2 - 5 - 1), size = (0.1, 2), fill = "midnightblue")
             for i in range (1, 4):
@@ -141,7 +155,8 @@ class ChipSeqPlot(object):
             self.peaks.add(ticmarker)
 
     def add_ytics(self):
-        end, start, width, margin = self.end, self.start, self. width, self.margin
+        maxh, margin = self.maxh, self.margin
+        scale_y, offset_y = self.scale_y, self.offset_y
 
         scale_tics = 60
         ytics = [i for i in range(0, int(maxh) + 1, scale_tics)]
@@ -149,7 +164,6 @@ class ChipSeqPlot(object):
             scale_tics /= 2
             ytics += [i for i in range(0, int(maxh) + 1, scale_tics) if i not in ytics]
         ytics = [round(offset_y - y * scale_y, 3) for y in ytics]
-        print ytics
         spacing = (ytics[0] - ytics[1]) / 2
         for tic in ytics:
             ticline = Rect(insert = (margin - 5 - 1, tic), size = (2, 0.1), fill = "midnightblue")
@@ -177,8 +191,4 @@ class ChipSeqPlot(object):
             fill = "midnightblue")
         self.peaks.add(x_axis)
         self.peaks.add(y_axis)
-
-    def save(self):
-        self.peaks.save()
-        self.plot = None
 
