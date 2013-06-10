@@ -100,8 +100,8 @@ class MongoCurious():
         if self.collection == "methylation":
             query_chr, query_start, query_end, query_samplabel = {}, {}, {}, {}
             if self.chromosome != None: query_chr = {'chr':self.chromosome}
-            if self.start != None: query_start = {"start_position":{"$lte":self.end}}
-            if self.end != None: query_end = {"end_position":{"$gte":self.start}}
+            if self.end != None: query_start = {"start_position":{"$lte":self.end}}
+            if self.start != None: query_end = {"end_position":{"$gte":self.start}}
             if self.sample_label != None: query_samplabel = {"sample_label":self.sample_label}
             query = dict(query_chr.items() + query_start.items() + query_end.items() + query_samplabel.items())
             return_chr = {'_id': False, 'beta_value': True,
@@ -132,7 +132,7 @@ class MongoCurious():
         if docs.count() == 0:
             print "    WARNING: The following query return zero probes or documents!"
             print "    ---> Find(", query, ")"
-            print "     use the checkquery() function to validate the inputs of your query."
+            print "     use the checkquery() method to validate the inputs of your query."
             sys.exit()
 
         print " Found %i probes or documents." % docs.count()
@@ -256,12 +256,11 @@ class MongoCurious():
             i = 0
             while self.start == None:
                 self.start = self.positions[i]
-                print i
                 i += 1
-            print self.start
+            print "    New start position:", self.start
         if self.end == None:
             self.end = self.positions[-1]
-            print self.end
+            print "    New end position:", self.end
         return None
 
 

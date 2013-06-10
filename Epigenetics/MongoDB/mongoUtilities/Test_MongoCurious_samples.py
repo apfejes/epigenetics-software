@@ -1,5 +1,5 @@
-import query_mongo
-MongoCurious = query_mongo.MongoCurious
+import MongoCurious
+MongoCurious = MongoCurious.MongoCurious
 
 # Example of how to use the class
 m = MongoCurious(database = "human_epigenetics", collection = "methylation")

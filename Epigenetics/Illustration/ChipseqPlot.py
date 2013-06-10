@@ -32,7 +32,7 @@ class ChipseqPlot(object):
         self.margin = 20.0
 
         # create drawing
-        self.peaks = Drawing(filename,
+        self.plot = Drawing(filename,
                         size = (str(self.length) + "mm " , str(self.width) + "mm"),
                         viewBox = ("0 0 " + str(self.length + self.margin + 30) + " " + str(self.width + self.margin + 30)),
                         preserveAspectRatio = "xMinYMin meet")
@@ -87,21 +87,21 @@ class ChipseqPlot(object):
                            stroke_linecap = 'round', stroke_opacity = 0.8,
                            fill = samples_color[sample_id][1], fill_opacity = 0.5, d = d))
 
-            self.peaks.add(peak)
+            self.plot.add(peak)
             # peaks.add(colorblend)
 
     def save(self):
-        self.peaks.save()
+        self.plot.save()
         self.plot = None
 
     def to_string(self):
-        return self.peaks.tostring()
-        self.peaks = None
+        return self.plot.tostring()
+        self.plot = None
 
     def add_legends(self):
         ''' Add title, axis, tic marks and labels '''
 
-        self.peaks.add(Text("Chipseq Peaks", insert = (self.margin, self.margin - 10.0),
+        self.plot.add(Text("Chipseq Peaks", insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5"))
         self.add_xtics()
         self.add_ytics()
@@ -150,9 +150,9 @@ class ChipseqPlot(object):
             for i in range (1, 4):
                 if tic_x - spacing * i > margin - 5:
                     ticline2 = Rect(insert = (tic_x - spacing * i, width + margin * 2 - 5 - 1), size = (0.1, 1), fill = "midnightblue")
-                    self.peaks.add(ticline2)
-            self.peaks.add(ticline)
-            self.peaks.add(ticmarker)
+                    self.plot.add(ticline2)
+            self.plot.add(ticline)
+            self.plot.add(ticmarker)
 
     def add_ytics(self):
         maxh, margin = self.maxh, self.margin
@@ -176,9 +176,9 @@ class ChipseqPlot(object):
             if len(label) == 2:
                 tic_x = tic_x + 2
             ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = "3"))
-            self.peaks.add(ticline)
-            self.peaks.add(ticline2)
-            self.peaks.add(ticmarker)
+            self.plot.add(ticline)
+            self.plot.add(ticline2)
+            self.plot.add(ticmarker)
 
     def add_axis(self):
         margin = self.margin
@@ -189,6 +189,6 @@ class ChipseqPlot(object):
         y_axis = Rect(insert = (margin - 5, margin - 8),
             size = (0.1, width + margin + 3),
             fill = "midnightblue")
-        self.peaks.add(x_axis)
-        self.peaks.add(y_axis)
+        self.plot.add(x_axis)
+        self.plot.add(y_axis)
 
