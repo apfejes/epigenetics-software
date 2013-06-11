@@ -89,7 +89,7 @@ class Histogram(object):
                     self.x_min = x
         bin_size = (float(self.x_max) - self.x_min) / self.bins
         for x in self.data:
-            self.binned_data[x // bin_size] += 1    # floored division.
+            self.binned_data[int(x // bin_size)] += 1    # floored division.
         for i in range(self.bins):
             if self.binned_data > self.x_max:
                 self.x_max = self.binned_data
