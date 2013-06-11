@@ -314,7 +314,8 @@ class MongoCurious():
             return drawing.to_string()
         if filename and not to_string:
             print " Making svg file \"%s\"\n" % filename
+            z = drawing
             drawing.save()
-            return None
+            return z
 
 
