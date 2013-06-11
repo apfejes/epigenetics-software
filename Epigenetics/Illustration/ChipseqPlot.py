@@ -14,12 +14,12 @@ class ChipseqPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, waves, start, end):
+    def __init__(self, filename, title, waves, start, end):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
         '''
-        self.filename = filename
+        self.title = title
         self.waves = waves
         self.start = start
         self.end = end
@@ -100,8 +100,9 @@ class ChipseqPlot(object):
 
     def add_legends(self):
         ''' Add title, axis, tic marks and labels '''
-
-        self.plot.add(Text("Chipseq Peaks", insert = (self.margin, self.margin - 10.0),
+        if self.title == None:
+            self.title = "Chipseq Peaks"
+        self.plot.add(Text(self.title, insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5"))
         self.add_xtics()
         self.add_ytics()

@@ -290,15 +290,15 @@ class MongoCurious():
         self.Query['waves'] = waves
         return None
 
-    def svg(self, filename = None, color = None, to_string = False):
+    def svg(self, filename = None, title = None, color = None, to_string = False):
         if self.collection == "methylation":
             if color == None: color = "royalblue"
-            drawing = methylationplot.MethylationPlot("/home/sperez/Documents/svg_temp/" + filename, self.positions, self.betas, color, self.start, self.end)
+            drawing = methylationplot.MethylationPlot("/home/sperez/Documents/svg_temp/" + filename, title, self.positions, self.betas, color, self.start, self.end)
             drawing.build()
             drawing.add_legends()
         if self.collection == "waves":
             if color == None: color = "indigo"
-            drawing = chipseqplot.ChipseqPlot("/home/sperez/Documents/svg_temp/" + filename, self.waves, self.start, self.end)
+            drawing = chipseqplot.ChipseqPlot("/home/sperez/Documents/svg_temp/" + filename, title, self.waves, self.start, self.end)
             drawing.build()
             drawing.add_legends()
 

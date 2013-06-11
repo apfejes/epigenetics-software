@@ -15,18 +15,17 @@ class MethylationPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, X, Y, color, start, end):
+    def __init__(self, filename, title, X, Y, color, start, end):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
         '''
-        self.filename = filename
+        self.title = title
         self.X = X
         self.Y = Y
+        self.color = color
         self.start = start
         self.end = end
-
-        self.color = color
 
         self.length = 200.0
         self.width = 60.0
@@ -78,8 +77,9 @@ class MethylationPlot(object):
 
     def add_legends(self):
         ''' Add title, axis, tic marks and labels '''
-
-        self.plot.add(Text("Methylation Plot", insert = (self.margin, self.margin - 10.0),
+        if self.title == None:
+            self.title = "Methylation PLot"
+        self.plot.add(Text(self.title, insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5"))
         self.add_xtics()
         self.add_ytics()

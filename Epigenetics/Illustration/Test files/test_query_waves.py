@@ -22,7 +22,7 @@ m.finddocs()
 # Extract the peak information in each probe
 m.getwaves()
 # Make the svg file called "peaks.svg" in the /SVGs folder
-m.svg(filename = "test_peak.svg", color = 'indigo')
+m.svg(filename = "test_peak.svg", title = "Chromosome Y", color = 'indigo')
 
 
 #
