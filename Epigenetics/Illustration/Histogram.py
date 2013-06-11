@@ -80,9 +80,14 @@ class Histogram(object):
         self.binned_data = {}
         for i in range(self.bins):
             self.binned_data[i] = 0
-        print "self.x_max =  %i, self.x_min = %i, self.bins = %i" % (self.x_max, self.x_min, self.bins)
-        bin_size = (float(self.x_max) - self.x_min) / float(self.bins)
-        print "bin size: %f" % bin_size
+        if self.x_max == 0 and self.x_min == 0 :
+            self.x_min = self.data[0]
+            for x in self.data:
+                if x > self.x_max:
+                    self.x_max = x
+                if x < self.x_min:
+                    self.x_min = x
+        bin_size = (float(self.x_max) - self.x_min) / self.bins
         for x in self.data:
             self.binned_data[x // bin_size] += 1    # floored division.
         for i in range(self.bins):
@@ -96,7 +101,6 @@ class Histogram(object):
     def y_to_printy(self, y):
         return (self.margin_top + self.height) - ((float(y) / self.y_max)
                                                   * self.height)
-
 
     def build(self):
         bin_width = (self.width - ((self.bins + 1) * self.gap)) // self.bins    # floored division
