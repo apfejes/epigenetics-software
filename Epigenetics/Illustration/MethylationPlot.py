@@ -72,8 +72,9 @@ class MethylationPlot(object):
         self.plot = None
 
     def to_string(self):
-        return self.plot.tostring()
+        z = self.plot.tostring()
         self.plot = None
+        return z
 
     def add_legends(self):
         ''' Add title, axis, tic marks and labels '''

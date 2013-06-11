@@ -291,19 +291,27 @@ class MongoCurious():
         return None
 
     def svg(self, filename = None, title = None, color = None, to_string = False):
+        ''' Plots the data using different SVG modules in Epigenetics/Illustrations
+            Saves the plot as an .svg file or a svg string for webserver rendering
+        '''
+
+        if filename:
+            filename = "/home/sperez/Documents/svg_temp/" + filename
+        else: filename = "test.svg"
+
         if self.collection == "methylation":
             if color == None: color = "royalblue"
-            drawing = methylationplot.MethylationPlot("/home/sperez/Documents/svg_temp/" + filename, title, self.positions, self.betas, color, self.start, self.end)
+            drawing = methylationplot.MethylationPlot(filename, title, self.positions, self.betas, color, self.start, self.end)
             drawing.build()
             drawing.add_legends()
         if self.collection == "waves":
             if color == None: color = "indigo"
-            drawing = chipseqplot.ChipseqPlot("/home/sperez/Documents/svg_temp/" + filename, title, self.waves, self.start, self.end)
+            drawing = chipseqplot.ChipseqPlot(filename, title, self.waves, self.start, self.end)
             drawing.build()
             drawing.add_legends()
 
         if filename == None or to_string:
-            return drawing.tostring()
+            return drawing.to_string()
         if filename and not to_string:
             print " Making svg file \"%s\"\n" % filename
             drawing.save()
