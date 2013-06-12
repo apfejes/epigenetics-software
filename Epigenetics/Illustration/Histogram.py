@@ -78,7 +78,7 @@ class Histogram(object):
 
     def bin_data(self):
         self.binned_data = {}
-        for i in range(self.bins):
+        for i in range(self.bins+1):
             self.binned_data[i] = 0
         if self.x_max == 0 and self.x_min == 0 :
             self.x_min = self.data[0]
@@ -106,7 +106,7 @@ class Histogram(object):
         bin_width = (self.width - ((self.bins + 1) * self.gap)) // self.bins    # floored division
         for i in range(self.bins):
             self.plot.add(Rect(insert = (self.margin_left + self.gap,
-                                       (self.margin_top + self.height) - ((self.binned_data[i] / self.y_max) * self.height)),
+                                       (self.margin_top + self.height) - ((float(self.binned_data[i]) / self.y_max) * self.height)),
                                size = (bin_width, ((self.binned_data[i] / self.y_max) * self.height)),
                                fill = "red"))
             self.plot.add(Text(i , insert = (self.margin_left + self.gap + (i * (bin_width + self.gap)), self.height + self.margin_top + 20), fill = "midnightblue", font_size = "15"))
