@@ -94,20 +94,21 @@ class ChipseqPlot(object):
 
     def save(self):
         self.plot.save()
-        self.plot = None
 
     def to_string(self):
         return self.plot.tostring()
-        self.plot = None
 
     def get_elements(self):
         z = self.elements
         self.elements = None
+        self.plot = None
         return z
 
     def add_data(self, elements = None):
-        if isinstance(elements, list):
-            raise ValueError("Data to add to plot should be stored in a list")
+        if not isinstance(elements, list):
+            raise ValueError("Data to add to plot should be stored in a list, not a {}".format(type(elements)))
+        for element in elements:
+            self.plot.add(element)
 
     def add_legends(self):
         ''' Add title, axis, tic marks and labels '''

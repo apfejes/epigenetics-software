@@ -72,7 +72,6 @@ class MethylationPlot(object):
 
     def save(self):
         self.plot.save()
-        self.plot = None
 
     def to_string(self):
         z = self.plot.tostring()
@@ -85,8 +84,11 @@ class MethylationPlot(object):
         return z
 
     def add_data(self, elements = None):
-        if isinstance(elements, list):
-            raise ValueError("Data to add to plot should be stored in a list")
+        if not isinstance(elements, list):
+            raise ValueError("Data to add to plot should be stored in a list, not a {}".format(type(elements)))
+        for element in elements:
+            self.plot.add(element)
+        print "% i svg elements have been added to the current svg object." % len(elements)
 
     def add_legends(self):
         ''' Add title, axis, tic marks and labels '''
