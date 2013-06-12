@@ -16,13 +16,13 @@ import MongoCurious
 m = MongoCurious.MongoCurious(database = "human_epigenetics")
 # Query the database
 
-query1 = m.query(collection = "waves", chromosome = "chrY", start = 59001000, end = 59012000)
+query1 = m.query(collection = "waves", chromosome = "chr4", start = 3076407, end = 3245676)
 # Extract the probes or documents relevant to that region
 m.finddocs()
 # Extract the peak information in each probe
 m.getwaves()
 # Make the svg file called "peaks.svg" in the /SVGs folder
-m.svg(filename = "test_peak.svg", color = 'indigo')
+m.svg(filename = "test_peak.svg", title = "Huntington gene", color = 'indigo')
 
 
 #
