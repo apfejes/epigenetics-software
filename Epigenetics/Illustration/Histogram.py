@@ -21,9 +21,9 @@ class Histogram(object):
         '''
         self.filename = filename
         self.bins = bins
-        self.y_max = 0
+        self.data_max = 0
         self.x_max = 0
-        self.y_min = 0
+        self.data_min = 0
         self.x_min = 0
 
         if 'gap' in kwargs:
@@ -80,19 +80,19 @@ class Histogram(object):
 
     def bin_data(self):
         self.binned_data = []
-        for i in range(self.bins):
+        for i in range(self.bins+1):
             self.binned_data[i] = 0
-        if self.x_max == 0 and self.x_min == 0 :
+        if self.data_max == 0 and self.data_min == 0 :
             self.x_min = self.data[0]
             for x in self.data:
-                if x > self.x_max:
-                    self.x_max = x
-                if x < self.x_min:
-                    self.x_min = x
+                if x > self.data_max:
+                    self.data_max = x
+                if x < self.data_min:
+                    self.data_min = x
         bin_size = (float(self.x_max) - self.x_min) / self.bins
         for x in self.data:
             self.binned_data[int(x // bin_size)] += 1    # floored division.
-        for i in range(self.bins):
+        for i in range(self.bins+1):
             if self.binned_data > self.x_max:
                 self.x_max = self.binned_data
             print "%i %i" % (i, self.binned_data[i])
