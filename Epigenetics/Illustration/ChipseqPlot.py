@@ -19,7 +19,7 @@ class ChipseqPlot(object):
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
         '''
-        self.items = []
+        self.elements = []
 
         self.title = title
         self.waves = waves
@@ -89,7 +89,7 @@ class ChipseqPlot(object):
                            stroke_linecap = 'round', stroke_opacity = 0.8,
                            fill = samples_color[sample_id][1], fill_opacity = 0.5, d = d))
 
-            self.items.append(peak)
+            self.elements.append(peak)
             self.plot.add(peak)
 
     def save(self):
@@ -100,10 +100,14 @@ class ChipseqPlot(object):
         return self.plot.tostring()
         self.plot = None
 
-    def get_items(self):
-        z = self.items
-        self.items = None
+    def get_elements(self):
+        z = self.elements
+        self.elements = None
         return z
+
+    def add_data(self, elements = None):
+        if isinstance(elements, list):
+            raise ValueError("Data to add to plot should be stored in a list")
 
     def add_legends(self):
         ''' Add title, axis, tic marks and labels '''
@@ -112,7 +116,7 @@ class ChipseqPlot(object):
         Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5")
         self.plot.add(Title)
-        self.items.append(Title)
+        self.elements.append(Title)
         self.add_xtics()
         self.add_ytics()
         self.add_axis()
@@ -164,8 +168,8 @@ class ChipseqPlot(object):
                     self.plot.add(ticline2)
             self.plot.add(ticline)
             self.plot.add(ticmarker)
-            self.items.append(ticline)
-            self.items.append(ticmarker)
+            self.elements.append(ticline)
+            self.elements.append(ticmarker)
 
     def add_ytics(self):
         maxh, margin = self.maxh, self.margin
@@ -192,9 +196,9 @@ class ChipseqPlot(object):
             self.plot.add(ticline)
             self.plot.add(ticline2)
             self.plot.add(ticmarker)
-            self.items.append(ticline)
-            self.items.append(ticline2)
-            self.items.append(ticmarker)
+            self.elements.append(ticline)
+            self.elements.append(ticline2)
+            self.elements.append(ticmarker)
 
     def add_axis(self):
         margin = self.margin
@@ -207,6 +211,6 @@ class ChipseqPlot(object):
             fill = "midnightblue")
         self.plot.add(x_axis)
         self.plot.add(y_axis)
-        self.items.append(x_axis)
-        self.items.append(y_axis)
+        self.elements.append(x_axis)
+        self.elements.append(y_axis)
 
