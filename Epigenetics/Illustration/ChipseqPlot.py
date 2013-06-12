@@ -14,12 +14,14 @@ class ChipseqPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, waves, start, end):
+    def __init__(self, filename, title, waves, start, end):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
         '''
-        self.filename = filename
+        self.items = []
+
+        self.title = title
         self.waves = waves
         self.start = start
         self.end = end
@@ -87,8 +89,8 @@ class ChipseqPlot(object):
                            stroke_linecap = 'round', stroke_opacity = 0.8,
                            fill = samples_color[sample_id][1], fill_opacity = 0.5, d = d))
 
+            self.items.append(peak)
             self.plot.add(peak)
-            # peaks.add(colorblend)
 
     def save(self):
         self.plot.save()
@@ -98,14 +100,23 @@ class ChipseqPlot(object):
         return self.plot.tostring()
         self.plot = None
 
+    def get_items(self):
+        z = self.items
+        self.items = None
+        return z
+
     def add_legends(self):
         ''' Add title, axis, tic marks and labels '''
-
-        self.plot.add(Text("Chipseq Peaks", insert = (self.margin, self.margin - 10.0),
-                fill = "midnightblue", font_size = "5"))
+        if self.title == None:
+            self.title = "Chipseq Peaks"
+        Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
+                fill = "midnightblue", font_size = "5")
+        self.plot.add(Title)
+        self.items.append(Title)
         self.add_xtics()
         self.add_ytics()
         self.add_axis()
+
 
     def makegaussian(self, start,
                      end, margin, length,
@@ -153,6 +164,8 @@ class ChipseqPlot(object):
                     self.plot.add(ticline2)
             self.plot.add(ticline)
             self.plot.add(ticmarker)
+            self.items.append(ticline)
+            self.items.append(ticmarker)
 
     def add_ytics(self):
         maxh, margin = self.maxh, self.margin
@@ -179,6 +192,9 @@ class ChipseqPlot(object):
             self.plot.add(ticline)
             self.plot.add(ticline2)
             self.plot.add(ticmarker)
+            self.items.append(ticline)
+            self.items.append(ticline2)
+            self.items.append(ticmarker)
 
     def add_axis(self):
         margin = self.margin
@@ -191,4 +207,6 @@ class ChipseqPlot(object):
             fill = "midnightblue")
         self.plot.add(x_axis)
         self.plot.add(y_axis)
+        self.items.append(x_axis)
+        self.items.append(y_axis)
 

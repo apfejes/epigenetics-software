@@ -15,11 +15,12 @@ import MongoCurious
 # Tell the database which collection you want to query from
 m = MongoCurious.MongoCurious(database = "human_epigenetics")
 # Query the database
-# query1 = m.query(chromosome = "chr4", start = 28800, end = 37000)
-query1 = m.query(collection = 'methylation', chromosome = "chr21", start = 10000000, end = 12000000)
+
+query1 = m.query(collection = 'methylation', chromosome = "chr4", start = 3076407, end = 3245676)
 # Extract the probes or documents relevant to that region
 m.finddocs()
 # Extract the peak information in each probe
 m.collectbetas()
 # Make the svg file called "peaks.svg" in the /SVGs folder
-m.svg(filename = "test_methylation.svg")
+drawing = m.svg(filename = "test_methylation.svg", title = "Huntington gene")
+print len(drawing.get_items())
