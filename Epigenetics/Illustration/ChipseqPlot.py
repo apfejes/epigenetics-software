@@ -109,6 +109,7 @@ class ChipseqPlot(object):
             raise ValueError("Data to add to plot should be stored in a list, not a {}".format(type(elements)))
         for element in elements:
             self.plot.add(element)
+        print "% i svg elements have been added to the current svg object." % len(elements)
 
     def add_legends(self):
         ''' Add title, axis, tic marks and labels '''
