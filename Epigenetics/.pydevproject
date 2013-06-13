@@ -9,6 +9,6 @@
 <path>/Epigenetics/MongoDB/mongoUtilities</path>
 <path>/Epigenetics/Illustration</path>
 <path>/Epigenetics/WaveGenerator/Utilities</path>
-<path>/Epigenetics/django/dbaccess</path>
+<path>/Epigenetics/django_server/dbaccess</path>
 </pydev_pathproperty>
 </pydev_project>

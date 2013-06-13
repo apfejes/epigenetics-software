@@ -13,6 +13,8 @@ import exceptions
 import os
 END_PROCESSES = False
 
+queue = None
+
 class StringWriter(threading.Thread):
     '''This class handles a multithreaded queue, allowing all threads to dump 
     their output text or other messages into a single location.  This prevents 
@@ -23,7 +25,7 @@ class StringWriter(threading.Thread):
 
     def __init__(self, queue_var, output_path = None, file_name = None, supress_print = False, thread = False):
         threading.Thread.__init__(self)
-        global queue
+        global queue    # IGNORE:W0603 - acceptable use of a global variable.
         queue = queue_var
         self.supress_print = supress_print
         if file_name != None:
