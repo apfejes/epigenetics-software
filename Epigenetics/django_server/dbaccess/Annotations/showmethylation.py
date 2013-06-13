@@ -14,4 +14,4 @@ m.finddocs()
 m.collectbetas()
 
 def svgcode():
-    return m.svg(title = "Huntington gene", to_string = True)
+    return m.svg(title = "Huntington gene", to_string = True, length = 300.0)

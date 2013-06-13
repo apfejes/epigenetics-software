@@ -34,8 +34,8 @@ class ChipseqPlot(object):
 
         # create drawing
         self.plot = Drawing(filename,
-                        size = (str(self.length * 1.5) + "mm" , str(self.width * 1.5) + "mm"),
-                        viewBox = ("0 0 " + str(self.length + self.margin * 2) + " " + str(self.width + self.margin * 2)),
+                        size = (str(self.length) + "mm" , str(self.width * 1.5) + "mm"),
+                        viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 2)),
                         preserveAspectRatio = "xMinYMin meet")
 
     def build(self):

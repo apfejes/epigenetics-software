@@ -33,8 +33,8 @@ class MethylationPlot(object):
 
         # create drawing
         self.plot = Drawing(filename,
-                        size = (str(self.length) + "mm" , str(self.width) + "mm"),
-                        viewBox = ("0 0 " + str(self.length + self.margin + 30) + " " + str(self.width + self.margin + 30)),
+                        size = (str(self.length) + "mm" , str(self.width * 1.5) + "mm"),
+                        viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 2)),
                         preserveAspectRatio = "xMinYMin meet")
 
     def build(self):
