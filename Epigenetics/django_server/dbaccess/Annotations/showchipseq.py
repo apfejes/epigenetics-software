@@ -15,5 +15,5 @@ m.finddocs()
 m.getwaves()
 
 def svgcode():
-    return m.svg(to_string = True, title = "Huntington gene", color = 'indigo')
+    return m.svg(to_string = True, title = "Huntington gene", color = 'indigo', length = 300.0)
 

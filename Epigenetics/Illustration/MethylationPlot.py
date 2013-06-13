@@ -15,7 +15,7 @@ class MethylationPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, title, X, Y, color, start, end):
+    def __init__(self, filename, title, X, Y, color, start, end, length, margin, width):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -27,10 +27,9 @@ class MethylationPlot(object):
         self.color = color
         self.start = start
         self.end = end
-
-        self.length = 200.0
-        self.width = 60.0
-        self.margin = 20.0
+        self.length = length    # default = 200.0
+        self.margin = margin    # default = 20.0
+        self.width = width    # default = 60.0
 
         # create drawing
         self.plot = Drawing(filename,

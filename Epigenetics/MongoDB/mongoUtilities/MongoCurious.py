@@ -290,7 +290,10 @@ class MongoCurious():
         self.Query['waves'] = waves
         return None
 
-    def svg(self, filename = None, title = None, color = None, to_string = False, get_elements = False):
+    def svg(self, filename = None, title = None,
+            color = None, to_string = False,
+            get_elements = False, length = 200.0,
+            margin = 20.0, width = 60.0):
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an .svg file or a svg string for webserver rendering
         '''
@@ -301,11 +304,16 @@ class MongoCurious():
 
         if self.collection == "methylation":
             if color == None: color = "royalblue"
-            drawing = methylationplot.MethylationPlot(filename, title, self.positions, self.betas, color, self.start, self.end)
+            drawing = methylationplot.MethylationPlot(filename, title,
+                                                      self.positions, self.betas,
+                                                      color, self.start, self.end,
+                                                      length, margin, width)
             drawing.build()
         if self.collection == "waves":
             if color == None: color = "indigo"
-            drawing = chipseqplot.ChipseqPlot(filename, title, self.waves, self.start, self.end)
+            drawing = chipseqplot.ChipseqPlot(filename, title, self.waves,
+                                              self.start, self.end,
+                                              length, margin, width)
             drawing.build()
 
         if to_string:
