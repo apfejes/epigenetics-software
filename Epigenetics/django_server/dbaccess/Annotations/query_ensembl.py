@@ -10,7 +10,7 @@ and: http://pycogent.org/cookbook/accessing_databases.html
 
 from cogent.db.ensembl.genome import Genome
 # import the functions
-import ensemblfx as fx
+import django_server.dbaccess.Annotations.ensemblfx as fx
 
 # Need to declare which release of Ensemble you want to use adn the account
 Release, account = 67, None
