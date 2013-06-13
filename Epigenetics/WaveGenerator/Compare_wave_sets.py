@@ -7,7 +7,6 @@ Created on 2013-04-15
 
 import sys
 import os
-import PrintThread
 import multiprocessing
 import time
 import scipy.odr as odr
@@ -23,6 +22,7 @@ sys.path.insert(0, _cur_dir + os.sep + "Utilities")
 import Parameters
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector, common_utilities
+import PrintThread
 from WaveGenerator.Utilities.Statistics import Kolmogorov_Smirnov as stats
 sys.path.insert(0, _cur_dir + os.sep + "Illustration")
 import Illustration.BoxPlot as boxplot
@@ -191,13 +191,13 @@ def run():
             pass
 
 
-    h1 = histogram.Histogram("/home/afejes/temp/test_hist_x.svg", 100)
+    h1 = histogram.Histogram("/home/afejes/temp/test_hist_x.svg", 100, x_max="100")
     h1.add_data(x)
     h1.bin_data()
     h1.build()
     h1.save()
 
-    h2 = histogram.Histogram("/home/afejes/temp/test_hist_y.svg", 100)
+    h2 = histogram.Histogram("/home/afejes/temp/test_hist_y.svg", 100, x_max="100")
     h2.add_data(y)
     h2.bin_data()
     h2.build()
