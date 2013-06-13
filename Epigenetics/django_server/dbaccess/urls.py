@@ -4,6 +4,7 @@ import views as views
 
 
 
+
 urlpatterns = patterns('',
 # 	url(r'^home$',views.index,name='index'),
 	url(r'^$', views.my_view, name = 'base'),

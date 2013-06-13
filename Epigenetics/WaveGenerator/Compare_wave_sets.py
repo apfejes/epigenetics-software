@@ -73,7 +73,7 @@ def run():
     util = common_utilities.MongoUtilities(mongo)    # get names of available samples
 
     print_queue = multiprocessing.Queue()
-    '''launch thread to read and process the print queue'''
+    # launch thread to read and process the print queue
     print_thread = PrintThread.StringWriter(print_queue, "/home/afejes/temp/", "waves.txt", True, True)
 
     # ask user for name of sample
@@ -115,6 +115,8 @@ def run():
     user_input = raw_input("enter the number(s). If using more than one, separate by a coma:")
 
     controls = []
+
+
     if "," in user_input:
         t = map(int, user_input.split(","))
         for i in t:
@@ -165,19 +167,19 @@ def run():
             jt = j - 1
             while jt >= 0 and waves2[jt]['pos'] > (pos_i - 4 * sdv_i) :
                 # print "jt - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[jt]['pos'], waves2[jt]['stddev']
-                p = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
-                if (p != 0):
-                    w = WavePair(chromosome, i, jt, p, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
-                    if p < 0.1:
+                pvalue = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
+                if (pvalue != 0):
+                    w = WavePair(chromosome, i, jt, pvalue, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
+                    if pvalue < 0.1:
                         print_queue.put(w.to_string())
                     both.append(w)
                 jt -= 1
             while j < max_j and waves2[j]['pos'] < (pos_i + 4 * sdv_i):
                 # print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
-                p = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
-                if (p != 0):
-                    w = WavePair(chromosome, i, j, p, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
-                    if p < 0.1:
+                pvalue = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
+                if (pvalue != 0):
+                    w = WavePair(chromosome, i, j, pvalue, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
+                    if pvalue < 0.1:
                         print_queue.put(w.to_string())
                     both.append(w)
                 j += 1
@@ -188,16 +190,15 @@ def run():
             if b.p < 0.05:
                 x.append(b.get_ht1())
                 y.append(b.get_ht2())
-            pass
 
 
-    h1 = histogram.Histogram("/home/afejes/temp/test_hist_x.svg", 100, x_max="100")
+    h1 = histogram.Histogram("/home/afejes/temp/test_hist_x.svg", 100, x_max = "100")
     h1.add_data(x)
     h1.bin_data()
     h1.build()
     h1.save()
 
-    h2 = histogram.Histogram("/home/afejes/temp/test_hist_y.svg", 100, x_max="100")
+    h2 = histogram.Histogram("/home/afejes/temp/test_hist_y.svg", 100, x_max = "100")
     h2.add_data(y)
     h2.bin_data()
     h2.build()
@@ -246,10 +247,10 @@ def run():
 
 
 def CreateListFromCursor(cursor):
-    list = []
+    listitems = []
     for record in cursor:
-        list.append(record)
-    return list
+        listitems.append(record)
+    return listitems
 
 
 
@@ -270,6 +271,6 @@ if __name__ == '__main__':
         print" eg. python ImportWaveToDB.py /directory/database.conf"
 
     conf_file = sys.argv[1]
-    p = Parameters.parameter(conf_file)
+    param = Parameters.parameter(conf_file)
     run()
     print "Completed."

@@ -19,6 +19,7 @@ MONGO_DB_PASSWORD = False
 MONGO_SESSIONS_COLLECTION = 'mongo_sessions'
 
 
+
 # Leave these entries empty if using Pymongo and Mongodb
 DATABASES = {
     'default': {
@@ -145,6 +146,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     # 'polls',
+
 )
 
 # A sample logging configuration. The only tangible logging
