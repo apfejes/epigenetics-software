@@ -7,7 +7,6 @@ Created on 2013-04-15
 
 import sys
 import os
-import PrintThread
 import multiprocessing
 import time
 import scipy.odr as odr
@@ -23,9 +22,11 @@ sys.path.insert(0, _cur_dir + os.sep + "Utilities")
 import Parameters
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector, common_utilities
+import PrintThread
 from WaveGenerator.Utilities.Statistics import Kolmogorov_Smirnov as stats
 sys.path.insert(0, _cur_dir + os.sep + "Illustration")
 import Illustration.BoxPlot as boxplot
+import Illustration.Histogram as histogram
 
 class WavePair():
     # i, j, p, pos1, pos2, stddev1, stddev2
@@ -183,12 +184,24 @@ def run():
             i += 1
             # print "i %s and max_i %s", i, max_i
 
-
         for b in both:
-            if b.p < 0.05 and b.get_ht2 > 20:
+            if b.p < 0.05:
                 x.append(b.get_ht1())
                 y.append(b.get_ht2())
             pass
+
+
+    h1 = histogram.Histogram("/home/afejes/temp/test_hist_x.svg", 100, x_max="100")
+    h1.add_data(x)
+    h1.bin_data()
+    h1.build()
+    h1.save()
+
+    h2 = histogram.Histogram("/home/afejes/temp/test_hist_y.svg", 100, x_max="100")
+    h2.add_data(y)
+    h2.bin_data()
+    h2.build()
+    h2.save()
 
     # NORMALIZATION
     linear = odr.Model(f)

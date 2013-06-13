@@ -21,9 +21,9 @@ class Histogram(object):
         '''
         self.filename = filename
         self.bins = bins
-        self.y_max = 0
+        self.data_max = 0
         self.x_max = 0
-        self.y_min = 0
+        self.data_min = 0
         self.x_min = 0
 
         if 'gap' in kwargs:
@@ -59,8 +59,6 @@ class Histogram(object):
             self.margin_right = kwargs.margin_right    # IGNORE:E1101
         else:
             self.margin_right = 20
-        self.max_x = 100
-        self.max_y = 100
 
         # start drawing object
         self.plot = Drawing(self.filename, debug = self.debug,
@@ -79,8 +77,8 @@ class Histogram(object):
         self.data = x
 
     def bin_data(self):
-        self.binned_data = []
-        for i in range(self.bins):
+        self.binned_data = {}
+        for i in range(self.bins+1):
             self.binned_data[i] = 0
         if self.x_max == 0 and self.x_min == 0 :
             self.x_min = self.data[0]
@@ -89,27 +87,30 @@ class Histogram(object):
                     self.x_max = x
                 if x < self.x_min:
                     self.x_min = x
+        print "self.x_max = %f" %(self.x_max)
         bin_size = (float(self.x_max) - self.x_min) / self.bins
         for x in self.data:
-            self.binned_data[int(x // bin_size)] += 1    # floored division.
-        for i in range(self.bins):
-            if self.binned_data > self.x_max:
-                self.x_max = self.binned_data
+            print "x: %i - bin_size: %f" % (x, bin_size)
+            print "x//bin_size = %f int() = %i" % (x//bin_size, int(x//bin_size))
+            k = int(x//bin_size)
+            if k > self.bins:
+                k = self.bins
+            self.binned_data[k] += 1    # floored division.
+            if self.binned_data[k] > self.data_max:
+                self.data_max = self.binned_data[k]
+        for i in range(self.bins+1):
             print "%i %i" % (i, self.binned_data[i])
 
     def x_to_printx(self, x):
-        return self.margin_left + ((float(x) / self.max_x) * self.width)
+        return self.margin_left + ((float(x) / self.x_max) * self.width)
 
-    def y_to_printy(self, y):
-        return (self.margin_top + self.height) - ((float(y) / self.max_y)
-                                                  * self.height)
 
     def build(self):
         bin_width = (self.width - ((self.bins + 1) * self.gap)) // self.bins    # floored division
         for i in range(self.bins):
-            self.plot.add(Rect(insert = (self.margin_left + self.gap,
-                                       (self.margin_top + self.height) - ((self.binned_data[i] / self.max_y) * self.height)),
-                               size = (bin_width, ((self.binned_data[i] / self.max_y) * self.height)),
+            self.plot.add(Rect(insert = (self.margin_left + self.gap + (i*(bin_width + self.gap)),
+                                       (self.margin_top + self.height) - ((float(self.binned_data[i]) / self.data_max) * self.height)),
+                               size = (bin_width, ((float(self.binned_data[i]) / self.data_max) * self.height)),
                                fill = "red"))
             self.plot.add(Text(i , insert = (self.margin_left + self.gap + (i * (bin_width + self.gap)), self.height + self.margin_top + 20), fill = "midnightblue", font_size = "15"))
         self.data = None
