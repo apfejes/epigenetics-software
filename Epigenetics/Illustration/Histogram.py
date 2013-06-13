@@ -1,4 +1,4 @@
-from svgwrite.shapes import Rect
+# from svgwrite.shapes import Rect
 from svgwrite.shapes import Line
 from svgwrite.shapes import Circle
 from svgwrite.text import Text
@@ -10,27 +10,26 @@ from svgwrite.drawing import Drawing
 # from query_ensembl import coordinates
 # from query_ensembl import name, location
 
-class Histogram(object):
+class BoxPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, bins, **kwargs):
+    def __init__(self, filename, x_max, y_max, **kwargs):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
         '''
         self.filename = filename
-        self.bins = bins
-        self.data_max = 0
-        self.x_max = 0
-        self.data_min = 0
-        self.x_min = 0
-
-        if 'gap' in kwargs:
-            self.gap = kwargs.gap    # IGNORE:E1101
+        self.x_max = x_max
+        self.y_max = y_max
+        if 'x_min' in kwargs:
+            self.x_min = kwargs.x_min    # IGNORE:E1101
         else:
-            self.gap = 5
-
+            self.x_min = 0
+        if 'y_min' in kwargs:
+            self.y_min = kwargs.y_min    # IGNORE:E1101
+        else:
+            self.y_min = 0
         if 'height' in kwargs:
             self.height = kwargs.height    # IGNORE:E1101
         else:
@@ -59,60 +58,69 @@ class Histogram(object):
             self.margin_right = kwargs.margin_right    # IGNORE:E1101
         else:
             self.margin_right = 20
+        self.max_x = 100
+        self.max_y = 100
+        self.data = None
 
         # start drawing object
         self.plot = Drawing(self.filename, debug = self.debug,
-                            size = (self.width + self.margin_left + self.margin_right,
-                                    self.height + self.margin_top + self.margin_bottom),
+                            size = (self.width + self.margin_left + self.margin_right, self.height + self.margin_top + self.margin_bottom),
                             # viewBox = ("0 0 " + str(float(length) + 10) + " " + str(float(width) + 10)),
                             preserveAspectRatio = "xMinYMin meet")    # , size=('200mm', '150mm'), viewBox=('0 0 200 150'))
-        self.plot.add(Line(start = (self.margin_left - 4, self.margin_top), \
-                           end = (self.margin_left - 4, self.margin_top + self.height),
-                           stroke_width = 0.5, stroke = "black"))
-        self.plot.add(Line(start = (self.margin_left, self.margin_top + self.height + 4),
-                           end = (self.margin_left + self.width, self.margin_top + self.height + 4),
-                           stroke_width = 0.5, stroke = "black"))
+        self.plot.add(Line(start = (self.margin_left - 4, self.margin_top), end = (self.margin_left - 4, self.margin_top + self.height), stroke_width = 0.5, stroke = "black"))
+        self.plot.add(Line(start = (self.margin_left, self.margin_top + self.height + 4), end = (self.margin_left + self.width, self.margin_top + self.height + 4), stroke_width = 0.5, stroke = "black"))
+
+    def add_and_zip_data(self, x, y):
+        self.data = zip(x, y)
 
     def add_data(self, x):
         self.data = x
 
-    def bin_data(self):
-        self.binned_data = {}
-        for i in range(self.bins+1):
-            self.binned_data[i] = 0
-        if self.x_max == 0 and self.x_min == 0 :
-            self.x_min = self.data[0]
-            for x in self.data:
-                if x > self.x_max:
-                    self.x_max = x
-                if x < self.x_min:
-                    self.x_min = x
-        print "self.x_max = %f" %(self.x_max)
-        bin_size = (float(self.x_max) - self.x_min) / self.bins
-        for x in self.data:
-            print "x: %i - bin_size: %f" % (x, bin_size)
-            print "x//bin_size = %f int() = %i" % (x//bin_size, int(x//bin_size))
-            k = int(x//bin_size)
-            if k > self.bins:
-                k = self.bins
-            self.binned_data[k] += 1    # floored division.
-            if self.binned_data[k] > self.data_max:
-                self.data_max = self.binned_data[k]
-        for i in range(self.bins+1):
-            print "%i %i" % (i, self.binned_data[i])
+    def add_regression(self, slope):
+
+        self.max_min()
+        x = self.max_x
+        y = slope * x
+        print "x %f y %f" % (x, y)
+
+        if y > self.max_y:
+            y = self.max_y
+            x = y / slope
+            print "x %f y %f" % (x, y)
+
+
+        self.plot.add(Line(start = (self.margin_left, self.margin_top + self.height),
+                           end = (self.x_to_printx(x), self.y_to_printy(y)),
+                                  stroke_width = 1, stroke = "black"))
 
     def x_to_printx(self, x):
-        return self.margin_left + ((float(x) / self.x_max) * self.width)
+        return self.margin_left + ((float(x) / self.max_x) * self.width)
+
+    def y_to_printy(self, y):
+        return (self.margin_top + self.height) - ((float(y) / self.max_y) * self.height)
+
+
+    def max_min(self):
+        self.max_x = self.data[0][0]
+        self.max_y = self.data[0][1]
+        for x, y in self.data:
+            if x > self.max_x:
+                self.max_x = x
+            if y > self.max_y:
+                self.max_y = y
+        print "max x y : %f %f" % (self.max_x, self.max_y)
 
 
     def build(self):
-        bin_width = (self.width - ((self.bins + 1) * self.gap)) // self.bins    # floored division
-        for i in range(self.bins):
-            self.plot.add(Rect(insert = (self.margin_left + self.gap + (i*(bin_width + self.gap)),
-                                       (self.margin_top + self.height) - ((float(self.binned_data[i]) / self.data_max) * self.height)),
-                               size = (bin_width, ((float(self.binned_data[i]) / self.data_max) * self.height)),
-                               fill = "red"))
-            self.plot.add(Text(i , insert = (self.margin_left + self.gap + (i * (bin_width + self.gap)), self.height + self.margin_top + 20), fill = "midnightblue", font_size = "15"))
+        self.max_min()
+        for x, y in self.data:
+            self.plot.add(Circle(center = (self.margin_left + ((x / self.max_x) * self.width),
+                                          (self.margin_top + self.height) - ((y / self.max_y) * self.height)),
+                                 r = 2, stroke_width = 0.1, stroke_linecap = 'round',
+                                 stroke_opacity = 0.5, fill = "dodgerblue",
+                                 fill_opacity = 0.3))
+        self.plot.add(Text(self.max_x, insert = (self.margin_left + self.width - 50, self.margin_top + self.height + 20.0),
+                fill = "midnightblue", font_size = "15"))
         self.data = None
 
 
@@ -123,5 +131,3 @@ class Histogram(object):
     def to_string(self):
         z = self.plot.tostring()
         self.plot = None
-        return z
-

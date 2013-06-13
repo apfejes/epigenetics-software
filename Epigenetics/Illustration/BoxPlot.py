@@ -131,4 +131,3 @@ class BoxPlot(object):
         z = self.plot.tostring()
         self.plot = None
         return z
-
