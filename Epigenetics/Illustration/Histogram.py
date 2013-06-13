@@ -1,6 +1,6 @@
 from svgwrite.shapes import Rect
 from svgwrite.shapes import Line
-from svgwrite.shapes import Circle
+# from svgwrite.shapes import Circle
 from svgwrite.text import Text
 from svgwrite.drawing import Drawing
 
@@ -59,6 +59,8 @@ class Histogram(object):
             self.margin_right = kwargs.margin_right    # IGNORE:E1101
         else:
             self.margin_right = 20
+        self.data = None
+        self.binned_data = None
 
         # start drawing object
         self.plot = Drawing(self.filename, debug = self.debug,
@@ -78,7 +80,7 @@ class Histogram(object):
 
     def bin_data(self):
         self.binned_data = {}
-        for i in range(self.bins+1):
+        for i in range(self.bins + 1):
             self.binned_data[i] = 0
         if self.x_max == 0 and self.x_min == 0 :
             self.x_min = self.data[0]
@@ -87,18 +89,18 @@ class Histogram(object):
                     self.x_max = x
                 if x < self.x_min:
                     self.x_min = x
-        print "self.x_max = %f" %(self.x_max)
+        print "self.x_max = %f" % (self.x_max)
         bin_size = (float(self.x_max) - self.x_min) / self.bins
         for x in self.data:
             print "x: %i - bin_size: %f" % (x, bin_size)
-            print "x//bin_size = %f int() = %i" % (x//bin_size, int(x//bin_size))
-            k = int(x//bin_size)
+            print "x//bin_size = %f int() = %i" % (x // bin_size, int(x // bin_size))
+            k = int(x // bin_size)
             if k > self.bins:
                 k = self.bins
             self.binned_data[k] += 1    # floored division.
             if self.binned_data[k] > self.data_max:
                 self.data_max = self.binned_data[k]
-        for i in range(self.bins+1):
+        for i in range(self.bins + 1):
             print "%i %i" % (i, self.binned_data[i])
 
     def x_to_printx(self, x):
@@ -108,7 +110,7 @@ class Histogram(object):
     def build(self):
         bin_width = (self.width - ((self.bins + 1) * self.gap)) // self.bins    # floored division
         for i in range(self.bins):
-            self.plot.add(Rect(insert = (self.margin_left + self.gap + (i*(bin_width + self.gap)),
+            self.plot.add(Rect(insert = (self.margin_left + self.gap + (i * (bin_width + self.gap)),
                                        (self.margin_top + self.height) - ((float(self.binned_data[i]) / self.data_max) * self.height)),
                                size = (bin_width, ((float(self.binned_data[i]) / self.data_max) * self.height)),
                                fill = "red"))

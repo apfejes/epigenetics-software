@@ -11,15 +11,14 @@ import traceback
 import Queue
 import exceptions
 import os
-import time
 END_PROCESSES = False
-
 
 class StringWriter(threading.Thread):
     '''This class handles a multithreaded queue, allowing all threads to dump 
     their output text or other messages into a single location.  This prevents 
     concurrency issues and allows a multithreaded/multiprocess program to have 
     consistently clean output.'''
+
 
 
     def __init__(self, queue_var, output_path = None, file_name = None, supress_print = False, thread = False):

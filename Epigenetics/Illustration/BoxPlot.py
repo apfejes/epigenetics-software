@@ -60,6 +60,7 @@ class BoxPlot(object):
             self.margin_right = 20
         self.max_x = 100
         self.max_y = 100
+        self.data = None
 
         # start drawing object
         self.plot = Drawing(self.filename, debug = self.debug,
