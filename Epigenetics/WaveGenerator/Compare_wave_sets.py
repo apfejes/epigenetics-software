@@ -25,8 +25,8 @@ import Mongo_Connector, common_utilities
 import PrintThread
 from WaveGenerator.Utilities.Statistics import Kolmogorov_Smirnov as stats
 sys.path.insert(0, _cur_dir + os.sep + "Illustration")
-import Illustration.BoxPlot as boxplot
 import Illustration.Histogram as histogram
+import Illustration.BoxPlot as boxplot
 
 class WavePair():
     # i, j, p, pos1, pos2, stddev1, stddev2
