@@ -22,41 +22,47 @@ class Histogram(object):
         self.filename = filename
         self.bins = bins
         self.data_max = 0
-        self.x_max = 0
         self.data_min = 0
         self.x_min = 0
 
+        if 'x_max' in kwargs:
+            self.x_max = kwargs['x_max']
+        else:
+            self.x_max = 0
+        if 'x_min' in kwargs:
+            self.x_min = kwargs['x_min']
+        else:
+            self.x_min = 0
         if 'gap' in kwargs:
-            self.gap = kwargs.gap    # IGNORE:E1101
+            self.gap = kwargs['gap']
         else:
             self.gap = 5
-
         if 'height' in kwargs:
-            self.height = kwargs.height    # IGNORE:E1101
+            self.height = kwargs['height']
         else:
             self.height = 600
         if 'width' in kwargs:
-            self.width = kwargs.width    # IGNORE:E1101
+            self.width = kwargs['width']
         else:
             self.width = 1200
         if 'debug' in kwargs:
-            self.debug = kwargs.debug    # IGNORE:E1101
+            self.debug = kwargs['debug']
         else:
             self.debug = True
         if 'margin_top' in kwargs:
-            self.margin_top = kwargs.margin_top    # IGNORE:E1101
+            self.margin_top = kwargs['margin_top']
         else:
             self.margin_top = 20
         if 'margin_bottom' in kwargs:
-            self.margin_bottom = kwargs.margin_bottom    # IGNORE:E1101
+            self.margin_bottom = kwargs['margin_bottom']
         else:
             self.margin_bottom = 20
         if 'margin_left' in kwargs:
-            self.margin_left = kwargs.margin_left    # IGNORE:E1101
+            self.margin_left = kwargs['margin_left']
         else:
             self.margin_left = 20
         if 'margin_right' in kwargs:
-            self.margin_right = kwargs.margin_right    # IGNORE:E1101
+            self.margin_right = kwargs['margin_right']
         else:
             self.margin_right = 20
         self.data = None
@@ -89,12 +95,17 @@ class Histogram(object):
                     self.x_max = x
                 if x < self.x_min:
                     self.x_min = x
-        print "self.x_max = %f" % (self.x_max)
+        # print "self.x_max = %f" % (self.x_max)
         bin_size = (float(self.x_max) - self.x_min) / self.bins
+        print "bin_size: %f" % (bin_size)
         for x in self.data:
-            print "x: %i - bin_size: %f" % (x, bin_size)
-            print "x//bin_size = %f int() = %i" % (x // bin_size, int(x // bin_size))
-            k = int(x // bin_size)
+            # print "x: %i - bin_size: %f" % (x, bin_size)
+            # print "x//bin_size = %f int() = %i" % (x // bin_size, int(x // bin_size))
+            k = 0
+            if x > self.x_max:
+                k = self.bins + 1
+            else:
+                k = int(x // bin_size)
             if k > self.bins:
                 k = self.bins
             self.binned_data[k] += 1    # floored division.

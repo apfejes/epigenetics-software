@@ -26,7 +26,7 @@ import PrintThread
 from WaveGenerator.Utilities.Statistics import Kolmogorov_Smirnov as stats
 sys.path.insert(0, _cur_dir + os.sep + "Illustration")
 import Illustration.Histogram as histogram
-import Illustration.BoxPlot as boxplot
+import Illustration.ScatterPlot as scatterplot
 
 class WavePair():
     # i, j, p, pos1, pos2, stddev1, stddev2
@@ -90,7 +90,7 @@ def run():
 
     samples = []
     if "," in user_input:
-        t = map(int, user_input.split(","))
+        t = [int(o) for o in user_input.split(",")]
         for i in t:
             samples.append(s[i])
     else:
@@ -118,7 +118,7 @@ def run():
 
 
     if "," in user_input:
-        t = map(int, user_input.split(","))
+        t = [int(o) for o in user_input.split(",")]
         for i in t:
             controls.append(s[i])
     else:
@@ -192,13 +192,13 @@ def run():
                 y.append(b.get_ht2())
 
 
-    h1 = histogram.Histogram("/home/afejes/temp/test_hist_x.svg", 100, x_max = "100")
+    h1 = histogram.Histogram("/home/afejes/temp/test_hist_x.svg", 100, x_max = 100)
     h1.add_data(x)
     h1.bin_data()
     h1.build()
     h1.save()
 
-    h2 = histogram.Histogram("/home/afejes/temp/test_hist_y.svg", 100, x_max = "100")
+    h2 = histogram.Histogram("/home/afejes/temp/test_hist_y.svg", 100, x_max = 100)
     h2.add_data(y)
     h2.bin_data()
     h2.build()
@@ -228,7 +228,7 @@ def run():
     print "ODR - explicit fit: coeff %s err %s" % (coeff, err)
         # normalize the heights
 
-    bp = boxplot.BoxPlot("/home/afejes/temp/test_plot.svg", 1200, 600)
+    bp = scatterplot.ScatterPlot("/home/afejes/temp/test_plot.svg", 1200, 600)
     bp.add_and_zip_data(x, y)
     bp.add_regression(coeff)
     bp.build()
