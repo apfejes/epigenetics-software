@@ -22,5 +22,5 @@ m.finddocs()
 # Extract the peak information in each probe
 m.collectbetas()
 # Make the svg file called "peaks.svg" in the /SVGs folder
-drawing = m.svg(filename = "test_methylation.svg", title = "Huntington gene")
-print len(drawing.get_items())
+m.svg(filename = "test_methylation.svg", title = "Huntington gene")
+

@@ -30,7 +30,7 @@ def view_methylation(request):
 def view_chipseq(request):
     return render(request, 'chipseq.jade')
 
-def collections():
+def collections(request):
     db = mongo[database_name]
     # return db.collection_names()
     x = " "
@@ -38,18 +38,18 @@ def collections():
         x += item + '\n\n  '
     return HttpResponse(x)
 
-def methylation_code():
-    from django_server.dbaccess.Annotations import showmethylation
+def methylation_code(request):
+    from Annotations import showmethylation
     string = showmethylation.svgcode()
     return HttpResponse(string)
 
-def chipseq_code():
-    from django_server.dbaccess.Annotations import showchipseq
+def chipseq_code(request):
+    from Annotations import showchipseq
     string = showchipseq.svgcode()
     return HttpResponse(string)
 
-def send_svg():
-    from django_server.dbaccess.Annotations import showgene
+def send_svg(request):
+    from Annotations import showgene
     return HttpResponse(showgene.svgcode())
 
 

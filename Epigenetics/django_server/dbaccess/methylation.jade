@@ -1,0 +1,17 @@
+extends base
+
+block title
+    | Human Epigenetics Database
+
+
+block content
+    article
+        header
+            h2 Methylation
+        block intro
+            p Here is an example of the methylation pattern of a gene.
+            
+        image
+            embed(src!='{% url 'methylation_code' %}', width='800', height = '300')
+            
+            

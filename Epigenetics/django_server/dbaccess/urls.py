@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url
 # from django.views.generic import TemplateView
-import django_server.dbaccess.views as views
+import views as views
+
 
 
 

@@ -19,16 +19,17 @@ MONGO_DB_PASSWORD = False
 MONGO_SESSIONS_COLLECTION = 'mongo_sessions'
 
 
-#Leave these entries empty if using Pymongo and Mongodb
+
+# Leave these entries empty if using Pymongo and Mongodb
 DATABASES = {
     'default': {
-        'ENGINE': '', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '',                      # Or path to database file if using sqlite3.
+        'ENGINE': '',    # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '',    # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-	'PORT': '',                      # Set to empty string for default.
+        'HOST': '',    # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+	'PORT': '',    # Set to empty string for default.
     }
 }
 
@@ -98,7 +99,7 @@ SECRET_KEY = '=f!)%_2dn439ethd_(%lx$brs%t@$ucybaox(f0)2@szv(3)!4'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    ('pyjade.ext.django.Loader',(
+    ('pyjade.ext.django.Loader', (
                                  'django.template.loaders.filesystem.Loader',
                                  'django.template.loaders.app_directories.Loader',
                                  'django.template.loaders.eggs.Loader',
@@ -112,10 +113,10 @@ mimetypes.add_type("image/svg+xml", ".svg", True)
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
-    #'django.contrib.sessions.middleware.SessionMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
-    #'django.contrib.auth.middleware.AuthenticationMiddleware',
-    #'django.contrib.messages.middleware.MessageMiddleware',
+    # 'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -129,22 +130,23 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/home/sperez/epigenetics-software/epigenetics-software/Epigenetics/django/dbaccess/"
+    "/home/sperez/epigenetics-software/epigenetics-software/Epigenetics/django_server/dbaccess/"
 )
 
-#Disabled auth, session and admin in order to use Mongodb
+# Disabled auth, session and admin in order to use Mongodb
 INSTALLED_APPS = (
-    #'django.contrib.auth',
+    # 'django.contrib.auth',
     'django.contrib.contenttypes',
-    #'django.contrib.sessions',
+    # 'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    #'django.contrib.admin',
+    # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    #'polls',
+    # 'polls',
+
 )
 
 # A sample logging configuration. The only tangible logging

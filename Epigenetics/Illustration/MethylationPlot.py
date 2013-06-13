@@ -20,7 +20,7 @@ class MethylationPlot(object):
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
         '''
-        self.items = []
+        self.elements = []
         self.title = title
         self.X = X
         self.Y = Y
@@ -34,7 +34,7 @@ class MethylationPlot(object):
 
         # create drawing
         self.plot = Drawing(filename,
-                        size = (str(self.length) + "mm " , str(self.width) + "mm"),
+                        size = (str(self.length) + "mm" , str(self.width) + "mm"),
                         viewBox = ("0 0 " + str(self.length + self.margin + 30) + " " + str(self.width + self.margin + 30)),
                         preserveAspectRatio = "xMinYMin meet")
 
@@ -66,23 +66,29 @@ class MethylationPlot(object):
 
         for x, y in zip(X, Y):
             point = Circle(center = (x, y), r = 0.3, fill = self.color)
-            self.items.append(point)
+            self.elements.append(point)
             self.plot.add(point)
 
 
     def save(self):
         self.plot.save()
-        self.plot = None
 
     def to_string(self):
         z = self.plot.tostring()
         self.plot = None
         return z
 
-    def get_items(self):
-        z = self.items
-        self.items = None
+    def get_elements(self):
+        z = self.elements
+        self.elements = None
         return z
+
+    def add_data(self, elements = None):
+        if not isinstance(elements, list):
+            raise ValueError("Data to add to plot should be stored in a list, not a {}".format(type(elements)))
+        for element in elements:
+            self.plot.add(element)
+        print "% i svg elements have been added to the current svg object." % len(elements)
 
     def add_legends(self):
         ''' Add title, axis, tic marks and labels '''
@@ -91,7 +97,7 @@ class MethylationPlot(object):
         Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5")
         self.plot.add(Title)
-        self.items.append(Title)
+        self.elements.append(Title)
         self.add_xtics()
         self.add_ytics()
         self.add_axis()
@@ -121,8 +127,8 @@ class MethylationPlot(object):
                     self.plot.add(ticline2)
             self.plot.add(ticline)
             self.plot.add(ticmarker)
-            self.items.append(ticline)
-            self.items.append(ticmarker)
+            self.elements.append(ticline)
+            self.elements.append(ticmarker)
 
     def add_ytics(self):
         maxh, margin = max(self.Y), self.margin
@@ -144,9 +150,9 @@ class MethylationPlot(object):
             self.plot.add(ticline)
             self.plot.add(ticline2)
             self.plot.add(ticmarker)
-            self.items.append(ticline)
-            self.items.append(ticline2)
-            self.items.append(ticmarker)
+            self.elements.append(ticline)
+            self.elements.append(ticline2)
+            self.elements.append(ticmarker)
 
     def add_axis(self):
         margin = self.margin
@@ -159,5 +165,5 @@ class MethylationPlot(object):
             fill = "midnightblue")
         self.plot.add(x_axis)
         self.plot.add(y_axis)
-        self.items.append(x_axis)
-        self.items.append(y_axis)
+        self.elements.append(x_axis)
+        self.elements.append(y_axis)
