@@ -14,7 +14,7 @@ class ChipseqPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, title, waves, start, end):
+    def __init__(self, filename, title, waves, start, end, length, margin, width):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -25,18 +25,17 @@ class ChipseqPlot(object):
         self.waves = waves
         self.start = start
         self.end = end
+        self.length = length    # default = 200.0
+        self.margin = margin    # default = 20.0
+        self.width = width    # default = 60.0
 
         self.colors = [('indigo', 'slateblue'), ('red', 'orange'),
                   ('green', 'limegreen'), ('orange', 'yellow')]
 
-        self.length = 200.0
-        self.width = 60.0
-        self.margin = 20.0
-
         # create drawing
         self.plot = Drawing(filename,
-                        size = (str(self.length) + "mm" , str(self.width) + "mm"),
-                        viewBox = ("0 0 " + str(self.length + self.margin + 30) + " " + str(self.width + self.margin + 30)),
+                        size = (str(self.length * 1.5) + "mm" , str(self.width * 1.5) + "mm"),
+                        viewBox = ("0 0 " + str(self.length + self.margin * 2) + " " + str(self.width + self.margin * 2)),
                         preserveAspectRatio = "xMinYMin meet")
 
     def build(self):
