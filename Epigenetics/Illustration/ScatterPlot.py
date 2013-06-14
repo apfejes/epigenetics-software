@@ -10,7 +10,7 @@ from svgwrite.drawing import Drawing
 # from query_ensembl import coordinates
 # from query_ensembl import name, location
 
-class BoxPlot(object):
+class ScatterPlot(object):
     '''
     classdocs
     '''
@@ -23,39 +23,39 @@ class BoxPlot(object):
         self.x_max = x_max
         self.y_max = y_max
         if 'x_min' in kwargs:
-            self.x_min = kwargs.x_min    # IGNORE:E1101
+            self.x_min = kwargs['x_min']
         else:
             self.x_min = 0
         if 'y_min' in kwargs:
-            self.y_min = kwargs.y_min    # IGNORE:E1101
+            self.y_min = kwargs['y_min']
         else:
             self.y_min = 0
         if 'height' in kwargs:
-            self.height = kwargs.height    # IGNORE:E1101
+            self.height = kwargs['height']
         else:
             self.height = 600
         if 'width' in kwargs:
-            self.width = kwargs.width    # IGNORE:E1101
+            self.width = kwargs['width']
         else:
             self.width = 1200
         if 'debug' in kwargs:
-            self.debug = kwargs.debug    # IGNORE:E1101
+            self.debug = kwargs['debug']
         else:
             self.debug = True
         if 'margin_top' in kwargs:
-            self.margin_top = kwargs.margin_top    # IGNORE:E1101
+            self.margin_top = kwargs['margin_top']
         else:
             self.margin_top = 20
         if 'margin_bottom' in kwargs:
-            self.margin_bottom = kwargs.margin_bottom    # IGNORE:E1101
+            self.margin_bottom = kwargs['margin_bottom']
         else:
             self.margin_bottom = 20
         if 'margin_left' in kwargs:
-            self.margin_left = kwargs.margin_left    # IGNORE:E1101
+            self.margin_left = kwargs['margin_left']
         else:
             self.margin_left = 20
         if 'margin_right' in kwargs:
-            self.margin_right = kwargs.margin_right    # IGNORE:E1101
+            self.margin_right = kwargs['margin_right']
         else:
             self.margin_right = 20
         self.max_x = 100
