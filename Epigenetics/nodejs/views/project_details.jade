@@ -48,27 +48,52 @@ a(href='/')
   input#rollButton(type="button", value="Edit", onclick="viewItem()")
   ul
     li 
-      a(href="/input/sample_new/"+project._id)='Add samples to this project'
+      a(href="/input/sample_new/"+project._id)='Add samples to this project (Must be done before any other steps.)'
     li
-      a(href="/input/nanodrop_new/"+project._id)='Add a nanodrop report to this project (requires samples be added first)'
+      a(href="/input/nanodrop_new/"+project._id)='Add a nanodrop report to this project'
     li
       a(href="/view/sample_spreadsheet_edit/"+project._id)='Edit samples in this project'
+
+
+  ul
     li
-      a(href="/view/sample_spreadsheet/"+project._id)='Proceed to move samples to plates'
-  
+      a(href="/input/bs_new/"+project._id)='Proceed to move samples to bisulfite treatment'
+    li
+      a(href="/view/sample_spreadsheet/"+project._id)='Proceed to move samples to sequencing arrays'
+
 #transactiondetails
   H3 Transactions:
-  table
-    - each transaction in transactions
-      tr 
-        td.trlabel1 
-          b #{transaction.type} 
-        td.trlabel2 $#{transaction.amt } 
-        td.trdate #{transaction.date } 
-      //#{transaction._id} #{transaction.projectid }
   ul
     li
       a(href="/input/payment_new/"+project._id)='Add a payment record'
+  table
+    - var balance = 0
+    - each transaction in transactions
+      tr 
+        td.trlabel1
+          b #{transaction.type} 
+        if transaction.type == "Invoiced"
+          - balance -= parseFloat(transaction.amt)
+          td.tramountred $#{transaction.amt } 
+        
+        if transaction.type == "Payment Received"
+          - balance += parseFloat(transaction.amt)
+          td.tramount $#{transaction.amt }
+        td.trdate #{transaction.date } 
+      //#{transaction._id} #{transaction.projectid }
+    tr
+      td 
+        hr
+    tr
+      td.trlabel1
+        b Balance
+      if balance < 0
+        td.tramountred
+          $!{balance}
+      else
+        td.tramount
+          $!{balance}
+
 #platedetails
   H3 Plates:
   ul
