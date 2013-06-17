@@ -117,8 +117,8 @@ class ScatterPlot(object):
             self.plot.add(Circle(center = (self.margin_left + ((x / self.max_x) * self.width),
                                           (self.margin_top + self.height) - ((y / self.max_y) * self.height)),
                                  r = 2, stroke_width = 0.1, stroke_linecap = 'round',
-                                 stroke_opacity = 0.5, fill = "dodgerblue",
-                                 fill_opacity = 0.3))
+                                 stroke_opacity = 0.3, fill = "dodgerblue",
+                                 fill_opacity = 0.2))
         self.plot.add(Text(self.max_x, insert = (self.margin_left + self.width - 50, self.margin_top + self.height + 20.0),
                 fill = "midnightblue", font_size = "15"))
         self.data = None

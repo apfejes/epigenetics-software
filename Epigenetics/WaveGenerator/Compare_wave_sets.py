@@ -187,7 +187,9 @@ def run():
             # print "i %s and max_i %s", i, max_i
 
         for b in both:
-            if b.p < 0.05:
+            ratio = float(b.get_ht1()) / b.get_ht2()
+
+            if b.p < 0.05 and ratio > (float(1) / 20) and ratio < 20:
                 x.append(b.get_ht1())
                 y.append(b.get_ht2())
 
