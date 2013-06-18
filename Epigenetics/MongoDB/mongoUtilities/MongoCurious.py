@@ -44,6 +44,9 @@ class MongoCurious():
         if collection == None:
             raise ValueError("Please specify a collection.")
         self.collection = collection
+        if database == None:
+            raise ValueError("Please specificy a database.")
+        self.database = database
         Query['database'] = self.database
         Query['collection'] = self.collection
         Query['project'] = project
@@ -56,9 +59,6 @@ class MongoCurious():
         elif isinstance(chromosome, int):
                 Query['chromosome'] = 'chr' + str(chromosome)
                 self.chromosome = chromosome
-        if self.project:
-            self.sample_groups = self.creategroups()
-            Query['sample groups'] = self.sample_groups
         Query['start'] = start
         self.start = start
         Query['end'] = end
@@ -69,7 +69,9 @@ class MongoCurious():
         self.sample_type = sample_type
         Query['sample id'] = sample_id
         self.sample_id = sample_id
-
+        if self.project:
+            self.sample_groups = self.creategroups()
+            Query['sample groups'] = self.sample_groups
         self.Query = Query
         return self.Query
 
@@ -78,11 +80,11 @@ class MongoCurious():
         t0 = time()
         self.mongo.ensure_index(self.collection, 'chr')
         print "Checking validity of query inputs..."
-        if self.chromosome != None:
-            Chromosomes = self.mongo.distinct(self.collection, 'chr')
-            if self.chromosome not in Chromosomes:
-                raise ValueError("Invalid chromosome name. Please choose from the following possible inputs:",
-                                 Chromosomes.encode("utf-8"))
+        
+        Chromosomes = self.mongo.distinct(self.collection, 'chr')
+        if self.chromosome not in Chromosomes:
+            raise ValueError("Invalid chromosome name. Please choose from the following possible inputs:",
+                             Chromosomes.encode("utf-8"))
 
         if self.project != None:
             Projects = self.mongo.distinct(self.collection, "project")
