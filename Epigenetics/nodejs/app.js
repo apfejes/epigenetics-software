@@ -120,7 +120,31 @@ app.get('/view/:id', function(req, res) {
   });
 });
 
+//------------------------------------
+//  Bisulfite Sequencing
+//------------------------------------
 
+app.get('/input/bs_new/:id', function(req, res) {
+  articleProvider.getSamples(req.params.id, function(error, samples) {
+    if (error) console.log("sample_spreadsheet/:id (get) error: ", error)
+    else 
+      res.render('bs_new.jade', {samples:samples, projectid:req.params.id});
+  })
+});
+
+app.post('/input/bs_new/:id', function(req, res){
+  switch(req.param('step')) {
+    case '0':
+      articleProvider.process_Array(req.body, function(error, data) {
+        articleProvider.assign_to_bs_plate(data, function(error, assigned) {
+          res.render('bs_step1.jade', {assignments: assigned, assigned:JSON.stringify(assigned)});
+        });
+      });
+      break;
+    case '1':
+      break;
+  }
+});
 
 //------------------------------------
 //  PAYMENT INFO:

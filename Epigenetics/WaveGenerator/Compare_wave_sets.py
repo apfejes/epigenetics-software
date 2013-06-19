@@ -85,7 +85,7 @@ def run():
         s.append(r)
         print ("%i. %s") % (c, r)
         c += 1
-    print "here are the names of available samples: which one do you want to use?"
+    print "here are the names of available samples: which one do you want to use as a sample?"
     user_input = raw_input("enter the number(s). If using more than one, separate by a coma:")
 
     samples = []
@@ -111,7 +111,7 @@ def run():
         s.append(r)
         print ("%i. %s") % (c, r)
         c += 1
-    print "here are the names of available samples: which one do you want to use?"
+    print "here are the names of available samples: which one do you want to use as a control?"
     user_input = raw_input("enter the number(s). If using more than one, separate by a coma:")
 
     controls = []
@@ -189,7 +189,7 @@ def run():
         for b in both:
             ratio = float(b.get_ht1()) / b.get_ht2()
 
-            if b.p < 0.05 and ratio > (float(1) / 20) and ratio < 20:
+            if b.p < 0.0005 and ratio > (float(1) / 20) and ratio < 20:
                 x.append(b.get_ht1())
                 y.append(b.get_ht2())
 
@@ -236,7 +236,57 @@ def run():
     bp.build()
     bp.save()
 
-        # filter out from control
+    # filter out from control
+    paired_data = []
+    max_i = len(waves1)
+    max_j = len(waves2)
+    while (i < max_i and j < max_j):
+        pos_i = waves1[i]['pos']
+        sdv_i = waves1[i]['stddev']
+        ht_i = waves1[i]['height']
+        jt = j - 1
+        none_found = True
+        best = none
+        while jt >= 0 and waves2[jt]['pos'] > (pos_i - 4 * sdv_i) :
+            # print "jt - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[jt]['pos'], waves2[jt]['stddev']
+            pvalue = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
+            if (pvalue != 0):
+                w = WavePair(chromosome, i, jt, pvalue, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
+                if best == none:
+                    best = w
+                    none_found= False
+                elif pvalue < best.pvalue:
+                    best = w
+                    none_found= False 
+            jt -= 1
+        while j < max_j and waves2[j]['pos'] < (pos_i + 4 * sdv_i):
+            # print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
+            pvalue = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
+            if (pvalue != 0):
+                w = WavePair(chromosome, i, j, pvalue, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
+                if best == none:
+                    best = w
+                    none_found= False
+                elif pvalue < best.pvalue:
+                    best = w
+                    none_found= False
+            j += 1
+        if none_found:
+            w = WavePair(chromosome, i, -1, -1, pos_i, -1, sdv_i, -1, ht_i, 0)
+            paired_data.append(w)
+        else:
+            paired_data.append(best)
+        
+        i += 1
+        
+        
+    for b in paired_data:
+        if (b.get_ht1 > b.get_ht2 * coeff ):
+            print_queue.put(w.to_string())
+      
+    
+    
+    
         # return waves that are unique to sample
     if print_thread == None or not print_thread.is_alive():
         pass

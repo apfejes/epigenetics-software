@@ -525,16 +525,36 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
 };
 
 
+//__________________________________
+//
+// Assign to BS plate
+//__________________________________
 
-
-
-
+ArticleProvider.prototype.assign_to_bs_plate = function(body, callback) {
+  var selected = [];
+  for (item in body) {
+    console.log("item :", item)
+    if (body[item].bs_flag && body[item].bs_flag == "on") {
+      selected.push(body[item])
+    }
+  }
+  console.log("selected:", selected)
+  console.log("selected.length:", selected.length)
+  body.sort(function() {return 0.5 - Math.random()})  //randomize order
+  //console.log("body:", body)
+  //if 
+  
+  //console.log("body.length:", body.length)
+  
+  
+  callback(selected)
+}
 
 
 
 //__________________________________
 //
-// Process Array
+// Process Array - also used to process BS data
 //__________________________________
 
 ArticleProvider.prototype.process_Array = function(body, callback) {

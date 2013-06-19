@@ -49,7 +49,10 @@ form( method="post")
           if (sample.nanodrop)
             - var best_date = sample.nanodrop[0].date
             - var best_time = sample.nanodrop[0].time
-            - for n in sample.nanodrop 
+            - for n in sample.nanodrop
+              - if (n.nd_type)
+                - if (n.nd_type.indexOf("bcDNA") == -1)
+                   continue
               - if (n.date > best_date) 
                  - best_date = n.date
                  - best_time = n.time
@@ -57,35 +60,41 @@ form( method="post")
                 - if (n.time > best_time)
                   - best_date = n.date
                   - best_time = n.time
+            - var record_found = "false"
             - each n in sample.nanodrop            
-              - if (n.date == best_date  && n.time == best_time)
-                  input(type="hidden", name="#{sample.sampleid}-#{sample.sample_num}-date", value = n.date)
-                  input(type="hidden", name="#{sample.sampleid}-#{sample.sample_num}-time", value = n.time)
-                  td.lines
-                    !{n.conc} #{n.units} 
-                  if (n.vol)
+              - if (n.nd_type && n.date == best_date  && n.time == best_time)
+                - if (n.nd_type.indexOf("bcDNA") != -1)
+                    - record_found = "true"
+                    input(type="hidden", name="#{sample.sampleid}-#{sample.sample_num}-date", value = n.date)
+                    input(type="hidden", name="#{sample.sampleid}-#{sample.sample_num}-time", value = n.time)
                     td.lines
-                      !{n.vol}
-                  else 
-                    td.redwlines  
-                      | ---
-                  td.lines #{n.a260}
-                  td.lines #{n.a280}
-                  - var a260_280 = n.a260/n.a280
-                  td.lines !{a260_280.toFixed(3)}
-                  - var a260_230 = n.a260/n.a230
-                  td.lines !{a260_230.toFixed(3)}
-                  if (n.vol)
-                    - var total_na = (n.conc*n.vol).toFixed(2) 
-                    - if (total_na < 750)  
-                      td.redwlines
-                        !{total_na} ng
-                    - else
-                      td.greenwlines 
-                        !{total_na} ng
-                  else
-                    td.redwlines  
-                      | ---
+                      !{n.conc} #{n.units} 
+                    if (n.vol)
+                      td.lines
+                        !{n.vol}
+                    else 
+                      td.redwlines  
+                        | ---
+                    td.lines #{n.a260}
+                    td.lines #{n.a280}
+                    - var a260_280 = n.a260/n.a280
+                    td.lines !{a260_280.toFixed(3)}
+                    - var a260_230 = n.a260/n.a230
+                    td.lines !{a260_230.toFixed(3)}
+                    if (n.vol)
+                      - var total_na = (n.conc*n.vol).toFixed(2) 
+                      - if (total_na < 750)  
+                        td.redwlines
+                          !{total_na} ng
+                      - else
+                        td.greenwlines 
+                          !{total_na} ng
+                    else
+                      td.redwlines  
+                        | ---
+              if (record_found == "false")
+                td.lines(colspan=7)
+                  | No bisulfite conversion data found for this sample. 
           else
             td.redwlines
             td.redwlines
@@ -99,9 +108,8 @@ form( method="post")
           td.lines #{sample.created_at.getDate()}-#{sample.created_at.getMonth()}-#{sample.created_at.getFullYear()} #{sample.created_at.getHours()}:#{sample.created_at.getMinutes()}
           td.lines
             if (sample.plates)
+              ul
               - for plate in sample.plates
-                ul
-                  li
-                    a(href="/input/plate_edit/"+plate)=plate
+                  li: a(href="/input/plate_edit/"+plate)=plate
     input(type="submit", value="Assign to Arrays")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
