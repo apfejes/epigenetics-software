@@ -8,11 +8,9 @@ and then query the methylation data. Or we can do the opposite.
 '''
 
 import os, sys
-_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
-_root_dir = os.path.dirname(_cur_dir)
-
-sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
-import MongoCurious
+from time import time
+sys.path.insert(0, "/home/sperez/git/software/epigenetics-software/Epigenetics")
+from MongoDB.mongoUtilities import MongoCurious
 
 
 m = MongoCurious.MongoCurious(database = "human_epigenetics")
