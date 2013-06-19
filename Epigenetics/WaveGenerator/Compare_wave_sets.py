@@ -271,13 +271,15 @@ def run():
                     best = w
                     none_found= False
             j += 1
-        i += 1
-        
         if none_found:
             w = WavePair(chromosome, i, -1, -1, pos_i, -1, sdv_i, -1, ht_i, 0)
             paired_data.append(w)
         else:
             paired_data.append(best)
+        
+        i += 1
+        
+        
     for b in paired_data:
         if (b.get_ht1 > b.get_ht2 * coeff ):
             print_queue.put(w.to_string())
