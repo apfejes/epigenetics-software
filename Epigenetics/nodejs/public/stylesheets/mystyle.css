@@ -35,6 +35,8 @@ table, td{
   border: 1px solid #aaaaaa;
   border-spacing: 0px;
   border-collapse:collapse;
+  padding-left:2px;
+  padding-right:0px;
 }
 
 .redwlines {

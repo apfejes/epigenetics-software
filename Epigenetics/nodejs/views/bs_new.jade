@@ -1,0 +1,79 @@
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+a(href='/')
+  #logo
+h1 Begin Bisulfite Sequence Process
+#section1
+  H3 Pick samples to move to bisulfite sequencing 
+  form( method="post", enctype="multipart/form-data")
+    input(type="hidden", name="step", value = 0)
+    input(type="hidden", name="projectid", value= projectid)
+    b Notes: 
+    ol 
+      li Up to 96 samples may be placed on a plate.  If you select more than 96 samples, a random collection of 96 will be placed on the plate, and the remainder will not left unaltered.  
+    br
+    input(type="submit", value="Assign to New Bisulfite Sequencing Plate")
+    input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
+    table.lines
+      tr
+        td.lines SampleID
+        td.lines conc
+        td.lines Volume (µl)
+        td.lines Total N.A. (ng)
+        td.lines Bisulfite
+        td.lines Previous Bisulfite Treatment Plates
+      - each sample in samples
+        tr
+          td.lines 
+            b #{sample.sampleid}-#{sample.sample_num}
+          if (sample.nanodrop)
+            - var best_date = sample.nanodrop[0].date
+            - var best_time = sample.nanodrop[0].time
+            - for n in sample.nanodrop
+              - if (n.nd_type)
+                - if (n.nd_type.indexOf("bcDNA") != -1)
+                   continue
+              - if (n.date > best_date) 
+                 - best_date = n.date
+                 - best_time = n.time
+              - else if (n.date == best_date)
+                - if (n.time > best_time)
+                  - best_date = n.date
+                  - best_time = n.time
+            - var record_found = "false"
+            - var total_na = 0
+            - each n in sample.nanodrop            
+            
+              - if (n.nd_type && n.date == best_date  && n.time == best_time)
+                - if (n.nd_type.indexOf("bcDNA") == -1)
+                    - record_found = "true"
+                    input(type="hidden", name="#{sample.sampleid}-#{sample.sample_num}-date", value = n.date)
+                    input(type="hidden", name="#{sample.sampleid}-#{sample.sample_num}-time", value = n.time)
+                    td.lines
+                      !{n.conc} #{n.units} 
+                    if (n.vol)
+                      td.lines
+                        !{n.vol}
+                    else 
+                      td.redwlines  
+                        | ---
+                    if (n.vol)
+                      - total_na = (n.conc*n.vol).toFixed(2) 
+                      - if (total_na < 750)  
+                        td.redwlines
+                          !{total_na} ng
+                      - else
+                        td.greenwlines 
+                          !{total_na} ng
+                    else
+                      td.redwlines  
+                        | ---
+                td.lines
+                  - if (total_na > 750) 
+                    input(type="checkbox", name="#{sample.sampleid}-#{sample.sample_num}-bs_flag", checked="checked")
+                  - else
+                    input(type="checkbox", name="#{sample.sampleid}-#{sample.sample_num}-bs_flag")
+              if (record_found == "false")
+                td.lines(colspan=4)
+                  | No DNA nanodrop data found for this sample. 
+    input(type="submit", value="Assign to New Bisulfite Sequencing Plate")
+    input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
