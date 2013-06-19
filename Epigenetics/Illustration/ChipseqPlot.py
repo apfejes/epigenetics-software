@@ -134,11 +134,11 @@ class ChipseqPlot(object):
                      height, stddev):
         X = []
         endpts = int((sqrt((-2) * stddev * stddev * log(tail / height))))
-        for i in range (-stddev, stddev, 3):
+        for i in range (-stddev, stddev, 10):
             X.append(float(i))
-        for i in range (-endpts, -stddev, 5):
+        for i in range (-endpts, -stddev, 20):
             X.append(float(i))
-        for i in range (stddev, endpts, 5):
+        for i in range (stddev, endpts, 20):
             X.append(float(i))
         if (endpts) not in X: X.append(endpts)
         X.sort()
@@ -146,7 +146,6 @@ class ChipseqPlot(object):
         X = [x for x in X if 0 <= (x + pos - offset) < (end - start)]
         stddev = float(stddev)
         Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
-
         return X, Y
 
     def add_xtics(self):

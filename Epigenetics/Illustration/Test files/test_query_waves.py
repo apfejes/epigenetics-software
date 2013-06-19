@@ -6,11 +6,9 @@ Created on 2013-05-30
 Example of how to use the class MongoCurious to plot ChipSeq peaks from db.waves collection
 '''
 import os, sys
-_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
-_root_dir = os.path.dirname(_cur_dir)
-
-sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
-import MongoCurious
+from time import time
+sys.path.insert(0, "/home/sperez/git/software/epigenetics-software/Epigenetics")
+from MongoDB.mongoUtilities import MongoCurious
 
 # Tell the database which collection you want to query from
 m = MongoCurious.MongoCurious(database = "human_epigenetics")
