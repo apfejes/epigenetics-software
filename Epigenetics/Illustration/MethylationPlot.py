@@ -55,7 +55,7 @@ class MethylationPlot(object):
         Y = [round((invertby - item) * scale_y, 2) + margin for item in Y]
 
 
-
+# IF PLOTTING METHYLATION AS PATH, NOT POINTS:
         # d contains the coordinates that make up the path
 #         d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
 #         for i in range(2, len(X)):
@@ -66,13 +66,16 @@ class MethylationPlot(object):
         for x, y in zip(X, Y):
             point = Circle(center = (x, y), r = 0.3, fill = self.color)
             self.elements.append(point)
-            self.plot.add(point)
 
 
     def save(self):
+        for element in self.elements:
+            self.plot.add(element)
         self.plot.save()
 
     def to_string(self):
+        for element in self.elements:
+            self.plot.add(element)
         z = self.plot.tostring()
         self.plot = None
         return z
@@ -83,9 +86,10 @@ class MethylationPlot(object):
         return z
 
     def add_data(self, elements = None):
-        if not isinstance(elements, list):
+        elements_to_add = elements
+        if not isinstance(elements_to_add, list):
             raise ValueError("Data to add to plot should be stored in a list, not a {}".format(type(elements)))
-        for element in elements:
+        for element in elements_to_add:
             self.plot.add(element)
         print "% i svg elements have been added to the current svg object." % len(elements)
 
@@ -123,9 +127,7 @@ class MethylationPlot(object):
             for i in range (1, 4):
                 if tic_x - spacing * i > margin - 5:
                     ticline2 = Rect(insert = (tic_x - spacing * i, width + margin * 2 - 5 - 1), size = (0.1, 1), fill = "midnightblue")
-                    self.plot.add(ticline2)
-            self.plot.add(ticline)
-            self.plot.add(ticmarker)
+                    self.elements.append(ticline2)
             self.elements.append(ticline)
             self.elements.append(ticmarker)
 
@@ -146,9 +148,6 @@ class MethylationPlot(object):
             if len(label) == 2:
                 tic_x = tic_x + 2
             ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = "3"))
-            self.plot.add(ticline)
-            self.plot.add(ticline2)
-            self.plot.add(ticmarker)
             self.elements.append(ticline)
             self.elements.append(ticline2)
             self.elements.append(ticmarker)
@@ -162,7 +161,5 @@ class MethylationPlot(object):
         y_axis = Rect(insert = (margin - 5, margin - 8),
             size = (0.1, width + margin + 3),
             fill = "midnightblue")
-        self.plot.add(x_axis)
-        self.plot.add(y_axis)
         self.elements.append(x_axis)
         self.elements.append(y_axis)

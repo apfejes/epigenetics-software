@@ -89,24 +89,30 @@ class ChipseqPlot(object):
                            fill = samples_color[sample_id][1], fill_opacity = 0.5, d = d))
 
             self.elements.append(peak)
-            self.plot.add(peak)
+
 
     def save(self):
+        for element in self.elements:
+            self.plot.add(element)
         self.plot.save()
 
     def to_string(self):
-        return self.plot.tostring()
+        for element in self.elements:
+            self.plot.add(element)
+        z = self.plot.tostring()
+        self.plot = None
+        return z
 
     def get_elements(self):
         z = self.elements
         self.elements = None
-        self.plot = None
         return z
 
     def add_data(self, elements = None):
-        if not isinstance(elements, list):
+        elements_to_add = elements
+        if not isinstance(elements_to_add, list):
             raise ValueError("Data to add to plot should be stored in a list, not a {}".format(type(elements)))
-        for element in elements:
+        for element in elements_to_add:
             self.plot.add(element)
         print "% i svg elements have been added to the current svg object." % len(elements)
 
@@ -116,7 +122,6 @@ class ChipseqPlot(object):
             self.title = "Chipseq Peaks"
         Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5")
-        self.plot.add(Title)
         self.elements.append(Title)
         self.add_xtics()
         self.add_ytics()
@@ -129,11 +134,11 @@ class ChipseqPlot(object):
                      height, stddev):
         X = []
         endpts = int((sqrt((-2) * stddev * stddev * log(tail / height))))
-        for i in range (-stddev, stddev, 3):
+        for i in range (-stddev, stddev, 10):
             X.append(float(i))
-        for i in range (-endpts, -stddev, 5):
+        for i in range (-endpts, -stddev, 20):
             X.append(float(i))
-        for i in range (stddev, endpts, 5):
+        for i in range (stddev, endpts, 20):
             X.append(float(i))
         if (endpts) not in X: X.append(endpts)
         X.sort()
@@ -141,7 +146,6 @@ class ChipseqPlot(object):
         X = [x for x in X if 0 <= (x + pos - offset) < (end - start)]
         stddev = float(stddev)
         Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
-
         return X, Y
 
     def add_xtics(self):
@@ -166,9 +170,7 @@ class ChipseqPlot(object):
             for i in range (1, 4):
                 if tic_x - spacing * i > margin - 5:
                     ticline2 = Rect(insert = (tic_x - spacing * i, width + margin * 2 - 5 - 1), size = (0.1, 1), fill = "midnightblue")
-                    self.plot.add(ticline2)
-            self.plot.add(ticline)
-            self.plot.add(ticmarker)
+                    self.elements.append(ticline2)
             self.elements.append(ticline)
             self.elements.append(ticmarker)
 
@@ -194,9 +196,6 @@ class ChipseqPlot(object):
             if len(label) == 2:
                 tic_x = tic_x + 2
             ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = "3"))
-            self.plot.add(ticline)
-            self.plot.add(ticline2)
-            self.plot.add(ticmarker)
             self.elements.append(ticline)
             self.elements.append(ticline2)
             self.elements.append(ticmarker)
@@ -210,8 +209,6 @@ class ChipseqPlot(object):
         y_axis = Rect(insert = (margin - 5, margin - 8),
             size = (0.1, width + margin + 3),
             fill = "midnightblue")
-        self.plot.add(x_axis)
-        self.plot.add(y_axis)
         self.elements.append(x_axis)
         self.elements.append(y_axis)
 

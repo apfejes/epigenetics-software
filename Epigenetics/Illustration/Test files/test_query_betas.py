@@ -6,21 +6,27 @@ Created on 2013-05-30
 Example of how to use the class MongoCurious to plot methylation data from the methylation collection
 '''
 import os, sys
-_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
-_root_dir = os.path.dirname(_cur_dir)
-
-sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
-import MongoCurious
+from time import time
+sys.path.insert(0, "/home/sperez/git/software/epigenetics-software/Epigenetics")
+from MongoDB.mongoUtilities import MongoCurious
 
 # Tell the database which collection you want to query from
+t0 = time()
 m = MongoCurious.MongoCurious(database = "human_epigenetics")
-# Query the database
+print " Query %.3f" % (time() - t0)
 
+t0 = time()
 query1 = m.query(collection = 'methylation', chromosome = "chr4", start = 3076407, end = 3245676)
-# Extract the probes or documents relevant to that region
-m.finddocs()
-# Extract the peak information in each probe
-m.collectbetas()
-# Make the svg file called "peaks.svg" in the /SVGs folder
-m.svg(filename = "test_methylation.svg", title = "Huntington gene")
+print "Extract %.3f" % (time() - t0)
 
+t0 = time()
+m.finddocs()
+print "find docs %.3f" % (time() - t0)
+
+t0 = time()
+m.collectbetas()
+print "collect betas %.3f" % (time() - t0)
+
+t0 = time()
+m.svg(filename = "test_methylation.svg", title = "Huntington gene")
+print "svg %.3f" % (time() - t0)
