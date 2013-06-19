@@ -279,7 +279,7 @@ def run():
         
         i += 1
         
-    print "The list of paried data is :" % ( len(paired_data))
+    print "The list of paried data is %i:" % ( len(paired_data))
     for b in paired_data:
         if (b.get_ht1 > b.get_ht2 * coeff ):
             print_queue.put(w.to_string())
