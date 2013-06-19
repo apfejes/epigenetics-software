@@ -237,6 +237,7 @@ def run():
     bp.save()
 
     # filter out from control
+    paired_data = []
     max_i = len(waves1)
     max_j = len(waves2)
     while (i < max_i and j < max_j):
