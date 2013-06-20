@@ -15,7 +15,7 @@ class MethylationPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, title, X, Y, color, start, end, length, margin, width):
+    def __init__(self, filename, title, X, Y, sample_ids, color, start, end, length, margin, width):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -24,6 +24,7 @@ class MethylationPlot(object):
         self.title = title
         self.X = X
         self.Y = Y
+        self.sample_ids = sample_ids
         self.color = color
         self.start = start
         self.end = end
@@ -63,8 +64,21 @@ class MethylationPlot(object):
 #
 #         self.plot.add(Path(stroke = self.color, fill = "none", stroke_width = '0.3', d = d))
 
-        for x, y in zip(X, Y):
-            point = Circle(center = (x, y), r = 0.3, fill = self.color)
+
+        if self.sample_ids:
+            self.colors = ['indigo','orange','blueviolet','aqua','darkred','green','lightcoral','blue','limegreen','yellow','pink','lightblue','brown', 'grey']
+        
+        sample_count = 0
+        samples_color = {}
+        
+        for x, y, sample_id in zip(X, Y, self.sample_ids):
+            if sample_id not in samples_color :
+                sample_count += 1
+                samples_color[sample_id] = self.colors[sample_count - 1]
+                if sample_count == len(self.colors):
+                    sample_count = 0
+                    print "Ran out of colours!"
+            point = Circle(center = (x, y), r = 0.3, fill = samples_color[sample_id])
             self.elements.append(point)
 
 

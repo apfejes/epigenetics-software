@@ -7,7 +7,7 @@ Example of how to use the class MongoCurious to plot ChipSeq peaks from db.waves
 '''
 import os, sys
 from time import time
-sys.path.insert(0, "/home/sperez/git/software/epigenetics-software/Epigenetics")
+sys.path.insert(0, "/home/sperez/epigenetics-software/epigenetics-software/Epigenetics")
 from MongoDB.mongoUtilities import MongoCurious
 t0 = time()
 # Tell the database which collection you want to query from

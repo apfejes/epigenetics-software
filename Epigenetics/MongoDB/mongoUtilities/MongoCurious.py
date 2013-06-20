@@ -210,6 +210,7 @@ class MongoCurious():
         return sample_groups
 
     def collectbetas(self,
+                     separate_samples = False,
                      window_size = 1):
         '''Collects and bins methylation data'''
 
@@ -233,23 +234,30 @@ class MongoCurious():
 
         print '    %s probes\' beta values were extracted and binned.' % count
 
+        
+        sample_ids = []
         x_position = []
         y_avg = []
         for pos, tup_list in sorted(position_dic.iteritems()):
             beta_values = []
             for beta, samp in tup_list:
-                if self.sample_type == None:
-                    beta_values.append(beta)
-                elif samp in self.sample_groups:
-                    beta_values.append(beta)
-                else: continue
-                data_avg = mean(beta_values)
-                x_position.append(pos)
-                y_avg.append(data_avg)
+                if separate_samples:
+                    if self.sample_type == None or samp in self.sample_groups:
+                        x_position.append(pos)
+                        y_avg.append(beta)
+                        sample_ids.append(samp)
+                else:
+                    if self.sample_type == None or samp in self.sample_groups:
+                        beta_values.append(beta)
+                    else: continue
+                    data_avg = mean(beta_values)
+                    x_position.append(pos)
+                    y_avg.append(data_avg)
 
         print "    %i beta values collected" % len(x_position)
         self.positions = x_position
         self.betas = y_avg
+        self.sample_ids = sample_ids
 
         if self.start == None:
             i = 0
@@ -304,7 +312,8 @@ class MongoCurious():
             if color == None: color = "royalblue"
             drawing = methylationplot.MethylationPlot(filename, title,
                                                       self.positions, self.betas,
-                                                      color, self.start, self.end,
+                                                      self.sample_ids, color,
+                                                      self.start, self.end,
                                                       length, margin, width)
             drawing.build()
         if self.collection == "waves":

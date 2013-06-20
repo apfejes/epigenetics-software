@@ -7,7 +7,7 @@ Example of how to use the class MongoCurious to plot methylation data from the m
 '''
 import os, sys
 from time import time
-sys.path.insert(0, "/home/sperez/git/software/epigenetics-software/Epigenetics")
+sys.path.insert(0, "/home/sperez/epigenetics-software/epigenetics-software/Epigenetics")
 from MongoDB.mongoUtilities import MongoCurious
 
 # Tell the database which collection you want to query from
@@ -24,7 +24,7 @@ m.finddocs()
 print "find docs %.3f" % (time() - t0)
 
 t0 = time()
-m.collectbetas()
+m.collectbetas(separate_samples = True)
 print "collect betas %.3f" % (time() - t0)
 
 t0 = time()
