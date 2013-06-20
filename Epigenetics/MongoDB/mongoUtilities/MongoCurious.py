@@ -44,9 +44,6 @@ class MongoCurious():
         if collection == None:
             raise ValueError("Please specify a collection.")
         self.collection = collection
-        if database == None:
-            raise ValueError("Please specificy a database.")
-        self.database = database
         Query['database'] = self.database
         Query['collection'] = self.collection
         Query['project'] = project
@@ -80,7 +77,7 @@ class MongoCurious():
         t0 = time()
         self.mongo.ensure_index(self.collection, 'chr')
         print "Checking validity of query inputs..."
-        
+
         Chromosomes = self.mongo.distinct(self.collection, 'chr')
         if self.chromosome not in Chromosomes:
             raise ValueError("Invalid chromosome name. Please choose from the following possible inputs:",
@@ -299,7 +296,6 @@ class MongoCurious():
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an .svg file or a svg string for webserver rendering
         '''
-
         if filename:
             filename = "/home/sperez/Documents/svg_temp/" + filename
         elif not get_elements: filename = "test.svg"

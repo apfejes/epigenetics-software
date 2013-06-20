@@ -9,7 +9,7 @@ import os, sys
 from time import time
 sys.path.insert(0, "/home/sperez/git/software/epigenetics-software/Epigenetics")
 from MongoDB.mongoUtilities import MongoCurious
-
+t0 = time()
 # Tell the database which collection you want to query from
 m = MongoCurious.MongoCurious(database = "human_epigenetics")
 # Query the database
@@ -22,7 +22,7 @@ m.getwaves()
 # Make the svg file called "peaks.svg" in the /SVGs folder
 m.svg(filename = "test_peak.svg", title = "Huntington gene", color = 'indigo')
 
-
+print time() - t0
 #
 # query1 = m.query(chromosome = "chrY", start = 59001100, end = 59002000)
 # # Extract the probes or documents relevant to that region

@@ -133,7 +133,7 @@ class ChipseqPlot(object):
                      pos, tail, offset,
                      height, stddev):
         endpts = int((sqrt((-2) * stddev * stddev * log(tail / height))))
-        spacing = 32
+        spacing = 64
         n_points = 0
         while n_points < 25 and spacing >= 2:
             X = []
