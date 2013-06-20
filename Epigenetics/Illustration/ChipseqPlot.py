@@ -132,18 +132,22 @@ class ChipseqPlot(object):
                      end, margin, length,
                      pos, tail, offset,
                      height, stddev):
-        X = []
         endpts = int((sqrt((-2) * stddev * stddev * log(tail / height))))
-        for i in range (-stddev, stddev, 10):
-            X.append(float(i))
-        for i in range (-endpts, -stddev, 20):
-            X.append(float(i))
-        for i in range (stddev, endpts, 20):
-            X.append(float(i))
+        spacing = 32
+        n_points = 0
+        while n_points < 25 and spacing >= 2:
+            X = []
+            for i in range (-stddev, stddev, spacing):
+                X.append(float(i))
+            for i in range (-endpts, -stddev, spacing):
+                X.append(float(i))
+            for i in range (stddev, endpts, spacing):
+                X.append(float(i))
+            n_points = len(X)
+            spacing /= 2
         if (endpts) not in X: X.append(endpts)
         X.sort()
-        X = [float(x) for x in X]
-        X = [x for x in X if 0 <= (x + pos - offset) < (end - start)]
+        X = [float(x) for x in X if 0 <= (x + pos - offset) < (end - start)]
         stddev = float(stddev)
         Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
         return X, Y
