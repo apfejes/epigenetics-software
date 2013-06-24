@@ -56,20 +56,24 @@ class MethylationPlot(object):
         Y = [round((invertby - item) * scale_y, 2) + margin for item in Y]
 
 
-# IF PLOTTING METHYLATION AS PATH, NOT POINTS:
-        # d contains the coordinates that make up the path
+# #IF PLOTTING METHYLATION AS PATH, NOT POINTS:
+# #        d contains the coordinates that make up the path
 #         d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
 #         for i in range(2, len(X)):
 #             d = d + (" " + str(X[i]) + "," + str(Y[i]))
-#
+# 
 #         self.plot.add(Path(stroke = self.color, fill = "none", stroke_width = '0.3', d = d))
 
 
         if self.sample_ids:
             #A few random colors
             #self.colors = ['indigo','orange','blueviolet','aqua','darkred','green','lightcoral','blue','limegreen','yellow','pink','lightblue','brown', 'grey']
-            #29 blue,green.grey palette
-            self.colors = ['blue','cornflowerblue','darkblue','deepskyblue','darkturquoise','aquamarine','dodgerblue', 'lightblue', 'lightskyblue','lightseagreen','mediumslateblue','midnightblue','navy','mediumturquoise','limegreen','mediumspringgreen','forestgreen', 'seagreen','palegreen', 'olive', 'yellowgreen','teal', 'paleturquoise','darkolivegreen','darkgreen','cadetblue', 'darkslategrey','darkseagreen','grey']
+            #29 blue,green,grey palette
+            self.colors = ['blue','cornflowerblue','darkblue','deepskyblue','darkturquoise','aquamarine',
+                           'dodgerblue', 'lightblue', 'lightskyblue','lightseagreen','mediumslateblue',
+                           'midnightblue','navy','mediumturquoise','limegreen','mediumspringgreen','forestgreen', 
+                           'seagreen','palegreen', 'olive', 'yellowgreen','teal', 'paleturquoise',
+                           'darkolivegreen','darkgreen','cadetblue', 'darkslategrey','darkseagreen','grey']
         sample_count = 0
         samples_color = {}
         

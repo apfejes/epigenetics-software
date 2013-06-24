@@ -48,5 +48,7 @@ if __name__ == "__main__":
     starttime = time.time()
     directory = sys.argv[1]
     print('Grabbing beta and expression text files from %s' %directory)
-    InsertMethylData(directory)
-    print('Done in %i seconds' %(time.time() - starttime))
+    total = InsertMethylData(directory)
+    print('\n*** A total of %i documents were addded to the collection' %total)
+    print('\nDone in %i seconds' %(time.time() - starttime))
+    

@@ -11,7 +11,7 @@ import glob
 import re
 import csv
 import sys
-
+from time import time
 
 class Files(object):
     '''
@@ -89,6 +89,7 @@ class Files(object):
         BulkInsert = []
         count = 0
         number_of_inserts = 0
+        t0 = time()
         while True:
             count += 1
             try:
@@ -114,19 +115,20 @@ class Files(object):
                 document[keynameexprs] = float(row_i_exprs[i+1])
                 BulkInsert.append(document)
                 
-            if count%10000 == 0:
+            if count%100 == 0:
                 number_of_inserts += len(BulkInsert)
                 collection.insert(BulkInsert)
-                print('{0}{1}{2}'.format('There are ',
-                                         str(collection.count()),
-                                             ' docs in collection'))
+                print('    %i documents inserted in %%i seconds.' %len(BulkInsert) %(time()-t0))
+                print('The number of added documents adds up to %i.' %number_of_inserts)
+                t0 = time()
+                
                 BulkInsert = []
         number_of_inserts += len(BulkInsert)
         collection.insert(BulkInsert)
         BulkInsert = []
         fbeta.close()
         fexprs.close()
-        print('{0}{1}{2}'.format('There are ',
+        print('{0}{1}{2}'.format('There are now',
                                  str(collection.count()),
                                      ' docs in collection'))
         return number_of_inserts
