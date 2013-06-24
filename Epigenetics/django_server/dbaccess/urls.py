@@ -17,4 +17,5 @@ urlpatterns = patterns('',
 	url(r'^svgmethylationcode/$', views.methylation_code, name = 'methylation_code'),
 	url(r'^chipseq/', views.view_chipseq, name = 'chipseq'),
 	url(r'^svgchipseqcode/$', views.chipseq_code, name = 'chipseq_code'),
+	url(r'^query/$', views.query, name = 'query'),
 	)

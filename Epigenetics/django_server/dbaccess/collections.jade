@@ -1,16 +1,30 @@
 extends base
 
 block title
-    | Human Epigenetics Database
+	| Human Epigenetics Database
 
 
 block content
-    article
-        header
-            h2 Collections
-        block intro
-            p The following are the collections of data available:
-            
-        block text
-            embed(src!='{% url 'collection_names' %}')
-            
+	article
+		header
+			h2 Collections
+		block intro
+			p The following are the collections of data available:
+
+		block form
+			form(action='/dbaccess/query',method='post')
+				div(data-role='fieldcontain')
+					fieldset(data-role='chromosome')
+						label(for='chr') Chromosome:
+							input(id='chr',type='text',value='',placeholder='1,2,...X,Y',name='chr')
+					fieldset(data-role='start')
+						label(for='start') Starting position:
+							input(id='start',type='text',value='',name='start')
+					fieldset(data-role='end')
+						label(for='end') Ending position:
+							input(id='end',type='text',value='',name='end')
+				div(data-role='fieldcontain')
+					input(type='submit',value='Query!',data-transition='fade', data-theme='c')  
+
+// block text
+//	embed(src!='{% url 'collection_names' %}')

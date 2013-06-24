@@ -3,9 +3,9 @@ Created on 2013-05-07
 
 @author: sperez
 '''
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-
+from queryforms import QueryFormS
 # from django.views.generic import TemplateView
 
 
@@ -52,4 +52,17 @@ def send_svg(request):
     from Annotations import showgene
     return HttpResponse(showgene.svgcode())
 
+def query(request):
+    if request.method == 'POST': # If the query has been submitted...
+        form = QueryForm(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            # Process the data in form.cleaned_data
+            # ...
+            return HttpResponseRedirect('query.html') # Redirect after POST
+    else:
+        form = QueryForm() # An unbound form
+
+    return render(request, 'query.html', {
+        'form': form,
+    })
 

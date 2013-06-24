@@ -118,8 +118,8 @@ class Files(object):
             if count%100 == 0:
                 number_of_inserts += len(BulkInsert)
                 collection.insert(BulkInsert)
-                print('    %i documents inserted in %%i seconds.' %len(BulkInsert) %(time()-t0))
-                print('The number of added documents adds up to %i.' %number_of_inserts)
+                print(('{0}{1:,}{2}{3}{4}').format('    ',len(BulkInsert),'documents inserted in',(time()-t0),' seconds.'))
+                print(('{0}{1:,}').format('The number of added documents adds up to', number_of_inserts))
                 t0 = time()
                 
                 BulkInsert = []
