@@ -64,7 +64,7 @@ def query(request):
             chr = 'chr' + str(form.cleaned_data['chr'])
             start = str(form.cleaned_data['start'])
             end = str(form.cleaned_data['end'])
-            print collection, chr, start, end
+            print "\n\n Received a form:", collection, chr, start, end
             if collection == 'chipseq':
                 return chipseq_code(request, chr, start, end)
             elif collection == 'methylation':
