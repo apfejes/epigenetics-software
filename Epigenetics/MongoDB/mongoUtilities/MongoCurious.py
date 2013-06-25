@@ -93,7 +93,7 @@ class MongoCurious():
 
     def finddocs(self):
         '''Finds probes or documents corresponding to query'''
-        self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
+        #self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
 
         # Preparing the different parameters of the query depending on the collection chosen
         if self.collection == "methylation":
@@ -113,6 +113,7 @@ class MongoCurious():
             docs = self.mongo.find(self.collection, query, return_chr).sort('start_position', 1)
 
         if self.collection == "waves":
+            self.mongo.ensure_index(self.collection, 'pos')
             query_chr, query_pos, = {}, {}
             if self.chromosome != None: query_chr = {'chr':self.chromosome}
             if self.start != None and self.end != None:
