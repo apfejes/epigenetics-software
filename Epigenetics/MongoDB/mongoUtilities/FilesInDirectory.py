@@ -97,7 +97,7 @@ class Files(object):
                 row_i_exprs = readerexprs.next()
             
             except StopIteration:
-                print('Stopping, no more rows to iterate.')
+                print('\n Stopping, no more rows to iterate.')
                 break
             
                 
@@ -128,9 +128,9 @@ class Files(object):
         BulkInsert = []
         fbeta.close()
         fexprs.close()
-        print('{0}{1}{2}'.format('There are now',
+        print('{0}{1}{2}'.format('*** There are now ',
                                  str(collection.count()),
-                                     ' docs in collection'))
+                                     ' docs in the collection. ***'))
         return number_of_inserts
 
 
