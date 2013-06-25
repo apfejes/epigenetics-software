@@ -9,11 +9,12 @@ from MongoDB.mongoUtilities import MongoCurious
 
 m = MongoCurious.MongoCurious(database = "human_epigenetics")
 
+#For Huntington gene
+#chromosome = 'chr4', start = 3076407, end = 3245676)
 
-query1 = m.query(collection = "waves", chromosome = "chr4", start = 3076407, end = 3245676)
-m.finddocs()
-m.getwaves()
-
-def svgcode():
+def svgcode(chr = None, start = None, end = None):
+    query1 = m.query(collection = "waves", chromosome = chr, start = start, end = end)
+    m.finddocs()
+    m.getwaves()
     return m.svg(to_string = True, title = "Huntington gene", color = 'indigo', length = 300.0)
 

@@ -56,10 +56,10 @@ class MongoCurious():
         elif isinstance(chromosome, int):
                 Query['chromosome'] = 'chr' + str(chromosome)
                 self.chromosome = chromosome
-        Query['start'] = start
-        self.start = start
-        Query['end'] = end
-        self.end = end
+        Query['start'] = int(start)
+        self.start = int(start)
+        Query['end'] = int(end)
+        self.end = int(end)
         Query['sample label'] = sample_label
         self.sample_label = sample_label
         Query['sample type'] = sample_type
@@ -130,7 +130,7 @@ class MongoCurious():
             docs = self.mongo.find(self.collection, query, return_chr).sort('height', -1)
 
         if docs.count() == 0:
-            print "    WARNING: The following query return zero probes or documents!"
+            print("    WARNING: The following query return zero probes or documents!")
             print "    ---> Find(", query, ")"
             print "     use the checkquery() method to validate the inputs of your query."
             sys.exit()

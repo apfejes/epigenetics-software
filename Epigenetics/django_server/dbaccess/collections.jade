@@ -12,8 +12,11 @@ block content
 			p The following are the collections of data available:
 
 		block form
-			form(action='/dbaccess/query',method='post')
+			form(action='/dbaccess/query/',method='post')
 				div(data-role='fieldcontain')
+					fieldset(data-role='collection')
+						label(for='collection') Collection:
+							input(id='collection',type='text',value='',placeholder='methylation, chipseq, etc...',name='collection')
 					fieldset(data-role='chromosome')
 						label(for='chr') Chromosome:
 							input(id='chr',type='text',value='',placeholder='1,2,...X,Y',name='chr')

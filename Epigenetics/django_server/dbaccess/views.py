@@ -5,7 +5,7 @@ Created on 2013-05-07
 '''
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from queryforms import QueryFormS
+from queryforms import QueryForm
 # from django.views.generic import TemplateView
 
 
@@ -43,9 +43,9 @@ def methylation_code(request):
     string = showmethylation.svgcode()
     return HttpResponse(string)
 
-def chipseq_code(request):
+def chipseq_code(request, chr, start, end):
     from Annotations import showchipseq
-    string = showchipseq.svgcode()
+    string = showchipseq.svgcode(chr = chr, start = start, end = end)
     return HttpResponse(string)
 
 def send_svg(request):
@@ -58,11 +58,17 @@ def query(request):
         if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data
             # ...
-            return HttpResponseRedirect('query.html') # Redirect after POST
+            collection = str(form.cleaned_data['collection'])
+            chr = 'chr' + str(form.cleaned_data['chr'])
+            start = str(form.cleaned_data['start'])
+            end = str(form.cleaned_data['end'])
+            print collection, chr, start, end
+            if collection == 'chipseq':
+                return chipseq_code(request, chr, start, end)
+            #return HttpResponseRedirect('query.html') # Redirect after POST
     else:
         form = QueryForm() # An unbound form
-
-    return render(request, 'query.html', {
+        return render(request, 'query.html', {
         'form': form,
     })
 
