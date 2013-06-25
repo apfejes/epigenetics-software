@@ -70,23 +70,23 @@ class MethylationPlot(object):
             #self.colors = ['indigo','orange','blueviolet','aqua','darkred','green','lightcoral','blue','limegreen','yellow','pink','lightblue','brown', 'grey']
             #29 blue,green,grey palette
             self.colors = ['blue','cornflowerblue','darkblue','deepskyblue','darkturquoise','aquamarine',
-                           'dodgerblue', 'lightblue', 'lightskyblue','lightseagreen','mediumslateblue',
-                           'midnightblue','navy','mediumturquoise','limegreen','mediumspringgreen','forestgreen', 
-                           'seagreen','palegreen', 'olive', 'yellowgreen','teal', 'paleturquoise',
+#                           'dodgerblue', 'lightblue', 'lightskyblue','lightseagreen','mediumslateblue',
+#                           'midnightblue','navy','mediumturquoise','limegreen','mediumspringgreen','forestgreen', 
+#                           'seagreen','palegreen', 'olive', 'yellowgreen','teal', 'paleturquoise',
                            'darkolivegreen','darkgreen','cadetblue', 'darkslategrey','darkseagreen','grey']
         sample_count = 0
         samples_color = {}
         
         for x, y, sample_id in zip(X, Y, self.sample_ids):
             if sample_id not in samples_color :
-                if sample_count > len(self.colors):
-                    sample_count = 0
-                    print "Ran out of colours!"
                 sample_count += 1
                 samples_color[sample_id] = self.colors[sample_count - 1]
+                if sample_count == len(self.colors):
+                    sample_count = 0
+                elif sample_count > len(self.colors): print "Ran out of colours!"
             point = Circle(center = (x, y), r = 0.3, fill = samples_color[sample_id])
             self.elements.append(point)
-
+             
 
     def save(self):
         for element in self.elements:
