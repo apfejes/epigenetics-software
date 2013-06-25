@@ -49,6 +49,11 @@ if __name__ == "__main__":
     directory = sys.argv[1]
     print('Grabbing beta and expression text files from %s' %directory)
     total = InsertMethylData(directory)
-    print('\n*** A total of %i documents were addded to the collection' %total)
+    print('*** A total of %i documents were addded to the collection. ***' %total)
     print('\nDone in %i seconds' %(time.time() - starttime))
+    t0 = time.time()
+    print("Updating indexes...")
+    mongo.ensure_index(collection, 'start_position')
+    mongo.ensure_index(collection, 'project')
+    print('\nDone in %i seconds' %(time.time() - t0))
     
