@@ -24,6 +24,9 @@ def my_view(request):
 def view_collections(request):
     return render(request, 'collections.jade')
 
+def view_query_form(request):
+    return render(request, 'query_form.jade')
+
 def view_methylation(request):
     return render(request, 'methylation.jade')
 
@@ -57,7 +60,6 @@ def query(request):
         form = QueryForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data
-            # ...
             collection = str(form.cleaned_data['collection'])
             chr = 'chr' + str(form.cleaned_data['chr'])
             start = str(form.cleaned_data['start'])
@@ -65,10 +67,13 @@ def query(request):
             print collection, chr, start, end
             if collection == 'chipseq':
                 return chipseq_code(request, chr, start, end)
-            #return HttpResponseRedirect('query.html') # Redirect after POST
+            elif collection == 'methylation':
+                return HttpResponse('The \'' + collection + '\' collection is not available yet.')
+            else: 
+                return HttpResponse(collection + ' is an invalid collection! Please try again...')
+        else:
+            return HttpResponse('You query parameters were invalid! Please try again...') # Redirect after POST
     else:
-        form = QueryForm() # An unbound form
-        return render(request, 'query.html', {
-        'form': form,
-    })
+        #form = QueryForm() # An unbound form
+        return HttpResponse('You query parameters were invalid! Please try again...') # Redirect after POS
 

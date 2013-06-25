@@ -7,27 +7,8 @@ block title
 block content
 	article
 		header
-			h2 Collections
+			h2 Query the database
 		block intro
-			p The following are the collections of data available:
-
-		block form
-			form(action='/dbaccess/query/',method='post')
-				div(data-role='fieldcontain')
-					fieldset(data-role='collection')
-						label(for='collection') Collection:
-							input(id='collection',type='text',value='',placeholder='methylation, chipseq, etc...',name='collection')
-					fieldset(data-role='chromosome')
-						label(for='chr') Chromosome:
-							input(id='chr',type='text',value='',placeholder='1,2,...X,Y',name='chr')
-					fieldset(data-role='start')
-						label(for='start') Starting position:
-							input(id='start',type='text',value='',name='start')
-					fieldset(data-role='end')
-						label(for='end') Ending position:
-							input(id='end',type='text',value='',name='end')
-				div(data-role='fieldcontain')
-					input(type='submit',value='Query!',data-transition='fade', data-theme='c')  
-
-// block text
-//	embed(src!='{% url 'collection_names' %}')
+			p Please fill in the query parameters to launch the visualization:
+		block text
+			embed(src!='{% url 'collection_names' %}')
