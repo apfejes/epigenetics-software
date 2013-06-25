@@ -34,13 +34,16 @@ class MongoConnector():
     def drop(self, collection_name):
         self.db.drop_database(collection_name)
 
-    def ensure_index(self, collection_name, key):
+    def ensure_index(self, collection_name, key, background = None):
         collection = self.db[collection_name]
-        return collection.ensure_index(key)
+        if background:
+            return collection.ensure_index(key, background)
+        else:
+            return collection.ensure_index(key)
 
     def find(self, collection_name, findQuery = None, returnQuery = None, sortField = None):
         collection = self.db[collection_name]
-        if sortField != None:
+        if sortField:
             return collection.find(findQuery, returnQuery).sort(sortField, 1)
         else:
             return collection.find(findQuery, returnQuery)
