@@ -52,8 +52,8 @@ if __name__ == "__main__":
     print('*** A total of %i documents were addded to the collection. ***' %total)
     print('\nDone in %i seconds' %(time.time() - starttime))
     t0 = time.time()
-    print("Updating indexes...")
-    mongo.ensure_index(collection, 'start_position')
-    mongo.ensure_index(collection, 'project')
+    print("Updating indexes in background...")
+    mongo.ensure_index(collection, 'start_position',{'background':True})
+    mongo.ensure_index(collection, 'project',{'background':True})
     print('\nDone in %i seconds' %(time.time() - t0))
     
