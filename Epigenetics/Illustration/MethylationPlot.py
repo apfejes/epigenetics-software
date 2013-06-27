@@ -41,19 +41,17 @@ class MethylationPlot(object):
     def build(self):
         length, end, start, width, margin = self.length, self.end, self.start, self.width, self. margin
 
-        X, Y = self.X, self.Y
-
-        offset = X[0]
-        invertby = max(Y)
+        offset = self.X[0]
+        invertby = max(self.Y)
         self.offset_y = (width + margin) * 0.8 + margin
         scale_x = length / (end - start)
         self.scale_x = scale_x
-        scale_y = (width + margin) * 0.8 / max(Y)
+        scale_y = (width + margin) * 0.8 / max(self.Y)
         self.scale_y = scale_y
 
         # scale the variables
-        X = [round(float(item - offset) * scale_x, 3) + margin for item in X]
-        Y = [round((invertby - item) * scale_y, 2) + margin for item in Y]
+        self.X = [round(float(item - offset) * scale_x, 3) + margin for item in self.X]
+        self.Y = [round((invertby - item) * scale_y, 2) + margin for item in self.Y]
 
 
 # #IF PLOTTING METHYLATION AS PATH, NOT POINTS:
@@ -70,14 +68,14 @@ class MethylationPlot(object):
             #self.colors = ['indigo','orange','blueviolet','aqua','darkred','green','lightcoral','blue','limegreen','yellow','pink','lightblue','brown', 'grey']
             #29 blue,green,grey palette
             self.colors = ['blue','cornflowerblue','darkblue','deepskyblue','darkturquoise','aquamarine',
-#                           'dodgerblue', 'lightblue', 'lightskyblue','lightseagreen','mediumslateblue',
-#                           'midnightblue','navy','mediumturquoise','limegreen','mediumspringgreen','forestgreen', 
-#                           'seagreen','palegreen', 'olive', 'yellowgreen','teal', 'paleturquoise',
+                           'dodgerblue', 'lightblue', 'lightskyblue','lightseagreen','mediumslateblue',
+                           'midnightblue','navy','mediumturquoise','limegreen','mediumspringgreen','forestgreen', 
+                           'seagreen','palegreen', 'olive', 'yellowgreen','teal', 'paleturquoise',
                            'darkolivegreen','darkgreen','cadetblue', 'darkslategrey','darkseagreen','grey']
         sample_count = 0
         samples_color = {}
         
-        for x, y, sample_id in zip(X, Y, self.sample_ids):
+        for x, y, sample_id in zip(self.X, self.Y, self.sample_ids):
             if sample_id not in samples_color :
                 sample_count += 1
                 samples_color[sample_id] = self.colors[sample_count - 1]
