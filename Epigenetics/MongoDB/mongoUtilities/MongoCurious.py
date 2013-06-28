@@ -149,7 +149,7 @@ class MongoCurious():
         self.docs = docs
         self.count = self.docs.count()
         self.Query['cursor'] = self.docs
-        return None
+        return self.docs
 
 
     def creategroups(self):
