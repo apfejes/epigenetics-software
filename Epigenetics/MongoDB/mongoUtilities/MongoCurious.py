@@ -94,8 +94,8 @@ class MongoCurious():
     def finddocs(self):
         '''Finds probes or documents corresponding to query'''
         #self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
-        query_chr, query_start, query_end, query_samplabel = {}, {}, {}, {}
-        if self.chromosome != None: query_chr = {'chr':self.chromosome}
+        query_start, query_end, query_samplabel, query_pos, query_sampgroup, query_project = {}, {}, {}, {}, {}, {}
+        query_chr = {'chr':self.chromosome}
 
         # Preparing the different parameters of the query depending on the collection chosen
         if self.collection == "methylation":
@@ -118,12 +118,21 @@ class MongoCurious():
                           'sample_id': True}
             sortby, sortorder = 'height', (-1)
 
+        elif self.collection =="samples":
+            if self.project != None: query_project = {"project":self.project}
+            if self.sample_label != None: query_samplabel = {"sample_label":self.sample_label}
+            if self.sample_group != None: query_sampgroup = {"sample_label":self.sample_group}
+            return_chr = {'_id': False, 'sample_label': True,
+                          'project': True, 'Sample Group': True}
+            sortby, sortorder = 'sample_label', 1
 
         else: 
             print "Collection queried is either not supported or not in the database. Exiting..."
             sys.exit()
             
-        query = dict(query_chr.items() + query_start.items() + query_end.items() + query_samplabel.items() + query_pos.items())
+        query = dict(query_chr.items() + query_start.items() + query_end.items()  
+                     + query_samplabel.items() + query_pos.items()
+                     + query_sampgroup.items() + query_project.items())
         print "\n Conducting query: "
         print "   From the database '{0}', and collection '{1}', ".format(self.database, self.collection)
         print "   Find(", query, ")"
