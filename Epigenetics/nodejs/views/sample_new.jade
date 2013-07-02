@@ -4,6 +4,8 @@ a(href='/')
 h1= title
 #newinformation
   H3 Add Sample Names to the project
+  ul
+    li This file must be a plain text file with each sample name on a separate line.  Please do not attempt to import Excel spreadsheets.
   form( method="post", enctype="multipart/form-data")
     input(type="hidden", name="projectid", value= projectid)
     div

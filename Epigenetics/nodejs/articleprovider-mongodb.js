@@ -533,21 +533,15 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
 ArticleProvider.prototype.assign_to_bs_plate = function(body, callback) {
   var selected = [];
   for (item in body) {
-    console.log("item :", item)
     if (body[item].bs_flag && body[item].bs_flag == "on") {
+      //console.log("body[item] :", body[item])
       selected.push(body[item])
     }
   }
-  console.log("selected:", selected)
-  console.log("selected.length:", selected.length)
-  body.sort(function() {return 0.5 - Math.random()})  //randomize order
-  //console.log("body:", body)
-  //if 
-  
-  //console.log("body.length:", body.length)
-  
-  
-  callback(selected)
+  //console.log("selected:", selected)
+  var len = selected.length
+  selected.sort(function() {return 0.5 - Math.random()})  //randomize order
+  callback(null, selected) //replace null with error messages as required
 }
 
 
@@ -620,6 +614,7 @@ ArticleProvider.prototype.reserve_array = function(body, callback) {
   var tiles = {}
   for (key in body) {
     if (key.indexOf("-cell", key.length-5) != -1) {  //ends with -cell
+      
       tiles[key.substring(0,key.lastIndexOf("-"))] = "reserved"
     }
   }

@@ -1,0 +1,81 @@
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+a(href='/')
+  #logo
+h1 Second Step - Manually place replicates
+- var reserved = Object.keys(layout).length
+- var samples = reserved + count
+- var chips = Math.ceil(samples/12)
+- if (chips > 8) { chips = 8;} 
+
+form(name = "replicate_assignment", method="post")
+  #project
+    - if (samples < 96 && samples%chips !=0 ) {
+      H3 The number of samples to plate (!{samples}) is not divisible by 12 (including reserved spaces).  Please change the number of reserved spaces, or alter the number of samples.
+      input(type="button", value="Back", onClick="window.history.back(-1)")
+    -} else {
+      - var translate = {1:"A",2:"B",3:"C",4:"D",5:"E",6:"F",7:"G",8:"H"};
+      input(type="hidden", name="step", value = 2)
+      input(type="hidden", id ="unassigned", name="unassigned", value = unassigned)
+      input(type="hidden", id ="layout", name="layout_store", value = layout_store)
+      input(type="hidden", id ="list", name="list", value = list)
+      input(type="hidden", id ="chips", name="chips", value=chips)
+      input(type="hidden", id ="samples", name="samples", value=samples)
+      div
+        H4 Based on the number of samples (!{count}) and reserved spaces (!{reserved}), you have chosen to use !{chips} chips.
+        | White spaces were previously reserved 
+        br
+        | Grey spaces are blocked because insufficient samples were selected. 
+        br
+        p Press Next to accept these assignments.  Press Back to regenerate.
+      table
+        tr  
+          td
+            - for (var h = 1; h <=8; h++) {
+              td.center
+                !{translate[h]}
+            -}
+        - for (var j = 1; j <=6; j++) {
+          tr
+            td
+              !{j}
+            - for (var i =1; i <= 8; i++) {
+              - var a = i + "-" + j
+              - var n = i + "-" + j + "-cell"
+              - if (layout[a]) {
+                td.whitewlines
+              - } else if (chips < (1 + Math.ceil(i/2))) {
+                td.greywlines(id =a+"-td", class = "all_td")
+              - } else { 
+                td.greenwlines(id =a+"-td", class = "all_td")
+                  input(type="checkbox", name=n, id=n, class = "all_check")
+              - }
+            - }
+        -}
+        tr
+          td
+            | &nbsp
+        - for (var j = 7; j <=12; j++) {
+          tr
+            td
+              !{j}
+            - for (var i =1; i <= 8; i++) {
+              - var n = i + "-" + j + "-cell"
+              - var a = i + "-" + j
+              - if (layout[a]) {
+                td.whitewlines
+              - } else if (chips < (1 + Math.ceil(i/2))) {
+                td.greywlines(id =a+"-td", class = "all_td")
+              - } else { 
+                 td.greenwlines(id =a+"-td", class = "all_td")
+                 input(type="checkbox", name=n, id=n, class = "all_check")
+              - }
+            - }
+        - }
+
+      br
+      div
+        input(type="submit", value="Next", onClick="validation('replicate_assignment');return false;")
+        input(type="button", value="Back", onClick="window.history.back(-1)")
+    -}
+
+    

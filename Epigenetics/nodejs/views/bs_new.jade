@@ -75,5 +75,13 @@ h1 Begin Bisulfite Sequence Process
               if (record_found == "false")
                 td.lines(colspan=4)
                   | No DNA nanodrop data found for this sample. 
+            td.lines
+              - if (sample.bsplates)
+                ul
+                  - each n in sample.bsplates
+                    li !{n}
+              - else
+                | 
+                 
     input(type="submit", value="Assign to New Bisulfite Sequencing Plate")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
