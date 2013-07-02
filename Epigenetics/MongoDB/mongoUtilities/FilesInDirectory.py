@@ -49,6 +49,7 @@ class Files(object):
         self.expressions_fnames.sort()
         self.annotation_fnames.sort()
         # 3.
+        
         projects = []
         for file_name in self.betas_fnames:
             project_name = re.sub('\_betas.txt$', '', file_name)
