@@ -15,7 +15,7 @@ class MethylationPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, title, X, Y, color, start, end, length, margin, width):
+    def __init__(self, filename, title, X, Y, sample_ids, color, start, end, length, margin, width):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -24,6 +24,7 @@ class MethylationPlot(object):
         self.title = title
         self.X = X
         self.Y = Y
+        self.sample_ids = sample_ids
         self.color = color
         self.start = start
         self.end = end
@@ -40,33 +41,50 @@ class MethylationPlot(object):
     def build(self):
         length, end, start, width, margin = self.length, self.end, self.start, self.width, self. margin
 
-        X, Y = self.X, self.Y
-
-        offset = X[0]
-        invertby = max(Y)
+        offset = self.X[0]
+        invertby = max(self.Y)
         self.offset_y = (width + margin) * 0.8 + margin
         scale_x = length / (end - start)
         self.scale_x = scale_x
-        scale_y = (width + margin) * 0.8 / max(Y)
+        scale_y = (width + margin) * 0.8 / max(self.Y)
         self.scale_y = scale_y
 
         # scale the variables
-        X = [round(float(item - offset) * scale_x, 3) + margin for item in X]
-        Y = [round((invertby - item) * scale_y, 2) + margin for item in Y]
+        self.X = [round(float(item - offset) * scale_x, 3) + margin for item in self.X]
+        self.Y = [round((invertby - item) * scale_y, 2) + margin for item in self.Y]
 
 
-# IF PLOTTING METHYLATION AS PATH, NOT POINTS:
-        # d contains the coordinates that make up the path
+# #IF PLOTTING METHYLATION AS PATH, NOT POINTS:
+# #        d contains the coordinates that make up the path
 #         d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
 #         for i in range(2, len(X)):
 #             d = d + (" " + str(X[i]) + "," + str(Y[i]))
-#
+# 
 #         self.plot.add(Path(stroke = self.color, fill = "none", stroke_width = '0.3', d = d))
 
-        for x, y in zip(X, Y):
-            point = Circle(center = (x, y), r = 0.3, fill = self.color)
-            self.elements.append(point)
 
+        if self.sample_ids:
+            #A few random colors
+            #self.colors = ['indigo','orange','blueviolet','aqua','darkred','green','lightcoral','blue','limegreen','yellow','pink','lightblue','brown', 'grey']
+            #29 blue,green,grey palette
+            self.colors = ['blue','cornflowerblue','darkblue','deepskyblue','darkturquoise','aquamarine',
+                           'dodgerblue', 'lightblue', 'lightskyblue','lightseagreen','mediumslateblue',
+                           'midnightblue','navy','mediumturquoise','limegreen','mediumspringgreen','forestgreen', 
+                           'seagreen','palegreen', 'olive', 'yellowgreen','teal', 'paleturquoise',
+                           'darkolivegreen','darkgreen','cadetblue', 'darkslategrey','darkseagreen','grey']
+        sample_count = 0
+        samples_color = {}
+        
+        for x, y, sample_id in zip(self.X, self.Y, self.sample_ids):
+            if sample_id not in samples_color :
+                sample_count += 1
+                samples_color[sample_id] = self.colors[sample_count - 1]
+                if sample_count == len(self.colors):
+                    sample_count = 0
+                elif sample_count > len(self.colors): print "Ran out of colours!"
+            point = Circle(center = (x, y), r = 0.3, fill = samples_color[sample_id])
+            self.elements.append(point)
+             
 
     def save(self):
         for element in self.elements:

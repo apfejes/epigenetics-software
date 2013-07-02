@@ -56,10 +56,10 @@ class MongoCurious():
         elif isinstance(chromosome, int):
                 Query['chromosome'] = 'chr' + str(chromosome)
                 self.chromosome = chromosome
-        Query['start'] = start
-        self.start = start
-        Query['end'] = end
-        self.end = end
+        Query['start'] = int(start)
+        self.start = int(start)
+        Query['end'] = int(end)
+        self.end = int(end)
         Query['sample label'] = sample_label
         self.sample_label = sample_label
         Query['sample type'] = sample_type
@@ -93,43 +93,54 @@ class MongoCurious():
 
     def finddocs(self):
         '''Finds probes or documents corresponding to query'''
-        self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
+        #self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
+        query_start, query_end, query_samplabel, query_pos, query_sampgroup, query_project = {}, {}, {}, {}, {}, {}
+        query_chr = {'chr':self.chromosome}
 
         # Preparing the different parameters of the query depending on the collection chosen
         if self.collection == "methylation":
-            query_chr, query_start, query_end, query_samplabel = {}, {}, {}, {}
-            if self.chromosome != None: query_chr = {'chr':self.chromosome}
             if self.end != None: query_start = {"start_position":{"$lte":self.end}}
             if self.start != None: query_end = {"end_position":{"$gte":self.start}}
             if self.sample_label != None: query_samplabel = {"sample_label":self.sample_label}
-            query = dict(query_chr.items() + query_start.items() + query_end.items() + query_samplabel.items())
             return_chr = {'_id': False, 'beta_value': True,
                           'start_position': True, 'end_position': True,
                           'sample_label': True}
-            print "\n Conducting query: "
-            print "   From the database '{0}', and collection '{1}', ".format(self.database, self.collection)
-            print "   Find(", query, ")"
-            # Get probes corresponding to query and sort by starting positions for beta value binning
-            docs = self.mongo.find(self.collection, query, return_chr).sort('start_position', 1)
+            sortby, sortorder = 'start_position', 1
 
-        if self.collection == "waves":
-            query_chr, query_pos, = {}, {}
-            if self.chromosome != None: query_chr = {'chr':self.chromosome}
+        elif self.collection == "waves":
+            self.mongo.ensure_index(self.collection, 'pos')
+            query_pos = {}
             if self.start != None and self.end != None:
                 extension = 500    # extend the region of query to catch peaks with tails in the region
                 query_pos = {"pos":{"$lte":self.end + extension, "$gte":self.start - extension}}
-            query = dict(query_chr.items() + query_pos.items())
             return_chr = {'_id': False, 'pos': True,
                           'height': True, 'stddev': True,
                           'sample_id': True}
-            print "\n Conducting query: "
-            print "   From the database '{0}', and collection '{1}', ".format(self.database, self.collection)
-            print "   Find(", query, ")"
-            # Get documents corresponding to query and sort by inverse peak height for plotting purposes
-            docs = self.mongo.find(self.collection, query, return_chr).sort('height', -1)
+            sortby, sortorder = 'height', (-1)
+
+        elif self.collection =="samples":
+            if self.project != None: query_project = {"project":self.project}
+            if self.sample_label != None: query_samplabel = {"sample_label":self.sample_label}
+            if self.sample_group != None: query_sampgroup = {"sample_label":self.sample_group}
+            return_chr = {'_id': False, 'sample_label': True,
+                          'project': True, 'Sample Group': True}
+            sortby, sortorder = 'sample_label', 1
+
+        else: 
+            print "Collection queried is either not supported or not in the database. Exiting..."
+            sys.exit()
+            
+        query = dict(query_chr.items() + query_start.items() + query_end.items()  
+                     + query_samplabel.items() + query_pos.items()
+                     + query_sampgroup.items() + query_project.items())
+        print "\n Conducting query: "
+        print "   From the database '{0}', and collection '{1}', ".format(self.database, self.collection)
+        print "   Find(", query, ")"
+        # Get probes corresponding to query and sort by starting positions for beta value binning
+        docs = self.mongo.find(self.collection, query, return_chr).sort(sortby, sortorder)
 
         if docs.count() == 0:
-            print "    WARNING: The following query return zero probes or documents!"
+            print("    WARNING: The following query return zero probes or documents!")
             print "    ---> Find(", query, ")"
             print "     use the checkquery() method to validate the inputs of your query."
             sys.exit()
@@ -138,7 +149,7 @@ class MongoCurious():
         self.docs = docs
         self.count = self.docs.count()
         self.Query['cursor'] = self.docs
-        return None
+        return self.docs
 
 
     def creategroups(self):
@@ -150,12 +161,12 @@ class MongoCurious():
         print "    Creating sample groups..."
         if self.project == "down":
             if self.sample_type not in ["Control", "DS"]: self.sample_type = str(raw_input(
-            				"Please specify a sample type: \"Control\" or \"DS\"?"))
+                            "Please specify a sample type: \"Control\" or \"DS\"?"))
             feature = 'Sample Group'
             samplegroup = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
         if self.project == "kollman":
             if self.sample_type not in ["unstimulated", "listeria"]: self.sample_type = str(raw_input(
-            				"Please specify a sample type: \"unstimulated\" or \"listeria\"?"))
+                            "Please specify a sample type: \"unstimulated\" or \"listeria\"?"))
             feature = 'stimulation'
             samplegroup = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
         if self.project == "All":
@@ -166,9 +177,9 @@ class MongoCurious():
                 samplegroup = self.sample_dict(project = "kollman", feature = "stimulation")["unstimulated"]
                 samplegroup.append(self.sample_dict(project = "down", feature = "Sample Group")["Control"])
                 samplegroup.append(self.sample_dict(project = "kollman", feature = "stimulation",
-                					nottype = ["unstimulated", "listeria"]))
+                                    nottype = ["unstimulated", "listeria"]))
                 samplegroup.append(self.sample_dict(project = "down", feature = "Sample Group",
-                					nottype = ["Control", "DS"]))
+                                    nottype = ["Control", "DS"]))
             if self.sample_type == "disease":
                 samplegroup = self.sample_dict(project = "kollman", feature = "stimulation")["listeria"]
                 samplegroup.append(self.sample_dict(project = "down", feature = "Sample Group")["DS"])
@@ -210,6 +221,7 @@ class MongoCurious():
         return sample_groups
 
     def collectbetas(self,
+                     separate_samples = False,
                      window_size = 1):
         '''Collects and bins methylation data'''
 
@@ -233,23 +245,30 @@ class MongoCurious():
 
         print '    %s probes\' beta values were extracted and binned.' % count
 
+
+        sample_ids = []
         x_position = []
         y_avg = []
         for pos, tup_list in sorted(position_dic.iteritems()):
             beta_values = []
             for beta, samp in tup_list:
-                if self.sample_type == None:
-                    beta_values.append(beta)
-                elif samp in self.sample_groups:
-                    beta_values.append(beta)
-                else: continue
-                data_avg = mean(beta_values)
-                x_position.append(pos)
-                y_avg.append(data_avg)
+                if separate_samples:
+                    if self.sample_type == None or samp in self.sample_groups:
+                        x_position.append(pos)
+                        y_avg.append(beta)
+                        sample_ids.append(samp)
+                else:
+                    if self.sample_type == None or samp in self.sample_groups:
+                        beta_values.append(beta)
+                    else: continue
+                    data_avg = mean(beta_values)
+                    x_position.append(pos)
+                    y_avg.append(data_avg)
 
         print "    %i beta values collected" % len(x_position)
         self.positions = x_position
         self.betas = y_avg
+        self.sample_ids = sample_ids
 
         if self.start == None:
             i = 0
@@ -304,7 +323,8 @@ class MongoCurious():
             if color == None: color = "royalblue"
             drawing = methylationplot.MethylationPlot(filename, title,
                                                       self.positions, self.betas,
-                                                      color, self.start, self.end,
+                                                      self.sample_ids, color,
+                                                      self.start, self.end,
                                                       length, margin, width)
             drawing.build()
         if self.collection == "waves":
@@ -332,5 +352,3 @@ class MongoCurious():
             z = drawing
         drawing = None
         return z
-
-

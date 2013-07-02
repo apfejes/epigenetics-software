@@ -182,7 +182,7 @@ class ChipseqPlot(object):
         maxh, margin = self.maxh, self.margin
         scale_y, offset_y = self.scale_y, self.offset_y
 
-        scale_tics = 60
+        scale_tics = 64
         ytics = [i for i in range(0, int(maxh) + 1, scale_tics)]
         while len(ytics) < 4:
             scale_tics /= 2

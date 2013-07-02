@@ -7,13 +7,16 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 from MongoDB.mongoUtilities import MongoCurious
 
+print("Connecting to database:")
 m = MongoCurious.MongoCurious(database = "human_epigenetics")
 
+#For Huntington gene
+#chromosome = 'chr4', start = 3076407, end = 3245676)
 
-query1 = m.query(collection = "waves", chromosome = "chr4", start = 3076407, end = 3245676)
-m.finddocs()
-m.getwaves()
-
-def svgcode():
-    return m.svg(to_string = True, title = "Huntington gene", color = 'indigo', length = 300.0)
+def svgcode(chr = None, start = None, end = None):
+    print("Querying...")
+    query1 = m.query(collection = "waves", chromosome = chr, start = start, end = end)
+    m.finddocs()
+    m.getwaves()
+    return m.svg(to_string = True, title = "Chipseq peaks on chromosome "+str(chr), color = 'indigo', length = 300.0)
 

@@ -4,14 +4,14 @@ Created on 2013-04-12
 @author: jyeung
 '''
 
-
+from time import time
 import sys
 import os
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 # _root_dir = os.path.dirname(_cur_dir)
 # sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir)
-sys.path.insert(0, _cur_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
+sys.path.insert(0, _cur_dir + os.sep + "mongoUtilities")
 import Mongo_Connector, Samples
 
 
@@ -36,33 +36,71 @@ if __name__ == "__main__":
         sys.exit()
     filename = sys.argv[1]
     
-    kollman_or_down = raw_input('Inserting kollman or down?: ')
+    project_name = raw_input('Enter the name of the project: ')
+    columns_sample = []
+    columns_patient = []
     
-    if kollman_or_down == 'kollman':
+    if project_name == 'kollman':
         # Column names for kollman. 
-        columns_sample = ['sampleID', 'stimulation', 'life_stage']
-        columns_patient = []
-        project_name = 'kollman'
+        columns_sample.extend(['sampleID', 'stimulation', 'life_stage'])
     
-    elif kollman_or_down == 'down':
+    elif project_name == 'down':
         # Column names for down syndrome. 
-        columns_sample = ['SampleID', 'Sample Group', 'Curent_Age', 'Test_Date', 
-                          'Sample_Section', 'Sample_Well', 'Sentrix Barcode']
-        columns_patient = ['Total_BriefPraxis', 'DRM_SumofSocial', 'Handedness', 'Sex', 
+        columns_sample.extend(['SampleID', 'Sample Group', 'Curent_Age', 'Test_Date', 
+                          'Sample_Section', 'Sample_Well', 'Sentrix Barcode'])
+        columns_patient.extend(['Total_BriefPraxis', 'DRM_SumofSocial', 'Handedness', 'Sex', 
                            'Level_of_Intellectual_Delay', 'DMR_SumofCognitive', 
-                           'Percentage_BriefPraxis']
-        project_name = 'down'
+                           'Percentage_BriefPraxis'])
+    else:
+        print('\nPlease use the command \'$head ****_pData.txt\' to '+
+              'view the columns of the tabular data.')
+        print('You are now being asked which are the names of ' +
+              'the columns which pertain to sample information and '+ 
+              'which pertain to patient information.')
+        entering = True
+        while entering:
+            input  = raw_input('\nEnter a column name that contains sample information: ')
+            if input == '.':
+                print(str(len(columns_sample)) + ' names appended to list')
+                entering = False
+            else:
+                if input not in columns_sample:
+                    print('Input appended. Enter \'.\' to terminate the list.')
+                    columns_sample.append(input)
         
-    else: 
-        print('Unknown input, exiting...')
-        sys.exit()
-    
-    sample_label_identifier = raw_input('Insert column name that indicates the sample label or ID: ')
+        entering = True
+        while entering:
+            input  = raw_input('\nEnter a column name that contains patient information: ')
+            if input == '.':
+                print(str(len(columns_patient)) + ' names appended to list')
+                entering = False
+            else:
+                if input not in columns_patient:
+                    print('Input appended. Enter \'.\' to terminate the list.')
+                    columns_patient.append(input)
+            
+    sample_label_identifier = raw_input('\nInsert column name that indicates the sample label or ID: ')
     # sample_label_identifier = 'SampleID'    # for down project
     # sample_label_identifier = 'sampleID'    # for kollman project
-    InsertSampleInfo(filename, sample_label_identifier)
-    print('Inserted samples into db %s and collection %s' %(database_name, collection_name))
-
+    # sample_label_identifier = 'sampleID'    # for gecko project
+    print('\nProject:' + project_name)
+    print 'Sample Info columns: ', columns_sample
+    print 'Patient Info columns: ', columns_patient
+    run = ''
+    while run != 'yes' and run!= 'no':
+        run = raw_input('\nInsert sample information into database? Please enter \'yes\' or \'no\' :')
+        
+    if run == 'yes':
+        t0 = time()
+        print('\nInserting samples into db %s and collection %s...' %(database_name, collection_name))
+        InsertSampleInfo(filename, sample_label_identifier)
+        duration = time()-t0
+        #if int(duration) > 1:
+        #    print "Done in ", duration, " seconds."
+        print('Done.')
+    elif run == 'no':
+        print('Not inserting sample data into database. Exiting...')
+        sys.exit()
 
     
 
