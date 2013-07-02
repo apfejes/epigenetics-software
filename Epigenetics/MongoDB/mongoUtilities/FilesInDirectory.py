@@ -49,14 +49,17 @@ class Files(object):
         self.expressions_fnames.sort()
         self.annotation_fnames.sort()
         # 3.
+        if len(self.betas_fnames) == 1:
+            self.project  = raw_input('\nEnter the name of the \'project\' entry to give to the data: ')
+        elif len(self.betas_fnames)>1:
+            projects = []
+            for file_name in self.betas_fnames:
+                project_name = re.sub('\_betas.txt$', '', file_name)
+                projects.append(project_name)
+            self.project = projects
+            self.project.sort()
+            print(str(len(projects)) + ' projects found in ' + Directory)
         
-        projects = []
-        for file_name in self.betas_fnames:
-            project_name = re.sub('\_betas.txt$', '', file_name)
-            projects.append(project_name)
-        self.projects = projects
-        self.projects.sort()
-        print(str(len(projects)) + ' projects found in ' + Directory)
         
 
     def InsertDataToDB(self, collection, 
@@ -114,6 +117,7 @@ class Files(object):
                 document[rownamebeta] = rowname_beta
                 document[keynamebeta] = float(row_i_beta[i+1])
                 document[keynameexprs] = float(row_i_exprs[i+1])
+                document['project'] = str(self.project)
                 BulkInsert.append(document)
                 
             if count%100 == 0:
