@@ -54,6 +54,6 @@ if __name__ == "__main__":
     t0 = time.time()
     print("Updating indexes in background...")
     mongo.ensure_index(collection, 'start_position',{'background':True})
-    mongo.ensure_index(collection, 'project',{'background':True})
+    #mongo.ensure_index(collection, 'project',{'background':True})
     print('\nDone in %i seconds' %(time.time() - t0))
     

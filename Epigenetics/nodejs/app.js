@@ -136,13 +136,28 @@ app.post('/input/bs_new/:id', function(req, res){
   switch(req.param('step')) {
     case '0':
       articleProvider.process_Array(req.body, function(error, data) {
-        articleProvider.assign_to_bs_plate(data, function(error, assigned) {
-          res.render('bs_step1.jade', {assignments: assigned, assigned:JSON.stringify(assigned)});
+        articleProvider.assign_to_bs_plate(data, function(error, unassigned) {
+          res.render('bs_step1.jade', {unassigned:JSON.stringify(unassigned)});
+          //console.log("stringified:", JSON.stringify(unassigned));
         });
       });
       break;
     case '1':
+      articleProvider.reserve_array(req.body, function(layout) {
+        articleProvider.count_samples(JSON.parse(req.param('unassigned')), function(count) { //number of samples
+          articleProvider.parse_manual(JSON.parse(req.param('unassigned')), function(list) {  //number of manual entries to process.
+            //res.redirect('/');
+            res.render('bs_step2.jade',{count:count, list:list, layout:layout, layout_store:JSON.stringify(layout), unassigned:req.param('unassigned')});
+          });
+        });
+      });
       break;
+    case '1':
+    
+      //assign to database.
+      break
+    default:
+      res.redirect('/');
   }
 });
 

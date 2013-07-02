@@ -6,7 +6,7 @@ form( method="post")
   #project
     - var translate = {1:"A",2:"B",3:"C",4:"D",5:"E",6:"F",7:"G",8:"H"};
     input(type="hidden", id="step", name="step", value = 1)
-    input(type="hidden", id="assigned", name="assigned", value= assigned)
+    input(type="hidden", id="unassigned", name="unassigned", value= unassigned)
     div
       p If you would like to reserve specific locations on the chip, please do so now.
       p (You will be able to edit these locations, after the samples have been assigned.)
@@ -15,7 +15,7 @@ form( method="post")
         td
           - for (var h = 1; h <=8; h++) {
             td.center
-              !{translate[i]}
+              !{translate[h]}
           -}
       - for (var j = 1; j <=6; j++) {
         tr
@@ -23,17 +23,24 @@ form( method="post")
             !{j}
           - for (var i =1; i <= 8; i++) {
             - var a = i + "-" + j + "-cell"
-            td.whitewlines
-              
+            td.greenwlines
+              input(type="checkbox", name=a)
           - }
+      -}
+      tr
+        td
+          | &nbsp
+      - for (var j = 7; j <=12; j++) {
+        tr
           td
-            |  -
-          - for (var j = 7; j <=12; j++) {
+            !{j}
+          - for (var i =1; i <= 8; i++) {
             - var a = i + "-" + j + "-cell"
             td.greenwlines
               input(type="checkbox", name=a)
           - }
       - }
+    br
     div
       input(type="submit", value="Next")
       input(type="button", value="Back", onClick="window.history.back(-1)")
