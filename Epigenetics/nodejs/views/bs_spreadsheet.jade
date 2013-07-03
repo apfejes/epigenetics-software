@@ -62,7 +62,7 @@ form( method="post")
           td.lines #{sample.notes}
           td.lines
             if (sample.bsplates)
-              - for bsplate in sample.bsplates
-                ul
+              ul
+                - for bsplate in sample.bsplates
                   li
                     a(href="/input/bsplate_edit/"+bsplate)=bsplate

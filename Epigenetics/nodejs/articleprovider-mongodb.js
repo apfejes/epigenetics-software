@@ -5,7 +5,7 @@ var BSON = require('mongodb').BSON;
 var ObjectID = require('mongodb').ObjectID;
 
 ArticleProvider = function(host, port) {
-  this.db= new Db('test', new Server(host, port, {auto_reconnect: true}, {}), {safe:true});
+  this.db= new Db('lims', new Server(host, port, {auto_reconnect: true}, {}), {safe:true});
   this.db.open(function(){});
 };
 
@@ -251,6 +251,20 @@ ArticleProvider.prototype.getPlates = function(id, callback) {
       } else callback(null, transactions)
     });
 };
+
+  //---- 
+  //Retrieve bisulfite sequencing plates for a project
+  //---- 
+  
+ArticleProvider.prototype.getBsPlates = function(id, callback) {
+    this.getDBQuery('bsplates', {projectid: id}, {}, {}, function(error, transactions) {
+      if( error ) {
+        console.log("transaction-type error: ", error);
+        callback(error);
+      } else callback(null, transactions)
+    });
+};
+
 
   //---- 
   //Retrieve samples for a project

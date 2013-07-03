@@ -31,6 +31,10 @@ table, td{
   text-align:center;
 }
 
+.top {
+  vertical-align:top;
+}
+
 .lines{
   border: 1px solid #aaaaaa;
   border-spacing: 0px;
