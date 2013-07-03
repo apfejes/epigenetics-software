@@ -13,9 +13,9 @@ class MongoQuery():
         fixed_dictionary = {"database":None, "collection": None,
                             "sample type":None, "chromosome":None,
                             "start" : None, "end" : None,
-                            "sample label" : None, "sample groups" : None,
+                            "sample label" : None, "sample group" : None,
                             "project" : None, "cursor" : None, "waves" : None,
-                            "sample id": None}
+                            "sample id": None, 'sample_label_list':None}
         self._data = fixed_dictionary
 
     def __setitem__(self, key, value):

@@ -35,7 +35,7 @@ mongo.drop_index('methylation','project_1')
 
 queryDict = {'sample_label':{'$in':sample_labels_list}}
 updateDict = {'$set':{'project':'gecko'}}
-mongo.update('methylation', queryDict, updateDict, multiOpt = True)
+mongo.update('methylation', queryDict, updateDict, True)
 
 print "Done updating in ", (time()-t0)
 

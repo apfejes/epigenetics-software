@@ -24,7 +24,7 @@ m.finddocs()
 print "find docs %.3f" % (time() - t0)
 
 t0 = time()
-m.collectbetas(separate_samples = True)
+m.collectbetas()
 print "collect betas %.3f" % (time() - t0)
 
 t0 = time()
