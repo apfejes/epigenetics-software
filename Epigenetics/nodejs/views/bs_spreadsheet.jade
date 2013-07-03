@@ -1,0 +1,68 @@
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+a(href='/')
+  #logo
+h1 Begin Array Process
+form( method="post")
+  input(type="hidden", name="step", value = 0)
+  #section1
+    b Notes: 
+    br
+    table.lines
+      tr
+        td.lines SampleID
+        td.lines Array Location
+        td.lines conc
+        td.lines Total N.A. (ng)
+        td.lines Notes
+        td.lines Plates
+      - each sample in samples
+        tr
+          td.lines 
+            b #{sample.sampleid}-#{sample.sample_num}
+          td.lines
+            - for (var bsplate in bsplates)
+              - if (bsplates[bsplate] == sample.sampleid + "-" + sample.sample_num) {
+                !{bsplate}
+              -}
+          if (sample.nanodrop)
+            - var best_date = sample.nanodrop[0].date
+            - var best_time = sample.nanodrop[0].time
+            - for n in sample.nanodrop 
+              - if (n.date > best_date) 
+                 - best_date = n.date
+                 - best_time = n.time
+              - else if (n.date == best_date)
+                - if (n.time > best_time)
+                  - best_date = n.date
+                  - best_time = n.time
+            - each n in sample.nanodrop            
+              - if (n.date == best_date  && n.time == best_time)
+                  input(type="hidden", name="#{sample.sampleid}-#{sample.sample_num}-date", value = n.date)
+                  input(type="hidden", name="#{sample.sampleid}-#{sample.sample_num}-time", value = n.time)
+                  td.lines
+                    !{n.conc} #{n.units} 
+                  td.lines
+                    - var to_add = (160/n.conc).toFixed(2)
+                    - if (to_add > 4) {
+                      b all 
+                      | (!{to_add} µl)
+                    - } else {
+                      b !{to_add} µl
+                    -}
+
+          else
+            td.redwlines
+            td.redwlines
+            td.lines
+            td.lines
+            td.lines
+            td.lines
+            td.redwlines
+
+          td.lines #{sample.notes}
+          td.lines
+            if (sample.bsplates)
+              - for bsplate in sample.bsplates
+                ul
+                  li
+                    a(href="/input/bsplate_edit/"+bsplate)=bsplate
