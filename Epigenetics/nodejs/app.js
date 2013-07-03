@@ -78,7 +78,7 @@ app.get('/input/project_edit/:id', function(req, res){
 });
 
 app.post('/input/project_edit/:id', function(req, res){
-    console.log('updating project id: ', req.params.id)
+    //console.log('updating project id: ', req.params.id)
     articleProvider.updateDB('projects', {_id:ObjectID.createFromHexString(req.params.id)}, 
        {$set: {proj_name: req.param('proj_name'),
         lab_contact: req.param('lab_contact'),
@@ -124,6 +124,19 @@ app.get('/view/:id', function(req, res) {
 //  Bisulfite Sequencing
 //------------------------------------
 
+
+// This function requires the Plate ID.
+
+app.get('/input/bs_spreadsheet/:id', function(req, res){
+  articleProvider.bsplateById(req.params.id, function(error, bsplates) {
+    articleProvider.sampleByBsPlateId(req.params.id, function(error, samples) {
+      res.render('bs_spreadsheet.jade',{title: 'Edit Plate', samples:samples, bsplates:bsplates});
+    });
+  });
+});
+
+
+
 app.get('/input/bs_new/:id', function(req, res) {
   articleProvider.getSamples(req.params.id, function(error, samples) {
     if (error) console.log("sample_spreadsheet/:id (get) error: ", error)
@@ -144,7 +157,7 @@ app.post('/input/bs_new/:id', function(req, res){
       articleProvider.reserve_array(req.body, function(reserved) {
         articleProvider.count_samples(JSON.parse(req.param('unassigned')), function(count) { //number of samples
           articleProvider.assign_to_bs_plate(reserved, JSON.parse(req.param('unassigned')), function(layout) {
-            console.log("layout ", JSON.stringify(layout))
+            //console.log("layout ", JSON.stringify(layout))
             res.render('bs_step2.jade',{count:count, layout:layout, layout_store:JSON.stringify(layout)});
           });
         });
@@ -297,7 +310,7 @@ app.post('/view/sample_spreadsheet_edit/:id', function(req, res){
 
 app.get('/input/bsplate_edit/:id', function(req, res){
   articleProvider.bsplateById(req.params.id, function(error, bsplate) {
-    console.log("BSPLATE:", bsplate)
+    //console.log("BSPLATE:", bsplate)
     res.render('bsplate_edit.jade',{title: 'Edit Plate', bsplate:bsplate});
   });
 });

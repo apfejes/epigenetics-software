@@ -2,9 +2,9 @@ link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
 a(href='/')
   #logo
 - if (bsplate.barcode) {
-  h1 !{title} - !{bsplate.barcode}
+  h1 !{title} - barcode: !{bsplate.barcode}
 - } else {
-  h1= title
+  h1 !{title} - ID !{bsplate._id}
 - }
   
 form( method="post")

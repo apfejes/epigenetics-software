@@ -168,6 +168,16 @@ ArticleProvider.prototype.bsplateById = function(id, callback) {
     });
 };
 
+ArticleProvider.prototype.sampleByBsPlateId = function(id, callback) {
+    this.getDBQuery('samples', {bsplates: ObjectID.createFromHexString(id)}, {}, {sampleid:1}, function(error, result) {
+      if( error ) {
+        console.log("sampleById error:", error)
+        callback(error)
+      } else callback(null, result)
+    });
+};
+
+
 
 ArticleProvider.prototype.sampleByPlateId = function(id, callback) {
     this.getDBQuery('samples', {plates: ObjectID.createFromHexString(id)}, {}, {sampleid:1}, function(error, result) {
@@ -373,16 +383,9 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
 
 ArticleProvider.prototype.saveBSPlacement = function(layout, project_id, callback) {
   var date = new Date();
-  
   var o = JSON.parse(layout)
-  console.log("o1: ", o);
-  
   var plateid = 0 
   o['projectid']= project_id
-  console.log("o2: ", o);
-  
-  
-  
   this.insertDB('bsplates', o, function(error, results) { 
     if( error ) {
       console.log("UpdateDB for Save BS plates error: ", error)
@@ -615,10 +618,6 @@ ArticleProvider.prototype.assign_to_bs_plate = function(reserved,unassigned, cal
   var len = selected.length
   selected.sort(function() {return 0.5 - Math.random()})  //randomize order
   
-  
-  console.log("reserved:", reserved)
-  console.log("selected length:", selected.length)
-  
   if (reserved.length + selected.length > 96) {
     console.log("too many samples selected - assign to bs.plates")
   }
@@ -645,9 +644,6 @@ ArticleProvider.prototype.assign_to_bs_plate = function(reserved,unassigned, cal
       i += 1
     } 
   }
-  console.log("layout:", layout)
-  
-  
   callback(layout) //replace null with error messages as required
 }
 
