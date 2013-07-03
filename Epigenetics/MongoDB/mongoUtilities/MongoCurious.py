@@ -100,9 +100,10 @@ class MongoCurious():
         # Preparing the different parameters of the query depending on the collection chosen
         if self.collection == "methylation":
             query_chr = {'chr':self.chromosome}
-            if self.end != None: query_start = {"start_position":{"$lte":self.end}}
-            if self.start != None: query_end = {"end_position":{"$gte":self.start}}
-            if self.sample_label != None: query_samplabel = {"sample_label":self.sample_label}
+            if self.project: query_project = {'project': self.project}
+            if self.end: query_start = {"start_position":{"$lte":self.end}}
+            if self.start: query_end = {"end_position":{"$gte":self.start}}
+            if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
             return_chr = {'_id': False, 'beta_value': True,
                           'start_position': True, 'end_position': True,
                           'sample_label': True}
@@ -110,11 +111,12 @@ class MongoCurious():
 
         elif self.collection == "waves":
             query_chr = {'chr':self.chromosome}
-            self.mongo.ensure_index(self.collection, 'pos')
-            query_pos = {}
-            if self.start != None and self.end != None:
+            if self.project: query_project = {'project': self.project}
+            if self.start and self.end:
                 extension = 500    # extend the region of query to catch peaks with tails in the region
                 query_pos = {"pos":{"$lte":self.end + extension, "$gte":self.start - extension}}
+            if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
+            if self.sample_group: query_sampgroup = {"Sample Group":self.sample_group}
             return_chr = {'_id': False, 'pos': True,
                           'height': True, 'stddev': True,
                           'sample_id': True}
@@ -146,7 +148,7 @@ class MongoCurious():
             print "     use the checkquery() method to validate the inputs of your query."
             sys.exit()
 
-        print " Found %i probes or documents." % docs.count()
+        print " Found %i documents." % docs.count()
         self.docs = docs
         self.count = self.docs.count()
         self.Query['cursor'] = self.docs
@@ -222,7 +224,6 @@ class MongoCurious():
         return sample_label_list
 
     def collectbetas(self,
-                     separate_samples = False,
                      window_size = 1):
         '''Collects and bins methylation data'''
 
@@ -248,27 +249,23 @@ class MongoCurious():
 
 
         sample_ids = []
-        x_position = []
-        y_avg = []
+        position = []
+        values = []
         for pos, tup_list in sorted(position_dic.iteritems()):
             beta_values = []
             for beta, samp in tup_list:
-                if separate_samples:
-                    if self.sample_type == None or samp in self.sample_label_list:
-                        x_position.append(pos)
-                        y_avg.append(beta)
-                        sample_ids.append(samp)
-                else:
                     if self.sample_type == None or samp in self.sample_label_list:
                         beta_values.append(beta)
                     else: continue
-                    data_avg = mean(beta_values)
-                    x_position.append(pos)
-                    y_avg.append(data_avg)
+                    values.append((mean(beta_values), std(beta_values), len(beta_values)))
+                    position.append(pos)
+                    sample_ids.append(samp)
+
+
 
         print "    %i beta values collected" % len(x_position)
-        self.positions = x_position
-        self.betas = y_avg
+        self.positions = position
+        self.betas = values
         self.sample_ids = sample_ids
 
         if self.start == None:
