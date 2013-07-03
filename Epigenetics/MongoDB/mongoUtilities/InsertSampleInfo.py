@@ -57,28 +57,26 @@ if __name__ == "__main__":
         print('You are now being asked which are the names of ' +
               'the columns which pertain to sample information and '+ 
               'which pertain to patient information.')
-        entering = True
-        while entering:
+        while True:
             input  = raw_input('\nEnter a column name that contains sample information: ')
-            if input == '.':
+            if input:
                 print(str(len(columns_sample)) + ' names appended to list')
                 entering = False
-            else:
-                if input not in columns_sample:
-                    print('Input appended. Enter \'.\' to terminate the list.')
+            elif input not in columns_sample:
                     columns_sample.append(input)
-        
-        entering = True
-        while entering:
-            input  = raw_input('\nEnter a column name that contains patient information: ')
-            if input == '.':
+                    print('Input appended. Simply enter to terminate the list.')
+        print(str(len(columns_sample)) + ' names appended to list')
+
+        while True:
+            input  = raw_input('\nEnter a column name that contains sample information: ')
+            if input:
                 print(str(len(columns_patient)) + ' names appended to list')
                 entering = False
-            else:
-                if input not in columns_patient:
-                    print('Input appended. Enter \'.\' to terminate the list.')
+            elif input not in columns_patient:
                     columns_patient.append(input)
-            
+                    print('Input appended. Simply enter to terminate the list.')
+        print(str(len(columns_patient)) + ' names appended to list')   
+                
     sample_label_identifier = raw_input('\nInsert column name that indicates the sample label or ID: ')
     # sample_label_identifier = 'SampleID'    # for down project
     # sample_label_identifier = 'sampleID'    # for kollman project
