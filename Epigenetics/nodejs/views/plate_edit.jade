@@ -111,26 +111,38 @@ form( method="post")
         td
           input(type="text", name="sec2_plate_bc", value=plate.sec2_plate_bc)
       tr
+        td.top
+          b MA1 reagents :
         td
-          b MA1 reagent :
+          input(type="text", name="sec2_MA1_1", value=plate.sec2_MA1_1, placeholder="MA1-1 barcode")
+          br
+          input(type="text", name="sec2_MA1_2", value=plate.sec2_MA1_2, placeholder="MA1-2 barcode")
         td
-          input(type="text", name="sec2_MA1_1", value=plate.sec2_MA1_1)
-        td
-          input(type="text", name="sec2_MA1_2", value=plate.sec2_MA1_2)
+          input(type="text", name="sec2_MA1_1_lot", value=plate.sec2_MA1_1_lot, placeholder="MA1-1 lot number")
+          br
+          input(type="text", name="sec2_MA1_2_lot", value=plate.sec2_MA1_2_lot, placeholder="MA1-2 lot number")
       tr
-        td
+        td.top
           b RMP reagent :
         td
-          input(type="text", name="sec2_RMP_1", value=plate.sec2_RMP_1)
+          input(type="text", name="sec2_RMP_1", value=plate.sec2_RMP_1, placeholder="RMP-1 barcode")
+          br
+          input(type="text", name="sec2_RMP_2", value=plate.sec2_RMP_2, placeholder="RMP-2 barcode")
         td
-          input(type="text", name="sec2_RMP_2", value=plate.sec2_RMP_2)
+          input(type="text", name="sec2_RMP_1_lot", value=plate.sec2_RMP_1_lot, placeholder="RMP-1 lot number")
+          br
+          input(type="text", name="sec2_RMP_2_lot", value=plate.sec2_RMP_2_lot, placeholder="RMP-2 lot number")
       tr
-        td
+        td.top
           b MSM reagent :
         td
-          input(type="text", name="sec2_MSM_1", value=plate.sec2_MSM_1)
+          input(type="text", name="sec2_MSM_1", value=plate.sec2_MSM_1, placeholder="MSM-1 barcode")
+          br
+          input(type="text", name="sec2_MSM_2", value=plate.sec2_MSM_2, placeholder="MSM-2 barcode")
         td
-          input(type="text", name="sec2_MSM_2", value=plate.sec2_MSM_2)
+          input(type="text", name="sec2_MSM_1_lot", value=plate.sec2_MSM_1_lot, placeholder="MSM-1 lot number")
+          br
+          input(type="text", name="sec2_MSM_2_lot", value=plate.sec2_MSM_2_lot, placeholder="MSM-2 lot number")
       tr
         td
           b H
@@ -170,12 +182,16 @@ form( method="post")
         td
           b (37C, 1h) 
       tr
-        td 
+        td.top 
           b FMS reagent :
         td
-          input(type="text", name="sec3_FMS_1", value=plate.sec3_FMS_1)
+          input(type="text", name="sec3_FMS_1", value=plate.sec3_FMS_1, placeholder="FMS-1 barcode")
+          br
+          input(type="text", name="sec3_FMS_2", value=plate.sec3_FMS_2, placeholder="FMS-2 barcode")
         td
-          input(type="text", name="sec3_FMS_2", value=plate.sec3_FMS_2)
+          input(type="text", name="sec3_FMS_1_lot", value=plate.sec3_FMS_1_lot, placeholder="FMS-1 lot number")
+          br
+          input(type="text", name="sec3_FMS_2_lot", value=plate.sec3_FMS_2_lot, placeholder="FMS-2 lot number")
     input(type="submit", value="Save")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
     
@@ -235,12 +251,16 @@ form( method="post")
         td
           input(type="date", name="sec4_2pol_open", value=plate.sec4_2pol_open)
       tr
-        td
+        td.top
           b PM1 Reagent :
         td
-          input(type="text", name="sec4_PM1_1", value=plate.sec4_PM1_1)
+          input(type="text", name="sec4_PM1_1", value=plate.sec4_PM1_1, placeholder="PM1-1 barcode")
+          br
+          input(type="text", name="sec4_PM1_2", value=plate.sec4_PM1_2, placeholder="PM1-2 barcode")
         td
-          input(type="text", name="sec4_PM1_2", value=plate.sec4_PM1_2)
+          input(type="text", name="sec4_PM1_1_lot", value=plate.sec4_PM1_1_lot, placeholder="PM1-1 lot number")
+          br
+          input(type="text", name="sec4_PM1_2_lot", value=plate.sec4_PM1_2_lot, placeholder="PM1-2 lot number")
     input(type="submit", value="Save")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
     
@@ -271,8 +291,9 @@ form( method="post")
         td
           b RA1 Reagent :
         td
-          input(type="text", name="sec5_RA1", value=plate.sec5_RA1)
+          input(type="text", name="sec5_RA1", value=plate.sec5_RA1, placeholder="RA1 barcode")
         td
+          input(type="text", name="sec5_RA1_lot", value=plate.sec5_RA1_lot, placeholder="RA1 lot number")
     input(type="submit", value="Save")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
     
@@ -318,8 +339,9 @@ form( method="post")
         td
           b PB2 Reagent :
         td
-          input(type="text", name="sec6_PB2", value=plate.sec6_PB2)
+          input(type="text", name="sec6_PB2", value=plate.sec6_PB2, placeholder="PB2 barcode")
         td
+          input(type="text", name="sec6_PB2_lot", value=plate.sec6_PB2_lot, placeholder="PB2 lot number")
     input(type="submit", value="Save")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
   #section2
@@ -341,8 +363,9 @@ form( method="post")
         td
           b PB1 Reagent :
         td
-          input(type="text", name="sec7_PB1", value=plate.sec7_PB1)
+          input(type="text", name="sec7_PB1", value=plate.sec7_PB1, placeholder="PB1 barcode")
         td
+          input(type="text", name="sec7_PB1_lot", value=plate.sec7_PB1_lot, placeholder="PB1 lot number")
     input(type="submit", value="Save")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
   #section2
@@ -364,59 +387,82 @@ form( method="post")
         td
           b RA1 Reagent :
         td
-          input(type="text", name="sec8_RA1", value=plate.sec8_RA1)
+          input(type="text", name="sec8_RA1", value=plate.sec8_RA1, placeholder="RA1 barcode")
         td
+          input(type="text", name="sec8_RA1_lot", value=plate.sec8_RA1_lot, placeholder="RA1 lot number")
       tr
         td
           b XC3 Reagent :
         td
-          input(type="text", name="sec8_XC3", value=plate.sec8_XC3)
+          input(type="text", name="sec8_XC3", value=plate.sec8_XC3, placeholder="XC3 barcode")
         td
+          input(type="text", name="sec8_XC3_lot", value=plate.sec8_XC3_lot, placeholder="XC3 lot number")
       tr
         td
           b XC1 Reagent :
         td
-          input(type="text", name="sec8_XC1", value=plate.sec8_XC1)
+          input(type="text", name="sec8_XC1", value=plate.sec8_XC1, placeholder="XC1 barcode")
         td
+          input(type="text", name="sec8_XC1_lot", value=plate.sec8_XC1_lot, placeholder="XC1 lot number")
       tr
-        td
+        td.top
           b XC2 Reagent :
         td
-          input(type="text", name="sec8_XC2_1", value=plate.sec8_XC2_1)
+          input(type="text", name="sec8_XC2_1", value=plate.sec8_XC2_1, placeholder="XC2-1 barcode")
+          br
+          input(type="text", name="sec8_XC2_2", value=plate.sec8_XC2_2, placeholder="XC2-2 barcode")
         td
-          input(type="text", name="sec8_XC2_2", value=plate.sec8_XC2_2)
+          input(type="text", name="sec8_XC2_1_lot", value=plate.sec8_XC2_1_lot, placeholder="XC2-1 lot number")
+          br
+          input(type="text", name="sec8_XC2_2_lot", value=plate.sec8_XC2_2_lot, placeholder="XC2-2 lot number")
+          
       tr
-        td
+        td.top
           b STM Reagent :
         td
-          input(type="text", name="sec8_STM_1", value=plate.sec8_STM_1)
+          input(type="text", name="sec8_STM_1", value=plate.sec8_STM_1, placeholder="STM-1 barcode")
+          br
+          input(type="text", name="sec8_STM_2", value=plate.sec8_STM_2, placeholder="STM-2 barcode")
         td
-          input(type="text", name="sec8_STM_2", value=plate.sec8_STM_2)
+          input(type="text", name="sec8_STM_1_lot", value=plate.sec8_STM_1_lot, placeholder="STM-1 lot number")
+          br
+          input(type="text", name="sec8_STM_2_lot", value=plate.sec8_STM_2_lot, placeholder="STM-2 lot number")
       tr
-        td
+        td.top
           b TEM Reagent :
         td
-          input(type="text", name="sec8_TEM_1", value=plate.sec8_TEM_1)
+          input(type="text", name="sec8_TEM_1", value=plate.sec8_TEM_1, placeholder="TEM-1 barcode")
+          br
+          input(type="text", name="sec8_TEM_2", value=plate.sec8_TEM_2, placeholder="TEM-2 barcode")
         td
-          input(type="text", name="sec8_TEM_2", value=plate.sec8_TEM_2)
+          input(type="text", name="sec8_TEM_1_lot", value=plate.sec8_TEM_1_lot, placeholder="TEM-1 lot number")
+          br
+          input(type="text", name="sec8_TEM_2_lot", value=plate.sec8_TEM_2_lot, placeholder="TEM-2 lot number")
+          
       tr
-        td
+        td.top
           b ATM Reagent :
         td
-          input(type="text", name="sec8_ATM_1", value=plate.sec8_ATM_1)
+          input(type="text", name="sec8_ATM_1", value=plate.sec8_ATM_1, placeholder="ATM-1 barcode")
+          br
+          input(type="text", name="sec8_ATM_2", value=plate.sec8_ATM_2, placeholder="ATM-2 barcode")
         td
-          input(type="text", name="sec8_ATM_2", value=plate.sec8_ATM_2)
+          input(type="text", name="sec8_ATM_1_lot", value=plate.sec8_ATM_1_lot, placeholder="ATM-1 lot number")
+          br
+          input(type="text", name="sec8_ATM_2_lot", value=plate.sec8_ATM_2_lot, placeholder="ATM-2 lot number")
       tr
         td
           b XC4 Reagent :
         td
-          input(type="text", name="sec8_XC4", value=plate.sec8_XC4)
+          input(type="text", name="sec8_XC4", value=plate.sec8_XC4, placeholder="XC4 barcode")
         td
+          input(type="text", name="sec8_XC4_lot", value=plate.sec8_XC4_lot, placeholder="XC4 lot number")
       tr
         td
           b PB1 Reagent :
         td
-          input(type="text", name="sec8_PB1", value=plate.sec8_PB1)
+          input(type="text", name="sec8_PB1", value=plate.sec8_PB1, placeholder="PB1 barcode")
         td
+          input(type="text", name="sec8_PB1_lot", value=plate.sec8_PB1_lot, placeholder="PB1 lot number")
     input(type="submit", value="Save")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
