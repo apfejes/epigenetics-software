@@ -154,6 +154,21 @@ ArticleProvider.prototype.plateById = function(id, callback) {
     });
 };
 
+ArticleProvider.prototype.bsplateById = function(id, callback) {
+    this.getDBData('bsplates', function(error, plates_collection) {
+      if( error ) callback(error)
+      else {
+        plates_collection.findOne({_id: ObjectID.createFromHexString(id)}, function(error, result) {
+          if( error ) {
+            console.log("plateById error:", error)
+            callback(error)
+          } else callback(null, result)
+        });
+      }
+    });
+};
+
+
 ArticleProvider.prototype.sampleByPlateId = function(id, callback) {
     this.getDBQuery('samples', {plates: ObjectID.createFromHexString(id)}, {}, {sampleid:1}, function(error, result) {
       if( error ) {
@@ -353,6 +368,64 @@ ArticleProvider.prototype.saveSamples = function(sampleids, project_id, callback
 
 //__________________________________
 //
+// SAVE Placement on Bisulfite treatment plate
+//__________________________________
+
+ArticleProvider.prototype.saveBSPlacement = function(layout, project_id, callback) {
+  var date = new Date();
+  
+  var o = JSON.parse(layout)
+  console.log("o1: ", o);
+  
+  var plateid = 0 
+  o['projectid']= project_id
+  console.log("o2: ", o);
+  
+  
+  
+  this.insertDB('bsplates', o, function(error, results) { 
+    if( error ) {
+      console.log("UpdateDB for Save BS plates error: ", error)
+      callback(error)
+    } else{
+      plateid = results[0]._id
+      //console.log("newPlate:", plateid)
+      for (key in o) {
+        var value = o[key]
+        //console.log("key : ",key, " - ", value)
+        if (key != "projectid" && key != "_id") {
+          s_id = value.substring(0, value.indexOf("-"))
+          s_num = value.substring(value.indexOf("-")+1)
+          //console.log("running update on projectid : ", project_id, " sampleid: ", s_id, " sample number:", s_num) 
+          this.updateDB('samples', {projectid: project_id, sampleid: s_id, sample_num: s_num}, {$set: {bs_flag: null}, $push: {bsplates:plateid}}, false,
+            function(error, c) {
+              if ( error ) { 
+                console.log("Error in updating samples assigned to plate")
+                callback(error)
+              } 
+            }
+          );
+          
+        } else {
+          //just ignore this.  we don't need to process the projectid line.
+        }
+      }
+      this.updateDB('projects', {_id: ObjectID.createFromHexString(project_id)}, {$push: {bsplates:plateid}}, false,
+            function(error, c) {
+              if ( error ) { 
+                console.log("Error in updating plates assigned to project")
+                callback(error)
+              } 
+            }
+          );
+      callback(results[0]._id);
+    }
+  }.bind(this));
+};
+
+
+//__________________________________
+//
 // SAVE Placement on plate
 //__________________________________
 
@@ -364,18 +437,18 @@ ArticleProvider.prototype.savePlacement = function(assignments, project_id, call
   o['projectid']= project_id
   this.insertDB('plates', o, function(error, results) { 
     if( error ) {
-      console.log("UpdateDB for Nanodrop error: ", error)
+      console.log("UpdateDB for SavePlacement error: ", error)
       callback(error)
     } else{
       plateid = results[0]._id
-      console.log("newPlate:", plateid)
+      //console.log("newPlate:", plateid)
       for (key in o) {
         var value = o[key]
-        console.log("key : ",key, " - ", value)
+        //console.log("key : ",key, " - ", value)
         if (key != "projectid" && key != "_id") {
           s_id = value.substring(0, value.indexOf("-"))
           s_num = value.substring(value.indexOf("-")+1)
-          console.log("running update on projectid : ", project_id, " sampleid: ", s_id, " sample number:", s_num) 
+          //console.log("running update on projectid : ", project_id, " sampleid: ", s_id, " sample number:", s_num) 
           this.updateDB('samples', {projectid: project_id, sampleid: s_id, sample_num: s_num}, {$set: {proceed_flag: null}, $push: {plates:plateid}}, false,
             function(error, c) {
               if ( error ) { 
@@ -530,18 +603,52 @@ ArticleProvider.prototype.process_sample_spreadsheet = function(collection, proj
 // Assign to BS plate
 //__________________________________
 
-ArticleProvider.prototype.assign_to_bs_plate = function(body, callback) {
+ArticleProvider.prototype.assign_to_bs_plate = function(reserved,unassigned, callback) {
   var selected = [];
-  for (item in body) {
-    if (body[item].bs_flag && body[item].bs_flag == "on") {
-      //console.log("body[item] :", body[item])
-      selected.push(body[item])
+  for (item in unassigned) {
+    if (unassigned[item].bs_flag && unassigned[item].bs_flag == "on") {
+      //console.log("unassigned[item] :", unassigned[item])
+      selected.push(unassigned[item])
     }
   }
   //console.log("selected:", selected)
   var len = selected.length
   selected.sort(function() {return 0.5 - Math.random()})  //randomize order
-  callback(null, selected) //replace null with error messages as required
+  
+  
+  console.log("reserved:", reserved)
+  console.log("selected length:", selected.length)
+  
+  if (reserved.length + selected.length > 96) {
+    console.log("too many samples selected - assign to bs.plates")
+  }
+  i = 1
+  j = 1
+  layout = {}
+  for (s in selected) {
+    assigned = false;
+    while (!assigned) {
+      if (i > 8) {
+        i = 1;
+        j += 1;
+      }
+      if (j > 12) { 
+        j = 1;
+      }
+      cell = i + "-" + j
+      if (!reserved[cell]) {
+        assigned = true;
+        layout[cell] = selected[s].sampleid + "-" +  selected[s].sample_num
+      } else {
+        layout[cell] = "reserved"
+      }
+      i += 1
+    } 
+  }
+  console.log("layout:", layout)
+  
+  
+  callback(layout) //replace null with error messages as required
 }
 
 

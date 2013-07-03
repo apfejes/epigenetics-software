@@ -135,26 +135,25 @@ app.get('/input/bs_new/:id', function(req, res) {
 app.post('/input/bs_new/:id', function(req, res){
   switch(req.param('step')) {
     case '0':
-      articleProvider.process_Array(req.body, function(error, data) {
-        articleProvider.assign_to_bs_plate(data, function(error, unassigned) {
-          res.render('bs_step1.jade', {unassigned:JSON.stringify(unassigned)});
-          //console.log("stringified:", JSON.stringify(unassigned));
-        });
+      articleProvider.process_Array(req.body, function(error, unassigned) {
+        res.render('bs_step1.jade', {unassigned:JSON.stringify(unassigned)});
+        //console.log("stringified:", JSON.stringify(unassigned));
       });
       break;
     case '1':
-      articleProvider.reserve_array(req.body, function(layout) {
+      articleProvider.reserve_array(req.body, function(reserved) {
         articleProvider.count_samples(JSON.parse(req.param('unassigned')), function(count) { //number of samples
-          articleProvider.parse_manual(JSON.parse(req.param('unassigned')), function(list) {  //number of manual entries to process.
-            //res.redirect('/');
-            res.render('bs_step2.jade',{count:count, list:list, layout:layout, layout_store:JSON.stringify(layout), unassigned:req.param('unassigned')});
+          articleProvider.assign_to_bs_plate(reserved, JSON.parse(req.param('unassigned')), function(layout) {
+            console.log("layout ", JSON.stringify(layout))
+            res.render('bs_step2.jade',{count:count, layout:layout, layout_store:JSON.stringify(layout)});
           });
         });
       });
       break;
-    case '1':
-    
-      //assign to database.
+    case '2':  //assign to database.
+      articleProvider.saveBSPlacement(req.param('layout_store'), req.params.id, function(plateid) {
+        res.redirect('/input/bsplate_edit/' + plateid);
+      });
       break
     default:
       res.redirect('/');
@@ -263,7 +262,7 @@ app.post('/view/sample_spreadsheet/:id', function(req, res){
       });
       break;
     case '3':
-      console.log("assigned_store:",req.param('assigned_store')) 
+      //console.log("assigned_store:",req.param('assigned_store')) 
       articleProvider.savePlacement(req.param('assigned_store'), req.params.id, function(plateid) {
         res.redirect('/input/plate_edit/' + plateid);
       });
@@ -290,7 +289,18 @@ app.post('/view/sample_spreadsheet_edit/:id', function(req, res){
     });
   });
 });
+//------------------------------------
+//  Bisulfite PLATE INFO:
+//------------------------------------
 
+// This function requires the BS Plate ID.
+
+app.get('/input/bsplate_edit/:id', function(req, res){
+  articleProvider.bsplateById(req.params.id, function(error, bsplate) {
+    console.log("BSPLATE:", bsplate)
+    res.render('bsplate_edit.jade',{title: 'Edit Plate', bsplate:bsplate});
+  });
+});
 
 
 //------------------------------------
