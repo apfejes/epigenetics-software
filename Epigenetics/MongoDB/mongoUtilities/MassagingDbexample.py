@@ -29,9 +29,14 @@ print sample_labels_list
 
 t0 = time()
 mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, 'human_epigenetics')
-for sample in sample_labels_list:
-    queryDict = {'sample_label':sample}
-    updateDict = {'$set':{'project':'gecko'}}
-    mongo.update('methylation', queryDict, updateDict, multiOpt = True)
+
+#First we need to drop the index on 'project' 
+mongo.drop_index('methylation','project_1')
+
+queryDict = {'sample_label':{'$in':sample_labels_list}}
+updateDict = {'$set':{'project':'gecko'}}
+mongo.update('methylation', queryDict, updateDict, multiOpt = True)
 
 print "Done updating in ", (time()-t0)
+
+mongo.drop_index('methylation','project_1')
