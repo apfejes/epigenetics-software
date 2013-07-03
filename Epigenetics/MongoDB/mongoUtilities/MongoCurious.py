@@ -11,13 +11,13 @@ from math import sqrt
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
-
+_root_dir = os.path.dirname(_root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 import MongoQuery
-sys.path.insert(0, _cur_dir + os.sep + "Illustration")
-import Illustration.ChipseqPlot as chipseqplot
-import Illustration.MethylationPlot as methylationplot
+sys.path.insert(0, _root_dir + os.sep + "Illustration")
+import ChipseqPlot as chipseqplot
+import MethylationPlot as methylationplot
 
 
 class MongoCurious():
@@ -48,18 +48,19 @@ class MongoCurious():
         Query['collection'] = self.collection
         Query['project'] = project
         self.project = project
-        if chromosome == None:
-            raise ValueError("Please specificy a chromosome.")
-        if isinstance(chromosome, basestring):
-            Query['chromosome'] = chromosome
-            self.chromosome = chromosome
-        elif isinstance(chromosome, int):
-                Query['chromosome'] = 'chr' + str(chromosome)
+        if collection != 'samples':
+            Query['start'] = int(start)
+            self.start = int(start)
+            Query['end'] = int(end)
+            self.end = int(end)
+            if chromosome == None:
+                raise ValueError("Please specificy a chromosome.")
+            if isinstance(chromosome, basestring):
+                Query['chromosome'] = chromosome
                 self.chromosome = chromosome
-        Query['start'] = int(start)
-        self.start = int(start)
-        Query['end'] = int(end)
-        self.end = int(end)
+            elif isinstance(chromosome, int):
+                    Query['chromosome'] = 'chr' + str(chromosome)
+                    self.chromosome = chromosome
         Query['sample label'] = sample_label
         self.sample_label = sample_label
         Query['sample type'] = sample_type
