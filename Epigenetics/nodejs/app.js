@@ -106,13 +106,15 @@ app.get('/view/:id', function(req, res) {
 
   articleProvider.getNanodrop(req.params.id, function(error, nanodrops) {
     articleProvider.getPlates(req.params.id, function(error, plates) {
-      articleProvider.getTransactions(req.params.id, function(error, transactions) {
-        articleProvider.getSamples(req.params.id, function(error, samples) {
-          if (error) console.log("view/:id error: ", error)
-          else articleProvider.findById(req.params.id, function(error, project) {
-              res.render('project_details.jade',{proj_name: project.proj_name, 
-                  project:project, transactions:transactions, plates:plates,
-                  samples:samples, nanodrops:nanodrops});
+      articleProvider.getBsPlates(req.params.id, function(error, bsplates) {
+        articleProvider.getTransactions(req.params.id, function(error, transactions) {
+          articleProvider.getSamples(req.params.id, function(error, samples) {
+            if (error) console.log("view/:id error: ", error)
+            else articleProvider.findById(req.params.id, function(error, project) {
+                res.render('project_details.jade',{proj_name: project.proj_name, 
+                    project:project, transactions:transactions, plates:plates,
+                    samples:samples, nanodrops:nanodrops, bsplates:bsplates});
+            });
           });
         });
       });
@@ -314,6 +316,17 @@ app.get('/input/bsplate_edit/:id', function(req, res){
     res.render('bsplate_edit.jade',{title: 'Edit Plate', bsplate:bsplate});
   });
 });
+
+// This function requires the Plate ID.
+
+app.get('/input/bsplate_spreadsheet/:id', function(req, res){
+  articleProvider.bsplateById(req.params.id, function(error, bsplates) {
+    articleProvider.sampleByBsPlateId(req.params.id, function(error, samples) {
+      res.render('bs_spreadsheet.jade',{title: 'Edit Plate', samples:samples, bsplates:bsplates});
+    });
+  });
+});
+
 
 
 //------------------------------------

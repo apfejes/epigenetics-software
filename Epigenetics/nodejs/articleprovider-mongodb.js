@@ -253,6 +253,20 @@ ArticleProvider.prototype.getPlates = function(id, callback) {
 };
 
   //---- 
+  //Retrieve bisulfite sequencing plates for a project
+  //---- 
+  
+ArticleProvider.prototype.getBsPlates = function(id, callback) {
+    this.getDBQuery('bsplates', {projectid: id}, {}, {}, function(error, transactions) {
+      if( error ) {
+        console.log("transaction-type error: ", error);
+        callback(error);
+      } else callback(null, transactions)
+    });
+};
+
+
+  //---- 
   //Retrieve samples for a project
   //---- 
   

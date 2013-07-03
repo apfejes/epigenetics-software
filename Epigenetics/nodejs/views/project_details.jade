@@ -95,6 +95,15 @@ a(href='/')
           $!{balance}
 
 #platedetails
+  H3 Bisulfite Sequencing Plates:
+  ul
+    - each bsplate in bsplates
+      li
+        - if (bsplate.barcode) {
+          a(href="/input/bsplate_edit/"+bsplate._id)= bsplate.barcode
+        - } else { 
+          a(href="/input/bsplate_edit/"+bsplate._id)= bsplate._id 
+        - }
   H3 Plates:
   ul
     - each plate in plates
@@ -104,7 +113,6 @@ a(href='/')
         - } else { 
           a(href="/input/plate_edit/"+plate._id)= plate._id 
         - }
-
 
   
   
