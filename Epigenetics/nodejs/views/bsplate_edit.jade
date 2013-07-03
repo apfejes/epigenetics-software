@@ -1,0 +1,67 @@
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+a(href='/')
+  #logo
+- if (bsplate.barcode) {
+  h1 !{title} - !{bsplate.barcode}
+- } else {
+  h1= title
+- }
+  
+form( method="post")
+  input(type="hidden", name="bsplateid", value= bsplate._id)
+  input(type="hidden", name="projectid", value= bsplate.projectid)
+  - var translate = {1:"A",2:"B",3:"C",4:"D",5:"E",6:"F",7:"G",8:"H"};
+  #project
+    table
+      tr  
+        td
+          - for (var h = 1; h <=8; h++) {
+            td.center
+              !{translate[h]}
+          -}
+      - for (var j = 1; j <=6; j++) {
+        tr
+          td
+            !{j}
+          - for (var i =1; i <= 8; i++) {
+            - var a = i + "-" + j
+            - var n = i + "-" + j + "-cell"
+            - if (bsplate[a]=="reserved") {
+              td.whitewlines
+                a(href="/input/edit_reserved/"+bsplate._id + "-" + a)="Reserved"
+            - } else if (bsplate[a]) {
+              td.bluewlines 
+                | !{bsplate[a]}
+            - } else { 
+              td.greywlines 
+            - } 
+          - }
+      -}
+      tr
+        td
+          | &nbsp
+      - for (var j = 7; j <=12; j++) {
+        tr
+          td
+            !{j}
+          - for (var i =1; i <= 8; i++) {
+            - var n = i + "-" + j + "-cell"
+            - var a = i + "-" + j
+            - if (bsplate[a]=="reserved") {
+              td.whitewlines
+                a(href="/input/edit_reserved/"+bsplate._id + "-" + a)="Reserved"
+            - } else if (bsplate[a]) {
+              td.bluewlines 
+                | !{bsplate[a]}
+            - } else { 
+              td.greywlines 
+            - } 
+          - }
+      - }
+    br
+    ul
+      li
+        a(href="/input/bsplate_spreadsheet/"+bsplate._id)="See spreadsheet for this plate"
+   
+  
+  
