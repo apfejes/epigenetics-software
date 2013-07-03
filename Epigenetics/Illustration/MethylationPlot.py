@@ -23,7 +23,7 @@ class MethylationPlot(object):
         self.elements = []
         self.title = title
         self.X = X
-        self.Y = Y
+        self.Y = zip(*Y)[0]
         self.sample_ids = sample_ids
         self.color = color
         self.start = start
@@ -181,3 +181,27 @@ class MethylationPlot(object):
             fill = "midnightblue")
         self.elements.append(x_axis)
         self.elements.append(y_axis)
+        
+    def makegaussian(self, start,
+                     end, margin, length,
+                     pos, tail, offset,
+                     height, stddev):
+        endpts = int((sqrt((-2) * stddev * stddev * log(tail / height))))
+        spacing = 64
+        n_points = 0
+        while n_points < 25 and spacing >= 2:
+            X = []
+            for i in range (-stddev, stddev, spacing):
+                X.append(float(i))
+            for i in range (-endpts, -stddev, spacing):
+                X.append(float(i))
+            for i in range (stddev, endpts, spacing):
+                X.append(float(i))
+            n_points = len(X)
+            spacing /= 2
+        if (endpts) not in X: X.append(endpts)
+        X.sort()
+        X = [float(x) for x in X if 0 <= (x + pos - offset) < (end - start)]
+        stddev = float(stddev)
+        Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
+        return X, Y
