@@ -23,7 +23,9 @@ class MethylationPlot(object):
         self.elements = []
         self.title = title
         self.X = X
-        self.Y = Y
+        self.Y = zip(*Y)[0]
+        self.stddevs = zip(*Y)[1]
+        self.counts = zip(*Y)[2]
         self.sample_ids = sample_ids
         self.color = color
         self.start = start
@@ -52,6 +54,7 @@ class MethylationPlot(object):
         # scale the variables
         self.X = [round(float(item - offset) * scale_x, 3) + margin for item in self.X]
         self.Y = [round((invertby - item) * scale_y, 2) + margin for item in self.Y]
+        self.stddevs = [round((invertby - item) * scale_y, 2) + margin for item in self.stddevs]
 
 
 # #IF PLOTTING METHYLATION AS PATH, NOT POINTS:
@@ -75,7 +78,7 @@ class MethylationPlot(object):
         sample_count = 0
         samples_color = {}
         
-        for x, y, sample_id in zip(self.X, self.Y, self.sample_ids):
+        for x, y, s, c,sample_id in zip(self.X, self.Y, self.stddevs, self.counts, self.sample_ids):
             if sample_id not in samples_color :
                 sample_count += 1
                 samples_color[sample_id] = self.colors[sample_count - 1]
@@ -84,7 +87,16 @@ class MethylationPlot(object):
                 elif sample_count > len(self.colors): print "Ran out of colours!"
             point = Circle(center = (x, y), r = 0.3, fill = samples_color[sample_id])
             self.elements.append(point)
-             
+            
+            Y,X = self.makegaussian(y, s, c) #reverse output for sideways gaussians
+            d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
+            for i in range(2, len(X)):
+                d = d + (" " + str(X[i]) + "," + str(Y[i]))
+
+            peak = (Path(stroke = samples_color[sample_id], stroke_width = 0.1,
+                           stroke_linecap = 'round', stroke_opacity = 0.8, d = d))
+
+            self.elements.append(peak)
 
     def save(self):
         for element in self.elements:
@@ -181,3 +193,24 @@ class MethylationPlot(object):
             fill = "midnightblue")
         self.elements.append(x_axis)
         self.elements.append(y_axis)
+        
+    def makegaussian(self, mean, stddev, height):
+        endpts = int((sqrt((-2) * stddev * stddev * log(1/ height))))
+        spacing = 64
+        n_points = 0
+        while n_points < 25 and spacing >= 2:
+            X = []
+            for i in range (-stddev, stddev, spacing):
+                X.append(float(i))
+            for i in range (-endpts, -stddev, spacing):
+                X.append(float(i))
+            for i in range (stddev, endpts, spacing):
+                X.append(float(i))
+            n_points = len(X)
+            spacing /= 2
+        if (endpts) not in X: X.append(endpts)
+        X.sort()
+        X = [float(x) for x in X]
+        stddev = float(stddev)
+        Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
+        return X, Y

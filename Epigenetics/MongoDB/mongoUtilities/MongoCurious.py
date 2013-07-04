@@ -11,13 +11,13 @@ from math import sqrt
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
-
+_root_dir = os.path.dirname(_root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 import MongoQuery
-sys.path.insert(0, _cur_dir + os.sep + "Illustration")
-import Illustration.ChipseqPlot as chipseqplot
-import Illustration.MethylationPlot as methylationplot
+sys.path.insert(0, _root_dir + os.sep + "Illustration")
+import ChipseqPlot as chipseqplot
+import MethylationPlot as methylationplot
 
 
 class MongoCurious():
@@ -48,28 +48,29 @@ class MongoCurious():
         Query['collection'] = self.collection
         Query['project'] = project
         self.project = project
-        if chromosome == None:
-            raise ValueError("Please specificy a chromosome.")
-        if isinstance(chromosome, basestring):
-            Query['chromosome'] = chromosome
-            self.chromosome = chromosome
-        elif isinstance(chromosome, int):
-                Query['chromosome'] = 'chr' + str(chromosome)
+        if collection != 'samples':
+            Query['start'] = int(start)
+            self.start = int(start)
+            Query['end'] = int(end)
+            self.end = int(end)
+            if chromosome == None:
+                raise ValueError("Please specificy a chromosome.")
+            if isinstance(chromosome, basestring):
+                Query['chromosome'] = chromosome
                 self.chromosome = chromosome
-        Query['start'] = int(start)
-        self.start = int(start)
-        Query['end'] = int(end)
-        self.end = int(end)
+            elif isinstance(chromosome, int):
+                    Query['chromosome'] = 'chr' + str(chromosome)
+                    self.chromosome = chromosome
+            if self.project:
+                self.sample_label_list = self.creategroups()
+                Query['sample lable list'] = self.sample_label_list
+        self.Query = Query
         Query['sample label'] = sample_label
         self.sample_label = sample_label
         Query['sample type'] = sample_type
         self.sample_type = sample_type
         Query['sample id'] = sample_id
         self.sample_id = sample_id
-        if self.project:
-            self.sample_groups = self.creategroups()
-            Query['sample groups'] = self.sample_groups
-        self.Query = Query
         return self.Query
 
     def checkquery(self):
@@ -94,34 +95,36 @@ class MongoCurious():
     def finddocs(self):
         '''Finds probes or documents corresponding to query'''
         #self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
-        query_start, query_end, query_samplabel, query_pos, query_sampgroup, query_project = {}, {}, {}, {}, {}, {}
-        query_chr = {'chr':self.chromosome}
+        query_chr, query_start, query_end, query_samplabel, query_pos, query_sampgroup, query_project = {}, {}, {}, {}, {}, {}, {}
 
         # Preparing the different parameters of the query depending on the collection chosen
         if self.collection == "methylation":
-            if self.end != None: query_start = {"start_position":{"$lte":self.end}}
-            if self.start != None: query_end = {"end_position":{"$gte":self.start}}
-            if self.sample_label != None: query_samplabel = {"sample_label":self.sample_label}
+            query_chr = {'chr':self.chromosome}
+            if self.project: query_project = {'project': self.project}
+            if self.end: query_start = {"start_position":{"$lte":self.end}}
+            if self.start: query_end = {"end_position":{"$gte":self.start}}
+            if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
             return_chr = {'_id': False, 'beta_value': True,
                           'start_position': True, 'end_position': True,
                           'sample_label': True}
             sortby, sortorder = 'start_position', 1
 
         elif self.collection == "waves":
-            self.mongo.ensure_index(self.collection, 'pos')
-            query_pos = {}
-            if self.start != None and self.end != None:
+            query_chr = {'chr':self.chromosome}
+            if self.project: query_project = {'project': self.project}
+            if self.start and self.end:
                 extension = 500    # extend the region of query to catch peaks with tails in the region
                 query_pos = {"pos":{"$lte":self.end + extension, "$gte":self.start - extension}}
+            if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
+            if self.sample_group: query_sampgroup = {"Sample Group":self.sample_group}
             return_chr = {'_id': False, 'pos': True,
                           'height': True, 'stddev': True,
                           'sample_id': True}
             sortby, sortorder = 'height', (-1)
 
         elif self.collection =="samples":
-            if self.project != None: query_project = {"project":self.project}
-            if self.sample_label != None: query_samplabel = {"sample_label":self.sample_label}
-            if self.sample_group != None: query_sampgroup = {"sample_label":self.sample_group}
+            if self.project: query_project = {"project":self.project}
+            if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
             return_chr = {'_id': False, 'sample_label': True,
                           'project': True, 'Sample Group': True}
             sortby, sortorder = 'sample_label', 1
@@ -145,7 +148,7 @@ class MongoCurious():
             print "     use the checkquery() method to validate the inputs of your query."
             sys.exit()
 
-        print " Found %i probes or documents." % docs.count()
+        print " Found %i documents." % docs.count()
         self.docs = docs
         self.count = self.docs.count()
         self.Query['cursor'] = self.docs
@@ -156,36 +159,36 @@ class MongoCurious():
         '''
         Separate samples into 'groups' according to a particular feature and sample_type like disease
         or control.
-        samplegroup is a list of sample labels with the desired sample_type of that feature.
+        sample_label_list is a list of sample labels with the desired sample_type of that feature.
         '''
         print "    Creating sample groups..."
         if self.project == "down":
             if self.sample_type not in ["Control", "DS"]: self.sample_type = str(raw_input(
                             "Please specify a sample type: \"Control\" or \"DS\"?"))
             feature = 'Sample Group'
-            samplegroup = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
+            sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
         if self.project == "kollman":
             if self.sample_type not in ["unstimulated", "listeria"]: self.sample_type = str(raw_input(
                             "Please specify a sample type: \"unstimulated\" or \"listeria\"?"))
             feature = 'stimulation'
-            samplegroup = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
+            sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
         if self.project == "All":
             if self.sample_type != "control" or self.sample_type != None:
                 print "The sample type \"", self.sample_type, "\" is invalid."
                 self.sample_type = str(raw_input("Please specify a sample type: \"control\" or \"disease\"?"))
             if self.sample_type == "control" or self.sample_type == None:
-                samplegroup = self.sample_dict(project = "kollman", feature = "stimulation")["unstimulated"]
-                samplegroup.append(self.sample_dict(project = "down", feature = "Sample Group")["Control"])
-                samplegroup.append(self.sample_dict(project = "kollman", feature = "stimulation",
+                sample_label_list = self.sample_dict(project = "kollman", feature = "stimulation")["unstimulated"]
+                sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group")["Control"])
+                sample_label_list.append(self.sample_dict(project = "kollman", feature = "stimulation",
                                     nottype = ["unstimulated", "listeria"]))
-                samplegroup.append(self.sample_dict(project = "down", feature = "Sample Group",
+                sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group",
                                     nottype = ["Control", "DS"]))
             if self.sample_type == "disease":
-                samplegroup = self.sample_dict(project = "kollman", feature = "stimulation")["listeria"]
-                samplegroup.append(self.sample_dict(project = "down", feature = "Sample Group")["DS"])
+                sample_label_list = self.sample_dict(project = "kollman", feature = "stimulation")["listeria"]
+                sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group")["DS"])
 
-        print "    The sample labels with sample type", self.sample_type, " are:", samplegroup
-        return samplegroup
+        print "    The sample labels with sample type", self.sample_type, " are:", sample_label_list
+        return sample_label_list
 
     def sample_dict(self, project, feature, nottype = None):
         '''
@@ -205,23 +208,22 @@ class MongoCurious():
 
         samples = self.mongo.find("samples",
                              findQuery, returnQuery).sort(feature, 1)
-        sample_groups = {}
+        sample_label_list = {}
         sample_labels_list = []
         previous_group = None
         count = 0
         for doc in samples:
             if (doc[feature] != previous_group) and (count > 0):
-                sample_groups[previous_group] = sample_labels_list
+                sample_label_list[previous_group] = sample_labels_list
                 sample_labels_list = []
             sample_labels_list.append(doc['sample_label'])
             previous_group = doc[feature]
             count += 1
-        sample_groups[previous_group] = sample_labels_list    # Do once more after exiting loop
-        print sample_groups
-        return sample_groups
+        sample_label_list[previous_group] = sample_labels_list    # Do once more after exiting loop
+        print sample_label_list
+        return sample_label_list
 
     def collectbetas(self,
-                     separate_samples = False,
                      window_size = 1):
         '''Collects and bins methylation data'''
 
@@ -247,27 +249,23 @@ class MongoCurious():
 
 
         sample_ids = []
-        x_position = []
-        y_avg = []
+        position = []
+        values = []
         for pos, tup_list in sorted(position_dic.iteritems()):
             beta_values = []
             for beta, samp in tup_list:
-                if separate_samples:
-                    if self.sample_type == None or samp in self.sample_groups:
-                        x_position.append(pos)
-                        y_avg.append(beta)
-                        sample_ids.append(samp)
-                else:
-                    if self.sample_type == None or samp in self.sample_groups:
+                    if self.sample_type == None or samp in self.sample_label_list:
                         beta_values.append(beta)
                     else: continue
-                    data_avg = mean(beta_values)
-                    x_position.append(pos)
-                    y_avg.append(data_avg)
+                    values.append((mean(beta_values), std(beta_values), len(beta_values)))
+                    position.append(pos)
+                    sample_ids.append(samp)
+
+
 
         print "    %i beta values collected" % len(x_position)
-        self.positions = x_position
-        self.betas = y_avg
+        self.positions = position
+        self.betas = values
         self.sample_ids = sample_ids
 
         if self.start == None:

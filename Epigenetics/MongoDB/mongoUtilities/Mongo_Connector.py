@@ -41,6 +41,10 @@ class MongoConnector():
         else:
             return collection.ensure_index(key)
 
+    def drop_index(self, collection_name, index_or_name):
+        collection = self.db[collection_name]
+        return collection.drop_index(index_or_name)
+
     def find(self, collection_name, findQuery = None, returnQuery = None, sortField = None):
         collection = self.db[collection_name]
         if sortField:
