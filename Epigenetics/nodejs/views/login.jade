@@ -1,0 +1,17 @@
+html
+  head
+  link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+  a(href='/')
+    #logo
+    
+  #links
+    H3 Login to Lims System
+    form(method="post")
+      div
+        | Username:
+        input(type="text", name="username")
+      div
+        | Password:
+        input(type="password", name="password")
+      div
+        input(type="submit", value="Log In")
