@@ -7,17 +7,25 @@ var ArticleProvider = require('./articleprovider-mongodb').ArticleProvider;
 var Tsvreader = require('./tsvreader.js').Tsvreader;
 var ObjectID = require('mongodb').ObjectID;
 var app = express();
+var passport = require('passport'),
+    LocalStrategy = require('passport-local').Strategy;
+var port = 3000;
 
 // Configuration
 
 app.configure(function(){
+  app.use(express.static(__dirname + '/public'));
+  app.use(express.cookieParser());
+  app.use(express.bodyParser());
+  app.use(express.session({ secret: 'lims session' }));
+  app.use(passport.initialize());
+  app.use(passport.session());
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
-  app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(require('stylus').middleware({ src: __dirname + '/public' }));
   app.use(app.router);
-  app.use(express.static(__dirname + '/public'));
+
 });
 
 app.configure('development', function(){
@@ -25,7 +33,7 @@ app.configure('development', function(){
 });
 
 app.configure('production', function(){
-  app.use(express.errorHandler()); 
+  app.use(express.errorHandler());
 });
 
 var articleProvider = new ArticleProvider('localhost', 27017);
@@ -34,10 +42,39 @@ var tsvreader = new Tsvreader();
 // Routes
 
 //------------------------------------
+//  PASSPORT authentication
+//------------------------------------
+
+
+passport.use(new LocalStrategy(
+	function (username, password, callback) {
+	  articleProvider.localstrategy(username, password, callback);
+  }
+));
+
+passport.serializeUser(function(user, done) {
+  done(null, user._id);
+});
+
+passport.deserializeUser(function(id, done) {
+  articleProvider.deserialize(id, done);
+});
+
+
+app.post('/login', passport.authenticate('local', { successRedirect: '/',
+                                                    failureRedirect: '/login',
+                                                    failureFlash: 'Invalid user name or password.' }));
+                                                    
+app.get('/login', function(req, res){
+  res.render('login.jade', {title: 'Kobor Lab Lims - login'});
+});
+
+
+//------------------------------------
 //  HOME:
 //------------------------------------
 
-app.get('/', function(req, res){
+app.get('/', ensureAuthenticated, function(req, res){
     articleProvider.findAllProjects( function(error, docs1){
       res.render('index.jade', {title: 'Kobor Lab Lims', projects:docs1});
     })
@@ -47,14 +84,14 @@ app.get('/', function(req, res){
 //  PROJECT PAGES
 //------------------------------------
 
-app.get('/input/project_new', function(req, res) {
+app.get('/input/project_new', ensureAuthenticated, function(req, res) {
     articleProvider.project_status( function(error, docs) {
       if (error) console.log("app.get", error)
       else res.render('project_new.jade', {title: 'New Project', status:docs});
     })
 });
 
-app.post('/input/project_new', function(req, res){
+app.post('/input/project_new', ensureAuthenticated, function(req, res){
     articleProvider.insertDB('projects', {
         proj_name: req.param('proj_name'),
         lab_contact: req.param('lab_contact'),
@@ -69,7 +106,7 @@ app.post('/input/project_new', function(req, res){
     });
 });
 
-app.get('/input/project_edit/:id', function(req, res){
+app.get('/input/project_edit/:id', ensureAuthenticated, function(req, res){
   articleProvider.project_status( function(error, docs) {
     articleProvider.findById(req.params.id, function(error, project) {
       res.render('project_edit.jade',{title: 'Edit Project'+ project.proj_name, project:project, status:docs});
@@ -77,7 +114,7 @@ app.get('/input/project_edit/:id', function(req, res){
   });
 });
 
-app.post('/input/project_edit/:id', function(req, res){
+app.post('/input/project_edit/:id', ensureAuthenticated, function(req, res){
     //console.log('updating project id: ', req.params.id)
     articleProvider.updateDB('projects', {_id:ObjectID.createFromHexString(req.params.id)}, 
        {$set: {proj_name: req.param('proj_name'),
@@ -102,8 +139,7 @@ app.post('/input/project_edit/:id', function(req, res){
     // Function for viewing a project overview
     //----
 
-app.get('/view/:id', function(req, res) {
-
+app.get('/view/:id', ensureAuthenticated, function(req, res) {
   articleProvider.getNanodrop(req.params.id, function(error, nanodrops) {
     articleProvider.getPlates(req.params.id, function(error, plates) {
       articleProvider.getBsPlates(req.params.id, function(error, bsplates) {
@@ -129,7 +165,7 @@ app.get('/view/:id', function(req, res) {
 
 // This function requires the Plate ID.
 
-app.get('/input/bs_spreadsheet/:id', function(req, res){
+app.get('/input/bs_spreadsheet/:id', ensureAuthenticated, function(req, res){
   articleProvider.bsplateById(req.params.id, function(error, bsplates) {
     articleProvider.sampleByBsPlateId(req.params.id, function(error, samples) {
       res.render('bs_spreadsheet.jade',{title: 'Edit Plate', samples:samples, bsplates:bsplates});
@@ -139,15 +175,15 @@ app.get('/input/bs_spreadsheet/:id', function(req, res){
 
 
 
-app.get('/input/bs_new/:id', function(req, res) {
+app.get('/input/bs_new/:id', ensureAuthenticated, function(req, res) {
   articleProvider.getSamples(req.params.id, function(error, samples) {
     if (error) console.log("sample_spreadsheet/:id (get) error: ", error)
-    else 
+    else
       res.render('bs_new.jade', {samples:samples, projectid:req.params.id});
   })
 });
 
-app.post('/input/bs_new/:id', function(req, res){
+app.post('/input/bs_new/:id', ensureAuthenticated, function(req, res){
   switch(req.param('step')) {
     case '0':
       articleProvider.process_Array(req.body, function(error, unassigned) {
@@ -179,14 +215,14 @@ app.post('/input/bs_new/:id', function(req, res){
 //  PAYMENT INFO:
 //------------------------------------
 
-app.get('/input/payment_new/:id', function(req, res) {
+app.get('/input/payment_new/:id', ensureAuthenticated, function(req, res) {
     articleProvider.transaction_type( function(error, docs) {
       if (error) console.log("app.get.payment_new", error)
       else res.render('payment_new.jade', {title: 'Add a Payment Transaction', trtype:docs, projectid:req.params.id});
     })
 });
 
-app.post('/input/payment_new/:id', function(req, res){
+app.post('/input/payment_new/:id', ensureAuthenticated, function(req, res){
     articleProvider.insertDB ('transactions', {
         type: req.param('transaction'),
         amt: req.param('trans_amt'),
@@ -203,12 +239,12 @@ app.post('/input/payment_new/:id', function(req, res){
 //  SAMPLE INFO:
 //------------------------------------
 
-app.get('/input/sample_new/:id', function(req, res) {
+app.get('/input/sample_new/:id', ensureAuthenticated, function(req, res) {
     res.render('sample_new.jade', {title: 'New Sample', projectid:req.params.id}
     );
 });
 
-app.post('/input/sample_new/:id', function(req, res){
+app.post('/input/sample_new/:id', ensureAuthenticated, function(req, res){
     tsvreader.parseSimple(req.files.sample_file.path, function(error, data) {
       if (error) console.log("app.get.sample_new (post)", error)
       else {
@@ -224,7 +260,7 @@ app.post('/input/sample_new/:id', function(req, res){
 
 // This function requires the Sample ID.
 
-app.get('/view/sample_edit/:id', function(req, res){
+app.get('/view/sample_edit/:id', ensureAuthenticated, function(req, res){
   var id = req.params.id
   var sam = id.substring(0, id.indexOf("-"))
   var num = id.substring(id.indexOf("-")+1)
@@ -233,14 +269,14 @@ app.get('/view/sample_edit/:id', function(req, res){
   });
 });
 
-app.get('/view/sample_spreadsheet/:id', function(req, res){
+app.get('/view/sample_spreadsheet/:id', ensureAuthenticated, function(req, res){
   articleProvider.getSamples(req.params.id, function(error, samples) {
     if (error) console.log("sample_spreadsheet/:id (get) error: ", error)
     else res.render('sample_spreadsheet.jade',{samples:samples});
   });
 });
 
-app.post('/view/sample_spreadsheet/:id', function(req, res){
+app.post('/view/sample_spreadsheet/:id', ensureAuthenticated, function(req, res){
   //console.log(req.param('step'))
   switch(req.param('step')) {
     case '0':
@@ -277,7 +313,7 @@ app.post('/view/sample_spreadsheet/:id', function(req, res){
       });
       break;
     case '3':
-      //console.log("assigned_store:",req.param('assigned_store')) 
+      //console.log("assigned_store:",req.param('assigned_store'))
       articleProvider.savePlacement(req.param('assigned_store'), req.params.id, function(plateid) {
         res.redirect('/input/plate_edit/' + plateid);
       });
@@ -288,14 +324,14 @@ app.post('/view/sample_spreadsheet/:id', function(req, res){
 });
 
 
-app.get('/view/sample_spreadsheet_edit/:id', function(req, res){
+app.get('/view/sample_spreadsheet_edit/:id', ensureAuthenticated, function(req, res){
   articleProvider.getSamples(req.params.id, function(error, samples) {
     if (error) console.log("sample_spreadsheet/:id error: ", error)
     else res.render('sample_spreadsheet_edit.jade',{samples:samples});
   });
 });
 
-app.post('/view/sample_spreadsheet_edit/:id', function(req, res){
+app.post('/view/sample_spreadsheet_edit/:id', ensureAuthenticated, function(req, res){
   //console.log("request body", req.body);
   articleProvider.process_sample_spreadsheet('samples', req.params.id, req.body, function( error, docs) {
     articleProvider.getIDbyName(req.param('proj_name'), function(error, id) {
@@ -310,7 +346,7 @@ app.post('/view/sample_spreadsheet_edit/:id', function(req, res){
 
 // This function requires the BS Plate ID.
 
-app.get('/input/bsplate_edit/:id', function(req, res){
+app.get('/input/bsplate_edit/:id', ensureAuthenticated, function(req, res){
   articleProvider.bsplateById(req.params.id, function(error, bsplate) {
     //console.log("BSPLATE:", bsplate)
     res.render('bsplate_edit.jade',{title: 'Edit Plate', bsplate:bsplate});
@@ -319,7 +355,7 @@ app.get('/input/bsplate_edit/:id', function(req, res){
 
 // This function requires the Plate ID.
 
-app.get('/input/bsplate_spreadsheet/:id', function(req, res){
+app.get('/input/bsplate_spreadsheet/:id', ensureAuthenticated, function(req, res){
   articleProvider.bsplateById(req.params.id, function(error, bsplates) {
     articleProvider.sampleByBsPlateId(req.params.id, function(error, samples) {
       res.render('bs_spreadsheet.jade',{title: 'Edit Plate', samples:samples, bsplates:bsplates});
@@ -335,7 +371,7 @@ app.get('/input/bsplate_spreadsheet/:id', function(req, res){
 
 // This function requires the Plate ID.
 
-app.get('/input/plate_edit/:id', function(req, res){
+app.get('/input/plate_edit/:id', ensureAuthenticated, function(req, res){
   articleProvider.plateById(req.params.id, function(error, plate) {
     res.render('plate_edit.jade',{title: 'Edit Plate', plate:plate});
   });
@@ -344,7 +380,7 @@ app.get('/input/plate_edit/:id', function(req, res){
 
 // This function requires the Plate ID.
 
-app.post('/input/plate_edit/:id', function(req, res){
+app.post('/input/plate_edit/:id', ensureAuthenticated, function(req, res){
     articleProvider.updateDB('plates', {_id:ObjectID.createFromHexString(req.param('plateid'))}, 
        {$set: {barcode: req.param('barcode'),
         sec1_operator: req.param('sec1_operator'),
@@ -444,7 +480,7 @@ app.post('/input/plate_edit/:id', function(req, res){
 
 // This function requires the Plate ID.
 
-app.get('/input/plate_spreadsheet/:id', function(req, res){
+app.get('/input/plate_spreadsheet/:id', ensureAuthenticated, function(req, res){
   articleProvider.plateById(req.params.id, function(error, plates) {
     articleProvider.sampleByPlateId(req.params.id, function(error, samples) {
       res.render('plate_spreadsheet.jade',{title: 'Edit Plate', samples:samples, plates:plates});
@@ -456,14 +492,14 @@ app.get('/input/plate_spreadsheet/:id', function(req, res){
 //  NANODROP INFO:
 //------------------------------------
 
-app.get('/input/nanodrop_new/:id', function(req, res) {
+app.get('/input/nanodrop_new/:id', ensureAuthenticated, function(req, res) {
   articleProvider.nanodrop_types( function(error, docs) {
     res.render('nanodrop_new.jade', {title: 'Add a Nanodrop File to this project', projectid:req.params.id, status:docs}
     );
   })
 });
 
-app.post('/input/nanodrop_new/:id', function(req, res) {
+app.post('/input/nanodrop_new/:id', ensureAuthenticated, function(req, res) {
     tsvreader.parseNanodropFile(req.files.nanodrop_file.path, function(error, data) {
       if (error) {
         console.log("app.get.nanodrop_new (post)", error)
@@ -481,6 +517,16 @@ app.post('/input/nanodrop_new/:id', function(req, res) {
     });
 });
 
+// Simple route middleware to ensure user is authenticated.
+//   Use this route middleware on any resource that needs to be protected.  If
+//   the request is authenticated (typically via a persistent login session),
+//   the request will proceed.  Otherwise, the user will be redirected to the
+//   login page.
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login')
+}
 
-app.listen(3000, "0.0.0.0");
-console.log("Express server listening on port %d in %s mode", 27017, app.settings.env);
+
+app.listen(port, "0.0.0.0");
+console.log("Express server listening on port %d in %s mode", port, app.settings.env);

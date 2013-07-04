@@ -3,6 +3,9 @@ var Connection = require('mongodb').Connection;
 var Server = require('mongodb').Server;
 var BSON = require('mongodb').BSON;
 var ObjectID = require('mongodb').ObjectID;
+var passport = require('passport'),
+    LocalStrategy = require('passport-local').Strategy;
+
 
 ArticleProvider = function(host, port) {
   this.db= new Db('lims', new Server(host, port, {auto_reconnect: true}, {}), {safe:true});
@@ -23,6 +26,42 @@ ArticleProvider.prototype.getDBData= function(collection_name, callback) {
     else callback(null, project_collection);
   });
 };
+
+//__________________________________
+//
+//  Passport 
+//__________________________________
+
+
+
+
+ArticleProvider.prototype.localstrategy= function(username, password, callback) {
+    this.db.collection('User').findOne({ username: username }, function(err, user) {
+      if (err) { return callback(err); }
+      if (!user) {
+        return callback(null, false, { message: 'Incorrect username.' });
+      }
+      if (user.password != password) {
+        return callback(null, false, { message: 'Incorrect password.' });
+      }
+      return callback(null, user);
+    });
+}
+
+ArticleProvider.prototype.deserialize= function(id, callback) {
+  this.getDBData('User', function(error, project_collection) {
+    if ( error ) callback(error)
+    else {
+      project_collection.findOne({_id: ObjectID.createFromHexString(id)}, function(error, result) {
+        if ( error ) {
+          console.log("findByID error:", e)
+          callback(error)
+        } else callback(null, result)
+      });
+    }
+  });
+}
+
 
 //__________________________________
 //
