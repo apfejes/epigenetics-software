@@ -41,7 +41,6 @@ ArticleProvider.prototype.localstrategy= function(username, password, callback) 
       if (!user) {
         return callback(null, false, { message: 'Incorrect username.' });
       }
-      console.log("password: ", user.password);
       if (user.password != password) {
         return callback(null, false, { message: 'Incorrect password.' });
       }
