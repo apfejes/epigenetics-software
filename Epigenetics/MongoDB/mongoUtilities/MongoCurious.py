@@ -6,7 +6,7 @@ Created on 2013-05-23
 '''
 from time import time
 import os, sys
-from numpy import log, mean
+from numpy import log, mean, std
 from math import sqrt
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
@@ -263,7 +263,7 @@ class MongoCurious():
 
 
 
-        print "    %i beta values collected" % len(x_position)
+        print "    %i beta values collected" % len(position)
         self.positions = position
         self.betas = values
         self.sample_ids = sample_ids
@@ -277,7 +277,7 @@ class MongoCurious():
         if self.end == None:
             self.end = self.positions[-1]
             print "    New end position:", self.end
-        return None
+        return self.positions,self.betas, self.sample_ids
 
 
     def getwaves(self):
@@ -314,6 +314,8 @@ class MongoCurious():
             Saves the plot as an .svg file or a svg string for webserver rendering
         '''
         if filename:
+            if filename[-4:len(filename)] != '.svg':
+                filename += '.svg'
             filename = "/home/sperez/Documents/svg_temp/" + filename
         elif not get_elements: filename = "test.svg"
 
