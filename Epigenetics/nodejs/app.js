@@ -9,6 +9,7 @@ var ObjectID = require('mongodb').ObjectID;
 var app = express();
 var passport = require('passport'),
     LocalStrategy = require('passport-local').Strategy;
+var port = 3000;
 
 // Configuration
 
@@ -527,5 +528,5 @@ function ensureAuthenticated(req, res, next) {
 }
 
 
-app.listen(3000, "0.0.0.0");
-console.log("Express server listening on port %d in %s mode", 27017, app.settings.env);
+app.listen(port, "0.0.0.0");
+console.log("Express server listening on port %d in %s mode", port, app.settings.env);
