@@ -36,7 +36,7 @@ class MethylationPlot(object):
         # create drawing
         self.plot = Drawing(filename,
                         size = (str(self.length) + "mm" , str(self.width * 1.5) + "mm"),
-                        viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 3)),
+                        viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 4)),
                         preserveAspectRatio = "xMinYMin meet")
         print 'x', X
         print 'set', list(set(X))
@@ -116,6 +116,8 @@ class MethylationPlot(object):
                                d = d))
     
                 self.elements.append(gaussian)
+                
+        self.samples_color = samples_color
 
     def save(self):
         for element in self.elements:
@@ -148,6 +150,19 @@ class MethylationPlot(object):
             self.title = "Methylation PLot"
         Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5")
+        
+        if len(self.samples_color)>20: 
+            fontsize = '2'
+        else: fontsize = '3'
+        
+        spacing = 0.1
+        height = self.margin - 5.0
+        
+        for sample, color in self.samples_color.iteritems():
+            label = Text(sample, insert = (self.margin*2 + self.length, height),
+                                            fill = color, font_size = fontsize)
+            height += float(fontsize)+spacing
+            self.elements.append(label)
         self.plot.add(Title)
         self.elements.append(Title)
         self.add_xtics()

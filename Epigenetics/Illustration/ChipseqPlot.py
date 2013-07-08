@@ -35,7 +35,7 @@ class ChipseqPlot(object):
         # create drawing
         self.plot = Drawing(filename,
                         size = (str(self.length) + "mm" , str(self.width * 1.5) + "mm"),
-                        viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 2)),
+                        viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 4)),
                         preserveAspectRatio = "xMinYMin meet")
 
     def build(self):
@@ -89,6 +89,7 @@ class ChipseqPlot(object):
                            fill = samples_color[sample_id][1], fill_opacity = 0.5, d = d))
 
             self.elements.append(peak)
+        self.samples_color = samples_color
 
 
     def save(self):
@@ -123,6 +124,20 @@ class ChipseqPlot(object):
         Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5")
         self.elements.append(Title)
+        
+        if len(self.samples_color)>20: 
+            fontsize = '2'
+        else: fontsize = '3'
+        
+        spacing = 0.1
+        height = self.margin - 5.0
+        
+        for sample, color in self.samples_color.iteritems():
+            label = Text(sample, insert = (self.margin*2 + self.length, height),
+                                            fill = color[1], font_size = fontsize)
+            height += float(fontsize)+spacing
+            self.elements.append(label)
+            
         self.add_xtics()
         self.add_ytics()
         self.add_axis()
