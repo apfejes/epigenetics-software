@@ -126,11 +126,13 @@ class ChipseqPlot(object):
         self.elements.append(Title)
         
         if len(self.samples_color)>20: 
-            fontsize = '2'
+            fontsize = '2.5'
+        elif len(self.samples_color)<5: 
+            fontsize = '3.5'
         else: fontsize = '3'
         
         spacing = 0.1
-        height = self.margin - 5.0
+        height = self.margin
         
         for sample, color in self.samples_color.iteritems():
             label = Text(sample, insert = (self.margin*2 + self.length, height),
