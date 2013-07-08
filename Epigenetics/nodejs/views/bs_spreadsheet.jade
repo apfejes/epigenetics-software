@@ -27,7 +27,10 @@ form( method="post")
           if (sample.nanodrop)
             - var best_date = sample.nanodrop[0].date
             - var best_time = sample.nanodrop[0].time
-            - for n in sample.nanodrop 
+            - for n in sample.nanodrop
+              - if (n.nd_type)
+                - if (n.nd_type.indexOf("bcDNA") != -1)
+                   continue 
               - if (n.date > best_date) 
                  - best_date = n.date
                  - best_time = n.time
@@ -37,18 +40,22 @@ form( method="post")
                   - best_time = n.time
             - each n in sample.nanodrop            
               - if (n.date == best_date  && n.time == best_time)
+                - if (n.nd_type.indexOf("bcDNA") == -1)
                   input(type="hidden", name="#{sample.sampleid}-#{sample.sample_num}-date", value = n.date)
                   input(type="hidden", name="#{sample.sampleid}-#{sample.sample_num}-time", value = n.time)
+                  - var to_add = (750/n.conc).toFixed(2)
                   td.lines
                     !{n.conc} #{n.units} 
                   td.lines
-                    - var to_add = (160/n.conc).toFixed(2)
                     - if (to_add > 4) {
                       b all 
                       | (!{to_add} µl)
                     - } else {
                       b !{to_add} µl
                     -}
+                  td.lines
+                    -var water = (45-to_add)
+                    | (!{water} µl)
 
           else
             td.redwlines
