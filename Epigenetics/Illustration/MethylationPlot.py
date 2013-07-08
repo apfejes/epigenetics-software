@@ -22,10 +22,10 @@ class MethylationPlot(object):
         '''
         self.elements = []
         self.title = title
-        self.X = X
-        self.Y = zip(*Y)[0]
-        self.stddevs = zip(*Y)[1]
-        self.counts = zip(*Y)[2]
+        self.X = X                  #position
+        self.Y = zip(*Y)[0]         #mean    
+        self.stddevs = zip(*Y)[1]   #stdev
+        self.counts = zip(*Y)[2]    #count of probes
         self.sample_ids = sample_ids
         self.color = color
         self.start = start
@@ -59,7 +59,7 @@ class MethylationPlot(object):
         # scale the variables
         self.X = [round(float(item - offset) * scale_x, 3) + margin for item in self.X]
         self.Y = [round((invertby - item) * scale_y, 2) + margin for item in self.Y]
-        self.stddevs = [round((invertby - item) * scale_y, 2) + margin for item in self.stddevs]
+        self.stddevs = [round((item) * scale_y, 2) + margin for item in self.stddevs]
 # #IF PLOTTING METHYLATION AS PATH, NOT POINTS:
 # #        d contains the coordinates that make up the path
 #         d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
@@ -97,7 +97,7 @@ class MethylationPlot(object):
             gaussian_y, gaussian_x = self.makegaussian(y, int(s), c) #reverse output arguments for sideways gaussians
             #print "hooo", gaussian_y
             gaussian_x = [coord*scale_x+x for coord in gaussian_x]
-            gaussian_y = [round((invertby- item*0.01) +y, 4) for item in gaussian_y]
+            gaussian_y = [item/scale_y +y for item in gaussian_y]
             #print "hello", y, gaussian_y
             #offset = max(Y)
             #Y = [(coord-offset)*0.1+offset for coord in Y]
@@ -209,7 +209,7 @@ class MethylationPlot(object):
         self.elements.append(y_axis)
         
     def makegaussian(self, mean, stddev, height):
-        #print mean, stddev, height, (-2) * stddev * stddev * log(1.0/ height)
+        print mean, stddev, height, (-2) * stddev * stddev * log(1.0/ height)
         endpts = int((sqrt((-2) * stddev * stddev * log(1.0/ height))))
         spacing = 64
         n_points = 0
@@ -228,6 +228,6 @@ class MethylationPlot(object):
         X = [float(x) for x in X]
         stddev = float(stddev)
         Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
-        #print X
-        #print Y
+        print X
+        print Y
         return X, Y
