@@ -294,7 +294,7 @@ class MongoCurious():
             #search for sample label name:
             sample_id = ObjectId(sample_id)
             sample_label = self.mongo.find('samples', {'_id':sample_id},{'chip':True})[0]['chip']
-            print sample_label
+            #print sample_label
             # append all peaks with a center in the region
             if self.start <= pos <= self.end:
                 waves.append((pos, height, stddev, sample_label))
@@ -343,17 +343,20 @@ class MongoCurious():
             print " Returning svg as a unicode string"
             drawing.add_legends()
             z = drawing.to_string()
+            drawing= None
         elif get_elements:
             z = drawing.get_elements()
             print " Returning %i svg elements" % len(z)
+            drawing= None
         elif filename and not to_string and not get_elements:
             print " Making svg file \"%s\"\n" % filename
             drawing.add_legends()
             z = drawing
             z.save()
+            drawing = None
         else:
             print "No filename specified. Returning the SVG object with legends"
             drawing.add_legends()
             z = drawing
-        drawing = None
+            drawing = None
         return z

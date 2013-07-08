@@ -38,11 +38,11 @@ class MethylationPlot(object):
                         size = (str(self.length) + "mm" , str(self.width * 1.5) + "mm"),
                         viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 4)),
                         preserveAspectRatio = "xMinYMin meet")
-        print 'x', X
-        print 'set', list(set(X))
-        print 'y', self.Y
-        print 'sttdevs',self.stddevs
-        print 'counts', self.counts
+        #print 'x', X
+        #print 'set', list(set(X))
+        #print 'y', self.Y
+        #print 'sttdevs',self.stddevs
+        #print 'counts', self.counts
 
 
     def build(self):
@@ -60,7 +60,6 @@ class MethylationPlot(object):
         self.X = [round(float(item - offset) * scale_x, 3) + margin for item in self.X]
         self.Y = [round((invertby - item) * scale_y, 2) + margin for item in self.Y]
         self.stddevs = [(item) * scale_y for item in self.stddevs]
-        print self.stddevs
 # #IF PLOTTING METHYLATION AS PATH, NOT POINTS:
 # #        d contains the coordinates that make up the path
 #         d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
@@ -96,10 +95,7 @@ class MethylationPlot(object):
             self.elements.append(point)
             
             if s!= 0.0:
-                print 's=',s
                 gaussian_y, gaussian_x = self.makegaussian(y, s, c) #reverse output arguments for sideways gaussians
-                print "hooo", gaussian_x
-                print scale_x
                 gaussian_x = [coord/10+x for coord in gaussian_x]
                 magnify_std = 10
                 gaussian_y = [item/scale_y*magnify_std + y for item in gaussian_y]
@@ -132,6 +128,7 @@ class MethylationPlot(object):
         return z
 
     def get_elements(self):
+        self.add_sample_labels(self.margin*3.2 + self.length)
         z = self.elements
         self.elements = None
         return z
@@ -150,27 +147,30 @@ class MethylationPlot(object):
             self.title = "Methylation PLot"
         Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5")
-        
-        if len(self.samples_color)>25: 
+        self.plot.add(Title)
+        self.elements.append(Title)
+        self.add_xtics()
+        self.add_ytics()
+        self.add_axis()
+        self.add_sample_labels(self.margin*2 + self.length)
+
+    def add_sample_labels(self,x_position):
+        if len(self.samples_color)>20: 
             fontsize = '2.5'
         elif len(self.samples_color)<5: 
             fontsize = '3.5'
         else: fontsize = '3'
         
         spacing = 0.1
-        height = self.margin
+        y_position = self.margin
         
         for sample, color in self.samples_color.iteritems():
-            label = Text(sample, insert = (self.margin*2 + self.length, height),
+            label = Text(sample, insert = (x_position, y_position),
                                             fill = color, font_size = fontsize)
-            height += float(fontsize)+spacing
+            y_position += float(fontsize)+spacing
             self.elements.append(label)
-        self.plot.add(Title)
-        self.elements.append(Title)
-        self.add_xtics()
-        self.add_ytics()
-        self.add_axis()
-
+        return None
+    
     def add_xtics(self):
         end, start, width, margin = self.end, self.start, self. width, self.margin
         offset = start
@@ -231,7 +231,7 @@ class MethylationPlot(object):
         self.elements.append(y_axis)
         
     def makegaussian(self, mean, stddev, height):
-        print mean, stddev, height, (-1) * stddev * stddev * log(1.0/ height)
+        #print mean, stddev, height, (-1) * stddev * stddev * log(1.0/ height)
         endpts = int((sqrt((-2) * stddev * stddev * log(1.0/ height))))
         spacing = 64
         n_points = 0
@@ -250,6 +250,6 @@ class MethylationPlot(object):
         X.sort()
         X = [float(x) for x in X]
         Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
-        print X
-        print Y
+        #print X
+        #print Y
         return X, Y

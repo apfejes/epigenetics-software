@@ -105,6 +105,7 @@ class ChipseqPlot(object):
         return z
 
     def get_elements(self):
+        self.add_sample_labels(self.margin*3.2 + self.length)
         z = self.elements
         self.elements = None
         return z
@@ -124,7 +125,13 @@ class ChipseqPlot(object):
         Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5")
         self.elements.append(Title)
-        
+            
+        self.add_xtics()
+        self.add_ytics()
+        self.add_axis()
+        self.add_sample_labels(self.margin*2 + self.length)
+
+    def add_sample_labels(self,x_position):
         if len(self.samples_color)>20: 
             fontsize = '2.5'
         elif len(self.samples_color)<5: 
@@ -132,18 +139,14 @@ class ChipseqPlot(object):
         else: fontsize = '3'
         
         spacing = 0.1
-        height = self.margin
+        y_position = self.margin
         
         for sample, color in self.samples_color.iteritems():
-            label = Text(sample, insert = (self.margin*2 + self.length, height),
+            label = Text(sample, insert = (x_position, y_position),
                                             fill = color[1], font_size = fontsize)
-            height += float(fontsize)+spacing
+            y_position += float(fontsize)+spacing
             self.elements.append(label)
-            
-        self.add_xtics()
-        self.add_ytics()
-        self.add_axis()
-
+        return None
 
     def makegaussian(self, start,
                      end, margin, length,
