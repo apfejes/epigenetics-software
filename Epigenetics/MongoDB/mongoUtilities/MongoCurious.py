@@ -292,12 +292,9 @@ class MongoCurious():
 #            if isinstance(doc['stddev'], basestring): int()
             pos, height, stddev, sample_id = doc['pos'], doc['height'], int(doc['stddev']), doc['sample_id']
             #search for sample label name:
-            sample_id = 'ObjectId(\"' + str(sample_id) + '\")'
-            print sample_id
-            sample_label = self.mongo.find('samples', {'_id':sample_id},{'chip':True})
-            print sample_label, sample_label.count()
-            for item in sample_label:
-                print item
+            sample_id = ObjectId(sample_id)
+            sample_label = self.mongo.find('samples', {'_id':sample_id},{'chip':True})[0]['chip']
+            print sample_label
             # append all peaks with a center in the region
             if self.start <= pos <= self.end:
                 waves.append((pos, height, stddev, sample_label))

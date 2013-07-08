@@ -16,7 +16,7 @@ m = MongoCurious.MongoCurious(database = "human_epigenetics")
 print " Query %.3f" % (time() - t0)
 
 t0 = time()
-query1 = m.query(collection = 'methylation', chromosome = "chr4", start = 3076407, end = 3245676)
+query = m.query(collection = 'methylation', chromosome = "chr4", start = 3100000, end = 3239400)
 print "Extract %.3f" % (time() - t0)
 
 t0 = time()
@@ -24,10 +24,12 @@ m.finddocs()
 print "find docs %.3f" % (time() - t0)
 
 t0 = time()
-m.collectbetas()
+p,b,s = m.collectbetas()
+print p
+print s
+print b
 print "collect betas %.3f" % (time() - t0)
 
 t0 = time()
-m.svg(filename = "test_methylation.svg", title = "Huntington gene")
+m.svg(filename = "test_gaussian_meth.svg", title = "Huntington gene")
 print "svg %.3f" % (time() - t0)
-##

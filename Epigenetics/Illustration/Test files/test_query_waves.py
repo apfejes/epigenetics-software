@@ -14,7 +14,7 @@ t0 = time()
 m = MongoCurious.MongoCurious(database = "human_epigenetics")
 # Query the database
 
-query1 = m.query(collection = "waves", chromosome = "chr4", start = 3076407, end = 3245676)
+query1 = m.query(collection = "waves", chromosome = "chr4", start = 3205000, end = 3211000)
 # Extract the probes or documents relevant to that region
 m.finddocs()
 # Extract the peak information in each probe
