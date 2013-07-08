@@ -36,13 +36,13 @@ class MethylationPlot(object):
         # create drawing
         self.plot = Drawing(filename,
                         size = (str(self.length) + "mm" , str(self.width * 1.5) + "mm"),
-                        viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 2)),
+                        viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 3)),
                         preserveAspectRatio = "xMinYMin meet")
         print 'x', X
         print 'set', list(set(X))
         print 'y', self.Y
-        print self.stddevs
-        print self.counts
+        print 'sttdevs',self.stddevs
+        print 'counts', self.counts
 
 
     def build(self):
@@ -59,7 +59,8 @@ class MethylationPlot(object):
         # scale the variables
         self.X = [round(float(item - offset) * scale_x, 3) + margin for item in self.X]
         self.Y = [round((invertby - item) * scale_y, 2) + margin for item in self.Y]
-        self.stddevs = [round((item) * scale_y, 2) + margin for item in self.stddevs]
+        self.stddevs = [(item) * scale_y for item in self.stddevs]
+        print self.stddevs
 # #IF PLOTTING METHYLATION AS PATH, NOT POINTS:
 # #        d contains the coordinates that make up the path
 #         d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
@@ -94,23 +95,27 @@ class MethylationPlot(object):
             point = Circle(center = (x, y), r = 0.3, fill = samples_color[sample_id])
             self.elements.append(point)
             
-            gaussian_y, gaussian_x = self.makegaussian(y, int(s), c) #reverse output arguments for sideways gaussians
-            #print "hooo", gaussian_y
-            gaussian_x = [coord*scale_x+x for coord in gaussian_x]
-            gaussian_y = [item/scale_y +y for item in gaussian_y]
-            #print "hello", y, gaussian_y
-            #offset = max(Y)
-            #Y = [(coord-offset)*0.1+offset for coord in Y]
-            d = "M" + str(gaussian_x[0]) + "," + str(gaussian_y[0]) + " " + str(gaussian_x[1]) + "," + str(gaussian_y[1])
-            for i in range(2, len(gaussian_x)):
-                d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
-
-            gaussian = (Path(stroke = samples_color[sample_id], stroke_width = 0.1,
-                           stroke_linecap = 'round', stroke_opacity = 0.8,
-                           fill = 'orange', fill_opacity = 0.1, 
-                           d = d))
-
-            self.elements.append(gaussian)
+            if s!= 0.0:
+                print 's=',s
+                gaussian_y, gaussian_x = self.makegaussian(y, s, c) #reverse output arguments for sideways gaussians
+                print "hooo", gaussian_x
+                print scale_x
+                gaussian_x = [coord/10+x for coord in gaussian_x]
+                magnify_std = 10
+                gaussian_y = [item/scale_y*magnify_std + y for item in gaussian_y]
+                #print "hello", y, gaussian_y
+                #offset = max(Y)
+                #Y = [(coord-offset)*0.1+offset for coord in Y]
+                d = "M"
+                for i in range(0, len(gaussian_x)):
+                    d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
+    
+                gaussian = (Path(stroke = samples_color[sample_id], stroke_width = 0.1,
+                               stroke_linecap = 'round', stroke_opacity = 0.8,
+                               fill = 'orange', fill_opacity = 0.1, 
+                               d = d))
+    
+                self.elements.append(gaussian)
 
     def save(self):
         for element in self.elements:
@@ -209,24 +214,24 @@ class MethylationPlot(object):
         self.elements.append(y_axis)
         
     def makegaussian(self, mean, stddev, height):
-        print mean, stddev, height, (-2) * stddev * stddev * log(1.0/ height)
+        print mean, stddev, height, (-1) * stddev * stddev * log(1.0/ height)
         endpts = int((sqrt((-2) * stddev * stddev * log(1.0/ height))))
         spacing = 64
         n_points = 0
-        while n_points < 25 and spacing >= 2:
+        std = int(stddev)
+        while n_points < 25 and spacing >= 1:
             X = []
-            for i in range (-stddev, stddev, spacing):
+            for i in range (-std, std, spacing):
                 X.append(float(i))
-            for i in range (-endpts, -stddev, spacing):
+            for i in range (-endpts, -std, spacing):
                 X.append(float(i))
-            for i in range (stddev, endpts, spacing):
+            for i in range (std, endpts, spacing):
                 X.append(float(i))
             n_points = len(X)
             spacing /= 2
         if (endpts) not in X: X.append(endpts)
         X.sort()
         X = [float(x) for x in X]
-        stddev = float(stddev)
         Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
         print X
         print Y
