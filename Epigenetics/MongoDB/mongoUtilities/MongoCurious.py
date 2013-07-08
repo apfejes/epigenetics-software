@@ -19,6 +19,7 @@ sys.path.insert(0, _root_dir + os.sep + "Illustration")
 import ChipseqPlot as chipseqplot
 import MethylationPlot as methylationplot
 
+from bson.objectid import ObjectId
 
 class MongoCurious():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
@@ -116,7 +117,7 @@ class MongoCurious():
                 extension = 500    # extend the region of query to catch peaks with tails in the region
                 query_pos = {"pos":{"$lte":self.end + extension, "$gte":self.start - extension}}
             if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
-            if self.sample_group: query_sampgroup = {"Sample Group":self.sample_group}
+            #if self.sample_group: query_sampgroup = {"Sample Group":self.sample_group}
             return_chr = {'_id': False, 'pos': True,
                           'height': True, 'stddev': True,
                           'sample_id': True}
@@ -197,8 +198,8 @@ class MongoCurious():
         '''
 
         print "    Appending labels for project", project, "and", feature
-        self.mongo.ensure_index("samples", project)    # For speed
-        self.mongo.ensure_index("samples", feature)
+        #self.mongo.ensure_index("samples", project)    # For speed
+        #self.mongo.ensure_index("samples", feature)
 
         if nottype != None:
             add_query = {feature:{"$ne":nottype[0], "$ne":nottype[1]}}
@@ -290,15 +291,22 @@ class MongoCurious():
         for doc in self.docs:
 #            if isinstance(doc['stddev'], basestring): int()
             pos, height, stddev, sample_id = doc['pos'], doc['height'], int(doc['stddev']), doc['sample_id']
+            #search for sample label name:
+            sample_id = 'ObjectId(\"' + str(sample_id) + '\")'
+            print sample_id
+            sample_label = self.mongo.find('samples', {'_id':sample_id},{'chip':True})
+            print sample_label, sample_label.count()
+            for item in sample_label:
+                print item
             # append all peaks with a center in the region
             if self.start <= pos <= self.end:
-                waves.append((pos, height, stddev, sample_id))
+                waves.append((pos, height, stddev, sample_label))
                 count += 1
             else:
                 dist_to_region = min(abs(pos - self.end), abs(self.start - pos))
                 dist_from_peak_to_tail = sqrt((-2) * stddev * stddev * log(tail / height))
                 if dist_from_peak_to_tail - dist_to_region >= 0:
-                    waves.append((pos, height, stddev, sample_id))
+                    waves.append((pos, height, stddev, sample_label))
                     count += 1
                 # else: print "         Not included:    ", pos, height, stddev,
         print "   Only %i peaks were found to occur in region." % count
