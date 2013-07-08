@@ -39,4 +39,4 @@ mongo.update('methylation', queryDict, updateDict, True)
 
 print "Done updating in ", (time()-t0)
 
-mongo.drop_index('methylation','project_1')
+mongo.ensure_index('methylation','project')
