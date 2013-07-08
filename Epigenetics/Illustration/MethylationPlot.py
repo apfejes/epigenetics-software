@@ -9,6 +9,7 @@ from svgwrite.text import Text
 from svgwrite.drawing import Drawing
 from svgwrite.path import Path
 from math import fabs, exp, sqrt, log
+from numpy import mean
 
 class MethylationPlot(object):
     '''
@@ -32,17 +33,22 @@ class MethylationPlot(object):
         self.length = length    # default = 200.0
         self.margin = margin    # default = 20.0
         self.width = width    # default = 60.0
-
         # create drawing
         self.plot = Drawing(filename,
                         size = (str(self.length) + "mm" , str(self.width * 1.5) + "mm"),
                         viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 2)),
                         preserveAspectRatio = "xMinYMin meet")
+        print 'x', X
+        print 'set', list(set(X))
+        print 'y', self.Y
+        print self.stddevs
+        print self.counts
+
 
     def build(self):
         length, end, start, width, margin = self.length, self.end, self.start, self.width, self. margin
 
-        offset = self.X[0]
+        offset = start
         invertby = max(self.Y)
         self.offset_y = (width + margin) * 0.8 + margin
         scale_x = length / (end - start)
@@ -54,10 +60,6 @@ class MethylationPlot(object):
         self.X = [round(float(item - offset) * scale_x, 3) + margin for item in self.X]
         self.Y = [round((invertby - item) * scale_y, 2) + margin for item in self.Y]
         self.stddevs = [round((invertby - item) * scale_y, 2) + margin for item in self.stddevs]
-        print 'X', self.X
-        print 'y', self.Y
-        print 'stddev', self.stddevs
-
 # #IF PLOTTING METHYLATION AS PATH, NOT POINTS:
 # #        d contains the coordinates that make up the path
 #         d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
@@ -92,22 +94,23 @@ class MethylationPlot(object):
             point = Circle(center = (x, y), r = 0.3, fill = samples_color[sample_id])
             self.elements.append(point)
             
-            Y,X = self.makegaussian(y, int(s), c) #reverse output for sideways gaussians
-            X = [coord*scale_x*20+x for coord in X]
-            Y = [round((invertby- item*0.01) +y, 2) + margin for item in Y]
-            print y, Y
+            gaussian_y, gaussian_x = self.makegaussian(y, int(s), c) #reverse output arguments for sideways gaussians
+            #print "hooo", gaussian_y
+            gaussian_x = [coord*scale_x+x for coord in gaussian_x]
+            gaussian_y = [round((invertby- item*0.01) +y, 4) for item in gaussian_y]
+            #print "hello", y, gaussian_y
             #offset = max(Y)
             #Y = [(coord-offset)*0.1+offset for coord in Y]
-            d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
-            for i in range(2, len(X)):
-                d = d + (" " + str(X[i]) + "," + str(Y[i]))
+            d = "M" + str(gaussian_x[0]) + "," + str(gaussian_y[0]) + " " + str(gaussian_x[1]) + "," + str(gaussian_y[1])
+            for i in range(2, len(gaussian_x)):
+                d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
 
-            peak = (Path(stroke = samples_color[sample_id], stroke_width = 0.1,
+            gaussian = (Path(stroke = samples_color[sample_id], stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
                            fill = 'orange', fill_opacity = 0.1, 
                            d = d))
 
-            self.elements.append(peak)
+            self.elements.append(gaussian)
 
     def save(self):
         for element in self.elements:
@@ -206,7 +209,7 @@ class MethylationPlot(object):
         self.elements.append(y_axis)
         
     def makegaussian(self, mean, stddev, height):
-        print mean, stddev, height, (-2) * stddev * stddev * log(1.0/ height)
+        #print mean, stddev, height, (-2) * stddev * stddev * log(1.0/ height)
         endpts = int((sqrt((-2) * stddev * stddev * log(1.0/ height))))
         spacing = 64
         n_points = 0
@@ -225,6 +228,6 @@ class MethylationPlot(object):
         X = [float(x) for x in X]
         stddev = float(stddev)
         Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
-        print X
-        print Y
+        #print X
+        #print Y
         return X, Y
