@@ -15,24 +15,30 @@ class MethylationPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, title, X, Y, sample_ids, color, start, end, length, margin, width):
+    def __init__(self, filename, title, pos_betas_dict, color, start, end, length, margin, width):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
         '''
         self.elements = []
         self.title = title
-        self.X = X                  #position
-        self.Y = zip(*Y)[0]         #mean    
-        self.stddevs = zip(*Y)[1]   #stdev
-        self.counts = zip(*Y)[2]    #count of probes
-        self.sample_ids = sample_ids
         self.color = color
         self.start = start
         self.end = end
         self.length = length    # default = 200.0
         self.margin = margin    # default = 20.0
         self.width = width    # default = 60.0
+        
+        self.X = []
+        self.Y = []
+        self.sample_ids = []
+        self.stddevs = []
+        for position in pos_betas_dict.keys():
+            for y, sample in pos_betas_dict[position]:
+                self.X.append(position)
+                self.Y.append(y)
+                self.sample_ids.append(sample)
+        
         # create drawing
         self.plot = Drawing(filename,
                         size = (str(self.length) + "mm" , str(self.width * 1.5) + "mm"),
@@ -84,7 +90,7 @@ class MethylationPlot(object):
         sample_count = 0
         samples_color = {}
         
-        for x, y, s, c,sample_id in zip(self.X, self.Y, self.stddevs, self.counts, self.sample_ids):
+        for x, y, sample_id in zip(self.X, self.Y, self.sample_ids):
             if sample_id not in samples_color :
                 sample_count += 1
                 samples_color[sample_id] = self.colors[sample_count - 1]
@@ -92,26 +98,27 @@ class MethylationPlot(object):
                     sample_count = 0
                 elif sample_count > len(self.colors): print "Ran out of colours!"
             point = Circle(center = (x, y), r = 0.3, fill = samples_color[sample_id])
+            print point
             self.elements.append(point)
             
-            if s!= 0.0:
-                gaussian_y, gaussian_x = self.makegaussian(y, s, c) #reverse output arguments for sideways gaussians
-                gaussian_x = [coord/10+x for coord in gaussian_x]
-                magnify_std = 10
-                gaussian_y = [item/scale_y*magnify_std + y for item in gaussian_y]
-                #print "hello", y, gaussian_y
-                #offset = max(Y)
-                #Y = [(coord-offset)*0.1+offset for coord in Y]
-                d = "M"
-                for i in range(0, len(gaussian_x)):
-                    d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
-    
-                gaussian = (Path(stroke = samples_color[sample_id], stroke_width = 0.1,
-                               stroke_linecap = 'round', stroke_opacity = 0.8,
-                               fill = 'orange', fill_opacity = 0.1, 
-                               d = d))
-    
-                self.elements.append(gaussian)
+#             if s!= 0.0 or None:
+#                 gaussian_y, gaussian_x = self.makegaussian(y, s, c) #reverse output arguments for sideways gaussians
+#                 gaussian_x = [coord/10+x for coord in gaussian_x]
+#                 magnify_std = 10
+#                 gaussian_y = [item/scale_y*magnify_std + y for item in gaussian_y]
+#                 #print "hello", y, gaussian_y
+#                 #offset = max(Y)
+#                 #Y = [(coord-offset)*0.1+offset for coord in Y]
+#                 d = "M"
+#                 for i in range(0, len(gaussian_x)):
+#                     d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
+#     
+#                 gaussian = (Path(stroke = samples_color[sample_id], stroke_width = 0.1,
+#                                stroke_linecap = 'round', stroke_opacity = 0.8,
+#                                fill = 'orange', fill_opacity = 0.1, 
+#                                d = d))
+#     
+#                 self.elements.append(gaussian)
                 
         self.samples_color = samples_color
 

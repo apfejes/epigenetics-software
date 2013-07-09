@@ -222,51 +222,40 @@ class MongoCurious():
             count += 1
         sample_label_list[previous_group] = sample_labels_list    # Do once more after exiting loop
         print sample_label_list
+        self.sample_label_list = sample_label_list
         return sample_label_list
 
-    def collectbetas(self,
-                     window_size = 1):
+    def collectbetas(self, group_samples = True):
         '''Collects and bins methylation data'''
 
         # Bin the beta values and collect average positions
-        position_dic = {}
-        betasamp_list = []
+        pos_betas_dict = {}
         count = 0
+        print '\n\n'
         for doc in self.docs:
-            if count == 0:
-                prev_start_pos = doc['start_position']
-            if count != 0:
-                if (doc['start_position'] - prev_start_pos) > window_size:
-                    avg_position = (doc['start_position'] + prev_start_pos) / 2
-                    position_dic[avg_position] = betasamp_list
-                    betasamp_list = []
-                    prev_start_pos = doc['start_position']
-            betasamp_list.append((doc['beta_value'], doc['sample_label']))
+            start_pos = doc['start_position']
+            if start_pos in pos_betas_dict:
+                pos_betas_dict[start_pos].append((doc['beta_value'], doc['sample_label']))
+            else:
+                pos_betas_dict[start_pos] = [(doc['beta_value'], doc['sample_label'])]
             count += 1
-        avg_position = (doc['start_position'] + prev_start_pos) / 2
-        position_dic[avg_position] = betasamp_list
-
-        print '    %s probes\' beta values were extracted and binned.' % count
-
-
-        sample_ids = []
-        position = []
-        values = []
-        for pos, tup_list in sorted(position_dic.iteritems()):
-            beta_values = []
-            for beta, samp in tup_list:
-                    if self.sample_type == None or samp in self.sample_label_list:
-                        beta_values.append(beta)
-                    else: continue
-                    values.append((mean(beta_values), std(beta_values), len(beta_values)))
-                    position.append(pos)
-                    sample_ids.append(samp)
-
-
-        print "    %i beta values collected" % len(position)
-        self.positions = position
-        self.betas = values
-        self.sample_ids = sample_ids
+        
+        print '    %s probes\' beta values were extracted.' % count
+        print "    %i CpGs locations were found" % len(pos_betas_dict)
+        
+        print pos_betas_dict
+        self.pos_betas_dict = pos_betas_dict
+#         if group_samples:
+#             for position, pairs in pos_betas_dict.iteritems():
+#                 values = list(zip(*pairs)[0])
+#                 samples = 
+#                 print values
+#                 m = mean(values)
+#                 s = std(values)
+#                 pos_betas_dict[position] = (m,s)
+#             print pos_betas_dict
+#             sys.exit()
+#             
 
         if self.start == None:
             i = 0
@@ -277,7 +266,10 @@ class MongoCurious():
         if self.end == None:
             self.end = self.positions[-1]
             print "    New end position:", self.end
-        return self.positions,self.betas, self.sample_ids
+        
+        
+        
+        return self.pos_betas_dict
 
 
     def getwaves(self):
@@ -326,8 +318,7 @@ class MongoCurious():
         if self.collection == "methylation":
             if color == None: color = "royalblue"
             drawing = methylationplot.MethylationPlot(filename, title,
-                                                      self.positions, self.betas,
-                                                      self.sample_ids, color,
+                                                      self.pos_betas_dict, color,
                                                       self.start, self.end,
                                                       length, margin, width)
             drawing.build()
