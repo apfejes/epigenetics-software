@@ -245,17 +245,28 @@ class MongoCurious():
         
         print pos_betas_dict
         self.pos_betas_dict = pos_betas_dict
-#         if group_samples:
-#             for position, pairs in pos_betas_dict.iteritems():
-#                 values = list(zip(*pairs)[0])
-#                 samples = 
-#                 print values
-#                 m = mean(values)
-#                 s = std(values)
-#                 pos_betas_dict[position] = (m,s)
-#             print pos_betas_dict
-#             sys.exit()
-#             
+        
+        
+        if group_samples:
+            sample_peaks = {} #looks like  {position: (mean, std, sample_type)}
+            for position, pairs in pos_betas_dict.iteritems():
+                samples = zip(*pairs)[1]
+                values = zip(*pairs)[0]
+                for sample,value in zip(samples,values):
+                    print sample
+                    
+                sys.exit()
+                for sample in samples:
+                    sample_types = []
+                    if self.sample_label_list[sample] not in sample_types:
+                        sample_peaks[position] = (m,s,sample_type)
+
+                print values
+                
+                pos_betas_dict[position] = (m,s)
+            print pos_betas_dict
+            sys.exit()
+             
 
         if self.start == None:
             i = 0
