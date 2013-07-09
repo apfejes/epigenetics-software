@@ -81,14 +81,21 @@ class MethylationPlot(object):
             
             #A few random colors
             #self.colors = ['indigo','orange','blueviolet','aqua','darkred','green','lightcoral','blue','limegreen','yellow','pink','lightblue','brown', 'grey']
-            #29 blue,green,grey palette
-            self.colors = ['blue','cornflowerblue','darkblue','deepskyblue','darkturquoise','aquamarine',
-                           'dodgerblue', 'lightblue', 'lightskyblue','lightseagreen','mediumslateblue',
-                           'midnightblue','navy','mediumturquoise','limegreen','mediumspringgreen','forestgreen', 
-                           'seagreen','palegreen', 'olive', 'yellowgreen','teal', 'paleturquoise',
-                           'darkolivegreen','darkgreen','cadetblue', 'darkslategrey','darkseagreen','grey']
+            #blue, red, green, purple palettes
+            colors = {}
+            colors['blues']=['blue','cornflowerblue','darkblue','deepskyblue','darkturquoise',
+                           'midnightblue','navy','dodgerblue', 'lightblue', 'lightskyblue','cadetblue','teal']
+            colors['greens']=['aquamarine','lightseagreen','mediumturquoise','limegreen',
+                                   'mediumspringgreen','forestgreen', 'seagreen','palegreen', 'olive',
+                                   'yellowgreen', 'paleturquoise','darkolivegreen','darkgreen', 'darkseagreen']
+            colors['reds']=['orangered', 'tomato','orange', 'gold', 'firebrick', 'sandybrown', 
+                                 'lightcoral', 'crimson', 'coral', 'darkred', 'indianred', 'maroon']
+            colors['purples']=['darkslategrey','mediumslateblue','purple', 'blueviolet','darkviolet', 
+                                    'indigo', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
         sample_count = 0
         samples_color = {}
+        
+        self.colors = colors['blues']
         
         for x, y, sample_id in zip(self.X, self.Y, self.sample_ids):
             if sample_id not in samples_color :
@@ -101,8 +108,29 @@ class MethylationPlot(object):
             print point
             self.elements.append(point)
             
+            
+                
+#         if group_samples:
+#             sample_peaks = {} #looks like  {position: (mean, std, sample_type)}
+#             for position, pairs in pos_betas_dict.iteritems():
+#                 samples = zip(*pairs)[1]
+#                 values = zip(*pairs)[0]
+#                 sample_types = []
+#                 for sample,value in zip(samples,values):
+#                     type = self.sample_label_list[sample]
+#                     if type not in sample_types: 
+#                         peak[type]=(0,0) #(mean,std)
+#                     
+# 
+#                     sample_peaks[position] = peak
+# 
+#                 print values
+#                 
+#                 pos_betas_dict[position] = (m,s)
+#             print pos_betas_dict
+            
 #             if s!= 0.0 or None:
-#                 gaussian_y, gaussian_x = self.makegaussian(y, s, c) #reverse output arguments for sideways gaussians
+#                 gaussian_y, gaussian_x = self.makegaussian(y, s, height) #reverse output arguments for sideways gaussians
 #                 gaussian_x = [coord/10+x for coord in gaussian_x]
 #                 magnify_std = 10
 #                 gaussian_y = [item/scale_y*magnify_std + y for item in gaussian_y]
@@ -172,7 +200,7 @@ class MethylationPlot(object):
         y_position = self.margin
         
         for sample, color in self.samples_color.iteritems():
-            label = Text(sample, insert = (x_position, y_position),
+            label = Text(sample+color, insert = (x_position, y_position),
                                             fill = color, font_size = fontsize)
             y_position += float(fontsize)+spacing
             self.elements.append(label)
