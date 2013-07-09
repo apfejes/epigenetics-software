@@ -194,7 +194,7 @@ class MongoCurious():
     def sample_dict(self, project, feature, nottype = None):
         '''
         For a particular feature (for example, disease in Down Syndrome experiments) return a dictionary
-        structured as {sample label: sample_type} where sample_type is "control" or "diseased
+        structured as {sample_type: sample_label} where sample_type is "control" or "diseased
         '''
 
         print "    Appending labels for project", project, "and", feature
@@ -209,21 +209,18 @@ class MongoCurious():
 
         samples = self.mongo.find("samples",
                              findQuery, returnQuery).sort(feature, 1)
-        sample_label_list = {}
-        sample_labels_list = []
-        previous_group = None
-        count = 0
+                             
+        sample_dictionary = {}
         for doc in samples:
-            if (doc[feature] != previous_group) and (count > 0):
-                sample_label_list[previous_group] = sample_labels_list
-                sample_labels_list = []
-            sample_labels_list.append(doc['sample_label'])
-            previous_group = doc[feature]
-            count += 1
-        sample_label_list[previous_group] = sample_labels_list    # Do once more after exiting loop
-        print sample_label_list
-        self.sample_label_list = sample_label_list
-        return sample_label_list
+            type = str(doc[feature])
+            sample = str(doc['sample_label'])
+            if type in sample_dictionary:
+                sample_dictionary[type].append(sample)
+            else:
+                sample_dictionary[type] = [sample]
+        self.sample_dictionary = sample_dictionary
+        print sample_dictionary
+        return sample_dictionary
 
     def collectbetas(self, group_samples = True):
         '''Collects and bins methylation data'''
@@ -234,10 +231,13 @@ class MongoCurious():
         print '\n\n'
         for doc in self.docs:
             start_pos = doc['start_position']
+            sample = str(doc['sample_label'])
             if start_pos in pos_betas_dict:
-                pos_betas_dict[start_pos].append((doc['beta_value'], doc['sample_label']))
+                type = self.sample_dictionary[str(doc['sample_label'])]
+                pos_betas_dict[start_pos].append((doc['beta_value'], doc['sample_label'], type))
             else:
-                pos_betas_dict[start_pos] = [(doc['beta_value'], doc['sample_label'])]
+                type = self.sample_dictionary[(doc['sample_label'])]
+                pos_betas_dict[start_pos] = [(doc['beta_value'], doc['sample_label'], type)]
             count += 1
         
         print '    %s probes\' beta values were extracted.' % count
@@ -245,6 +245,27 @@ class MongoCurious():
         
         print pos_betas_dict
         self.pos_betas_dict = pos_betas_dict
+        
+        sys.exit()
+        
+        if group_samples:
+            sample_peaks = {} #looks like  {position: (mean, std, sample_type)}
+            for position, pairs in pos_betas_dict.iteritems():
+                samples = zip(*pairs)[1]
+                values = zip(*pairs)[0]
+                sample_types = []
+                for sample,value in zip(samples,values):
+                    type = self.sample_dictionary[sample]
+                    if type not in sample_types: 
+                        peak[type]=(0,0) #(mean,std)
+                     
+ 
+                    sample_peaks[position] = peak
+ 
+                print values
+                 
+                pos_betas_dict[position] = (m,s)
+            print pos_betas_dict        
         
         if self.start == None:
             i = 0
