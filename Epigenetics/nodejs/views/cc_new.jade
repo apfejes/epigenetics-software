@@ -1,0 +1,59 @@
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+a(href='/')
+  #logo
+h1= title
+form( method="post")
+  #newinformation
+    H3 Enter your sample Information:
+    table
+      tr 
+        td.label: b Researcher :
+        td: input(type="text", name="Researcher", id="Researcher")
+      tr
+        td: b CrossLinkingTime : 
+        td: input(type="text", name="CrossLinkingTime", id="CrossLinkingTime", required)
+      tr
+        td: b Protocol :
+        td: input(type="text", name="Protocol", id="Protocol")
+      tr
+        td: b ArrayLotNumber :
+        td: input(type="text", name="ArrayLotNumber", id="ArrayLotNumber")
+      tr
+        td: b Antibody :
+        td: input(type="text", name="Antibody", id="Antibody")
+      tr
+        td: b ArrayType :
+        td: input(type="text", name="ArrayType", id="ArrayType")
+      tr
+        td: b Type :
+        td: input(type="text", name="Type", id="Type")
+      tr
+        td: b AntibodyVolume :
+        td: input(type="text", name="AntibodyVolume", id="AntibodyVolume")
+      tr
+        td: b PubmedID :
+        td: input(type="text", name="PubmedID", id="PubmedID")
+      tr
+        td: b CatalogNumber :
+        td: input(type="text", name="CatalogNumber", id="CatalogNumber")
+      tr
+        td: b CEL file :
+        td: input(type="text", name="CEL_file", id="CEL_file", disabled)
+      tr
+        td: b StrainNumber :
+        td: input(type="text", name="StrainNumber", id="StrainNumber")
+      tr
+        td: b StrainBackground :
+        td: input(type="text", name="StrainBackground", id="StrainBackground")
+      tr
+        td: b Comments :
+        td: input(type="text", name="Comments", id="Comments")
+      tr
+        td: b Date:
+        td: input(type="date", name="Date", id="Date")
+        
+    div#editArticleSubmit
+      input(type="submit", value="Save")
+      input(type="button", value="Cancel", onClick="window.history.back(-1)")
+            
+                        
