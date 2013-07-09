@@ -32,12 +32,14 @@ class MethylationPlot(object):
         self.X = []
         self.Y = []
         self.sample_ids = []
+        self.sample_types = []
         self.stddevs = []
         for position in pos_betas_dict.keys():
-            for y, sample in pos_betas_dict[position]:
+            for y, sample, type in pos_betas_dict[position]:
                 self.X.append(position)
                 self.Y.append(y)
                 self.sample_ids.append(sample)
+                self.sample_types.append(type)
         
         # create drawing
         self.plot = Drawing(filename,
@@ -97,7 +99,7 @@ class MethylationPlot(object):
         sample_count = 0
         samples_color = {}
         
-        self.colors = colors['reds']
+        self.colors = colors['greens']
         for x, y, sample_id in zip(self.X, self.Y, self.sample_ids):
             if sample_id not in samples_color :
                 sample_count += 1

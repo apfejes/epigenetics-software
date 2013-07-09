@@ -176,6 +176,14 @@ class MongoCurious():
             if self.sample_type in ["unstimulated", "listeria"]:
                 feature = 'stimulation'
                 sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
+        
+        if self.project == "gecko":
+            if self.sample_type not in ['BUCCAL','BLOOD SPOT', 'PBMC', None]: self.sample_type = str(raw_input(
+                            "Please specify a sample type: \"BLOOD SPOT\" or \"BUCCAL\" or \"PBMC\"?"))
+            if self.sample_type in ['BUCCAL','BLOOD SPOT', 'PBMC']:
+                feature = 'Sample Group'
+                sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
+
 #         if self.project == "All":
 #             if self.sample_type != "control" or self.sample_type != None:
 #                 print "The sample type \"", self.sample_type, "\" is invalid."
@@ -230,59 +238,46 @@ class MongoCurious():
 
         # Bin the beta values and collect average positions
         pos_betas_dict = {}
+        sample_peaks = {}
         count = 0
         print '\n\n'
         for doc in self.docs:
-            start_pos = doc['start_position']
+            print doc
+            start_pos = doc['start_position'] #Assume CpG occurs at start of probe
             sample = str(doc['sample_label'])
-            for type in sample_dictionary.keys():
-                if sample in sample_dictionary[type]:
-                    if start_pos in pos_betas_dict:
-                        pos_betas_dict[start_pos].append((doc['beta_value'], doc['sample_label'], type))
-                    else:
-                        pos_betas_dict[start_pos] =(doc['beta_value'], doc['sample_label'], type)
-                        count += 1
+            beta = doc['beta_value']
+            type = None
+            if start_pos in pos_betas_dict:
+                pos_betas_dict[start_pos].append((beta, sample, type))
+            else:
+                pos_betas_dict[start_pos] =[(beta, sample, type)]
+            count += 1
         
         print '    %s probes\' beta values were extracted.' % count
         print "    %i CpGs locations were found" % len(pos_betas_dict)
         
-        print pos_betas_dict
-        self.pos_betas_dict = pos_betas_dict
-        
-        sys.exit()
-        
-        if group_samples:
-            sample_peaks = {} #looks like  {position: (mean, std, sample_type)}
-            for position, pairs in pos_betas_dict.iteritems():
-                samples = zip(*pairs)[1]
-                values = zip(*pairs)[0]
-                sample_types = []
-                for sample,value in zip(samples,values):
-                    type = self.sample_dictionary[sample]
-                    if type not in sample_types: 
-                        peak[type]=(0,0) #(mean,std)
-                     
- 
-                    sample_peaks[position] = peak
- 
-                print values
-                 
-                pos_betas_dict[position] = (m,s)
-            print pos_betas_dict        
-        
-        if self.start == None:
-            i = 0
-            while self.start == None:
-                self.start = self.positions[i]
-                i += 1
-            print "    New start position:", self.start
-        if self.end == None:
-            self.end = self.positions[-1]
-            print "    New end position:", self.end
-        
-        
-        
-        return self.pos_betas_dict
+#         print pos_betas_dict
+#         self.pos_betas_dict = pos_betas_dict
+#          
+#         if self.sample_dictionary:
+#             for type in self.sample_dictionary.keys():           #ALERT: this is quite inefficient, but since the dict will only have like 2-3 keys it's not too bad...
+#                 for pos, (beta, sample, type) in pos_betas_dict.iteritems():
+#                           
+#                         if sample in self.sample_dictionary[type]:
+#                         if start_pos in pos_betas_dict:
+#         if self.start == None:
+#             i = 0
+#             while self.start == None:
+#                 self.start = self.positions[i]
+#                 i += 1
+#             print "    New start position:", self.start
+#         if self.end == None:
+#             self.end = self.positions[-1]
+#             print "    New end position:", self.end
+#         
+#         
+#         
+#         return self.pos_betas_dict
 
 
     def getwaves(self):
