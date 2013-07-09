@@ -19,6 +19,7 @@ sys.path.insert(0, _root_dir + os.sep + "Illustration")
 import ChipseqPlot as chipseqplot
 import MethylationPlot as methylationplot
 
+from bson.objectid import ObjectId
 
 class MongoCurious():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
@@ -48,6 +49,12 @@ class MongoCurious():
         Query['collection'] = self.collection
         Query['project'] = project
         self.project = project
+        Query['sample label'] = sample_label
+        self.sample_label = sample_label
+        Query['sample type'] = sample_type
+        self.sample_type = sample_type
+        Query['sample id'] = sample_id
+        self.sample_id = sample_id
         if collection != 'samples':
             Query['start'] = int(start)
             self.start = int(start)
@@ -63,14 +70,8 @@ class MongoCurious():
                     self.chromosome = chromosome
             if self.project:
                 self.sample_label_list = self.creategroups()
-                Query['sample lable list'] = self.sample_label_list
+                Query['sample label list'] = self.sample_label_list
         self.Query = Query
-        Query['sample label'] = sample_label
-        self.sample_label = sample_label
-        Query['sample type'] = sample_type
-        self.sample_type = sample_type
-        Query['sample id'] = sample_id
-        self.sample_id = sample_id
         return self.Query
 
     def checkquery(self):
@@ -116,7 +117,7 @@ class MongoCurious():
                 extension = 500    # extend the region of query to catch peaks with tails in the region
                 query_pos = {"pos":{"$lte":self.end + extension, "$gte":self.start - extension}}
             if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
-            if self.sample_group: query_sampgroup = {"Sample Group":self.sample_group}
+            #if self.sample_group: query_sampgroup = {"Sample Group":self.sample_group}
             return_chr = {'_id': False, 'pos': True,
                           'height': True, 'stddev': True,
                           'sample_id': True}
@@ -197,8 +198,8 @@ class MongoCurious():
         '''
 
         print "    Appending labels for project", project, "and", feature
-        self.mongo.ensure_index("samples", project)    # For speed
-        self.mongo.ensure_index("samples", feature)
+        #self.mongo.ensure_index("samples", project)    # For speed
+        #self.mongo.ensure_index("samples", feature)
 
         if nottype != None:
             add_query = {feature:{"$ne":nottype[0], "$ne":nottype[1]}}
@@ -221,53 +222,30 @@ class MongoCurious():
             count += 1
         sample_label_list[previous_group] = sample_labels_list    # Do once more after exiting loop
         print sample_label_list
+        self.sample_label_list = sample_label_list
         return sample_label_list
 
-    def collectbetas(self,
-                     window_size = 1):
+    def collectbetas(self, group_samples = True):
         '''Collects and bins methylation data'''
 
         # Bin the beta values and collect average positions
-        position_dic = {}
-        betasamp_list = []
+        pos_betas_dict = {}
         count = 0
+        print '\n\n'
         for doc in self.docs:
-            if count == 0:
-                prev_start_pos = doc['start_position']
-            if count != 0:
-                if (doc['start_position'] - prev_start_pos) > window_size:
-                    avg_position = (doc['start_position'] + prev_start_pos) / 2
-                    position_dic[avg_position] = betasamp_list
-                    betasamp_list = []
-                    prev_start_pos = doc['start_position']
-            betasamp_list.append((doc['beta_value'], doc['sample_label']))
+            start_pos = doc['start_position']
+            if start_pos in pos_betas_dict:
+                pos_betas_dict[start_pos].append((doc['beta_value'], doc['sample_label']))
+            else:
+                pos_betas_dict[start_pos] = [(doc['beta_value'], doc['sample_label'])]
             count += 1
-        avg_position = (doc['start_position'] + prev_start_pos) / 2
-        position_dic[avg_position] = betasamp_list
-
-        print '    %s probes\' beta values were extracted and binned.' % count
-
-
-        sample_ids = []
-        position = []
-        values = []
-        for pos, tup_list in sorted(position_dic.iteritems()):
-            beta_values = []
-            for beta, samp in tup_list:
-                    if self.sample_type == None or samp in self.sample_label_list:
-                        beta_values.append(beta)
-                    else: continue
-                    values.append((mean(beta_values), std(beta_values), len(beta_values)))
-                    position.append(pos)
-                    sample_ids.append(samp)
-
-
-
-        print "    %i beta values collected" % len(position)
-        self.positions = position
-        self.betas = values
-        self.sample_ids = sample_ids
-
+        
+        print '    %s probes\' beta values were extracted.' % count
+        print "    %i CpGs locations were found" % len(pos_betas_dict)
+        
+        print pos_betas_dict
+        self.pos_betas_dict = pos_betas_dict
+        
         if self.start == None:
             i = 0
             while self.start == None:
@@ -277,7 +255,10 @@ class MongoCurious():
         if self.end == None:
             self.end = self.positions[-1]
             print "    New end position:", self.end
-        return self.positions,self.betas, self.sample_ids
+        
+        
+        
+        return self.pos_betas_dict
 
 
     def getwaves(self):
@@ -290,15 +271,19 @@ class MongoCurious():
         for doc in self.docs:
 #            if isinstance(doc['stddev'], basestring): int()
             pos, height, stddev, sample_id = doc['pos'], doc['height'], int(doc['stddev']), doc['sample_id']
+            #search for sample label name:
+            sample_id = ObjectId(sample_id)
+            sample_label = self.mongo.find('samples', {'_id':sample_id},{'chip':True})[0]['chip']
+            #print sample_label
             # append all peaks with a center in the region
             if self.start <= pos <= self.end:
-                waves.append((pos, height, stddev, sample_id))
+                waves.append((pos, height, stddev, sample_label))
                 count += 1
             else:
                 dist_to_region = min(abs(pos - self.end), abs(self.start - pos))
                 dist_from_peak_to_tail = sqrt((-2) * stddev * stddev * log(tail / height))
                 if dist_from_peak_to_tail - dist_to_region >= 0:
-                    waves.append((pos, height, stddev, sample_id))
+                    waves.append((pos, height, stddev, sample_label))
                     count += 1
                 # else: print "         Not included:    ", pos, height, stddev,
         print "   Only %i peaks were found to occur in region." % count
@@ -322,8 +307,7 @@ class MongoCurious():
         if self.collection == "methylation":
             if color == None: color = "royalblue"
             drawing = methylationplot.MethylationPlot(filename, title,
-                                                      self.positions, self.betas,
-                                                      self.sample_ids, color,
+                                                      self.pos_betas_dict, color,
                                                       self.start, self.end,
                                                       length, margin, width)
             drawing.build()
@@ -338,17 +322,20 @@ class MongoCurious():
             print " Returning svg as a unicode string"
             drawing.add_legends()
             z = drawing.to_string()
+            drawing= None
         elif get_elements:
             z = drawing.get_elements()
             print " Returning %i svg elements" % len(z)
+            drawing= None
         elif filename and not to_string and not get_elements:
             print " Making svg file \"%s\"\n" % filename
             drawing.add_legends()
             z = drawing
             z.save()
+            drawing = None
         else:
             print "No filename specified. Returning the SVG object with legends"
             drawing.add_legends()
             z = drawing
-        drawing = None
+            drawing = None
         return z

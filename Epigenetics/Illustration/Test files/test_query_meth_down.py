@@ -10,26 +10,30 @@ from time import time
 sys.path.insert(0, "/home/sperez/epigenetics-software/epigenetics-software/Epigenetics")
 from MongoDB.mongoUtilities import MongoCurious
 
+collection = 'methylation'
+chromosome = 'chr21'
+sampletype = "Control"
+project = "down"
+
+
 # Tell the database which collection you want to query from
 t0 = time()
 m = MongoCurious.MongoCurious(database = "human_epigenetics")
 print " Query %.3f" % (time() - t0)
 
 t0 = time()
-query = m.query(collection = 'methylation', chromosome = "chr4", start = 3100000, end = 3239400)
+m.query(collection = collection, chromosome = chromosome, project = project,
+        sample_type = sampletype, start = 30390000, end = 30395000)
 print "Extract %.3f" % (time() - t0)
 
 t0 = time()
 m.finddocs()
 print "find docs %.3f" % (time() - t0)
 
-t0 = time()
-p,b,s = m.collectbetas()
-print p
-print s
-print b
-print "collect betas %.3f" % (time() - t0)
+m.collectbetas()
 
 t0 = time()
-m.svg(filename = "test_gaussian_meth.svg", title = "Huntington gene")
+m.svg(filename = "test_down_samples.svg", title = "Down Samples")
 print "svg %.3f" % (time() - t0)
+
+

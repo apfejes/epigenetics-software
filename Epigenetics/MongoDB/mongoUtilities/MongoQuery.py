@@ -15,7 +15,7 @@ class MongoQuery():
                             "start" : None, "end" : None,
                             "sample label" : None, "sample group" : None,
                             "project" : None, "cursor" : None, "waves" : None,
-                            "sample id": None, 'sample_label_list':None}
+                            "sample id": None, 'sample label list':None}
         self._data = fixed_dictionary
 
     def __setitem__(self, key, value):
