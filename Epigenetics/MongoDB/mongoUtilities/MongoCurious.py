@@ -49,6 +49,12 @@ class MongoCurious():
         Query['collection'] = self.collection
         Query['project'] = project
         self.project = project
+        Query['sample label'] = sample_label
+        self.sample_label = sample_label
+        Query['sample type'] = sample_type
+        self.sample_type = sample_type
+        Query['sample id'] = sample_id
+        self.sample_id = sample_id
         if collection != 'samples':
             Query['start'] = int(start)
             self.start = int(start)
@@ -64,14 +70,8 @@ class MongoCurious():
                     self.chromosome = chromosome
             if self.project:
                 self.sample_label_list = self.creategroups()
-                Query['sample lable list'] = self.sample_label_list
+                Query['sample label list'] = self.sample_label_list
         self.Query = Query
-        Query['sample label'] = sample_label
-        self.sample_label = sample_label
-        Query['sample type'] = sample_type
-        self.sample_type = sample_type
-        Query['sample id'] = sample_id
-        self.sample_id = sample_id
         return self.Query
 
     def checkquery(self):
@@ -261,7 +261,6 @@ class MongoCurious():
                     values.append((mean(beta_values), std(beta_values), len(beta_values)))
                     position.append(pos)
                     sample_ids.append(samp)
-
 
 
         print "    %i beta values collected" % len(position)
