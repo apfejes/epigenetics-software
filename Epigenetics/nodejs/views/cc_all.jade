@@ -1,0 +1,39 @@
+link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
+a(href='/')
+  #logo
+h1 All ChIP-chip samples
+#section1
+  b Notes: 
+  br
+  table.lines
+    tr
+      td.lines CEL_file
+      td.lines StrainNumber
+      td.lines StrainBackground
+      td.lines Date
+      td.lines ArrayType
+      td.lines Mutations
+      td.lines Antibody
+      td.lines Researcher
+      td.lines Comments
+    - each sample in samples
+      tr
+      td.lines 
+        !{sample.CEL_file}
+      td.lines 
+        !{sample.StrainNumber}
+      td.lines 
+        !{sample.StrainBackground}
+      td.lines 
+        !{sample.Date}
+      td.lines 
+        !{sample.ArrayType}
+      td.lines 
+        !{sample.Mutations}
+      td.lines 
+        !{sample.Antibody}
+      td.lines 
+        !{sample.Researcher}
+      td.lines 
+        !{sample.Comments}
+    

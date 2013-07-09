@@ -75,44 +75,30 @@ form( method="post")
     h3 Section 1 - Quant DNA: 
     table
       tr
-        td.label
-          b Operator : 
-        td
-          input(type="text", name="sec1_operator", value=plate.sec1_operator)
+        td.label: b Operator : 
+        td: input(type="text", name="sec1_operator", value=plate.sec1_operator)
       tr
-        td
-          b Date :
-        td 
-          input(type="date", name="sec1_date", value=plate.sec1_date)
+        td: b Date :
+        td: input(type="date", name="sec1_date", value=plate.sec1_date)
   #section1
     h3 Section 2 - Make MSA2/4:
     table
       tr
-        td.label
-          b Operator :
-        td 
-          input(type="text", name="sec2_operator", value=plate.sec2_operator)
+        td.label: b Operator :
+        td: input(type="text", name="sec2_operator", value=plate.sec2_operator)
       tr
-        td
-          b Date :
-        td
-          input(type="date", name="sec2_date", value=plate.sec2_date)
+        td: b Date :
+        td: input(type="date", name="sec2_date", value=plate.sec2_date)
       tr 
-        td
-          b Hyb Oven Start/Stop :
-        td 
-          input(type="time", name="sec2_oven_start", value=plate.sec2_oven_start)
+        td: b Hyb Oven Start/Stop :
+        td: input(type="time", name="sec2_oven_start", value=plate.sec2_oven_start)
           input(type="time", name="sec2_oven_stop", value=plate.sec2_oven_stop)
-        td 
-          b (37C, 20-24h)
+        td: b (37C, 20-24h)
       tr
-        td 
-          b MSA2/4 plate barcode :
-        td
-          input(type="text", name="sec2_plate_bc", value=plate.sec2_plate_bc)
+        td: b MSA2/4 plate barcode :
+        td: input(type="text", name="sec2_plate_bc", value=plate.sec2_plate_bc)
       tr
-        td.top
-          b MA1 reagents :
+        td.top: b MA1 reagents :
         td
           input(type="text", name="sec2_MA1_1", value=plate.sec2_MA1_1, placeholder="MA1-1 barcode")
           br
@@ -122,8 +108,7 @@ form( method="post")
           br
           input(type="text", name="sec2_MA1_2_lot", value=plate.sec2_MA1_2_lot, placeholder="MA1-2 lot number")
       tr
-        td.top
-          b RMP reagent :
+        td.top: b RMP reagent :
         td
           input(type="text", name="sec2_RMP_1", value=plate.sec2_RMP_1, placeholder="RMP-1 barcode")
           br
@@ -133,8 +118,7 @@ form( method="post")
           br
           input(type="text", name="sec2_RMP_2_lot", value=plate.sec2_RMP_2_lot, placeholder="RMP-2 lot number")
       tr
-        td.top
-          b MSM reagent :
+        td.top: b MSM reagent :
         td
           input(type="text", name="sec2_MSM_1", value=plate.sec2_MSM_1, placeholder="MSM-1 barcode")
           br
@@ -148,42 +132,30 @@ form( method="post")
           b H
             sub 2
           b O reagent :
+        td: input(type="text", name="sec2_H20", value=plate.sec2_H20)
         td
-          input(type="text", name="sec2_H20", value=plate.sec2_H20)
-        td
-
-          
     input(type="submit", value="Save")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
   #section1
     h3 Section 3 - Fragment MAS2/4:
     table 
       tr
-        td.label
-          b Operator : 
-        td
-          input(type="text", name="sec3_operator", value=plate.sec3_operator)
+        td.label: b Operator : 
+        td: input(type="text", name="sec3_operator", value=plate.sec3_operator)
       tr
-        td
-          b Date :
-        td
-          input(type="date", name="sec3_date", value=plate.sec3_date)
+        td: b Date :
+        td: input(type="date", name="sec3_date", value=plate.sec3_date)
       tr
-        td 
-          b Vortex at 1600 rpm : 
-        td
-          input(type="checkbox", name="sec3_vortex", value=plate.sec3_vortex)
+        td: b Vortex at 1600 rpm : 
+        td: input(type="checkbox", name="sec3_vortex", value=plate.sec3_vortex)
       tr
-        td 
-          b Heat Block Start/Stop :
+        td: b Heat Block Start/Stop :
         td
           input(type="time", name="sec3_hb_start", value=plate.sec3_hb_start)
           input(type="time", name="sec3_hb_stop", value=plate.sec3_hb_stop)
-        td
-          b (37C, 1h) 
+        td: b (37C, 1h) 
       tr
-        td.top 
-          b FMS reagent :
+        td.top: b FMS reagent :
         td
           input(type="text", name="sec3_FMS_1", value=plate.sec3_FMS_1, placeholder="FMS-1 barcode")
           br
@@ -199,60 +171,43 @@ form( method="post")
     h3 Section 4 - Precip MSA2/4:
     table
       tr
-        td.label
-          b Operator : 
-        td
-          input(type="text", name="sec4_operator", value=plate.sec4_operator)
+        td.label: b Operator : 
+        td: input(type="text", name="sec4_operator", value=plate.sec4_operator)
       tr
-        td
-          b Date : 
-        td
-          input(type="date", name="sec4_date", value=plate.sec4_date)
+        td: b Date : 
+        td: input(type="date", name="sec4_date", value=plate.sec4_date)
       tr
-        td
-          b Vortex at 1600 rpm : 
-        td
-          input(type="checkbox", name="sec4_vortex", value=plate.sec4_vortex)
+        td: b Vortex at 1600 rpm : 
+        td: input(type="checkbox", name="sec4_vortex", value=plate.sec4_vortex)
       tr 
-        td
-          b Heat Block Start/Stop : 
+        td: b Heat Block Start/Stop : 
         td
           input(type="time", name="sec4_hb_start", value=plate.sec4_hb_start)
           input(type="time", name="sec4_hb_stop", value=plate.sec4_hb_stop)
-        td
-          b (37C, 5m)
+        td: b (37C, 5m)
       tr 
-        td
-          b Incubate Start/Stop : 
+        td: b Incubate Start/Stop : 
         td
           input(type="time", name="sec4_in_start", value=plate.sec4_in_start)
           input(type="time", name="sec4_in_stop", value=plate.sec4_in_stop)
-        td 
-          b (4C, 5m)
+        td: b (4C, 5m)
       tr 
-        td
-          b Centrifuge 3000 xg Start/Stop : 
+        td: b Centrifuge 3000 xg Start/Stop : 
         td
           input(type="time", name="sec4_cen_start", value=plate.sec4_cen_start)
           input(type="time", name="sec4_cen_stop", value=plate.sec4_cen_stop)
-        td
-          b (4C, 20m)
+        td: b (4C, 20m)
       tr 
-        td
-          b Air Dry Start/Stop : 
+        td: b Air Dry Start/Stop : 
         td
           input(type="time", name="sec4_dry_start", value=plate.sec4_dry_start)
           input(type="time", name="sec4_dry_stop", value=plate.sec4_dry_stop)
-        td
-          b (22C, 1h)
+        td: b (22C, 1h)
       tr
-        td
-          b 2-propanol Date Opened :
-        td
-          input(type="date", name="sec4_2pol_open", value=plate.sec4_2pol_open)
+        td: b 2-propanol Date Opened :
+        td: input(type="date", name="sec4_2pol_open", value=plate.sec4_2pol_open)
       tr
-        td.top
-          b PM1 Reagent :
+        td.top: b PM1 Reagent :
         td
           input(type="text", name="sec4_PM1_1", value=plate.sec4_PM1_1, placeholder="PM1-1 barcode")
           br
@@ -268,32 +223,23 @@ form( method="post")
     h3 Section 5 - Resuspend MSA2/4:
     table
       tr
-        td.label
-          b Operator : 
-        td
-          input(type="text", name="sec5_operator", value=plate.sec5_operator)
+        td.label: b Operator : 
+        td: input(type="text", name="sec5_operator", value=plate.sec5_operator)
         td
       tr
-        td
-          b Date : 
-        td
-          input(type="date", name="sec5_date", value=plate.sec5_date)
+        td: b Date : 
+        td: input(type="date", name="sec5_date", value=plate.sec5_date)
         td
       tr 
-        td
-          b Hyb Oven  Start/Stop : 
+        td: b Hyb Oven  Start/Stop : 
         td
           input(type="time", name="sec5_ovn_start", value=plate.sec5_ovn_start)
           input(type="time", name="sec5_ovn_stop", value=plate.sec5_ovn_stop)
-        td
-          b (48C, 1h)
+        td: b (48C, 1h)
       tr
-        td
-          b RA1 Reagent :
-        td
-          input(type="text", name="sec5_RA1", value=plate.sec5_RA1, placeholder="RA1 barcode")
-        td
-          input(type="text", name="sec5_RA1_lot", value=plate.sec5_RA1_lot, placeholder="RA1 lot number")
+        td: b RA1 Reagent :
+        td: input(type="text", name="sec5_RA1", value=plate.sec5_RA1, placeholder="RA1 barcode")
+        td: input(type="text", name="sec5_RA1_lot", value=plate.sec5_RA1_lot, placeholder="RA1 lot number")
     input(type="submit", value="Save")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")
     
@@ -301,22 +247,16 @@ form( method="post")
     h3 Section 6 - Hyb multi Beadchip:
     table
       tr
-        td.label
-          b Operator : 
-        td
-          input(type="text", name="sec6_operator", value=plate.sec6_operator)
+        td.label: b Operator : 
+        td: input(type="text", name="sec6_operator", value=plate.sec6_operator)
         td
       tr
-        td
-          b Date :
-        td
-          input(type="date", name="sec6_date", value=plate.sec6_date)
+        td: b Date :
+        td: input(type="date", name="sec6_date", value=plate.sec6_date)
         td
       tr
-        td
-          b Vortex at 1800 rpm : 
-        td
-          input(type="checkbox", name="sec6_vortex", value=plate.sec6_vortex)
+        td: b Vortex at 1800 rpm : 
+        td: input(type="checkbox", name="sec6_vortex", value=plate.sec6_vortex)
         td
       tr 
         td
@@ -458,11 +398,8 @@ form( method="post")
         td
           input(type="text", name="sec8_XC4_lot", value=plate.sec8_XC4_lot, placeholder="XC4 lot number")
       tr
-        td
-          b PB1 Reagent :
-        td
-          input(type="text", name="sec8_PB1", value=plate.sec8_PB1, placeholder="PB1 barcode")
-        td
-          input(type="text", name="sec8_PB1_lot", value=plate.sec8_PB1_lot, placeholder="PB1 lot number")
+        td: b PB1 Reagent :
+        td: input(type="text", name="sec8_PB1", value=plate.sec8_PB1, placeholder="PB1 barcode")
+        td: input(type="text", name="sec8_PB1_lot", value=plate.sec8_PB1_lot, placeholder="PB1 lot number")
     input(type="submit", value="Save")
     input(type="button", value="Discard Edits", onClick="window.history.back(-1)")

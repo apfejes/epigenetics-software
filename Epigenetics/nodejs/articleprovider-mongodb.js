@@ -8,8 +8,10 @@ var passport = require('passport'),
 
 
 ArticleProvider = function(host, port) {
-  this.db= new Db('lims', new Server(host, port, {auto_reconnect: true}, {}), {safe:true});
+  this.db = new Db('lims', new Server(host, port, {auto_reconnect: true}, {}), {safe:true});
   this.db.open(function(){});
+  this.yeastdb = new Db('yeast_epigenetics', new Server(host, port, {auto_reconnect: true}, {}), {safe:true});
+  this.yeastdb.open(function(){});
 };
 
 //__________________________________
@@ -845,6 +847,53 @@ ArticleProvider.prototype.parse_random = function(data, callback) {
   }
   callback(list)
 }
+
+
+//__________________________________
+//
+//  YEAST DB!
+//__________________________________
+//
+
+//__________________________________
+//
+//  Perform a specific query (find) on a collection 
+//__________________________________
+
+
+ArticleProvider.prototype.getYeastDBQuery= function(collection_name, query_string, fields, sort_field, callback) {
+  if (sort_field != null && sort_field != {}) {
+    this.yeastdb.collection(collection_name).find(query_string, fields).sort(sort_field).toArray(function(e, results) {
+      if (e) {
+        console.log("getYeastDBQuery error:", e)
+        callback(e)
+      }
+      else callback(null, results)
+    })
+  } else {
+   this.yeastdb.collection(collection_name).find(query_string, fields).toArray(function(e, results) {
+      if (e) {
+        console.log("getYeastDBQuery error:", e)
+        callback(e)
+      }
+      else callback(null, results)
+    })
+  }
+};
+
+
+ArticleProvider.prototype.yeast_samples = function(callback) {
+    this.getYeastDBQuery('samples', {}, {}, {}, function(error, samples) {
+      if( error ) {
+        console.log("yeast samples-type error: ", error);
+        callback(error);
+      } 
+      else callback(error, samples)
+    });
+};
+
+
+
 
 //__________________________________
 //

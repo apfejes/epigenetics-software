@@ -528,5 +528,33 @@ function ensureAuthenticated(req, res, next) {
 }
 
 
+//------------------------------------
+//  Yeast Chip-Chip :
+//------------------------------------
+
+app.get('/input/cc_view_all', ensureAuthenticated, function(req, res) {
+  articleProvider.yeast_samples(function(error, samples) {
+    if (error) {
+      console.log("app.get.nanodrop_new (post)", error)
+    } else {
+       res.render('cc_all.jade', {samples:samples});
+    }
+  })
+});
+
+app.get('/input/cc_new', ensureAuthenticated, function(req, res) {
+  res.render('cc_new.jade', {title: 'New Project'});
+  
+  // not needed at the moment, but this is where to find 
+  // the source code for processing cel files:
+  //
+  // http://biopython.org/DIST/docs/api/Bio.Affy.CelFile-pysrc.html
+  //
+  //------------------------------
+  
+});
+
+
+
 app.listen(port, "0.0.0.0");
 console.log("Express server listening on port %d in %s mode", port, app.settings.env);
