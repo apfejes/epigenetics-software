@@ -96,20 +96,22 @@ class MethylationPlot(object):
         samples_color = {}
         
         self.colors = colors['blues']
-        
+        outofcolors = False
         for x, y, sample_id in zip(self.X, self.Y, self.sample_ids):
             if sample_id not in samples_color :
                 sample_count += 1
                 samples_color[sample_id] = self.colors[sample_count - 1]
                 if sample_count == len(self.colors):
                     sample_count = 0
-                elif sample_count > len(self.colors): print "Ran out of colours!"
+                    outofcolors = True
             point = Circle(center = (x, y), r = 0.3, fill = samples_color[sample_id])
             print point
             self.elements.append(point)
             
+        if outofcolors:
+            print "Ran out of colours! Looped over {0} colours to plot {1} different samples".format(len(self.colors),len(set(self.sample_ids)))
             
-                
+            
 #         if group_samples:
 #             sample_peaks = {} #looks like  {position: (mean, std, sample_type)}
 #             for position, pairs in pos_betas_dict.iteritems():
