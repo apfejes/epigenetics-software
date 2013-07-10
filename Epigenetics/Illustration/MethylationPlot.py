@@ -32,12 +32,14 @@ class MethylationPlot(object):
         self.X = []
         self.Y = []
         self.sample_ids = []
+        self.sample_types = []
         self.stddevs = []
         for position in pos_betas_dict.keys():
-            for y, sample in pos_betas_dict[position]:
+            for y, sample, type in pos_betas_dict[position]:
                 self.X.append(position)
                 self.Y.append(y)
                 self.sample_ids.append(sample)
+                self.sample_types.append(type)
         
         # create drawing
         self.plot = Drawing(filename,
@@ -84,52 +86,31 @@ class MethylationPlot(object):
             #blue, red, green, purple palettes
             colors = {}
             colors['blues']=['blue','cornflowerblue','darkblue','deepskyblue','darkturquoise',
-                           'midnightblue','navy','dodgerblue', 'lightblue', 'lightskyblue','cadetblue','teal']
-            colors['greens']=['aquamarine','lightseagreen','mediumturquoise','limegreen',
-                                   'mediumspringgreen','forestgreen', 'seagreen','palegreen', 'olive',
-                                   'yellowgreen', 'paleturquoise','darkolivegreen','darkgreen', 'darkseagreen']
+                           'midnightblue','navy','dodgerblue', 'lightblue', 'lightskyblue','cadetblue','teal',
+                           'paleturquoise', 'aquamarine', 'azure', 'aqua', 'lightsteelblue','powderblue' ]
+            colors['greens']=['lightseagreen','mediumturquoise','limegreen','lawngreen', 'olivedrab', 'chartreuse',
+                                   'mediumspringgreen','forestgreen', 'seagreen','palegreen', 'olive', ' darkcyan',
+                                   'yellowgreen', 'darkolivegreen','darkgreen', 'darkseagreen', 'lime']
             colors['reds']=['orangered', 'tomato','orange', 'gold', 'firebrick', 'sandybrown', 
                                  'lightcoral', 'crimson', 'coral', 'darkred', 'indianred', 'maroon']
-            colors['purples']=['darkslategrey','mediumslateblue','purple', 'blueviolet','darkviolet', 
-                                    'indigo', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
+            colors['purples']=['darkslategrey','orchid', 'purple', 'blueviolet','darkviolet', 
+                               'pink', 'mediumslateblue', 'lightpink', 'deeppink', 'indigo', 'lavenderblush',
+                               'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
         sample_count = 0
         samples_color = {}
         
-        self.colors = colors['blues']
-        outofcolors = False
+        self.colors = colors['greens']
         for x, y, sample_id in zip(self.X, self.Y, self.sample_ids):
             if sample_id not in samples_color :
                 sample_count += 1
                 samples_color[sample_id] = self.colors[sample_count - 1]
                 if sample_count == len(self.colors):
                     sample_count = 0
-                    outofcolors = True
             point = Circle(center = (x, y), r = 0.3, fill = samples_color[sample_id])
-            print point
             self.elements.append(point)
             
-        if outofcolors:
+        if self.colors < len(set(self.sample_ids)):
             print "Ran out of colours! Looped over {0} colours to plot {1} different samples".format(len(self.colors),len(set(self.sample_ids)))
-            
-            
-#         if group_samples:
-#             sample_peaks = {} #looks like  {position: (mean, std, sample_type)}
-#             for position, pairs in pos_betas_dict.iteritems():
-#                 samples = zip(*pairs)[1]
-#                 values = zip(*pairs)[0]
-#                 sample_types = []
-#                 for sample,value in zip(samples,values):
-#                     type = self.sample_label_list[sample]
-#                     if type not in sample_types: 
-#                         peak[type]=(0,0) #(mean,std)
-#                     
-# 
-#                     sample_peaks[position] = peak
-# 
-#                 print values
-#                 
-#                 pos_betas_dict[position] = (m,s)
-#             print pos_betas_dict
             
 #             if s!= 0.0 or None:
 #                 gaussian_y, gaussian_x = self.makegaussian(y, s, height) #reverse output arguments for sideways gaussians

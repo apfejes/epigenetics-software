@@ -164,29 +164,40 @@ class MongoCurious():
         '''
         print "    Creating sample groups..."
         if self.project == "down":
-            if self.sample_type not in ["Control", "DS"]: self.sample_type = str(raw_input(
+            if self.sample_type not in ["Control", "DS",None]: self.sample_type = str(raw_input(
                             "Please specify a sample type: \"Control\" or \"DS\"?"))
-            feature = 'Sample Group'
-            sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
+            if self.sample_type in ["Control", "DS"]:
+                feature = 'Sample Group'
+                sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
+
         if self.project == "kollman":
-            if self.sample_type not in ["unstimulated", "listeria"]: self.sample_type = str(raw_input(
+            if self.sample_type not in ["unstimulated", "listeria", None]: self.sample_type = str(raw_input(
                             "Please specify a sample type: \"unstimulated\" or \"listeria\"?"))
-            feature = 'stimulation'
-            sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
-        if self.project == "All":
-            if self.sample_type != "control" or self.sample_type != None:
-                print "The sample type \"", self.sample_type, "\" is invalid."
-                self.sample_type = str(raw_input("Please specify a sample type: \"control\" or \"disease\"?"))
-            if self.sample_type == "control" or self.sample_type == None:
-                sample_label_list = self.sample_dict(project = "kollman", feature = "stimulation")["unstimulated"]
-                sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group")["Control"])
-                sample_label_list.append(self.sample_dict(project = "kollman", feature = "stimulation",
-                                    nottype = ["unstimulated", "listeria"]))
-                sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group",
-                                    nottype = ["Control", "DS"]))
-            if self.sample_type == "disease":
-                sample_label_list = self.sample_dict(project = "kollman", feature = "stimulation")["listeria"]
-                sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group")["DS"])
+            if self.sample_type in ["unstimulated", "listeria"]:
+                feature = 'stimulation'
+                sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
+        
+        if self.project == "gecko":
+            if self.sample_type not in ['BUCCAL','BLOOD SPOT', 'PBMC', None]: self.sample_type = str(raw_input(
+                            "Please specify a sample type: \"BLOOD SPOT\" or \"BUCCAL\" or \"PBMC\"?"))
+            if self.sample_type in ['BUCCAL','BLOOD SPOT', 'PBMC']:
+                feature = 'Sample Group'
+                sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
+
+#         if self.project == "All":
+#             if self.sample_type != "control" or self.sample_type != None:
+#                 print "The sample type \"", self.sample_type, "\" is invalid."
+#                 self.sample_type = str(raw_input("Please specify a sample type: \"control\" or \"disease\"?"))
+#             if self.sample_type == "control" or self.sample_type == None:
+#                 sample_label_list = self.sample_dict(project = "kollman", feature = "stimulation")["unstimulated"]
+#                 sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group")["Control"])
+#                 sample_label_list.append(self.sample_dict(project = "kollman", feature = "stimulation",
+#                                     nottype = ["unstimulated", "listeria"]))
+#                 sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group",
+#                                     nottype = ["Control", "DS"]))
+#             if self.sample_type == "disease":
+#                 sample_label_list = self.sample_dict(project = "kollman", feature = "stimulation")["listeria"]
+#                 sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group")["DS"])
 
         print "    The sample labels with sample type", self.sample_type, " are:", sample_label_list
         return sample_label_list
@@ -194,7 +205,7 @@ class MongoCurious():
     def sample_dict(self, project, feature, nottype = None):
         '''
         For a particular feature (for example, disease in Down Syndrome experiments) return a dictionary
-        structured as {sample label: sample_type} where sample_type is "control" or "diseased
+        structured as {sample_type: sample_label} where sample_type is "control" or "diseased
         '''
 
         print "    Appending labels for project", project, "and", feature
@@ -209,56 +220,64 @@ class MongoCurious():
 
         samples = self.mongo.find("samples",
                              findQuery, returnQuery).sort(feature, 1)
-        sample_label_list = {}
-        sample_labels_list = []
-        previous_group = None
-        count = 0
+                             
+        sample_dictionary = {}
         for doc in samples:
-            if (doc[feature] != previous_group) and (count > 0):
-                sample_label_list[previous_group] = sample_labels_list
-                sample_labels_list = []
-            sample_labels_list.append(doc['sample_label'])
-            previous_group = doc[feature]
-            count += 1
-        sample_label_list[previous_group] = sample_labels_list    # Do once more after exiting loop
-        print sample_label_list
-        self.sample_label_list = sample_label_list
-        return sample_label_list
+            type = str(doc[feature])
+            sample = str(doc['sample_label'])
+            if type in sample_dictionary:
+                sample_dictionary[type].append(sample)
+            else:
+                sample_dictionary[type] = [sample]
+        self.sample_dictionary = sample_dictionary
+        print sample_dictionary
+        return sample_dictionary
 
     def collectbetas(self, group_samples = True):
         '''Collects and bins methylation data'''
 
         # Bin the beta values and collect average positions
         pos_betas_dict = {}
+        sample_peaks = {}
         count = 0
         print '\n\n'
         for doc in self.docs:
-            start_pos = doc['start_position']
+            print doc
+            start_pos = doc['start_position'] #Assume CpG occurs at start of probe
+            sample = str(doc['sample_label'])
+            beta = doc['beta_value']
+            type = None
             if start_pos in pos_betas_dict:
-                pos_betas_dict[start_pos].append((doc['beta_value'], doc['sample_label']))
+                pos_betas_dict[start_pos].append((beta, sample, type))
             else:
-                pos_betas_dict[start_pos] = [(doc['beta_value'], doc['sample_label'])]
+                pos_betas_dict[start_pos] =[(beta, sample, type)]
             count += 1
         
         print '    %s probes\' beta values were extracted.' % count
         print "    %i CpGs locations were found" % len(pos_betas_dict)
         
-        print pos_betas_dict
-        self.pos_betas_dict = pos_betas_dict
-        
-        if self.start == None:
-            i = 0
-            while self.start == None:
-                self.start = self.positions[i]
-                i += 1
-            print "    New start position:", self.start
-        if self.end == None:
-            self.end = self.positions[-1]
-            print "    New end position:", self.end
-        
-        
-        
-        return self.pos_betas_dict
+#         print pos_betas_dict
+#         self.pos_betas_dict = pos_betas_dict
+#          
+#         if self.sample_dictionary:
+#             for type in self.sample_dictionary.keys():           #ALERT: this is quite inefficient, but since the dict will only have like 2-3 keys it's not too bad...
+#                 for pos, (beta, sample, type) in pos_betas_dict.iteritems():
+#                           
+#                         if sample in self.sample_dictionary[type]:
+#                         if start_pos in pos_betas_dict:
+#         if self.start == None:
+#             i = 0
+#             while self.start == None:
+#                 self.start = self.positions[i]
+#                 i += 1
+#             print "    New start position:", self.start
+#         if self.end == None:
+#             self.end = self.positions[-1]
+#             print "    New end position:", self.end
+#         
+#         
+#         
+#         return self.pos_betas_dict
 
 
     def getwaves(self):
