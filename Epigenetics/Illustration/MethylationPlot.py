@@ -56,7 +56,7 @@ class MethylationPlot(object):
             colors['purple']=['darkslategrey','orchid', 'purple', 'blueviolet','darkviolet', 
                                'pink', 'mediumslateblue', 'lightpink', 'deeppink', 'indigo', 'lavenderblush',
                                'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
-            color_wheel = {1:'blue', 2:'red', 3:'purple', 4:'green'} 
+            color_wheel = {1:'blue', 2:'red', 4:'purple', 3:'green'} 
             return colors, color_wheel
 
 
@@ -107,8 +107,8 @@ class MethylationPlot(object):
                     color = color_wheel[type_count]
                 (m,s) = self.sample_peaks[position][sample_type]
                 m = round((invertby - m) * scale_y, 2) +margin
-                s = s * scale_y
-                point = Circle(center = (x, m), r = 0.6, fill = 'black')
+                s = round(s * scale_y,3)
+                #point = Circle(center = (x, m), r = 0.6, fill = 'black')
                 self.elements.append(point)
                 
                 height = 6.0
@@ -248,25 +248,17 @@ class MethylationPlot(object):
         self.elements.append(y_axis)
         
     def makegaussian(self, mean, stddev, height):
-        #print mean, stddev, height, (-1) * stddev * stddev * log(1.0/ height)
-        endpts = int((sqrt((-2) * stddev * stddev * log(1.0/ height))))
-        spacing = 64
-        n_points = 0
-        std = int(stddev)
-        while n_points < 25 and spacing >= 1:
-            X = []
-            for i in range (-std, std, spacing):
-                X.append(float(i))
-            for i in range (-endpts, -std, spacing):
-                X.append(float(i))
-            for i in range (std, endpts, spacing):
-                X.append(float(i))
-            n_points = len(X)
-            spacing /= 2
-        if (endpts) not in X: X.append(endpts)
+        print '\n', mean, stddev, height
+        endpts = (sqrt((-2) * stddev * stddev * log(1.0/ height)))
+        print 'end', endpts
+        X = [0]
+        X.extend([round(stddev*2.0*(i/9.0)-stddev,3) for i in range(0,10)]) #add 10 points  near mean
+        X.extend([round(abs(stddev-endpts)*(i/4.0)+stddev,3) for i in range(0,5)])
+        X.extend([round(abs(stddev-endpts)*(i/4.0)-2.0*stddev,3) for i in range(0,5)])
+        
         X.sort()
-        X = [float(x) for x in X]
-        Y = [round(height * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
-        #print X
-        #print Y
+        Y = [round(height * exp(-x ** 2 / (2.0 * stddev * stddev)), 3) for x in X]
+        print len(X), X
+        print len(set(X)), set(X)
+        print Y
         return X, Y
