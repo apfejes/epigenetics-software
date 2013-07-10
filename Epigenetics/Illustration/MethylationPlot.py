@@ -15,7 +15,7 @@ class MethylationPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, title,sample_peaks, pos_betas_dict, color, start, end, length, margin, width):
+    def __init__(self, filename, title, sample_peaks, pos_betas_dict, color, start, end, length, margin, width):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -28,18 +28,20 @@ class MethylationPlot(object):
         self.length = length    # default = 200.0
         self.margin = margin    # default = 20.0
         self.width = width    # default = 60.0
-        
-        self.X = []
+        self.pos_betas_dict = pos_betas_dict
+#        self.X = []
         self.Y = []
-        self.sample_ids = []
-        self.sample_types = []
-        self.stddevs = []
+#        self.sample_ids = []
+#        self.sample_types = []
+#        self.stddevs = []
         for position in pos_betas_dict.keys():
             for y, sample, type in pos_betas_dict[position]:
-                self.X.append(position)
+                #self.X.append(position)
                 self.Y.append(y)
-                self.sample_ids.append(sample)
-                self.sample_types.append(type)
+                #self.sample_ids.append(sample)
+                #self.sample_types.append(type)
+            #for type in sample_peaks[position]:
+        self.invertby = max(self.Y)
         
         # create drawing
         self.plot = Drawing(filename,
@@ -52,38 +54,7 @@ class MethylationPlot(object):
         #print 'sttdevs',self.stddevs
         #print 'counts', self.counts
 
-
-    def build(self):
-        length, end, start, width, margin = self.length, self.end, self.start, self.width, self. margin
-
-        offset = start
-        invertby = max(self.Y)
-        self.offset_y = (width + margin) * 0.8 + margin
-        scale_x = length / (end - start)
-        self.scale_x = scale_x
-        scale_y = (width + margin) * 0.8 / max(self.Y)
-        self.scale_y = scale_y
-
-        # scale the variables
-        self.X = [round(float(item - offset) * scale_x, 3) + margin for item in self.X]
-        self.Y = [round((invertby - item) * scale_y, 2) + margin for item in self.Y]
-        self.stddevs = [(item) * scale_y for item in self.stddevs]
-# #IF PLOTTING METHYLATION AS PATH, NOT POINTS:
-# #        d contains the coordinates that make up the path
-#         d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
-#         for i in range(2, len(X)):
-#             d = d + (" " + str(X[i]) + "," + str(Y[i]))
-# 
-#         self.plot.add(Path(stroke = self.color, fill = "none", stroke_width = '0.3', d = d))
-
-
-        if self.sample_ids:
-            
-            
-            
-            #A few random colors
-            #self.colors = ['indigo','orange','blueviolet','aqua','darkred','green','lightcoral','blue','limegreen','yellow','pink','lightblue','brown', 'grey']
-            #blue, red, green, purple palettes
+    def colors(self):
             colors = {}
             colors['blues']=['blue','cornflowerblue','darkblue','deepskyblue','darkturquoise',
                            'midnightblue','navy','dodgerblue', 'lightblue', 'lightskyblue','cadetblue','teal',
@@ -96,49 +67,72 @@ class MethylationPlot(object):
             colors['purples']=['darkslategrey','orchid', 'purple', 'blueviolet','darkviolet', 
                                'pink', 'mediumslateblue', 'lightpink', 'deeppink', 'indigo', 'lavenderblush',
                                'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
-        color_wheel = {1:'blues', 2:'reds', 3:'purples', 4:'greens'} 
+            color_wheel = {1:'blues', 2:'reds', 3:'purples', 4:'greens'} 
+            return colors, color_wheel
+
+    def build(self):
+        length, end, start, width, margin, invertby = self.length, self.end, self.start, self.width, self. margin, self.invertby
+
+        offset_x = start
+        self.offset_y = (width + margin) * 0.8 + margin
+        scale_x = length / (end - start)
+        self.scale_x = scale_x
+        scale_y = (width + margin) * 0.8 / max(self.Y)
+        self.scale_y = scale_y
+
+        # scale the variables
+        #self.X = [round(float(item - offset_x) * scale_x, 3) + margin for item in self.X]
+        #self.Y = [round((invertby - item) * scale_y, 2) + margin for item in self.Y]
+        #self.stddevs = [(item) * scale_y for item in self.stddevs]
         
+        colors,color_wheel = self.colors()#blue, red, green, purple palettes
+        print colors, color_wheel
+       
         sample_count = 0
         samples_color = {}
         type_count = 0
         types_color = {}
 
-        for x, y, sample_id, sample_type in zip(self.X, self.Y, self.sample_ids, self.sample_types):
-            if sample_type not in types_color:
-                type_count += 1
-                types_color[sample_type] = color_wheel[type_count]
-            self.colors = colors[types_color[sample_type]]
-            
-            if sample_id not in samples_color :
-                sample_count += 1
-                samples_color[sample_id] = self.colors[sample_count - 1]
-                if sample_count == len(self.colors):
-                    sample_count = 0
-            point = Circle(center = (x, y), r = 0.3, fill = samples_color[sample_id])
-            self.elements.append(point)
-            
-        if self.colors < len(set(self.sample_ids)):
-            print "Ran out of colours! Looped over {0} colours to plot {1} different samples".format(len(self.colors),len(set(self.sample_ids)))
-            
-#             if s!= 0.0 or None:
-#                 gaussian_y, gaussian_x = self.makegaussian(y, s, height) #reverse output arguments for sideways gaussians
-#                 gaussian_x = [coord/10+x for coord in gaussian_x]
-#                 magnify_std = 10
-#                 gaussian_y = [item/scale_y*magnify_std + y for item in gaussian_y]
-#                 #print "hello", y, gaussian_y
-#                 #offset = max(Y)
-#                 #Y = [(coord-offset)*0.1+offset for coord in Y]
-#                 d = "M"
-#                 for i in range(0, len(gaussian_x)):
-#                     d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
-#     
-#                 gaussian = (Path(stroke = samples_color[sample_id], stroke_width = 0.1,
-#                                stroke_linecap = 'round', stroke_opacity = 0.8,
-#                                fill = 'orange', fill_opacity = 0.1, 
-#                                d = d))
-#     
-#                 self.elements.append(gaussian)
+        for position in self.pos_betas_dict.keys():
+            x = round(float(position - offset_x) * scale_x, 3) + margin
+            for beta, sample_id, sample_type in self.pos_betas_dict[position]:
+                y = round((invertby - beta) * scale_y, 2) + margin
+    
+                if sample_type not in types_color:
+                    type_count += 1
+                    types_color[sample_type] = color_wheel[type_count]
+                self.colors = colors[types_color[sample_type]]
                 
+                if sample_id not in samples_color :
+                    sample_count += 1
+                    samples_color[sample_id] = self.colors[sample_count - 1]
+                    if sample_count == len(self.colors):
+                        sample_count = 0
+                point = Circle(center = (x, y), r = 0.3, fill = samples_color[sample_id])
+                self.elements.append(point)
+                
+            if self.colors < sample_count:
+                print "Ran out of colours! Looped over {0} colours to plot {1} different samples".format(len(self.colors),len(set(self.sample_ids)))
+                
+    #             if s!= 0.0 or None:
+    #                 gaussian_y, gaussian_x = self.makegaussian(y, s, height) #reverse output arguments for sideways gaussians
+    #                 gaussian_x = [coord/10+x for coord in gaussian_x]
+    #                 magnify_std = 10
+    #                 gaussian_y = [item/scale_y*magnify_std + y for item in gaussian_y]
+    #                 #print "hello", y, gaussian_y
+    #                 #offset_x = max(Y)
+    #                 #Y = [(coord-offset_x)*0.1+offset_x for coord in Y]
+    #                 d = "M"
+    #                 for i in range(0, len(gaussian_x)):
+    #                     d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
+    #     
+    #                 gaussian = (Path(stroke = samples_color[sample_id], stroke_width = 0.1,
+    #                                stroke_linecap = 'round', stroke_opacity = 0.8,
+    #                                fill = 'orange', fill_opacity = 0.1, 
+    #                                d = d))
+    #     
+    #                 self.elements.append(gaussian)
+                    
         self.samples_color = samples_color
 
     def save(self):
@@ -199,7 +193,7 @@ class MethylationPlot(object):
     
     def add_xtics(self):
         end, start, width, margin = self.end, self.start, self. width, self.margin
-        offset = start
+        offset_x = start
         scale_x = self.scale_x
         scale_tics = 1;
 
@@ -210,9 +204,9 @@ class MethylationPlot(object):
             scale_tics /= 2
             xtics += [i for i in range(start, end + 1) if i % (scale_tics) == 0 and i not in xtics]
         xtics.sort()
-        spacing = fabs((margin + (xtics[1] - offset) * scale_x) - (margin + (xtics[0] - offset) * scale_x)) / 4
+        spacing = fabs((margin + (xtics[1] - offset_x) * scale_x) - (margin + (xtics[0] - offset_x) * scale_x)) / 4
         for tic in xtics:
-            tic_x = (margin + (tic - offset) * scale_x)
+            tic_x = (margin + (tic - offset_x) * scale_x)
             tic_y = width + margin * 2
             ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = "3"))
             ticline = Rect(insert = (tic_x, width + margin * 2 - 5 - 1), size = (0.1, 2), fill = "midnightblue")
