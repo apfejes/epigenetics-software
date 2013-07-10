@@ -69,9 +69,9 @@ class MongoCurious():
             elif isinstance(chromosome, int):
                     Query['chromosome'] = 'chr' + str(chromosome)
                     self.chromosome = chromosome
-            if self.project:
-                self.sample_label_list = self.creategroups()
-                Query['sample label list'] = self.sample_label_list
+            self.sample_label_list = self.creategroups()
+            Query['sample label list'] = self.sample_label_list
+            Query['sample_dictionary'] = self.sample_dictionary
         self.Query = Query
         return self.Query
 
@@ -190,6 +190,10 @@ class MongoCurious():
                                  self.sample_dict(project = 'down', feature = 'Sample Group').items() +
                                  self.sample_dict(project = 'kollman', feature = 'stimulation').items())
             self.sample_dictionary = sample_dictionary
+            sample_label_list = []
+            for type in sample_dictionary.keys():
+                sample_label_list.extend(sample_dictionary[type])
+
             
 #         if self.project == "All":
 #             if self.sample_type != "control" or self.sample_type != None:
@@ -206,7 +210,8 @@ class MongoCurious():
 #                 sample_label_list = self.sample_dict(project = "kollman", feature = "stimulation")["listeria"]
 #                 sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group")["DS"])
 
-        print "    The sample labels with sample type", self.sample_type, " are:", sample_label_list
+        if self.sample_type:
+            print "    The sample labels with sample type", self.sample_type, " are:", sample_label_list
         return sample_label_list
 
     def sample_dict(self, project, feature, nottype = None):
@@ -255,9 +260,7 @@ class MongoCurious():
         pos_betas_dict = {} #contains CpGs
         sample_peaks = {}   #contains average CpG value and std for samples from same Sample Group
         count = 0
-        print '\n\n'
         for doc in self.docs:
-            print doc
             pos = doc['start_position'] #Assume CpG occurs at start of probe
             sample = str(doc['sample_label'])
             beta = doc['beta_value']
@@ -276,10 +279,10 @@ class MongoCurious():
                 sample_peaks[pos]={type:[beta]}
                 
                 
-        print '    %s probes\' beta values were extracted.' % count
+        print '\n    %s probes\' beta values were extracted.' % count
         print "    %i CpGs locations were found" % len(pos_betas_dict)
         
-        print pos_betas_dict
+        #print pos_betas_dict
         self.pos_betas_dict = pos_betas_dict
 
         for pos, type_dict in sample_peaks.iteritems():
@@ -288,7 +291,7 @@ class MongoCurious():
                 s = std(betas)
                 sample_peaks[pos].update({type : (m,s)})
                         
-        print sample_peaks
+        #print sample_peaks
         self.sample_peaks = sample_peaks
 
         if self.start == None:
