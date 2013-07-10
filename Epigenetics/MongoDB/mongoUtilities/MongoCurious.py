@@ -57,10 +57,15 @@ class MongoCurious():
         self.sample_id = sample_id
         self.sample_dictionary = None
         if collection != 'samples':
-            Query['start'] = int(start)
-            self.start = int(start)
-            Query['end'] = int(end)
-            self.end = int(end)
+            if start:
+                Query['start'] = int(start)
+                self.start = int(start)
+            else: self.start =None
+            if end:
+                Query['end'] = int(end)
+                self.end = int(end)
+            else:
+                self.end = None
             if chromosome == None:
                 raise ValueError("Please specificy a chromosome.")
             if isinstance(chromosome, basestring):
@@ -193,7 +198,7 @@ class MongoCurious():
             sample_label_list = []
             for type in sample_dictionary.keys():
                 sample_label_list.extend(sample_dictionary[type])
-
+            print sample_dictionary
             
 #         if self.project == "All":
 #             if self.sample_type != "control" or self.sample_type != None:
