@@ -15,7 +15,7 @@ class MethylationPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, title, pos_betas_dict, color, start, end, length, margin, width):
+    def __init__(self, filename, title,sample_peaks, pos_betas_dict, color, start, end, length, margin, width):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -96,11 +96,19 @@ class MethylationPlot(object):
             colors['purples']=['darkslategrey','orchid', 'purple', 'blueviolet','darkviolet', 
                                'pink', 'mediumslateblue', 'lightpink', 'deeppink', 'indigo', 'lavenderblush',
                                'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
+        color_wheel = {1:'blues', 2:'reds', 3:'purples', 4:'greens'} 
+        
         sample_count = 0
         samples_color = {}
-        
-        self.colors = colors['greens']
-        for x, y, sample_id in zip(self.X, self.Y, self.sample_ids):
+        type_count = 0
+        types_color = {}
+
+        for x, y, sample_id, sample_type in zip(self.X, self.Y, self.sample_ids, self.sample_types):
+            if sample_type not in types_color:
+                type_count += 1
+                types_color[sample_type] = color_wheel[type_count]
+            self.colors = colors[types_color[sample_type]]
+            
             if sample_id not in samples_color :
                 sample_count += 1
                 samples_color[sample_id] = self.colors[sample_count - 1]
