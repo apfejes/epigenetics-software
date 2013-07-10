@@ -191,7 +191,7 @@ class MethylationPlot(object):
         y_position = self.margin
         
         for sample, color in self.samples_color.iteritems():
-            label = Text(sample+color, insert = (x_position, y_position),
+            label = Text(sample, insert = (x_position, y_position),
                                             fill = color, font_size = fontsize)
             y_position += float(fontsize)+spacing
             self.elements.append(label)

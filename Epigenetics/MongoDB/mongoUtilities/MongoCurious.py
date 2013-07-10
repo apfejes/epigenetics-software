@@ -185,6 +185,12 @@ class MongoCurious():
                 feature = 'Sample Group'
                 sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
 
+        else:
+            sample_dictionary = dict(self.sample_dict(project = 'gecko', feature = 'Sample Group').items() +
+                                 self.sample_dict(project = 'down', feature = 'Sample Group').items() +
+                                 self.sample_dict(project = 'kollman', feature = 'stimulation').items())
+            self.sample_dictionary = sample_dictionary
+            
 #         if self.project == "All":
 #             if self.sample_type != "control" or self.sample_type != None:
 #                 print "The sample type \"", self.sample_type, "\" is invalid."
@@ -235,10 +241,13 @@ class MongoCurious():
         return sample_dictionary
 
     def type(self,sample):
-        for type, sample_list in self.sample_dictionary.iteritems():
-            if sample in sample_list:
-                return type
-
+        #inneficient way to look up the sample type of a sample.
+        if self.sample_dictionary:
+            for type, sample_list in self.sample_dictionary.iteritems():
+                if sample in sample_list:
+                    return type
+        else: return None
+        
     def collectbetas(self, group_samples = True):
         '''Collects and bins methylation data'''
 
@@ -294,7 +303,7 @@ class MongoCurious():
          
          
          
-        return self.pos_betas_dict
+        return self.pos_betas_dict, self.sample_peaks
 
 
     def getwaves(self):
@@ -342,9 +351,9 @@ class MongoCurious():
 
         if self.collection == "methylation":
             if color == None: color = "royalblue"
-            drawing = methylationplot.MethylationPlot(filename, title,
-                                                      self.pos_betas_dict, color,
-                                                      self.start, self.end,
+            drawing = methylationplot.MethylationPlot(filename, title, self.sample_peaks,
+                                                      self.pos_betas_dict, 
+                                                      color, self.start, self.end,
                                                       length, margin, width)
             drawing.build()
         if self.collection == "waves":
