@@ -55,6 +55,7 @@ class MongoCurious():
         self.sample_type = sample_type
         Query['sample id'] = sample_id
         self.sample_id = sample_id
+        self.sample_dictionary = None
         if collection != 'samples':
             Query['start'] = int(start)
             self.start = int(start)
@@ -233,51 +234,67 @@ class MongoCurious():
         print sample_dictionary
         return sample_dictionary
 
+    def type(self,sample):
+        for type, sample_list in self.sample_dictionary.iteritems():
+            if sample in sample_list:
+                return type
+
     def collectbetas(self, group_samples = True):
         '''Collects and bins methylation data'''
 
-        # Bin the beta values and collect average positions
-        pos_betas_dict = {}
-        sample_peaks = {}
+        # Bin the beta values and collect their position
+        pos_betas_dict = {} #contains CpGs
+        sample_peaks = {}   #contains average CpG value and std for samples from same Sample Group
         count = 0
         print '\n\n'
         for doc in self.docs:
             print doc
-            start_pos = doc['start_position'] #Assume CpG occurs at start of probe
+            pos = doc['start_position'] #Assume CpG occurs at start of probe
             sample = str(doc['sample_label'])
             beta = doc['beta_value']
-            type = None
-            if start_pos in pos_betas_dict:
-                pos_betas_dict[start_pos].append((beta, sample, type))
+            type = self.type(sample) #not very efficient since iterating through the dictionary to get key from value.
+            if pos in pos_betas_dict:
+                pos_betas_dict[pos].append((beta, sample, type))
             else:
-                pos_betas_dict[start_pos] =[(beta, sample, type)]
+                pos_betas_dict[pos] =[(beta, sample, type)]
             count += 1
-        
+            if pos in sample_peaks:
+                if type in sample_peaks[pos]:
+                    sample_peaks[pos][type].append(beta)
+                else:
+                    sample_peaks[pos][type] = [beta]
+            else:
+                sample_peaks[pos]={type:[beta]}
+                
+                
         print '    %s probes\' beta values were extracted.' % count
         print "    %i CpGs locations were found" % len(pos_betas_dict)
         
-#         print pos_betas_dict
-#         self.pos_betas_dict = pos_betas_dict
-#          
-#         if self.sample_dictionary:
-#             for type in self.sample_dictionary.keys():           #ALERT: this is quite inefficient, but since the dict will only have like 2-3 keys it's not too bad...
-#                 for pos, (beta, sample, type) in pos_betas_dict.iteritems():
-#                           
-#                         if sample in self.sample_dictionary[type]:
-#                         if start_pos in pos_betas_dict:
-#         if self.start == None:
-#             i = 0
-#             while self.start == None:
-#                 self.start = self.positions[i]
-#                 i += 1
-#             print "    New start position:", self.start
-#         if self.end == None:
-#             self.end = self.positions[-1]
-#             print "    New end position:", self.end
-#         
-#         
-#         
-#         return self.pos_betas_dict
+        print pos_betas_dict
+        self.pos_betas_dict = pos_betas_dict
+
+        for pos, type_dict in sample_peaks.iteritems():
+            for type, betas in type_dict.iteritems():
+                m = mean(betas)
+                s = std(betas)
+                sample_peaks[pos].update({type : (m,s)})
+                        
+        print sample_peaks
+        self.sample_peaks = sample_peaks
+
+        if self.start == None:
+            i = 0
+            while self.start == None:
+                self.start = self.positions[i]
+                i += 1
+            print "    New start position:", self.start
+        if self.end == None:
+            self.end = self.positions[-1]
+            print "    New end position:", self.end
+         
+         
+         
+        return self.pos_betas_dict
 
 
     def getwaves(self):
