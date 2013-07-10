@@ -160,7 +160,7 @@ def main(PARAM):
                                                         reads_list)
                     # print "adding map: ", current_chromosome, block_left
                     put_assigned(map_queues,
-                                 MappingItem.Item(coverage_map, chromosome,
+                                 MappingItem.Item(coverage_map, current_chromosome,
                                                   block_left),
                                  worker_processes)
                     if PARAM.get_parameter("make_wig"):
