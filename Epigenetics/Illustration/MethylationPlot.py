@@ -10,6 +10,8 @@ from svgwrite.drawing import Drawing
 from svgwrite.path import Path
 from math import fabs, exp, sqrt, log
 from numpy import mean
+import Color_Palette 
+palette = Color_Palette.ColorPalette()
 
 class MethylationPlot(object):
     '''
@@ -43,22 +45,6 @@ class MethylationPlot(object):
                         viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 4)),
                         preserveAspectRatio = "xMinYMin meet")
 
-    def colors(self):
-            colors = {}
-            colors['blue']=['blue','cornflowerblue','darkblue','deepskyblue','darkturquoise',
-                           'midnightblue','navy','dodgerblue', 'lightblue', 'lightskyblue','cadetblue','teal',
-                           'paleturquoise', 'aquamarine', 'azure', 'aqua', 'lightsteelblue','powderblue' ]
-            colors['green']=['lightseagreen','mediumturquoise','limegreen','lawngreen', 'olivedrab', 'chartreuse',
-                                   'mediumspringgreen','forestgreen', 'seagreen','palegreen', 'olive', ' darkcyan',
-                                   'yellowgreen', 'darkolivegreen','darkgreen', 'darkseagreen', 'lime']
-            colors['red']=['orangered', 'tomato','orange', 'gold', 'firebrick', 'sandybrown', 
-                                 'lightcoral', 'crimson', 'coral', 'darkred', 'indianred', 'maroon']
-            colors['purple']=['darkslategrey','orchid', 'purple', 'blueviolet','darkviolet', 
-                               'pink', 'mediumslateblue', 'lightpink', 'deeppink', 'indigo', 'lavenderblush',
-                               'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
-            color_wheel = {1:'blue', 2:'red', 4:'purple', 3:'green'} 
-            return colors, color_wheel
-
 
     def build(self):
         length, end, start, width, margin, invertby = self.length, self.end, self.start, self.width, self. margin, self.invertby
@@ -70,48 +56,26 @@ class MethylationPlot(object):
         scale_y = (width + margin) * 0.8 / max(self.Y)
         self.scale_y = scale_y
         
-        colors,color_wheel = self.colors()#blue, red, green, purple palettes
-       
-        sample_count = 0
-        samples_color = {}
-        type_count = 0
-        types_color = {}
+        colors, color_wheel = palette.Colors()       #blue, red, green, purple palettes
 
         for position in self.pos_betas_dict.keys():
-            x = round(float(position - offset_x) * scale_x, 3) + margin
+            x = round(float(position - offset_x) * scale_x, 2) + margin
+            
             for beta, sample_id, sample_type in self.pos_betas_dict[position]:
                 y = round((invertby - beta) * scale_y, 2) + margin
-    
-                if sample_type not in types_color:
-                    type_count += 1
-                    types_color[sample_type] = color_wheel[type_count]
-                self.colors = colors[types_color[sample_type]]
-                
-                if sample_id not in samples_color :
-                    sample_count += 1
-                    samples_color[sample_id] = self.colors[sample_count - 1]
-                    if sample_count == len(self.colors):
-                        sample_count = 0
-                point = Circle(center = (x, y), r = 0.3, fill = samples_color[sample_id])
-                print 'x', x
+                type_color, sample_color = palette.sorter(sample_type, sample_id)
+                point = Circle(center = (x, y), r = 0.3, fill = sample_color)
                 self.elements.append(point)
-            if self.colors < sample_count:
-                print "Ran out of colours! Looped over {0} colours to plot {1} different samples".format(len(self.colors),len(set(self.sample_ids)))
-                
-            type_count = 0 
-            types_color = {}
+            
             for sample_type in self.sample_peaks[position]:
-                if sample_type not in types_color:
-                    type_count += 1
-                    types_color[sample_type] = color_wheel[type_count]
-                    color = color_wheel[type_count]
+                type_color, sample_color = palette.sorter(sample_type, sample_id)
                 (m,s) = self.sample_peaks[position][sample_type]
                 m = round((invertby - m) * scale_y, 2) +margin
                 s = round(s * scale_y,3)
                 #point = Circle(center = (x, m), r = 0.6, fill = 'black')
                 self.elements.append(point)
                 
-                height = 6.0
+                height = 3.0
                 if s!= 0.0:
                     gaussian_y, gaussian_x = self.makegaussian(m, s, height) #reverse output arguments for sideways gaussians
                     gaussian_x = [coord + x for coord in gaussian_x]
@@ -123,14 +87,14 @@ class MethylationPlot(object):
                     for i in range(0, len(gaussian_x)):
                         d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
          
-                    gaussian = (Path(stroke = color, stroke_width = 0.1,
+                    gaussian = (Path(stroke = type_color, stroke_width = 0.1,
                                    stroke_linecap = 'round', stroke_opacity = 0.8,
-                                   fill = color, fill_opacity = 0.1, 
+                                   fill = type_color, fill_opacity = 0.1, 
                                    d = d))
          
                     self.elements.append(gaussian)
                     
-        self.samples_color = samples_color
+        #self.samples_color = samples_color
 
     def save(self):
         for element in self.elements:
@@ -172,16 +136,17 @@ class MethylationPlot(object):
         self.add_sample_labels(self.margin*2 + self.length)
 
     def add_sample_labels(self,x_position):
-        if len(self.samples_color)>20: 
+        samples_color = palette.colors_dict()
+        if len(samples_color)>20: 
             fontsize = '2.5'
-        elif len(self.samples_color)<5: 
+        elif len(samples_color)<5: 
             fontsize = '3.5'
         else: fontsize = '3'
         
         spacing = 0.1
         y_position = self.margin
         
-        for sample, color in self.samples_color.iteritems():
+        for sample, color in samples_color.iteritems():
             label = Text(sample, insert = (x_position, y_position),
                                             fill = color, font_size = fontsize)
             y_position += float(fontsize)+spacing
@@ -248,9 +213,7 @@ class MethylationPlot(object):
         self.elements.append(y_axis)
         
     def makegaussian(self, mean, stddev, height):
-        print '\n', mean, stddev, height
         endpts = (sqrt((-2) * stddev * stddev * log(1.0/ height)))
-        print 'end', endpts
         X = [0]
         X.extend([round(stddev*2.0*(i/9.0)-stddev,3) for i in range(0,10)]) #add 10 points  near mean
         X.extend([round(abs(stddev-endpts)*(i/4.0)+stddev,3) for i in range(0,5)])
@@ -258,7 +221,4 @@ class MethylationPlot(object):
         
         X.sort()
         Y = [round(height * exp(-x ** 2 / (2.0 * stddev * stddev)), 3) for x in X]
-        print len(X), X
-        print len(set(X)), set(X)
-        print Y
         return X, Y
