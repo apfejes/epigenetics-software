@@ -7,6 +7,7 @@ h1 All ChIP-chip samples
   br
   table.lines
     tr
+      td.lines ID
       td.lines CEL_file
       td.lines StrainNumber
       td.lines StrainBackground
@@ -19,21 +20,23 @@ h1 All ChIP-chip samples
     - each sample in samples
       tr
       td.lines 
-        !{sample.CEL_file}
+        a(href="/input/cc_details/"+sample._id)=sample._id
       td.lines 
-        !{sample.StrainNumber}
+        !{sample.cel_file}
       td.lines 
-        !{sample.StrainBackground}
+        !{sample.strainnumber}
       td.lines 
-        !{sample.Date}
+        !{sample.strainbackground}
       td.lines 
-        !{sample.ArrayType}
+        !{sample.date}
       td.lines 
-        !{sample.Mutations}
+        !{sample.arraytype}
       td.lines 
-        !{sample.Antibody}
+        !{sample.mutations}
       td.lines 
-        !{sample.Researcher}
+        !{sample.antibody}
       td.lines 
-        !{sample.Comments}
+        !{sample.researcher}
+      td.lines 
+        !{sample.comments}
     

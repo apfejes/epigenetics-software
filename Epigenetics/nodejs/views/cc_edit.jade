@@ -17,7 +17,7 @@ form( method="post")
         td: input(type="text", name="protocol", id="protocol", value=chipchip.protocol, required)
       tr
         td: b ArrayLotNumber :
-        td: input(type="text", name="arraylotnumber", id="arraylotnumber", value=chipchip.arraylotnumber, required)
+        td: input(type="text", name="arraylotnumber", id="arraylotnumber", value=chipchip.arraylotnumber)
       tr
         td: b Antibody :
         td: input(type="text", name="antibody", id="antibody", value=chipchip.antibody, required)
@@ -26,7 +26,7 @@ form( method="post")
         td: input(type="text", name="arraytype", id="arraytype", value=chipchip.arraytype, required)
       tr
         td: b Type :
-        td: input(type="text", name="type", id="type", value=chipchip.type, required)
+        td: input(type="text", name="type", id="type", value=chipchip.type)
       tr
         td: b AntibodyVolume :
         td: input(type="text", name="antibodyvolume", id="antibodyvolume", value=chipchip.antibodyvolume)
@@ -57,17 +57,3 @@ form( method="post")
       input(type="button", value="Cancel", onClick="window.history.back(-1)")
             
                         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
