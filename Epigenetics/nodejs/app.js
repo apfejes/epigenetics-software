@@ -543,7 +543,7 @@ app.get('/input/cc_view_all', ensureAuthenticated, function(req, res) {
 });
 
 app.get('/input/cc_new', ensureAuthenticated, function(req, res) {
-  res.render('cc_new.jade', {title: 'New Project'});
+  res.render('cc_new.jade', {title: 'ChIP-chip data'});
   
   // not needed at the moment, but this is where to find 
   // the source code for processing cel files:
@@ -552,6 +552,77 @@ app.get('/input/cc_new', ensureAuthenticated, function(req, res) {
   //
   //------------------------------
   
+});
+
+app.post('/input/cc_new', ensureAuthenticated, function(req, res){
+    articleProvider.insertyeastDB ('samples', {
+        researcher: req.param('researcher'),
+        crosslinkingtime: req.param('crosslinkingtime'),
+        protocol: req.param('protocol'),
+        arraylotnumber: req.param('arraylotnumber'),
+        antibody: req.param('antibody'),
+        arraytype: req.param('arraytype'),
+        type: req.param('type'),
+        antibodyvolume: req.param('antibodyvolume'),
+        pubmedid: req.param('pubmedid'),
+        catalognumber: req.param('catalognumber'),
+        cel_file: req.param('cel_file'),
+        strainnumber: req.param('strainnumber'),
+        strainbackground: req.param('strainbackground'),
+        comments: req.param('comments'),
+        date: req.param('date')
+    }, function(error, docs) {
+      if (error) console.log("app.get.cc_new", error)
+      else res.redirect('/input/cc_details/' + req.params.id);
+    })
+});
+
+  //requires the chip-chip-sample id.
+
+app.get('/input/cc_details/:id', ensureAuthenticated, function(req, res){
+  articleProvider.project_status( function(error, docs) {
+    articleProvider.findchipById(req.params.id, function(error, chipchip) {
+      res.render('cc_details.jade',{title: 'View chip-chip', chipchip:chipchip, status:docs});
+    });
+  });
+});
+
+
+  //requires the chip-chip-sample id.
+  
+app.get('/input/cc_edit/:id', ensureAuthenticated, function(req, res){
+  articleProvider.project_status( function(error, docs) {
+    articleProvider.findchipById(req.params.id, function(error, chipchip) {
+      res.render('cc_edit.jade',{title: 'Edit chip-chip', chipchip:chipchip, status:docs});
+    });
+  });
+});
+
+
+  //requires the chip-chip-sample id.
+
+app.post('/input/cc_edit/:id', ensureAuthenticated, function(req, res){
+    articleProvider.updateyeastDB ('samples', {_id:ObjectID.createFromHexString(req.params.id)},
+      {$set: {researcher: req.param('researcher'),
+        crosslinkingtime: req.param('crosslinkingtime'),
+        protocol: req.param('protocol'),
+        arraylotnumber: req.param('arraylotnumber'),
+        antibody: req.param('antibody'),
+        arraytype: req.param('arraytype'),
+        type: req.param('type'),
+        antibodyvolume: req.param('antibodyvolume'),
+        pubmedid: req.param('pubmedid'),
+        catalognumber: req.param('catalognumber'),
+        cel_file: req.param('cel_file'),
+        strainnumber: req.param('strainnumber'),
+        strainbackground: req.param('strainbackground'),
+        comments: req.param('comments'),
+        date: req.param('date')}
+      }, false,
+      function(error, docs) {
+        if (error) console.log("app.get.cc_edit", error)
+        else res.redirect('/input/cc_details/' + req.params.id);
+      })
 });
 
 

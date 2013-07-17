@@ -29,6 +29,17 @@ ArticleProvider.prototype.getDBData= function(collection_name, callback) {
   });
 };
 
+ArticleProvider.prototype.getyeastDBData= function(collection_name, callback) {
+  this.yeastdb.collection(collection_name, function(error, project_collection) {
+    if( error ) {
+      console.log("getyeastDBData error:", e)
+      callback(error);
+    }
+    else callback(null, project_collection);
+  });
+};
+
+
 //__________________________________
 //
 //  Passport 
@@ -121,6 +132,19 @@ ArticleProvider.prototype.updateDB= function(collection_name, update_criteria, q
   })
 };
 
+ArticleProvider.prototype.updateyeastDB= function(collection_name, update_criteria, query_string, upsert, callback) {
+  var upsert_string
+  if (upsert == true) upsert_string = '{upsert:true}'
+  else upsert_string = '{}'
+  this.yeastdb.collection(collection_name).update(update_criteria, query_string, upsert_string , function(e, results) {
+    if (e) { 
+      console.log("updateyeastDB error:", e)
+      callback(e)
+    } else callback(null, results)
+  })
+};
+
+
 
 //__________________________________
 //
@@ -130,6 +154,15 @@ ArticleProvider.prototype.updateDB= function(collection_name, update_criteria, q
 
 ArticleProvider.prototype.insertDB= function(collection_name, insert_criteria, callback) {
   this.db.collection(collection_name).insert(insert_criteria, function(e, results) {
+    if (e) { 
+      console.log("insertDB error:", e)
+      callback(e)
+    } else callback(null, results)
+  })
+};
+
+ArticleProvider.prototype.insertyeastDB= function(collection_name, insert_criteria, callback) {
+  this.yeastdb.collection(collection_name).insert(insert_criteria, function(e, results) {
     if (e) { 
       console.log("insertDB error:", e)
       callback(e)
@@ -879,6 +912,20 @@ ArticleProvider.prototype.getYeastDBQuery= function(collection_name, query_strin
       else callback(null, results)
     })
   }
+};
+
+ArticleProvider.prototype.findchipById = function(id, callback) {
+    this.getyeastDBData('samples', function(error, collection) {
+      if( error ) callback(error)
+      else {
+        collection.findOne({_id: ObjectID.createFromHexString(id)}, function(error, result) {
+          if( error ) {
+            console.log("findchipByID error:", e)
+            callback(error)
+          } else callback(null, result)
+        });
+      }
+    });
 };
 
 
