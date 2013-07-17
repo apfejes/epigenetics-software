@@ -55,11 +55,17 @@ class MongoCurious():
         self.sample_type = sample_type
         Query['sample id'] = sample_id
         self.sample_id = sample_id
+        self.sample_dictionary = None
         if collection != 'samples':
-            Query['start'] = int(start)
-            self.start = int(start)
-            Query['end'] = int(end)
-            self.end = int(end)
+            if start:
+                Query['start'] = int(start)
+                self.start = int(start)
+            else: self.start =None
+            if end:
+                Query['end'] = int(end)
+                self.end = int(end)
+            else:
+                self.end = None
             if chromosome == None:
                 raise ValueError("Please specificy a chromosome.")
             if isinstance(chromosome, basestring):
@@ -68,9 +74,9 @@ class MongoCurious():
             elif isinstance(chromosome, int):
                     Query['chromosome'] = 'chr' + str(chromosome)
                     self.chromosome = chromosome
-            if self.project:
-                self.sample_label_list = self.creategroups()
-                Query['sample label list'] = self.sample_label_list
+            self.sample_label_list = self.creategroups()
+            Query['sample label list'] = self.sample_label_list
+            Query['sample_dictionary'] = self.sample_dictionary
         self.Query = Query
         return self.Query
 
@@ -184,6 +190,16 @@ class MongoCurious():
                 feature = 'Sample Group'
                 sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
 
+        else:
+            sample_dictionary = dict(self.sample_dict(project = 'gecko', feature = 'Sample Group').items() +
+                                 self.sample_dict(project = 'down', feature = 'Sample Group').items() +
+                                 self.sample_dict(project = 'kollman', feature = 'stimulation').items())
+            self.sample_dictionary = sample_dictionary
+            sample_label_list = []
+            for type in sample_dictionary.keys():
+                sample_label_list.extend(sample_dictionary[type])
+            print sample_dictionary
+            
 #         if self.project == "All":
 #             if self.sample_type != "control" or self.sample_type != None:
 #                 print "The sample type \"", self.sample_type, "\" is invalid."
@@ -199,7 +215,8 @@ class MongoCurious():
 #                 sample_label_list = self.sample_dict(project = "kollman", feature = "stimulation")["listeria"]
 #                 sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group")["DS"])
 
-        print "    The sample labels with sample type", self.sample_type, " are:", sample_label_list
+        if self.sample_type:
+            print "    The sample labels with sample type", self.sample_type, " are:", sample_label_list
         return sample_label_list
 
     def sample_dict(self, project, feature, nottype = None):
@@ -233,51 +250,68 @@ class MongoCurious():
         print sample_dictionary
         return sample_dictionary
 
+    def type(self,sample):
+        #inneficient way to look up the sample type of a sample.
+        if self.sample_dictionary:
+            for type, sample_list in self.sample_dictionary.iteritems():
+                if sample in sample_list:
+                    return type
+        else: return None
+        
     def collectbetas(self, group_samples = True):
         '''Collects and bins methylation data'''
 
-        # Bin the beta values and collect average positions
-        pos_betas_dict = {}
-        sample_peaks = {}
+        # Bin the beta values and collect their position
+        pos_betas_dict = {} #contains CpGs
+        sample_peaks = {}   #contains average CpG value and std for samples from same Sample Group
         count = 0
-        print '\n\n'
         for doc in self.docs:
-            print doc
-            start_pos = doc['start_position'] #Assume CpG occurs at start of probe
+            pos = doc['start_position'] #Assume CpG occurs at start of probe
             sample = str(doc['sample_label'])
             beta = doc['beta_value']
-            type = None
-            if start_pos in pos_betas_dict:
-                pos_betas_dict[start_pos].append((beta, sample, type))
+            type = self.type(sample) #not very efficient since iterating through the dictionary to get key from value.
+            if pos in pos_betas_dict:
+                pos_betas_dict[pos].append((beta, sample, type))
             else:
-                pos_betas_dict[start_pos] =[(beta, sample, type)]
+                pos_betas_dict[pos] =[(beta, sample, type)]
             count += 1
-        
-        print '    %s probes\' beta values were extracted.' % count
+            if pos in sample_peaks:
+                if type in sample_peaks[pos]:
+                    sample_peaks[pos][type].append(beta)
+                else:
+                    sample_peaks[pos][type] = [beta]
+            else:
+                sample_peaks[pos]={type:[beta]}
+                
+                
+        print '\n    %s probes\' beta values were extracted.' % count
         print "    %i CpGs locations were found" % len(pos_betas_dict)
         
-#         print pos_betas_dict
-#         self.pos_betas_dict = pos_betas_dict
-#          
-#         if self.sample_dictionary:
-#             for type in self.sample_dictionary.keys():           #ALERT: this is quite inefficient, but since the dict will only have like 2-3 keys it's not too bad...
-#                 for pos, (beta, sample, type) in pos_betas_dict.iteritems():
-#                           
-#                         if sample in self.sample_dictionary[type]:
-#                         if start_pos in pos_betas_dict:
-#         if self.start == None:
-#             i = 0
-#             while self.start == None:
-#                 self.start = self.positions[i]
-#                 i += 1
-#             print "    New start position:", self.start
-#         if self.end == None:
-#             self.end = self.positions[-1]
-#             print "    New end position:", self.end
-#         
-#         
-#         
-#         return self.pos_betas_dict
+        #print pos_betas_dict
+        self.pos_betas_dict = pos_betas_dict
+
+        for pos, type_dict in sample_peaks.iteritems():
+            for type, betas in type_dict.iteritems():
+                m = mean(betas)
+                s = std(betas)
+                sample_peaks[pos].update({type : (m,s)})
+                        
+        #print sample_peaks
+        self.sample_peaks = sample_peaks
+
+        if self.start == None:
+            i = 0
+            while self.start == None:
+                self.start = self.positions[i]
+                i += 1
+            print "    New start position:", self.start
+        if self.end == None:
+            self.end = self.positions[-1]
+            print "    New end position:", self.end
+         
+         
+         
+        return self.pos_betas_dict, self.sample_peaks
 
 
     def getwaves(self):
@@ -325,9 +359,9 @@ class MongoCurious():
 
         if self.collection == "methylation":
             if color == None: color = "royalblue"
-            drawing = methylationplot.MethylationPlot(filename, title,
-                                                      self.pos_betas_dict, color,
-                                                      self.start, self.end,
+            drawing = methylationplot.MethylationPlot(filename, title, self.sample_peaks,
+                                                      self.pos_betas_dict, 
+                                                      color, self.start, self.end,
                                                       length, margin, width)
             drawing.build()
         if self.collection == "waves":

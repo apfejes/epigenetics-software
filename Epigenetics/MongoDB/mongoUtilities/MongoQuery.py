@@ -12,7 +12,7 @@ class MongoQuery():
 
         fixed_dictionary = {"database":None, "collection": None,
                             "sample type":None, "chromosome":None,
-                            "start" : None, "end" : None,
+                            "start" : None, "end" : None, "sample_dictionary":None,
                             "sample label" : None, "sample group" : None,
                             "project" : None, "cursor" : None, "waves" : None,
                             "sample id": None, 'sample label list':None}
