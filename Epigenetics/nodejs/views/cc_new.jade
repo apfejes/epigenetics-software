@@ -4,53 +4,53 @@ a(href='/')
 h1= title
 form( method="post")
   #newinformation
-    H3 Enter your sample Information:
+    H3 Enter your chip-chip sample Information:
     table
       tr 
         td.label: b Researcher :
-        td: input(type="text", name="Researcher", id="Researcher")
+        td: input(type="text", name="researcher", id="researcher")
       tr
         td: b CrossLinkingTime : 
-        td: input(type="text", name="CrossLinkingTime", id="CrossLinkingTime", required)
+        td: input(type="text", name="crosslinkingtime", id="crosslinkingtime", required)
       tr
         td: b Protocol :
-        td: input(type="text", name="Protocol", id="Protocol")
+        td: input(type="text", name="protocol", id="protocol", required)
       tr
         td: b ArrayLotNumber :
-        td: input(type="text", name="ArrayLotNumber", id="ArrayLotNumber")
+        td: input(type="text", name="arraylotnumber", id="arraylotnumber")
       tr
         td: b Antibody :
-        td: input(type="text", name="Antibody", id="Antibody")
+        td: input(type="text", name="antibody", id="antibody", required)
       tr
         td: b ArrayType :
-        td: input(type="text", name="ArrayType", id="ArrayType")
+        td: input(type="text", name="arraytype", id="arraytype", required)
       tr
         td: b Type :
-        td: input(type="text", name="Type", id="Type")
+        td: input(type="text", name="type", id="type")
       tr
         td: b AntibodyVolume :
-        td: input(type="text", name="AntibodyVolume", id="AntibodyVolume")
+        td: input(type="text", name="antibodyvolume", id="antibodyvolume")
       tr
         td: b PubmedID :
-        td: input(type="text", name="PubmedID", id="PubmedID")
+        td: input(type="text", name="pubmedid", id="pubmedid")
       tr
         td: b CatalogNumber :
-        td: input(type="text", name="CatalogNumber", id="CatalogNumber")
+        td: input(type="text", name="catalognumber", id="catalognumber")
       tr
         td: b CEL file :
-        td: input(type="text", name="CEL_file", id="CEL_file", disabled)
+        td: input(type="text", name="cel_file", id="cel_file", disabled)
       tr
         td: b StrainNumber :
-        td: input(type="text", name="StrainNumber", id="StrainNumber")
+        td: input(type="text", name="strainnumber", id="strainnumber", required)
       tr
         td: b StrainBackground :
-        td: input(type="text", name="StrainBackground", id="StrainBackground")
+        td: input(type="text", name="strainbackground", id="strainbackground", required)
       tr
         td: b Comments :
-        td: input(type="text", name="Comments", id="Comments")
+        td: input(type="text", name="comments", id="comments")
       tr
         td: b Date:
-        td: input(type="date", name="Date", id="Date")
+        td: input(type="date", name="date", id="date")
         
     div#editArticleSubmit
       input(type="submit", value="Save")
