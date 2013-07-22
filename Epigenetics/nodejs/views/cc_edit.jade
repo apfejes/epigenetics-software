@@ -37,8 +37,10 @@ form( method="post")
         td: b CatalogNumber :
         td: input(type="text", name="catalognumber", id="catalognumber", value=chipchip.catalognumber)
       tr
-        td: b CEL file :
-        td: input(type="text", name="cel_file", id="cel_file", value=chipchip.cel_file, disabled)
+        td
+          b CEL file 
+          | (Not Editable) :
+        td: input(type="text", name="cel_file", id="cel_file", value=chipchip.cel_file, readOnly="true")
       tr
         td: b StrainNumber :
         td: input(type="text", name="strainnumber", id="strainnumber", value=chipchip.strainnumber, required)

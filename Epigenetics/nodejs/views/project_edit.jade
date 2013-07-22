@@ -38,7 +38,7 @@ form( method="post")
         td: input(type="text", name="catalognumber", id="catalognumber", value=chipchip.catalognumber)
       tr
         td: b CEL file :
-        td: input(type="text", name="cel_file", id="cel_file", value=chipchip.cel_file, disabled)
+        td: input(type="text", name="cel_file", id="cel_file", value=chipchip.cel_file, readOnly="True")
       tr
         td: b StrainNumber :
         td: input(type="text", name="strainnumber", id="strainnumber", value=chipchip.strainnumber, required)
@@ -55,19 +55,3 @@ form( method="post")
     div#editArticleSubmit
       input(type="submit", value="Save")
       input(type="button", value="Cancel", onClick="window.history.back(-1)")
-            
-                        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
