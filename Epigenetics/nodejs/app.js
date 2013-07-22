@@ -613,7 +613,7 @@ app.post('/input/cc_edit/:id', ensureAuthenticated, function(req, res){
         antibodyvolume: req.param('antibodyvolume'),
         pubmedid: req.param('pubmedid'),
         catalognumber: req.param('catalognumber'),
-        cel_file: req.param('cel_file'),
+//        cel_file: req.param('cel_file'),
         strainnumber: req.param('strainnumber'),
         strainbackground: req.param('strainbackground'),
         comments: req.param('comments'),
