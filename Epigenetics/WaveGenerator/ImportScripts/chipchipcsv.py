@@ -7,6 +7,7 @@ Created on 2013-04-15
 
 import sys
 import os
+from string import lowercase
 
 # sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
@@ -44,6 +45,10 @@ def run():
     for line in f:
         if (first_line):
             headers = line.split("\t")
+            for h in range(len(headers)):
+                headers[h] = headers[h].lower()
+                if headers[h].find("\n") != -1:
+                    headers[h] = headers[h].replace("\n", "")
             first_line = False
         else:
             a = line.split("\t")
@@ -51,6 +56,8 @@ def run():
                 continue
             meta = {}
             for c in range(len(a)):
+                while a[c].endswith("\n"):
+                    a[c] = a[c][:-2]
                 meta[headers[c]] = a[c]
             print "Meta %s" % meta
             mongo.insert(collection_name, meta)
