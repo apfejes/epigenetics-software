@@ -51,6 +51,11 @@ def chipseq_code(request, chr, start, end):
     string = showchipseq.svgcode(chr = chr, start = start, end = end)
     return HttpResponse(string)
 
+def meth_code(request, chr, start, end):
+    from Annotations import showmethylation
+    string = showmethylation.svgcode(chr = chr, start = start, end = end)
+    return HttpResponse(string)
+
 def send_svg(request):
     from Annotations import showgene
     return HttpResponse(showgene.svgcode())
@@ -68,7 +73,8 @@ def query(request):
             if collection == 'chipseq':
                 return chipseq_code(request, chr, start, end)
             elif collection == 'methylation':
-                return HttpResponse('The \'' + collection + '\' collection is not available yet.')
+                return meth_code(request, chr, start, end)
+                #return HttpResponse('The \'' + collection + '\' collection is not available yet.')
             else: 
                 return HttpResponse(collection + ' is an invalid collection! Please try again...')
         else:
