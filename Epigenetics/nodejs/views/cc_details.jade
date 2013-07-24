@@ -2,56 +2,57 @@ link(rel='stylesheet', href='/stylesheets/mystyle.css', type='text/css' )
 a(href='/')
   #logo
 h1= title
-#newinformation
+#project
   H3 Chip-chip sample Information:
   table
     tr 
       td.label: b Researcher :
       td: !{chipchip.researcher}
     tr
-      td: b CrossLinkingTime : 
+      td.top: b CrossLinkingTime : 
       td: !{chipchip.crosslinkingtime}
     tr
-      td: b Protocol :
+      td.top: b Protocol :
       td: !{chipchip.protocol}
     tr
-      td: b ArrayLotNumber :
+      td.top: b ArrayLotNumber :
       td: !{chipchip.arraylotnumber}
     tr
-      td: b Antibody :
+      td.top: b Antibody :
       td: !{chipchip.antibody}
     tr
-      td: b ArrayType :
+      td.top: b ArrayType :
       td: !{chipchip.arraytype}
     tr
-      td: b Type :
+      td.top: b Type :
       td: !{chipchip.type}
     tr
-      td: b AntibodyVolume :
+      td.top: b AntibodyVolume :
       td: !{chipchip.antibodyvolume}
     tr
-      td: b PubmedID :
+      td.top: b PubmedID :
       td: !{chipchip.pubmedid}
     tr
-      td: b CatalogNumber :
+      td.top: b CatalogNumber :
       td: !{chipchip.catalognumber}
     tr
-      td: b CEL file :
+      td.top: b CEL file :
       td: !{chipchip.cel_file}
     tr
-      td: b StrainNumber :
+      td.top: b StrainNumber :
       td: !{chipchip.strainnumber}
     tr
-      td: b StrainBackground :
+      td.top: b StrainBackground :
       td: !{chipchip.strainbackground} 
     tr
-      td: b Comments :
+      td.top: b Comments :
       td: !{chipchip.comments}
     tr
-      td: b Date:
+      td.top: b Date:
       td: !{chipchip.date}
-    div#editArticleSubmit
-      input(type="button", value="Edit", onClick="window.location.assign('/input/cc_edit/#{chipchip._id}')")
-      input(type="button", value="Cancel", onClick="window.history.back(-1)")
-            
-                        
+   
+  br
+  input(type="button", value="Edit", onClick="window.location.assign('/input/cc_edit/#{chipchip._id}')")
+  input(type="button", value="Cancel", onClick="window.history.back(-1)")
+  input(type="button", value="Back to Spreadsheet", onClick="window.location.assign('/input/cc_view_all')")
+  
