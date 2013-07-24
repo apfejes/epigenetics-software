@@ -74,9 +74,9 @@ class MongoCurious():
             elif isinstance(chromosome, int):
                     Query['chromosome'] = 'chr' + str(chromosome)
                     self.chromosome = chromosome
-            self.sample_label_list = self.creategroups()
-            Query['sample label list'] = self.sample_label_list
-            Query['sample_dictionary'] = self.sample_dictionary
+            #self.sample_label_list = self.creategroups()
+            #Query['sample label list'] = self.sample_label_list
+            #Query['sample_dictionary'] = self.sample_dictionary
         self.Query = Query
         return self.Query
 
@@ -102,19 +102,21 @@ class MongoCurious():
     def finddocs(self):
         '''Finds probes or documents corresponding to query'''
         #self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
-        query_chr, query_start, query_end, query_samplabel, query_pos, query_sampgroup, query_project = {}, {}, {}, {}, {}, {}, {}
+        query_chr, query_location, query_samplabel, query_pos, query_sampgroup, query_project = {}, {}, {}, {}, {}, {}
 
         # Preparing the different parameters of the query depending on the collection chosen
         if self.collection == "methylation":
-            query_chr = {'chr':self.chromosome}
-            if self.project: query_project = {'project': self.project}
-            if self.end: query_start = {"start_position":{"$lte":self.end}}
-            if self.start: query_end = {"end_position":{"$gte":self.start}}
-            if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
-            return_chr = {'_id': False, 'beta_value': True,
-                          'start_position': True, 'end_position': True,
-                          'sample_label': True}
-            sortby, sortorder = 'start_position', 1
+            query_chr = {"chr":self.chromosome}
+            #if self.project: query_project = {'project': self.project}
+            if self.end and self.start: 
+                query_location = {"mapinfo":{"$gte":self.start, "$lte":self.end }}
+            #if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
+            #return_chr = {'_id': False, 'beta_value': True,
+            #              'start_position': True, 'end_position': True,
+            #              'sample_label': True}
+                print query_location
+            return_chr = {'TargetID': True}
+            sortby, sortorder = 'mapinfo', 1
 
         elif self.collection == "waves":
             query_chr = {'chr':self.chromosome}
@@ -140,7 +142,7 @@ class MongoCurious():
             print "Collection queried is either not supported or not in the database. Exiting..."
             sys.exit()
             
-        query = dict(query_chr.items() + query_start.items() + query_end.items()  
+        query = dict(query_chr.items() + query_location.items()  
                      + query_samplabel.items() + query_pos.items()
                      + query_sampgroup.items() + query_project.items())
         print "\n Conducting query: "

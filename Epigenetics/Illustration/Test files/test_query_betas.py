@@ -16,7 +16,7 @@ m = MongoCurious.MongoCurious(database = "human_epigenetics")
 print " Query %.3f" % (time() - t0)
 
 t0 = time()
-query = m.query(collection = 'methylation', chromosome = "chr4", start = 3100000, end = 3239400)
+query = m.query(collection = 'methylation', chromosome = "chr4", start = 2000000, end = 3000000)
 print "Extract %.3f" % (time() - t0)
 
 t0 = time()
