@@ -45,28 +45,37 @@ def ReadRObject(rdatafile):
     print "rdata:", rdatafile
     robjects.r('workspace <- load(\"' + rdatafile + '\")')
     robjects.r('methylObj <- get(workspace)')
-    size_pdata = robjects.r('dim(pData(methylObj))')
-    print "Size pdata:", size_pdata
-    size_exprs = robjects.r('dim(exprs(methylObj))')
-    print "Size exprs:", size_exprs
-    size_betas = robjects.r('dim(betas(methylObj))')
-    print "Size betas:", size_betas
+    print('Workspace creation completed in %s seconds') % int((time.time() - starttime))
 
-    num_probes = size_exprs[0]
-    print "num probes:", num_probes
-    num_samples = size_exprs[1]
-    print "num samples:", num_samples
+    size_fdata = robjects.r('dim(fData(methylObj))')
+    print "Size fdata:", size_fdata
+    fdata_row = robjects.r('fData(methylObj)')
+    # print "Type fdata:", type(fdata)
 
-    probes = robjects.r('rownames(exprs(methylObj))')
-    # print "probes", probes
-    # for s in range(0, num_samples):    # this will be 0 to 14 for 15 samples, so will need to add one.
-    beta = robjects.r('betas(methylObj)[,1,drop=FALSE]')
-    # print "betas", beta
-    exprs = robjects.r('exprs(methylObj)[,1,drop=FALSE]')
-    print "lengths, probes %i, beta %i, exprs %i" % (len(probes), len(beta), len(exprs))
-    complete = zip(probes, beta, exprs)
+    row_names = robjects.r('rownames(fData(methylObj))')
+    col_names = robjects.r('colnames(fData(methylObj))')
+    for i, c in enumerate(col_names):
+        col_names[i] = c.lower()
+    # print "colnames:", col_names
+
+    AllProbes = []
+
+    for i in range(0, 1000):    # fdata_size):
+        fdata_row = robjects.r('fData(methylObj)[' + str(i + 1) + ',1:57,drop=FALSE]')
+        print fdata_row
+
+    #    probe = {}
+    #    for j, c in enumerate(col_names):
+    #        row = fdata[i]
+    #        print row
+    #        probe[c] = row[j]
+            # fdata[i, j]
+    #    print probe
+
+
+
     # print "complete sample for ",s
-    print complete
+    # print complete
 
 
 
