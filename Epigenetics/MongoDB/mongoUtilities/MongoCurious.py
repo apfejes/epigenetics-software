@@ -78,6 +78,10 @@ class MongoCurious():
             Query['sample label list'] = self.sample_label_list
             Query['sample_dictionary'] = self.sample_dictionary
         self.Query = Query
+        if self.collection == 'methylation':
+            collection = 'annotations'
+        else: collection = self.collection
+        self.docs = self.finddocs(collection = collection)
         return self.Query
 
     def checkquery(self):
@@ -99,24 +103,26 @@ class MongoCurious():
         return None
 
 
-    def finddocs(self):
+    def finddocs(self, probe_id = None, collection = None):
         '''Finds probes or documents corresponding to query'''
         #self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
-        query_chr, query_start, query_end, query_samplabel, query_pos, query_sampgroup, query_project = {}, {}, {}, {}, {}, {}, {}
+        query_chr, query_location, query_samplabel, query_pos, query_sampgroup, query_project, query_probe = {}, {}, {}, {}, {}, {}, {}
 
         # Preparing the different parameters of the query depending on the collection chosen
-        if self.collection == "methylation":
-            query_chr = {'chr':self.chromosome}
-            if self.project: query_project = {'project': self.project}
-            if self.end: query_start = {"start_position":{"$lte":self.end}}
-            if self.start: query_end = {"end_position":{"$gte":self.start}}
-            if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
-            return_chr = {'_id': False, 'beta_value': True,
-                          'start_position': True, 'end_position': True,
-                          'sample_label': True}
-            sortby, sortorder = 'start_position', 1
+        if collection ==  "annotations":
+            query_chr = {"chr":self.chromosome}
+            #if self.project: query_project = {'project': self.project}
+            if self.end and self.start: 
+                query_location = {"mapinfo":{"$gte":self.start, "$lte":self.end }}
+            #if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
+            #return_chr = {'_id': False, 'beta_value': True,
+            #              'start_position': True, 'end_position': True,
+            #              'sample_label': True}
+            return_chr = {'targetid': True, 'mapinfo':True}
+            sortby, sortorder = 'mapinfo', 1
 
-        elif self.collection == "waves":
+        elif collection == "waves":
+            collection = 'waves'
             query_chr = {'chr':self.chromosome}
             if self.project: query_project = {'project': self.project}
             if self.start and self.end:
@@ -129,25 +135,35 @@ class MongoCurious():
                           'sample_id': True}
             sortby, sortorder = 'height', (-1)
 
-        elif self.collection =="samples":
+        elif collection =="samples":
             if self.project: query_project = {"project":self.project}
             if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
             return_chr = {'_id': False, 'sample_label': True,
                           'project': True, 'Sample Group': True}
             sortby, sortorder = 'sample_label', 1
 
+        elif collection ==  "methylation":
+            if self.project: query_project = {'project': self.project}
+            if probe_id: 
+                query_probe = {"probe_id":probe_id}
+            if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
+            return_chr = {'beta_value':True, 'sample_label': True, 'project':True, 
+                          'probe_id':True}
+            sortby, sortorder = 'sample_label', 1
+
+
         else: 
             print "Collection queried is either not supported or not in the database. Exiting..."
             sys.exit()
             
-        query = dict(query_chr.items() + query_start.items() + query_end.items()  
+        query = dict(query_chr.items() + query_location.items() + query_probe.items()
                      + query_samplabel.items() + query_pos.items()
                      + query_sampgroup.items() + query_project.items())
         print "\n Conducting query: "
-        print "   From the database '{0}', and collection '{1}', ".format(self.database, self.collection)
+        print "   From the database '{0}', and collection '{1}', ".format(self.database, collection)
         print "   Find(", query, ")"
         # Get probes corresponding to query and sort by starting positions for beta value binning
-        docs = self.mongo.find(self.collection, query, return_chr).sort(sortby, sortorder)
+        docs = self.mongo.find(collection, query, return_chr).sort(sortby, sortorder)
 
         if docs.count() == 0:
             print("    WARNING: The following query return zero probes or documents!")
@@ -156,10 +172,9 @@ class MongoCurious():
             sys.exit()
 
         print " Found %i documents." % docs.count()
-        self.docs = docs
-        self.count = self.docs.count()
-        self.Query['cursor'] = self.docs
-        return self.docs
+        self.count = docs.count()
+        self.Query['cursor'] = docs
+        return docs
 
 
     def creategroups(self):
@@ -265,10 +280,16 @@ class MongoCurious():
         pos_betas_dict = {} #contains CpGs
         sample_peaks = {}   #contains average CpG value and std for samples from same Sample Group
         count = 0
+        probes = {}
         for doc in self.docs:
-            pos = doc['start_position'] #Assume CpG occurs at start of probe
-            sample = str(doc['sample_label'])
-            beta = doc['beta_value']
+            probes[str(doc['targetid'])] = doc['mapinfo']
+            
+        probedata = self.finddocs(probe_id = {'$in':probes.keys()}, collection = self.collection)
+        for methyldata in probedata:
+            sample = str(methyldata['sample_label'])
+            beta = methyldata['beta_value']
+            pos = probes[methyldata['probe_id']]
+            print pos, sample, beta
             type = self.type(sample) #not very efficient since iterating through the dictionary to get key from value.
             if pos in pos_betas_dict:
                 pos_betas_dict[pos].append((beta, sample, type))

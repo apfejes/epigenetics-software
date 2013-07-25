@@ -18,42 +18,51 @@ import Mongo_Connector, FilesInDirectory
 
 
 database_name = 'human_epigenetics'
-# database_name = 'jake_test'    # For testing purposes
 collection_name = 'methylation'
 # directory = '/home/jyeung/Documents/Outputs/Down'
 
-
-def InsertMethylData(directory):
-    '''
-    From a directory, takes the betas.txt and expression.txt and inserts 
-    a document into mongo that contains beta values, expression values,
-    sample and probe ID. 
+def InsertDataToDB(self, collection, data):
+    #fdata is a dictionary which is organized as:
+    #data{probe_id:(sample_id, beta, mvalue)}
+    #data = {'c001':(sampA, 0,0), 'c002':(sampB,1,2), 'c003':(sampC,4,5)}
+    BulkInsert = []
+    count = 0
+    number_of_inserts = 0
+    t0 = time()
     
-    It is recommended to run UpdateMethylData.py afterwards to include 
-    methyl450array annotations into the inserted documents. 
-    '''
-    # Connect to database
+    for probe_id, (sample_id, beta, mvalue) in data.iteritems():
+        document = {}
+        document['sample_id'] = sample_id
+        document['probe_id'] = probe_id
+        document['beta_value'] = float(beta)
+        document['m_value'] = float(mvalue)
+        BulkInsert.append(document)
+            
+        if count%100 == 0:
+            number_of_inserts += len(BulkInsert)
+            collection.insert(BulkInsert)
+            print(('{0}{1:,}{2}{3}{4}').format('    ',len(BulkInsert),'documents inserted in',(time()-t0),' seconds.'))
+            print(('{0}{1:,}').format('The number of added documents adds up to', number_of_inserts))
+            t0 = time()
+            BulkInsert = []
+            
+    return number_of_inserts
+
+def InsertMethylData(database_name,collection_name,data):
+    starttime = time.time()
+    
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
     collection = mongo.db[collection_name]
-    # Grab all files in that directory.
-    files = FilesInDirectory.Files(directory)
-    Bulk = files.InsertDataToDB(collection)
-    return Bulk
-
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print('Directory must be given on the command line.')
-        sys.exit()
-    starttime = time.time()
-    directory = sys.argv[1]
-    print('Grabbing beta and expression text files from %s' %directory)
-    total = InsertMethylData(directory)
-    print('*** A total of %i documents were addded to the collection. ***' %total)
+    totalfiles = InsertDataToDB(collection, data)
+    
+    print('*** A total of %i documents were addded to the collection. ***' %totalfiles)
     print('\nDone in %i seconds' %(time.time() - starttime))
+    print('{0}{1}{2}'.format('*** There are now ',
+                         str(collection.count()),
+                             ' docs in the collection. ***'))
     t0 = time.time()
     print("Updating indexes in background...")
-    mongo.ensure_index(collection, 'start_position',{'background':True})
-    #mongo.ensure_index(collection, 'project',{'background':True})
+    mongo.ensure_index(collection, 'probe_id',{'background':True})
     print('\nDone in %i seconds' %(time.time() - t0))
-    
+
+    return None
