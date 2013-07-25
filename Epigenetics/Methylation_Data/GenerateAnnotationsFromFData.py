@@ -60,12 +60,28 @@ def ReadRObject(rdatafile):
 
     AllProbes = []
 
-    for i in range(0, 1000):    # fdata_size):
+    for i in range(0, 10):    # fdata_size):
         fdata_row = robjects.r('fData(methylObj)[' + str(i + 1) + ',1:57,drop=FALSE]')
-        print fdata_row
+        # print fdata_row
+        probe = {}
+        for j, item in enumerate(fdata_row):
 
-    #    probe = {}
-    #    for j, c in enumerate(col_names):
+
+
+            if hasattr(item, 'levels'):
+                probe[col_names[j]] = item.levels[item[0] - 1]
+            else:
+                probe[col_names[j]] = item[0]
+        print probe
+        # AllProbes.append(probe)
+    # return
+    #        print "unconvert:", type(item), col_names[j], item
+    #        if hasattr(item, 'levels'):
+    #            print "convert:", type(item.levels[item[0] - 1]), col_names[j], item.levels[item[0] - 1]
+    #        else:
+    #            print "plain:", type(item[0]), col_names[j], item[0]
+
+    # for j, c in enumerate(col_names):
     #        row = fdata[i]
     #        print row
     #        probe[c] = row[j]
