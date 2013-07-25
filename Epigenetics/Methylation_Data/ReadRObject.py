@@ -42,7 +42,7 @@ def ReadRObject(rdatafile):
     # Rfunction(rdatafile)
 
     importr('methylumi')
-    print "rdata:", rdatafile
+    print "\n rdata:", rdatafile
     robjects.r('workspace <- load(\"' + rdatafile + '\")')
     robjects.r('methylObj <- get(workspace)')
     size_pdata = robjects.r('dim(pData(methylObj))')
@@ -63,11 +63,21 @@ def ReadRObject(rdatafile):
     beta = robjects.r('betas(methylObj)[,1,drop=FALSE]')
     # print "betas", beta
     exprs = robjects.r('exprs(methylObj)[,1,drop=FALSE]')
+    
+    samps0 = robjects.r('pData(methylObj)[,1]')
+    samps1 = robjects.r('pData(methylObj)[,1,drop=FALSE]')
+    samps12 = robjects.r('pData(methylObj)[,12,drop=FALSE]')
+    title = robjects.r('pData(methylObj)[0,9,drop=FALSE]')
+    print "\n samp0", samps0
+    print "\n samp1", samps1
+
+    print 'title1', str(title), 'h'
     print "lengths, probes %i, beta %i, exprs %i" % (len(probes), len(beta), len(exprs))
     complete = zip(probes, beta, exprs)
     # print "complete sample for ",s
-    print complete
+    #print complete
 
+    project_name = raw_input('Enter the name of the project to insert in sample table: ')
 
 
 

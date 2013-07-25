@@ -78,7 +78,7 @@ class MethylationPlot(object):
                 height = 3.0
                 if s!= 0.0:
                     gaussian_y, gaussian_x = self.makegaussian(m, s, height) #reverse output arguments for sideways gaussians
-                    gaussian_x = [coord + x for coord in gaussian_x]
+                    gaussian_x = [coord + x -1 for coord in gaussian_x]
                     gaussian_y = [item + m for item in gaussian_y]
                     #print "hello", y, gaussian_y
                     #offset_x = max(Y)
