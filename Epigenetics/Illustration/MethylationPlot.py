@@ -39,11 +39,13 @@ class MethylationPlot(object):
                 self.Y.append(y)
         self.invertby = max(self.Y)
         
+        size = (str(self.length) + "mm" , str(self.width * 1.5) + "mm")
         # create drawing
-        self.plot = Drawing(filename,
-                        size = (str(self.length) + "mm" , str(self.width * 1.5) + "mm"),
-                        viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 4)),
-                        preserveAspectRatio = "xMinYMin meet")
+        self.plot = Drawing(filename, size = size,
+                            viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 4)),
+                            preserveAspectRatio = "xMinYMin meet")
+        background = Rect(insert = (0,0), size = size, fill = "yellow")
+        self.plot.add(background)
 
 
     def build(self):
