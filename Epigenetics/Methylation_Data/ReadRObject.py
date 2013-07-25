@@ -61,6 +61,9 @@ def ReadRObject(rdatafile):
     # print "probes", probes
     for s in range(0, num_samples):    # this will be 0 to 14 for 15 samples, so will need to add one.
         beta = robjects.r('betas(methylObj)[,' + str(s + 1) + ',drop=FALSE]')
+        exprs = robjects.r('exprs(methylObj)[,' + str(s + 1) + ',drop=FALSE]')
+    print "lengths, probes %i, beta %i, exprs %i" % (len(probes), len(beta), len(exprs))
+    complete = zip(probes, beta, exprs)
     # print "betas", beta
 
     
@@ -73,9 +76,6 @@ def ReadRObject(rdatafile):
 
     print 'title1', str(title), 'h'
 
-    exprs = robjects.r('exprs(methylObj)[,' + str(s + 1) + ',drop=FALSE]')
-    print "lengths, probes %i, beta %i, exprs %i" % (len(probes), len(beta), len(exprs))
-    complete = zip(probes, beta, exprs)
 
     # print "complete sample for ",s
 
