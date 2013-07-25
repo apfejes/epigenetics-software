@@ -59,10 +59,10 @@ def ReadRObject(rdatafile):
 
     probes = robjects.r('rownames(exprs(methylObj))')
     # print "probes", probes
-    # for s in range(0, num_samples):    # this will be 0 to 14 for 15 samples, so will need to add one.
-    beta = robjects.r('betas(methylObj)[,1,drop=FALSE]')
+    for s in range(0, num_samples):    # this will be 0 to 14 for 15 samples, so will need to add one.
+        beta = robjects.r('betas(methylObj)[,' + str(s + 1) + ',drop=FALSE]')
     # print "betas", beta
-    exprs = robjects.r('exprs(methylObj)[,1,drop=FALSE]')
+
     
     samps0 = robjects.r('pData(methylObj)[,1]')
     samps1 = robjects.r('pData(methylObj)[,1,drop=FALSE]')
@@ -72,10 +72,13 @@ def ReadRObject(rdatafile):
     print "\n samp1", samps1
 
     print 'title1', str(title), 'h'
+
+    exprs = robjects.r('exprs(methylObj)[,' + str(s + 1) + ',drop=FALSE]')
     print "lengths, probes %i, beta %i, exprs %i" % (len(probes), len(beta), len(exprs))
     complete = zip(probes, beta, exprs)
+
     # print "complete sample for ",s
-    #print complete
+
 
     project_name = raw_input('Enter the name of the project to insert in sample table: ')
 
