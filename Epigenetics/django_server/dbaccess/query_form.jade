@@ -14,17 +14,17 @@ block content
 		block form
 			form(action='/dbaccess/query/',method='post')
 				div(data-role='fieldcontain')
+					fieldset(data-role='database')
+						label(for='database') Organism:
+							select(name='database') 
+								option(value="human")="Human"
+								option(value="yeast")="Yeast"
+								option(value="arabidopsis")="Arabidopsis"
 					fieldset(data-role='collection')
 						label(for='collection') Collection:
 							select(name='collection') 
 								option(value="chipseq")="ChIP-Seq"
 								option(value="methylation")="Methylation"
-					fieldset(data-role='organism')
-						label(for='org') Organism:
-							select(name='organism') 
-								option(value="human")="Human"
-								option(value="yeast")="Yeast"
-								option(value="arabidopsis")="Arabidopsis"
 					fieldset(data-role='chromosome')
 						label(for='chr') Chromosome:
 							input(id='chr',type='text',value='',placeholder='1,2,...X,Y',name='chr')

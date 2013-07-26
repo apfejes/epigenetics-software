@@ -37,7 +37,7 @@ class ChipseqPlot(object):
         self.plot = Drawing(filename, size = size,
                         viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 4)),
                         preserveAspectRatio = "xMinYMin meet")
-        background = Rect(insert = (0,0), size = size, fill = "yellow")
+        background = Rect(insert = (0,0), size = size, fill = "white")
         self.plot.add(background)
 
     def build(self):

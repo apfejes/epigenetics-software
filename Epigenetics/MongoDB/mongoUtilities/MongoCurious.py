@@ -360,9 +360,15 @@ class MongoCurious():
                     waves.append((pos, height, stddev, sample_label))
                     count += 1
                 # else: print "         Not included:    ", pos, height, stddev,
-        print "   Only %i peaks were found to occur in region." % count
-        self.waves = waves
-        self.Query['waves'] = waves
+        if count == 0:
+            print("    WARNING: None of peaks found in the query lie in the region!")
+            print "    ---> Exiting..."
+            sys.exit()
+        else:
+            print "   Only %i peaks were found to occur in region." % count
+            self.waves = waves
+            self.Query['waves'] = waves
+        
         return None
 
     def svg(self, filename = None, title = None,

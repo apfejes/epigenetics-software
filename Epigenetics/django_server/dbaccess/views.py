@@ -65,7 +65,7 @@ def query(request):
         form = QueryForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data
-            database = str(form.cleaned_data['org'])
+            database = str(form.cleaned_data['database'])
             collection = str(form.cleaned_data['collection'])
             chr = 'chr' + str(form.cleaned_data['chr'])
             start = str(form.cleaned_data['start'])
