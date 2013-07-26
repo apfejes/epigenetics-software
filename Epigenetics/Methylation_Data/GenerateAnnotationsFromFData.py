@@ -51,6 +51,7 @@ def ReadRObject(rdatafile):
     size_fdata = robjects.r('dim(fData(methylObj))')
     print "Size fdata:", size_fdata
     rows_fdata = size_fdata[0]
+    cols_fdata = size_fdata[1]
     print "fdata rows:", rows_fdata
     fdata_row = robjects.r('fData(methylObj)')
     # print "Type fdata:", type(fdata)
@@ -62,27 +63,43 @@ def ReadRObject(rdatafile):
     # print "colnames:", col_names
 
     AllProbes = []
+    batch_size = 1000
+    batch = 0
+    end = -1
 
-    for i in range(0, rows_fdata):
+    while (batch) * batch_size < rows_fdata:
+        time1 = time.time()
+        start = end + 1
+        end = (batch + 1) * batch_size
+        if end > rows_fdata:
+            end = rows_fdata
         t0 = time.time()
-        fdata_row = robjects.r('fData(methylObj)[' + str(i + 1) + ',1:57,drop=FALSE]')
-        t1 = time.time()
-        probe = {}
-        t2 = time.time()
-
-        for j, item in enumerate(fdata_row):
-            a = 0
-            try:
-                a = getattr(item, 'levels')
-            except AttributeError:
-                probe[col_names[j]] = item[0]
+        items = [{} for k in range(batch_size)]    # zero to batch_size-1
+        for x in range(1, cols_fdata + 1):    # one to cols_fdata  - the column number - iterate.
+            column = robjects.r('fData(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + ',drop=FALSE]')
+            lev = False
+            levels = ""
+            if hasattr(column.rx(1, 1), "levels"):
+                lev = True
+                levels = robjects.r('factor(fData(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + '], ordered=TRUE)')
             else:
-                probe[col_names[j]] = a
-        t3 = time.time()
-        AllProbes.append(probe)
-        t4 = time.time()
-        print "%i => Takes %f seconds to run step 1, %f for step 2, %f for step 3"\
-          % (i, (t1 - t0), (t3 - t2), (t4 - t3),)
+                levels = ""
+            for y in range(1, batch_size + 1):    # the data
+                print "x, y = %i, %i" % (x, y)
+                if lev:
+                    items[y - 1][col_names[x - 1]] = levels.rx(y - 1)
+                else:
+                    items[y - 1][col_names[x - 1]] = column.rx(y, 1)[0]
+        print "Item zero", items[0]
+        batch += 1
+        time2 = time.time()
+        print "Batch %i completed at %f seconds" % (batch, time2 - time1)
+        ib = InsertBatch.InsertBatchToDB("annotations", items)
+        time3 = time.time()
+        print "Batch %i inserted in %f seconds" % (batch, time3 - time2)
+
+
+
 
     return AllProbes
 
@@ -94,5 +111,5 @@ if __name__ == "__main__":
     starttime = time.time()
     rdatafile = sys.argv[1]
     data = ReadRObject(rdatafile)
-    ib = InsertBatch.InsertBatchToDB("annotations", data)
+
     print('Done in %s seconds') % int((time.time() - starttime))

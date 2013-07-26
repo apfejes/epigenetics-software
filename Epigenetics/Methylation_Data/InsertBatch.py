@@ -21,7 +21,7 @@ database = 'human_epigenetics'
 
 
 
-def InsertBatchToDB(self, collection, annotationdata):
+def InsertBatchToDB(collection, annotationdata):
     starttime = time.time()
 
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database)
@@ -30,7 +30,7 @@ def InsertBatchToDB(self, collection, annotationdata):
     BulkInsert = []
     count = 0
     number_of_inserts = 0
-    t0 = time()
+    t0 = time.time()
 
     for probe_dict in annotationdata:    # for each row in array of annotations
         BulkInsert.append(probe_dict)
@@ -38,21 +38,18 @@ def InsertBatchToDB(self, collection, annotationdata):
         if len(BulkInsert) % 1000 == 0:
             number_of_inserts += len(BulkInsert)
             coll_obj.insert(BulkInsert)
-            print "%i annotation documents inserted in %i seconds." % (len(BulkInsert), time() - t0)
+            print "%i annotation documents inserted in %i seconds." % (len(BulkInsert), time.time() - t0)
             print "The number of added documents adds up to %s" % (number_of_inserts)
-            t0 = time()
+            t0 = time.time()
             BulkInsert = []
 
-    number_of_inserts += len(BulkInsert)
-    coll_obj.insert(BulkInsert)
+    if len(BulkInsert) > 0:
+        number_of_inserts += len(BulkInsert)
+        coll_obj.insert(BulkInsert)
 
-    print "*** A total of %i documents were addded to the annotation coll_obj. ***" % (totalfiles)
-    print "\nDone in %i seconds" % (time.time() - starttime)
-    print "*** There are now %i docs in the annotation coll_obj. *** " % (coll_obj.count())
-    t0 = time.time()
-    print "Updating indexes in background..."
-    mongo.ensure_index(coll_obj, 'mapinfo', {'background':True})
-    print '\nDone in %i seconds' % (time.time() - t0)
+    print "*** A total of %i documents were addded to the annotation coll_obj. ***" % (number_of_inserts)
+    # print "*** There are now %i docs in the annotation coll_obj. *** " % (coll_obj.count())
+    print '\nDone in %i seconds' % (time.time() - starttime)
 
     return None
 
