@@ -25,7 +25,7 @@ def InsertBatchToDB(self, collection, annotationdata):
     starttime = time.time()
 
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database)
-    collection = mongo.db["annotations"]
+    coll_obj = mongo.db[collection]
 
     BulkInsert = []
     count = 0
@@ -37,21 +37,21 @@ def InsertBatchToDB(self, collection, annotationdata):
 
         if len(BulkInsert) % 1000 == 0:
             number_of_inserts += len(BulkInsert)
-            collection.insert(BulkInsert)
+            coll_obj.insert(BulkInsert)
             print "%i annotation documents inserted in %i seconds." % (len(BulkInsert), time() - t0)
             print "The number of added documents adds up to %s" % (number_of_inserts)
             t0 = time()
             BulkInsert = []
 
     number_of_inserts += len(BulkInsert)
-    collection.insert(BulkInsert)
+    coll_obj.insert(BulkInsert)
 
-    print "*** A total of %i documents were addded to the annotation collection. ***" % (totalfiles)
+    print "*** A total of %i documents were addded to the annotation coll_obj. ***" % (totalfiles)
     print "\nDone in %i seconds" % (time.time() - starttime)
-    print "*** There are now %i docs in the annotation collection. *** " % (collection.count())
+    print "*** There are now %i docs in the annotation coll_obj. *** " % (coll_obj.count())
     t0 = time.time()
     print "Updating indexes in background..."
-    mongo.ensure_index(collection, 'mapinfo', {'background':True})
+    mongo.ensure_index(coll_obj, 'mapinfo', {'background':True})
     print '\nDone in %i seconds' % (time.time() - t0)
 
     return None
