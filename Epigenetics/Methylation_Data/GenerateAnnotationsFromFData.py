@@ -9,6 +9,7 @@ import sys
 import time
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
+import InsertBatch
 
 
 def ReadRObject(rdatafile):
@@ -49,6 +50,8 @@ def ReadRObject(rdatafile):
 
     size_fdata = robjects.r('dim(fData(methylObj))')
     print "Size fdata:", size_fdata
+    rows_fdata = size_fdata[0]
+    print "fdata rows:", rows_fdata
     fdata_row = robjects.r('fData(methylObj)')
     # print "Type fdata:", type(fdata)
 
@@ -60,71 +63,28 @@ def ReadRObject(rdatafile):
 
     AllProbes = []
 
-    for i in range(0, 10):    # fdata_size):
+    for i in range(0, rows_fdata):
+        t0 = time.time()
         fdata_row = robjects.r('fData(methylObj)[' + str(i + 1) + ',1:57,drop=FALSE]')
-        # print fdata_row
+        t1 = time.time()
         probe = {}
+        t2 = time.time()
+
         for j, item in enumerate(fdata_row):
-
-
-
-            if hasattr(item, 'levels'):
-                probe[col_names[j]] = item.levels[item[0] - 1]
-            else:
+            a = 0
+            try:
+                a = getattr(item, 'levels')
+            except AttributeError:
                 probe[col_names[j]] = item[0]
-        print probe
-        # AllProbes.append(probe)
-    # return
-    #        print "unconvert:", type(item), col_names[j], item
-    #        if hasattr(item, 'levels'):
-    #            print "convert:", type(item.levels[item[0] - 1]), col_names[j], item.levels[item[0] - 1]
-    #        else:
-    #            print "plain:", type(item[0]), col_names[j], item[0]
+            else:
+                probe[col_names[j]] = a
+        t3 = time.time()
+        AllProbes.append(probe)
+        t4 = time.time()
+        print "%i => Takes %f seconds to run step 1, %f for step 2, %f for step 3"\
+          % (i, (t1 - t0), (t3 - t2), (t4 - t3),)
 
-    # for j, c in enumerate(col_names):
-    #        row = fdata[i]
-    #        print row
-    #        probe[c] = row[j]
-            # fdata[i, j]
-    #    print probe
-
-
-
-    # print "complete sample for ",s
-    # print complete
-
-
-
-
-#                write.table(exprs(methylObj),
-#                            file=paste(workspace, "_expression.txt", sep=""),
-#                            sep="\t", quote=FALSE, row.names=TRUE, col.names=TRUE)
-#               write.table(betas(methylObj),
-#                            file=paste(workspace, "_betas.txt", sep=""),
-#                            sep="\t", quote=FALSE, row.names=TRUE, col.names=TRUE)
-
-
-    # robjects.r('''
-    #        WriteRObjectData <- function(rdatafile, outputDirectory) {
-    #            setwd(outputDirectory)
-    #            print(paste('Writing to: ', getwd()))
-    #            workspace <- load(rdatafile)
-    #            methylObj <- get(workspace)
-    #            write.table(pData(methylObj),
-    #                        file=paste(workspace, "_pData.txt", sep=""),
-    #                        sep="\t", quote=FALSE, row.names=TRUE, col.names=TRUE)
-    #            write.table(exprs(methylObj),
-    #                        file=paste(workspace, "_expression.txt", sep=""),
-    #                        sep="\t", quote=FALSE, row.names=TRUE, col.names=TRUE)
-    #            write.table(betas(methylObj),
-    #                        file=paste(workspace, "_betas.txt", sep=""),
-    #                        sep="\t", quote=FALSE, row.names=TRUE, col.names=TRUE)
-    #        }
-    #        ''')
-
-
-    # Rfunction = robjects.r['WriteRObjectData']
-    # Rfunction(rdatafile, outputDirectory)
+    return AllProbes
 
 
 if __name__ == "__main__":
@@ -133,5 +93,6 @@ if __name__ == "__main__":
         sys.exit()
     starttime = time.time()
     rdatafile = sys.argv[1]
-    ReadRObject(rdatafile)
+    data = ReadRObject(rdatafile)
+    ib = InsertBatch.InsertBatchToDB("annotations", data)
     print('Done in %s seconds') % int((time.time() - starttime))
