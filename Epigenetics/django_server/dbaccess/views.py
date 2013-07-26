@@ -46,14 +46,14 @@ def methylation_code(request):
     string = showmethylation.svgcode()
     return HttpResponse(string)
 
-def chipseq_code(request, chr, start, end):
+def chipseq_code(request, database, chr, start, end):
     from Annotations import showchipseq
-    string = showchipseq.svgcode(chr = chr, start = start, end = end)
+    string = showchipseq.svgcode(db = database, chr = chr, start = start, end = end)
     return HttpResponse(string)
 
-def meth_code(request, chr, start, end):
+def meth_code(request, database, chr, start, end):
     from Annotations import showmethylation
-    string = showmethylation.svgcode(chr = chr, start = start, end = end)
+    string = showmethylation.svgcode(db = database, chr = chr, start = start, end = end)
     return HttpResponse(string)
 
 def send_svg(request):
@@ -65,15 +65,16 @@ def query(request):
         form = QueryForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data
+            database = str(form.cleaned_data['org'])
             collection = str(form.cleaned_data['collection'])
             chr = 'chr' + str(form.cleaned_data['chr'])
             start = str(form.cleaned_data['start'])
             end = str(form.cleaned_data['end'])
-            print "\n\n Received a form:", collection, chr, start, end
+            print "\n\n Received a form:", database, collection, chr, start, end
             if collection == 'chipseq':
-                return chipseq_code(request, chr, start, end)
+                return chipseq_code(request, database, chr, start, end)
             elif collection == 'methylation':
-                return meth_code(request, chr, start, end)
+                return meth_code(request, databasem, chr, start, end)
                 #return HttpResponse('The \'' + collection + '\' collection is not available yet.')
             else: 
                 return HttpResponse(collection + ' is an invalid collection! Please try again...')
