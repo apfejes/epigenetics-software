@@ -74,35 +74,25 @@ def ReadRObject(rdatafile):
         if end > rows_fdata:
             end = rows_fdata
         t0 = time.time()
-        items = [{} for k in range(batch_size)]    # zero to batch_size-1
+        items = [{} for k in range(start, end)]    # zero to batch_size-1
         for x in range(1, cols_fdata + 1):    # one to cols_fdata  - the column number - iterate.
             column = robjects.r('fData(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + ',drop=FALSE]')
             lev = False
-            levels = ""
             if hasattr(column.rx(1, 1), "levels"):
                 lev = True
-                levels = robjects.r('factor(fData(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + '], ordered=TRUE)')
-            else:
-                levels = ""
-            for y in range(1, batch_size + 1):    # the data
-                print "x, y = %i, %i" % (x, y)
+                column = robjects.r('as.character(fData(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + '])')
+            for y in range(1, (end - start + 1)):    # the data
                 if lev:
-                    items[y - 1][col_names[x - 1]] = levels.rx(y - 1)
+                    items[y - 1][col_names[x - 1]] = column.rx(y)[0]
                 else:
                     items[y - 1][col_names[x - 1]] = column.rx(y, 1)[0]
-        print "Item zero", items[0]
+        # print "Item zero", items[0]
         batch += 1
         time2 = time.time()
         print "Batch %i completed at %f seconds" % (batch, time2 - time1)
         ib = InsertBatch.InsertBatchToDB("annotations", items)
         time3 = time.time()
         print "Batch %i inserted in %f seconds" % (batch, time3 - time2)
-
-
-
-
-    return AllProbes
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -111,5 +101,4 @@ if __name__ == "__main__":
     starttime = time.time()
     rdatafile = sys.argv[1]
     data = ReadRObject(rdatafile)
-
     print('Done in %s seconds') % int((time.time() - starttime))
