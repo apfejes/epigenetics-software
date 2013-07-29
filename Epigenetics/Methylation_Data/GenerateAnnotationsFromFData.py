@@ -1,9 +1,8 @@
 '''
 Created on 2013-04-17
 
-@author: jyeung
+@author: jyeung, apfejes
 '''
-
 
 import sys
 import time
@@ -18,29 +17,10 @@ def ReadRObject(rdatafile):
     
     Uses rpy2 library.
     
-    robjects.r(' ') is used to talk to R. In this case, it first writes
-    a function in R called 'WriteObjectData'.
-    
-    Second, we create a python object that can call 'WriteObjectData'
-    function using robjects.r[' '].
-    
-    Third, we input variables from python into the python object, which allows
-    the R function be run with python variables.
+    Modified to accept data directly from an R object, then insert it into the 
+    database via Insert Branch.  Shortcuts the export process, to make it more
+    efficient
     '''
-    # Load libraries
-
-
-
-
-    # Load .RData file
-    # robjects.r('''
-    #        SetupRObjectData <- function(rdatafile) {
-    #            workspace <- load(rdatafile)
-    #            methylObj <- get(workspace)
-    #            }
-    #            ''')
-    # Rfunction = robjects.r['SetupRObjectData']
-    # Rfunction(rdatafile)
 
     importr('methylumi')
     print "rdata:", rdatafile
@@ -54,13 +34,11 @@ def ReadRObject(rdatafile):
     cols_fdata = size_fdata[1]
     print "fdata rows:", rows_fdata
     fdata_row = robjects.r('fData(methylObj)')
-    # print "Type fdata:", type(fdata)
 
     row_names = robjects.r('rownames(fData(methylObj))')
     col_names = robjects.r('colnames(fData(methylObj))')
     for i, c in enumerate(col_names):
         col_names[i] = c.lower()
-    # print "colnames:", col_names
 
     AllProbes = []
     batch_size = 1000
@@ -86,7 +64,6 @@ def ReadRObject(rdatafile):
                     items[y - 1][col_names[x - 1]] = column.rx(y)[0]
                 else:
                     items[y - 1][col_names[x - 1]] = column.rx(y, 1)[0]
-        # print "Item zero", items[0]
         batch += 1
         time2 = time.time()
         print "Batch %i completed at %f seconds" % (batch, time2 - time1)
