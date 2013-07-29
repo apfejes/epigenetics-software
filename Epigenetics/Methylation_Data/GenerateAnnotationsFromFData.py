@@ -9,9 +9,9 @@ import time
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
 import InsertBatch
+import Mongo_Connector
 
-
-def ReadRObject(rdatafile):
+def ReadRObject(mongo, rdatafile):
     '''
     Takes a methylumi object and writes beta, expression and phenoData to .txt
     
@@ -41,7 +41,7 @@ def ReadRObject(rdatafile):
         col_names[i] = c.lower()
 
     AllProbes = []
-    batch_size = 1000
+    batch_size = 5000
     batch = 0
     end = -1
 
@@ -52,14 +52,14 @@ def ReadRObject(rdatafile):
         if end > rows_fdata:
             end = rows_fdata
         t0 = time.time()
-        items = [{} for k in range(start, end)]    # zero to batch_size-1
+        items = [{} for k in range(start, end + 1)]    # zero to batch_size-1
         for x in range(1, cols_fdata + 1):    # one to cols_fdata  - the column number - iterate.
             column = robjects.r('fData(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + ',drop=FALSE]')
             lev = False
             if hasattr(column.rx(1, 1), "levels"):
                 lev = True
                 column = robjects.r('as.character(fData(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + '])')
-            for y in range(1, (end - start + 1)):    # the data
+            for y in range(1, (end - start + 2)):    # the data
                 if lev:
                     items[y - 1][col_names[x - 1]] = column.rx(y)[0]
                 else:
@@ -67,15 +67,18 @@ def ReadRObject(rdatafile):
         batch += 1
         time2 = time.time()
         print "Batch %i completed at %f seconds" % (batch, time2 - time1)
-        ib = InsertBatch.InsertBatchToDB("annotations", items)
-        time3 = time.time()
-        print "Batch %i inserted in %f seconds" % (batch, time3 - time2)
+        ib = mongo.InsertBatchToDB("annotations", items)
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print('RData filename must be given.')
+    if len(sys.argv) < 1:
+        print 'RData filename must be given as the second parameter.'
+        print "eg. python GenerateAnnotationFromFData.py /directory/database.RDATA"
         sys.exit()
+
+
+    db_name = "human_epigenetics"
+    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
     starttime = time.time()
     rdatafile = sys.argv[1]
-    data = ReadRObject(rdatafile)
+    data = ReadRObject(mongo, rdatafile)
     print('Done in %s seconds') % int((time.time() - starttime))

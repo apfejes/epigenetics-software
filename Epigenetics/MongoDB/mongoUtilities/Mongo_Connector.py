@@ -12,6 +12,8 @@ import sys
 
 class MongoConnector():
     '''Class for simplifying the interactions with a mongodb server'''
+    BULKINSERTSIZE = 1000
+
 
     def __init__(self, machine, port, database_name):
         '''wrapper around connect to Mongo, in order to consolidate all of the 
@@ -62,5 +64,23 @@ class MongoConnector():
     def distinct(self, collection_name, field):
         collection = self.db[collection_name]
         return collection.distinct(field)
+
+    def InsertBatchToDB(self, collection_name, annotationdata):
+        collection = self.db[collection_name]
+        BulkInsert = []
+        number_of_inserts = 0
+
+        for probe_dict in annotationdata:    # for each row in array of annotations
+            BulkInsert.append(probe_dict)
+
+            if len(BulkInsert) % self.BULKINSERTSIZE == 0:
+                number_of_inserts += len(BulkInsert)
+                collection.insert(BulkInsert)
+                BulkInsert = []
+
+        if len(BulkInsert) > 0:
+            number_of_inserts += len(BulkInsert)
+            collection.insert(BulkInsert)
+        return number_of_inserts
 
 
