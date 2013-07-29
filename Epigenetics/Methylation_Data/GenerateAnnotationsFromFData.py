@@ -4,11 +4,18 @@ Created on 2013-04-17
 @author: jyeung, apfejes
 '''
 
+
 import sys
 import time
+import os
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
-import InsertBatch
+
+_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
+_root_dir = os.path.dirname(_cur_dir)
+print _root_dir
+sys.path.insert(0, _root_dir)
+sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 
 def ReadRObject(mongo, rdatafile):
@@ -33,17 +40,14 @@ def ReadRObject(mongo, rdatafile):
     rows_fdata = size_fdata[0]
     cols_fdata = size_fdata[1]
     print "fdata rows:", rows_fdata
-    fdata_row = robjects.r('fData(methylObj)')
-
-    row_names = robjects.r('rownames(fData(methylObj))')
     col_names = robjects.r('colnames(fData(methylObj))')
     for i, c in enumerate(col_names):
         col_names[i] = c.lower()
 
-    AllProbes = []
     batch_size = 5000
     batch = 0
     end = -1
+    records_added_to_db = 0
 
     while (batch) * batch_size < rows_fdata:
         time1 = time.time()
@@ -51,7 +55,6 @@ def ReadRObject(mongo, rdatafile):
         end = (batch + 1) * batch_size
         if end > rows_fdata:
             end = rows_fdata
-        t0 = time.time()
         items = [{} for k in range(start, end + 1)]    # zero to batch_size-1
         for x in range(1, cols_fdata + 1):    # one to cols_fdata  - the column number - iterate.
             column = robjects.r('fData(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + ',drop=FALSE]')
@@ -67,18 +70,17 @@ def ReadRObject(mongo, rdatafile):
         batch += 1
         time2 = time.time()
         print "Batch %i completed at %f seconds" % (batch, time2 - time1)
-        ib = mongo.InsertBatchToDB("annotations", items)
+        records_added_to_db += mongo.InsertBatchToDB("annotations", items)
+    return records_added_to_db
 
 if __name__ == "__main__":
     if len(sys.argv) < 1:
         print 'RData filename must be given as the second parameter.'
         print "eg. python GenerateAnnotationFromFData.py /directory/database.RDATA"
         sys.exit()
-
-
     db_name = "human_epigenetics"
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
     starttime = time.time()
     rdatafile = sys.argv[1]
-    data = ReadRObject(mongo, rdatafile)
+    ReadRObject(mongo, rdatafile)
     print('Done in %s seconds') % int((time.time() - starttime))
