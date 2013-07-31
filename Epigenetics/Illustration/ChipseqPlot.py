@@ -14,7 +14,7 @@ class ChipseqPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, title, waves, start, end, length, margin, width):
+    def __init__(self, filename, title, waves, start, end, annotations, length, margin, width):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.

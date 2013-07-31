@@ -330,7 +330,7 @@ class MongoCurious():
             self.end = self.positions[-1]
             print "    New end position:", self.end
          
-         
+        self.annotations = self.getannotations() 
          
         return self.pos_betas_dict, self.sample_peaks
 
@@ -369,17 +369,23 @@ class MongoCurious():
             self.waves = waves
             self.Query['waves'] = waves
         
+        self.annotations = self.getannotations() 
+        
         return None
 
-    def getannotations(self, collection):
+    def getannotations(self):
         docs = self.finddocs(collection = 'annotations')
         TSSes = []
         Islands = []
         for doc in docs:
-            TSSes.append(int(doc['distanceTSS']) + doc['mapinfo'])
+            location  = int(doc['distanceTSS']) + doc['mapinfo']
+            if location in range(self.start, self.end):
+                TSSes.append(location)
             start = int(doc['distanceCpGI']) + doc['mapinfo']
             end = int(doc['lengthCpGI']) + start
-            Islands.append((start,end))
+            if end < self.end or start > self.start:
+                Islands.append((start,end))
+        return (TSSes, Islands)
 
 
     def svg(self, filename = None, title = None,
@@ -398,14 +404,14 @@ class MongoCurious():
         if self.collection == "methylation":
             if color == None: color = "royalblue"
             drawing = methylationplot.MethylationPlot(filename, title, self.sample_peaks,
-                                                      self.pos_betas_dict, 
+                                                      self.pos_betas_dict, self.annotations,
                                                       color, self.start, self.end,
                                                       length, margin, width)
             drawing.build()
         if self.collection == "waves":
             if color == None: color = "indigo"
             drawing = chipseqplot.ChipseqPlot(filename, title, self.waves,
-                                              self.start, self.end,
+                                              self.start, self.end, self.annotations,
                                               length, margin, width)
             drawing.build()
 
