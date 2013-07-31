@@ -17,7 +17,7 @@ class MethylationPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, title, sample_peaks, pos_betas_dict, color, start, end, length, margin, width):
+    def __init__(self, filename, title, sample_peaks, pos_betas_dict, annotations, color, start, end, length, margin, width):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
