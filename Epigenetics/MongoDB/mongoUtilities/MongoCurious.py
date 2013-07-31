@@ -118,7 +118,7 @@ class MongoCurious():
             #return_chr = {'_id': False, 'beta_value': True,
             #              'start_position': True, 'end_position': True,
             #              'sample_label': True}
-            return_chr = {'targetid': True, 'mapinfo':True, 'distanceTSS':True} 
+            return_chr = {'targetid': True, 'mapinfo':True, 'distanceTSS':True, 'Islands': True} 
             sortby, sortorder = 'mapinfo', 1
 
         elif collection == "waves":
@@ -373,10 +373,13 @@ class MongoCurious():
 
     def getannotations(self, collection):
         docs = self.finddocs(collection = 'annotations')
-        TSSes = {}
+        TSSes = []
+        Islands = []
         for doc in docs:
             TSSes.append(int(doc['distanceTSS']) + doc['mapinfo'])
-            
+            start = int(doc['distanceCpGI']) + doc['mapinfo']
+            end = int(doc['lengthCpGI']) + start
+            Islands.append((start,end))
 
 
     def svg(self, filename = None, title = None,
