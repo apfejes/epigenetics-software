@@ -23,10 +23,10 @@ import Parameters
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector, common_utilities
 import PrintThread
-from WaveGenerator.Utilities.Statistics import Kolmogorov_Smirnov as stats
+from Statistics import Kolmogorov_Smirnov as stats
 sys.path.insert(0, _cur_dir + os.sep + "Illustration")
-import Illustration.Histogram as histogram
-import Illustration.ScatterPlot as scatterplot
+import Histogram as histogram
+import ScatterPlot as scatterplot
 
 class WavePair():
     # i, j, p, pos1, pos2, stddev1, stddev2
@@ -145,11 +145,11 @@ def run():
         for i in id_s:
             # print "i %s" % i
             cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, "pos")
-            waves1 = CreateListFromCursor(cursor)
+            waves1 = common_utilities.CreateListFromCursor(cursor)
         for i in id_r:
             # print "i %s" % i
             cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, "pos")
-            waves2 = CreateListFromCursor(cursor)
+            waves2 = common_utilities.CreateListFromCursor(cursor)
             # print "list1.length", len(list1)
             # for j in range(len(list1)):
             #    print list1[j]
@@ -246,47 +246,47 @@ def run():
         ht_i = waves1[i]['height']
         jt = j - 1
         none_found = True
-        best = none
+        best = None
         while jt >= 0 and waves2[jt]['pos'] > (pos_i - 4 * sdv_i) :
             # print "jt - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[jt]['pos'], waves2[jt]['stddev']
             pvalue = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
             if (pvalue != 0):
                 w = WavePair(chromosome, i, jt, pvalue, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
-                if best == none:
+                if best == None:
                     best = w
-                    none_found= False
+                    none_found = False
                 elif pvalue < best.pvalue:
                     best = w
-                    none_found= False 
+                    none_found = False
             jt -= 1
         while j < max_j and waves2[j]['pos'] < (pos_i + 4 * sdv_i):
             # print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
             pvalue = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
             if (pvalue != 0):
                 w = WavePair(chromosome, i, j, pvalue, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
-                if best == none:
+                if best == None:
                     best = w
-                    none_found= False
+                    none_found = False
                 elif pvalue < best.pvalue:
                     best = w
-                    none_found= False
+                    none_found = False
             j += 1
         if none_found:
             w = WavePair(chromosome, i, -1, -1, pos_i, -1, sdv_i, -1, ht_i, 0)
             paired_data.append(w)
         else:
             paired_data.append(best)
-        
+
         i += 1
-        
-    print "The list of paried data is %i:" % ( len(paired_data))
+
+    print "The list of paried data is %i:" % (len(paired_data))
     for b in paired_data:
-        if (b.get_ht1 > b.get_ht2 * coeff ):
+        if (b.get_ht1 > b.get_ht2 * coeff):
             print_queue.put(w.to_string())
-      
-    
-    
-    
+
+
+
+
         # return waves that are unique to sample
     if print_thread == None or not print_thread.is_alive():
         pass
@@ -295,15 +295,6 @@ def run():
             print "waiting on print_queue to empty", print_queue.qsize()
             time.sleep(1)
         print_thread.END_PROCESSES = True
-
-
-
-def CreateListFromCursor(cursor):
-    listitems = []
-    for record in cursor:
-        listitems.append(record)
-    return listitems
-
 
 
 # derived from http://docs.scipy.org/doc/scipy-dev/reference/odr.html
