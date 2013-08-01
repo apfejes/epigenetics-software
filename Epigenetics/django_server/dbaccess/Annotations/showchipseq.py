@@ -18,7 +18,5 @@ def svgcode(db = None, chromosome = None, start = None, end = None):
     m = MongoCurious.MongoCurious(database = database)
     print("Querying...")
     query1 = m.query(collection = "waves", chromosome = chromosome, start = start, end = end)
-    #m.finddocs()
-    m.getwaves()
     return m.svg(to_string = True, title = organism + " ChIP-Seq peaks on " + str(chromosome) + " ("+str(start)+"-"+str(end) +")", color = 'indigo', length = 300.0)
 

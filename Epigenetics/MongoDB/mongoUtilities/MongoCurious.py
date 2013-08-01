@@ -69,12 +69,14 @@ class MongoCurious():
                 self.end = None
             if chromosome == None:
                 raise ValueError("Please specificy a chromosome.")
-            if isinstance(chromosome, basestring):
-                Query['chromosome'] = chromosome
-                self.chromosome = chromosome
-            elif isinstance(chromosome, int):
-                    Query['chromosome'] = 'chr' + str(chromosome)
-                    self.chromosome = chromosome
+            if isinstance(chromosome, int):
+                chromosome = str(chromosome)
+            if collection != 'waves' and chromosome[0:3] == 'chr':
+                    chromosome = chromosome[3] #should just be the chromosome number without the 'chr'
+            if collection == 'waves' and chromosome[0:3] != 'chr' :
+                    chromosome = 'chr' + str(chromosome)
+            Query['chromosome'] = chromosome
+            self.chromosome = chromosome
             self.sample_label_list = self.creategroups()
             Query['sample label list'] = self.sample_label_list
             Query['sample_dictionary'] = self.sample_dictionary
@@ -85,7 +87,11 @@ class MongoCurious():
         self.docs = self.finddocs(collection = collection)
         if self.errorcount > 0:
             return self.docs #return error message
-        self.collectbetas()
+        if collection == 'waves':
+            self.getwaves()
+        else:
+            self.collectbetas()
+        self.annotations = None
         return self.docs
 
     def checkquery(self):
@@ -171,7 +177,7 @@ class MongoCurious():
 
         if docs.count() == 0:
             message  = "    WARNING: The following query return zero probes or documents!" 
-            message  += "\n    ---> Find(", query, ")"
+            message  += "\n    ---> Find(" + str(query) + ")"
             message  += "\n     use the checkquery() method to validate the inputs of your query."
             self.errorlog(message)
             sys.exit()
@@ -373,7 +379,7 @@ class MongoCurious():
             self.waves = waves
             self.Query['waves'] = waves
         
-        self.annotations = self.getannotations() 
+        #self.annotations = self.getannotations() 
         
         return None
 
