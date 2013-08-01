@@ -3,7 +3,7 @@ Created on 2013-05-07
 
 @author: sperez
 '''
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import render
 from queryforms import QueryForm
 # from django.views.generic import TemplateView
@@ -46,14 +46,14 @@ def methylation_code(request):
     string = showmethylation.svgcode()
     return HttpResponse(string)
 
-def chipseq_code(request, database, chr, start, end):
+def chipseq_code(request, database, chromosome, start, end):
     from Annotations import showchipseq
-    string = showchipseq.svgcode(db = database, chr = chr, start = start, end = end)
+    string = showchipseq.svgcode(db = database, chromosome = chromosome, start = start, end = end)
     return HttpResponse(string)
 
-def meth_code(request, database, chr, start, end):
+def meth_code(request, database, chromosome, start, end):
     from Annotations import showmethylation
-    string = showmethylation.svgcode(db = database, chr = chr, start = start, end = end)
+    string = showmethylation.svgcode(db = database, chromosome = chromosome, start = start, end = end)
     return HttpResponse(string)
 
 def send_svg(request):
@@ -67,14 +67,14 @@ def query(request):
             # Process the data in form.cleaned_data
             database = str(form.cleaned_data['database'])
             collection = str(form.cleaned_data['collection'])
-            chr = 'chr' + str(form.cleaned_data['chr'])
+            chromosome = 'chr' + str(form.cleaned_data['chromosome'])
             start = str(form.cleaned_data['start'])
             end = str(form.cleaned_data['end'])
-            print "\n\n Received a form:", database, collection, chr, start, end
+            print "\n\n Received a form:", database, collection, chromosome, start, end
             if collection == 'chipseq':
-                return chipseq_code(request, database, chr, start, end)
+                return chipseq_code(request, database, chromosome, start, end)
             elif collection == 'methylation':
-                return meth_code(request, databasem, chr, start, end)
+                return meth_code(request, database, chromosome, start, end)
                 #return HttpResponse('The \'' + collection + '\' collection is not available yet.')
             else: 
                 return HttpResponse(collection + ' is an invalid collection! Please try again...')
@@ -82,5 +82,5 @@ def query(request):
             return HttpResponse('You query parameters were invalid! Please try again...') # Redirect after POST
     else:
         #form = QueryForm() # An unbound form
-        return HttpResponse('You query parameters were invalid! Please try again...') # Redirect after POS
+        return HttpResponse('Please try again...') # Redirect after POS
 
