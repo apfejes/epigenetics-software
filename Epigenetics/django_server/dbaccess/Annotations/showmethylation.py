@@ -17,8 +17,8 @@ def svgcode(db = None, chromosome = None, start = None, end = None):
     database = db + "_epigenetics"
     m = MongoCurious.MongoCurious(database = database)
     print("Querying...")
-    query1 = m.query(collection = "methylation", chromosome = chromosome, start = start, end = end)
-    m.finddocs()
-    m.collectbetas()
+    message = m.query(collection = "methylation", chromosome = chromosome, start = start, end = end)
+    if message:
+        return message
     return m.svg(to_string = True, title = organism + "DNA methylation data on  "+str(chromosome)+" ("+str(start)+"-"+str(end) +")", color = 'indigo', length = 300.0)
 

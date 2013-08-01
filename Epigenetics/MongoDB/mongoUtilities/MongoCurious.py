@@ -30,6 +30,7 @@ class MongoCurious():
             raise ValueError("Please specify a database.")
         else: self.database = database
         self.mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, self.database)
+        self.errorcount = 0
 
     def query(self,
                 collection = None,
@@ -81,8 +82,11 @@ class MongoCurious():
         if self.collection == 'methylation':
             collection = 'annotations'
         else: collection = self.collection
-        self.docs = self.finddocs(collection = collection) 
-        return self.Query
+        self.docs = self.finddocs(collection = collection)
+        if self.errorcount > 0:
+            return self.docs #return error message
+        self.collectbetas()
+        return self.docs
 
     def checkquery(self):
         '''Checks that query inputs are valid'''
@@ -439,6 +443,7 @@ class MongoCurious():
     def errorlog(self, errormessage): 
         #returns error message to server so that the main function calling errorlog
         #can then do sys.exit once the message is sent.
+        self.errorcount +=1
         print errormessage
         return errormessage
         
