@@ -3,7 +3,7 @@ Created on 2013-03-27
 
 @author: afejes
 '''
-from MongoDB.mongoUtilities import Mongo_Connector
+
 import sys
 import os
 
@@ -13,6 +13,7 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir + os.sep + "Utilities")
 import Parameters
+from MongoDB.mongoUtilities import Mongo_Connector
 
 def create_param_obj(param_file):
     '''copy of function in The WaveGenerator - should be refactored to remove redundancy!!'''
@@ -55,7 +56,7 @@ def run():
 
     print "Thanks - Data has been collected."
     print "opening connection(s) to MongoDB..."
-    db_name = "human_epigenetics"
+    db_name = "arabidopsis_epigenetics"
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
 
     print "processing %s..." % wave_input_file

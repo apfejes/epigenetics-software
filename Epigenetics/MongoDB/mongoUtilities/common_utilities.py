@@ -4,6 +4,13 @@ Created on 2013-04-15
 @author: afejes
 '''
 
+def CreateListFromCursor(cursor):
+    listitems = []
+    for record in cursor:
+        listitems.append(record)
+    return listitems
+
+
 class MongoUtilities(object):
     '''
     classdocs
