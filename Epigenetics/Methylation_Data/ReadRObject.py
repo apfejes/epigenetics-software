@@ -7,7 +7,6 @@ Created on 2013-04-17
 import os
 import sys
 import time
-import bson
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
@@ -18,7 +17,7 @@ import Mongo_Connector
 # from platform import system
 
 
-def ReadRObject(mongo, rdatafile, proj_name):
+def ReadRObject(mongo, rdatafile, proj_name, collection_name):
     '''
     Takes a methylumi object and writes beta, expression and phenoData to .txt
     
@@ -33,21 +32,7 @@ def ReadRObject(mongo, rdatafile, proj_name):
     Third, we input variables from python into the python object, which allows
     the R function be run with python variables.
     '''
-    # Load libraries
-
-
-
-
-    # Load .RData file
-    # robjects.r('''
-    #        SetupRObjectData <- function(rdatafile) {
-    #            workspace <- load(rdatafile)
-    #            methylObj <- get(workspace)
-    #            }
-    #            ''')
-    # Rfunction = robjects.r['SetupRObjectData']
-    # Rfunction(rdatafile)
-
+    # Initialize the R environment
     importr('methylumi')
     print "\n rdata:", rdatafile
     robjects.r('workspace <- load(\"' + rdatafile + '\")')
@@ -69,7 +54,7 @@ def ReadRObject(mongo, rdatafile, proj_name):
     print "num samples:", num_samples
     num_sample_fields = size_pdata[1]
 
-    probes = robjects.r('rownames(exprs(methylObj))')
+    # probes = robjects.r('rownames(exprs(methylObj))')
     col_names = robjects.r('colnames(pData(methylObj))')
     columns = []
     for i, j in enumerate(col_names):
@@ -80,7 +65,7 @@ def ReadRObject(mongo, rdatafile, proj_name):
     # print "columns = ", columns
 
 
-    samples = [{} for k in range(1, num_samples + 1)]
+    samples = [{} for _k in range(1, num_samples + 1)]
     sample_names = []
     for count in range(1, num_sample_fields + 1):
         field = robjects.r('pData(methylObj)[,' + str(count) + ',drop=FALSE]')
@@ -118,7 +103,7 @@ def ReadRObject(mongo, rdatafile, proj_name):
             end = num_probes
 
         for x in range(1, num_samples + 1):    # one to number of samples  - the column number - iterate.
-            items = [{} for k in range(start, end + 1)]    # zero to batch_size-1
+            items = [{} for _k in range(start, end + 1)]    # zero to batch_size-1
             betas = robjects.r('betas(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + ',drop=FALSE]')    # don't worry about levels. Data will always be floats, for this table
             rows = robjects.r('rownames(betas(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + ',drop=FALSE])')
 
@@ -131,7 +116,7 @@ def ReadRObject(mongo, rdatafile, proj_name):
             mvals = robjects.r('exprs(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + ',drop=FALSE]')    # don't worry about levels. Data will always be floats, for this table
             for y in range(1, (end - start + 1)):    # the data
                 items[y - 1]["mval"] = mvals.rx(y, 1)[0]
-            records_added_to_db += mongo.InsertBatchToDB("methylation", items)
+            records_added_to_db += mongo.InsertBatchToDB(collection_name, items)
         batch += 1
         time2 = time.time()
         print "Batch %i completed at %f seconds" % (batch, time2 - time1)
@@ -144,9 +129,10 @@ if __name__ == "__main__":
         print('RData filename must be given.')
         sys.exit()
     starttime = time.time()
-    rdatafile = sys.argv[1]
-    db_name = "test_epigenetics"
-    project_name = raw_input('Enter the name of the project to insert in the ' + db_name + ' table: ')
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
-    ReadRObject(mongo, rdatafile, project_name)
+    rdata_file = sys.argv[1]
+    db_name = "human_epigenetics"
+    collection = "methylation"
+    project_name = raw_input('Enter the name of the project to insert in the ' + collection + ' collection of the ' + db_name + ' database: ')
+    mongodb = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
+    ReadRObject(mongodb, rdata_file, project_name, collection)
     print('Done in %s seconds') % int((time.time() - starttime))
