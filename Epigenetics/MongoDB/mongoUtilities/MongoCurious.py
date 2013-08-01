@@ -299,7 +299,7 @@ class MongoCurious():
         probedata = self.finddocs(probe_id = {'$in':probes.keys()}, collection = self.collection)
         for methyldata in probedata:
             sample = str(methyldata['sampleid'])
-            beta = methyldata['mval']
+            beta = methyldata['beta']
             pos = probes[methyldata['probeid']]
             print pos, sample, beta
             stype = self.stype(sample) #not very efficient since iterating through the dictionary to get key from value.
