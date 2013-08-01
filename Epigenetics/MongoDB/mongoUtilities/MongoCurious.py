@@ -321,17 +321,15 @@ class MongoCurious():
         self.sample_peaks = sample_peaks
 
         if self.start == None:
-            i = 0
-            while self.start == None:
-                self.start = self.positions[i]
-                i += 1
+            self.start = min(pos_betas_dict.keys()) #slow and could be improve upon
+            #This might work instead: self.start = pos_betas_dict.keys()[0]
+            
             print "    New start position:", self.start
         if self.end == None:
-            self.end = self.positions[-1]
+            self.end = max(pos_betas_dict.keys()) #slow and could be improved
             print "    New end position:", self.end
          
         self.annotations = self.getannotations() 
-         
         return self.pos_betas_dict, self.sample_peaks
 
 
