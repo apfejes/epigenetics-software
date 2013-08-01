@@ -17,6 +17,8 @@ def svgcode(db = None, chromosome = None, start = None, end = None):
     database = db + "_epigenetics"
     m = MongoCurious.MongoCurious(database = database)
     print("Querying...")
-    query1 = m.query(collection = "waves", chromosome = chromosome, start = start, end = end)
+    message = m.query(collection = "waves", chromosome = chromosome, start = start, end = end)
+    if message:
+        return message
     return m.svg(to_string = True, title = organism + " ChIP-Seq peaks on " + str(chromosome) + " ("+str(start)+"-"+str(end) +")", color = 'indigo', length = 300.0)
 

@@ -89,6 +89,7 @@ class MongoCurious():
             return self.docs #return error message
         if collection == 'waves':
             self.getwaves()
+
         else:
             self.collectbetas()
         self.annotations = None
@@ -153,13 +154,12 @@ class MongoCurious():
             sortby, sortorder = 'sample_label', 1
 
         elif collection ==  "methylation":
-            if self.project: query_project = {'project': self.project}
             if probe_id: 
-                query_probe = {"probe_id":probe_id}
+                query_probe = {"probeid":probe_id}
             if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
-            return_chr = {'beta_value':True, 'sample_label': True, 'project':True, 
-                          'probe_id':True}
-            sortby, sortorder = 'sample_label', 1
+            return_chr = {'mval':True, 'sampleid': True, 'beta':True, 
+                          'probeid':True}
+            sortby, sortorder = 'sampleid', 1
 
 
         else: 
@@ -298,9 +298,9 @@ class MongoCurious():
             
         probedata = self.finddocs(probe_id = {'$in':probes.keys()}, collection = self.collection)
         for methyldata in probedata:
-            sample = str(methyldata['sample_label'])
-            beta = methyldata['beta_value']
-            pos = probes[methyldata['probe_id']]
+            sample = str(methyldata['sampleid'])
+            beta = methyldata['mval']
+            pos = probes[methyldata['probeid']]
             print pos, sample, beta
             stype = self.stype(sample) #not very efficient since iterating through the dictionary to get key from value.
             if pos in pos_betas_dict:
@@ -341,7 +341,7 @@ class MongoCurious():
             self.end = max(pos_betas_dict.keys()) #slow and could be improved
             print "    New end position:", self.end
          
-        self.annotations = self.getannotations() 
+        #self.annotations = self.getannotations() 
         return self.pos_betas_dict, self.sample_peaks
 
 
@@ -371,9 +371,8 @@ class MongoCurious():
                     count += 1
                 # else: print "         Not included:    ", pos, height, stddev,
         if count == 0:
-            print("    WARNING: None of peaks found in the query lie in the region!")
-            print "    ---> Exiting..."
-            sys.exit()
+            message = "    WARNING: None of peaks found in the query lie in the region!"
+            self.errorlog(message)
         else:
             print "   Only %i peaks were found to occur in region." % count
             self.waves = waves
@@ -447,8 +446,7 @@ class MongoCurious():
         return z
     
     def errorlog(self, errormessage): 
-        #returns error message to server so that the main function calling errorlog
-        #can then do sys.exit once the message is sent.
+        #returns error message to server
         self.errorcount +=1
         print errormessage
         return errormessage
