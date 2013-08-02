@@ -17,17 +17,13 @@ m = MongoCurious.MongoCurious(database = database)
 print " Query %.3f" % (time() - t0)
 
 #for htt
-chr = 'chr4'
+chr = '4'
 start = 3076408 
 end = 3245687
 
 t0 = time()
 query = m.query(collection = 'methylation', project = 'down', chromosome = chr, start = start, end = end)
 print "Extract %.3f" % (time() - t0)
-
-t0 = time()
-m.collectbetas()
-print "collect betas %.3f" % (time() - t0)
 
 t0 = time()
 m.svg(filename = "test_gaussian_meth.svg", title = "Huntington gene")

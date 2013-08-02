@@ -30,6 +30,7 @@ class MongoCurious():
             raise ValueError("Please specify a database.")
         else: self.database = database
         self.mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, self.database)
+        self.errorcount = 0
 
     def query(self,
                 collection = None,
@@ -68,12 +69,14 @@ class MongoCurious():
                 self.end = None
             if chromosome == None:
                 raise ValueError("Please specificy a chromosome.")
-            if isinstance(chromosome, basestring):
-                Query['chromosome'] = chromosome
-                self.chromosome = chromosome
-            elif isinstance(chromosome, int):
-                    Query['chromosome'] = 'chr' + str(chromosome)
-                    self.chromosome = chromosome
+            if isinstance(chromosome, int):
+                chromosome = str(chromosome)
+            if collection != 'waves' and chromosome[0:3] == 'chr':
+                    chromosome = chromosome[3] #should just be the chromosome number without the 'chr'
+            if collection == 'waves' and chromosome[0:3] != 'chr' :
+                    chromosome = 'chr' + str(chromosome)
+            Query['chromosome'] = chromosome
+            self.chromosome = chromosome
             self.sample_label_list = self.creategroups()
             Query['sample label list'] = self.sample_label_list
             Query['sample_dictionary'] = self.sample_dictionary
@@ -82,7 +85,15 @@ class MongoCurious():
             collection = 'annotations'
         else: collection = self.collection
         self.docs = self.finddocs(collection = collection)
-        return self.Query
+        if self.errorcount > 0:
+            return self.docs #return error message
+        if collection == 'waves':
+            self.getwaves()
+
+        else:
+            self.collectbetas()
+        self.annotations = None
+        return self.docs
 
     def checkquery(self):
         '''Checks that query inputs are valid'''
@@ -143,13 +154,12 @@ class MongoCurious():
             sortby, sortorder = 'sample_label', 1
 
         elif collection ==  "methylation":
-            if self.project: query_project = {'project': self.project}
             if probe_id: 
-                query_probe = {"probe_id":probe_id}
+                query_probe = {"probeid":probe_id}
             if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
-            return_chr = {'beta_value':True, 'sample_label': True, 'project':True, 
-                          'probe_id':True}
-            sortby, sortorder = 'sample_label', 1
+            return_chr = {'mval':True, 'sampleid': True, 'beta':True, 
+                          'probeid':True}
+            sortby, sortorder = 'sampleid', 1
 
 
         else: 
@@ -166,10 +176,12 @@ class MongoCurious():
         docs = self.mongo.find(collection, query, return_chr).sort(sortby, sortorder)
 
         if docs.count() == 0:
-            print("    WARNING: The following query return zero probes or documents!")
-            print "    ---> Find(", query, ")"
-            print "     use the checkquery() method to validate the inputs of your query."
+            message  = "    WARNING: The following query return zero probes or documents!" 
+            message  += "\n    ---> Find(" + str(query) + ")"
+            message  += "\n     use the checkquery() method to validate the inputs of your query."
+            self.errorlog(message)
             sys.exit()
+            
 
         print " Found %i documents." % docs.count()
         self.count = docs.count()
@@ -211,8 +223,8 @@ class MongoCurious():
                                  self.sample_dict(project = 'kollman', feature = 'stimulation').items())
             self.sample_dictionary = sample_dictionary
             sample_label_list = []
-            for type in sample_dictionary.keys():
-                sample_label_list.extend(sample_dictionary[type])
+            for stype in sample_dictionary.keys():
+                sample_label_list.extend(sample_dictionary[stype])
             print sample_dictionary
             
 #         if self.project == "All":
@@ -255,22 +267,22 @@ class MongoCurious():
                              
         sample_dictionary = {}
         for doc in samples:
-            type = str(doc[feature])
+            stype = str(doc[feature])
             sample = str(doc['sample_label'])
-            if type in sample_dictionary:
-                sample_dictionary[type].append(sample)
+            if stype in sample_dictionary:
+                sample_dictionary[stype].append(sample)
             else:
-                sample_dictionary[type] = [sample]
+                sample_dictionary[stype] = [sample]
         self.sample_dictionary = sample_dictionary
         print sample_dictionary
         return sample_dictionary
 
-    def type(self,sample):
+    def stype(self,sample):
         #inneficient way to look up the sample type of a sample.
         if self.sample_dictionary:
-            for type, sample_list in self.sample_dictionary.iteritems():
+            for stype, sample_list in self.sample_dictionary.iteritems():
                 if sample in sample_list:
-                    return type
+                    return stype
         else: return None
         
     def collectbetas(self, group_samples = True):
@@ -286,23 +298,23 @@ class MongoCurious():
             
         probedata = self.finddocs(probe_id = {'$in':probes.keys()}, collection = self.collection)
         for methyldata in probedata:
-            sample = str(methyldata['sample_label'])
-            beta = methyldata['beta_value']
-            pos = probes[methyldata['probe_id']]
+            sample = str(methyldata['sampleid'])
+            beta = methyldata['beta']
+            pos = probes[methyldata['probeid']]
             print pos, sample, beta
-            type = self.type(sample) #not very efficient since iterating through the dictionary to get key from value.
+            stype = self.stype(sample) #not very efficient since iterating through the dictionary to get key from value.
             if pos in pos_betas_dict:
-                pos_betas_dict[pos].append((beta, sample, type))
+                pos_betas_dict[pos].append((beta, sample, stype))
             else:
-                pos_betas_dict[pos] =[(beta, sample, type)]
+                pos_betas_dict[pos] =[(beta, sample, stype)]
             count += 1
             if pos in sample_peaks:
-                if type in sample_peaks[pos]:
-                    sample_peaks[pos][type].append(beta)
+                if stype in sample_peaks[pos]:
+                    sample_peaks[pos][stype].append(beta)
                 else:
-                    sample_peaks[pos][type] = [beta]
+                    sample_peaks[pos][stype] = [beta]
             else:
-                sample_peaks[pos]={type:[beta]}
+                sample_peaks[pos]={stype:[beta]}
                 
                 
         print '\n    %s probes\' beta values were extracted.' % count
@@ -312,26 +324,24 @@ class MongoCurious():
         self.pos_betas_dict = pos_betas_dict
 
         for pos, type_dict in sample_peaks.iteritems():
-            for type, betas in type_dict.iteritems():
+            for stype, betas in type_dict.iteritems():
                 m = mean(betas)
                 s = std(betas)
-                sample_peaks[pos].update({type : (m,s)})
+                sample_peaks[pos].update({stype : (m,s)})
                         
         #print sample_peaks
         self.sample_peaks = sample_peaks
 
         if self.start == None:
-            i = 0
-            while self.start == None:
-                self.start = self.positions[i]
-                i += 1
+            self.start = min(pos_betas_dict.keys()) #slow and could be improve upon
+            #This might work instead: self.start = pos_betas_dict.keys()[0]
+            
             print "    New start position:", self.start
         if self.end == None:
-            self.end = self.positions[-1]
+            self.end = max(pos_betas_dict.keys()) #slow and could be improved
             print "    New end position:", self.end
          
-        self.annotations = self.getannotations() 
-         
+        #self.annotations = self.getannotations() 
         return self.pos_betas_dict, self.sample_peaks
 
 
@@ -361,15 +371,14 @@ class MongoCurious():
                     count += 1
                 # else: print "         Not included:    ", pos, height, stddev,
         if count == 0:
-            print("    WARNING: None of peaks found in the query lie in the region!")
-            print "    ---> Exiting..."
-            sys.exit()
+            message = "    WARNING: None of peaks found in the query lie in the region!"
+            self.errorlog(message)
         else:
             print "   Only %i peaks were found to occur in region." % count
             self.waves = waves
             self.Query['waves'] = waves
         
-        self.annotations = self.getannotations() 
+        #self.annotations = self.getannotations() 
         
         return None
 
@@ -386,7 +395,6 @@ class MongoCurious():
             if end < self.end or start > self.start:
                 Islands.append((start,end))
         return (TSSes, Islands)
-
 
     def svg(self, filename = None, title = None,
             color = None, to_string = False,
@@ -436,3 +444,10 @@ class MongoCurious():
             z = drawing
             drawing = None
         return z
+    
+    def errorlog(self, errormessage): 
+        #returns error message to server
+        self.errorcount +=1
+        print errormessage
+        return errormessage
+        
