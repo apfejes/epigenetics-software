@@ -46,9 +46,6 @@ class MongoCurious():
         if collection == None:
             raise ValueError("Please specify a collection.")
         self.collection = collection
-        Query['database'] = self.database
-        Query['collection'] = self.collection
-        Query['project'] = project
         self.project = project
         Query['sample label'] = sample_label
         self.sample_label = sample_label
@@ -71,28 +68,35 @@ class MongoCurious():
                 raise ValueError("Please specificy a chromosome.")
             if isinstance(chromosome, int):
                 chromosome = str(chromosome)
-            if collection != 'waves' and chromosome[0:3] == 'chr':
+            if collection == 'methylation' and chromosome[0:3] == 'chr':
                     chromosome = chromosome[3] #should just be the chromosome number without the 'chr'
             if collection == 'waves' and chromosome[0:3] != 'chr' :
                     chromosome = 'chr' + str(chromosome)
             Query['chromosome'] = chromosome
             self.chromosome = chromosome
-            self.sample_label_list = self.creategroups()
-            Query['sample label list'] = self.sample_label_list
-            Query['sample_dictionary'] = self.sample_dictionary
+
         self.Query = Query
+        
+        
         if self.collection == 'methylation':
             collection = 'annotations'
-        else: collection = self.collection
+        
         self.docs = self.finddocs(collection = collection)
+        
+        self.sample_ids_list = self.samples_organizer()
+        Query['sample label list'] = self.sample_ids_list
+        
         if self.errorcount > 0:
             return self.docs #return error message
-        if collection == 'waves':
+        
+        if self.collection == 'waves':
             self.getwaves()
 
-        else:
+        if self.collection == 'methylation':
             self.collectbetas()
+            
         self.annotations = None
+        
         return self.docs
 
     def checkquery(self):
@@ -114,7 +118,7 @@ class MongoCurious():
         return None
 
 
-    def finddocs(self, probe_id = None, collection = None):
+    def finddocs(self, sample_ids_list = None, probe_id = None, collection = None):
         '''Finds probes or documents corresponding to query'''
         #self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
         query_chr, query_location, query_samplabel, query_pos, query_sampgroup, query_project, query_probe = {}, {}, {}, {}, {}, {}, {}
@@ -149,14 +153,16 @@ class MongoCurious():
         elif collection =="samples":
             if self.project: query_project = {"project":self.project}
             if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
-            return_chr = {'_id': False, 'sample_label': True,
-                          'project': True, 'Sample Group': True}
+            if self.sample_group: query_sampgroup = {"sample_group":self.sample_group}
+            return_chr = {'_id': True, 'sample_label': True,
+                          'project': True, 'sample_group': True}
             sortby, sortorder = 'sample_label', 1
 
         elif collection ==  "methylation":
+            if sample_ids_list:
+                query_samplist = {"sampleid":sample_ids_list}
             if probe_id: 
                 query_probe = {"probeid":probe_id}
-            if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
             return_chr = {'mval':True, 'sampleid': True, 'beta':True, 
                           'probeid':True}
             sortby, sortorder = 'sampleid', 1
@@ -189,101 +195,23 @@ class MongoCurious():
         return docs
 
 
-    def creategroups(self):
-        '''
-        Separate samples into 'groups' according to a particular feature and sample_type like disease
-        or control.
-        sample_label_list is a list of sample labels with the desired sample_type of that feature.
-        '''
-        print "    Creating sample groups..."
-        if self.project == "down":
-            if self.sample_type not in ["Control", "DS",None]: self.sample_type = str(raw_input(
-                            "Please specify a sample type: \"Control\" or \"DS\"?"))
-            if self.sample_type in ["Control", "DS"]:
-                feature = 'Sample Group'
-                sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
-
-        if self.project == "kollman":
-            if self.sample_type not in ["unstimulated", "listeria", None]: self.sample_type = str(raw_input(
-                            "Please specify a sample type: \"unstimulated\" or \"listeria\"?"))
-            if self.sample_type in ["unstimulated", "listeria"]:
-                feature = 'stimulation'
-                sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
+    
+    def samples_organizer(self):
+        #Finds the sample_ids of the project and sample group user is interested in
         
-        if self.project == "gecko":
-            if self.sample_type not in ['BUCCAL','BLOOD SPOT', 'PBMC', None]: self.sample_type = str(raw_input(
-                            "Please specify a sample type: \"BLOOD SPOT\" or \"BUCCAL\" or \"PBMC\"?"))
-            if self.sample_type in ['BUCCAL','BLOOD SPOT', 'PBMC']:
-                feature = 'Sample Group'
-                sample_label_list = self.sample_dict(project = self.project, feature = feature)[self.sample_type]
-
-        else:
-            sample_dictionary = dict(self.sample_dict(project = 'gecko', feature = 'Sample Group').items() +
-                                 self.sample_dict(project = 'down', feature = 'Sample Group').items() +
-                                 self.sample_dict(project = 'kollman', feature = 'stimulation').items())
-            self.sample_dictionary = sample_dictionary
-            sample_label_list = []
-            for stype in sample_dictionary.keys():
-                sample_label_list.extend(sample_dictionary[stype])
-            print sample_dictionary
+        samplesdocs = self.finddocs(collection = 'samples')
+        
+        sample_ids = {}
+        for doc in samplesdocs:
+            sample_id = str(doc['_id'])
+            sample_group = doc['sample_group']
+            sample_label = doc['samplelabel']
+            if (self.sample_type and sample_group == self.sample_type) or self.sample_type == None: 
+                if self.sample_label == sample_label or self.sample_label == None:
+                    sample_ids[sample_id] = (sample_group, sample_label)
             
-#         if self.project == "All":
-#             if self.sample_type != "control" or self.sample_type != None:
-#                 print "The sample type \"", self.sample_type, "\" is invalid."
-#                 self.sample_type = str(raw_input("Please specify a sample type: \"control\" or \"disease\"?"))
-#             if self.sample_type == "control" or self.sample_type == None:
-#                 sample_label_list = self.sample_dict(project = "kollman", feature = "stimulation")["unstimulated"]
-#                 sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group")["Control"])
-#                 sample_label_list.append(self.sample_dict(project = "kollman", feature = "stimulation",
-#                                     nottype = ["unstimulated", "listeria"]))
-#                 sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group",
-#                                     nottype = ["Control", "DS"]))
-#             if self.sample_type == "disease":
-#                 sample_label_list = self.sample_dict(project = "kollman", feature = "stimulation")["listeria"]
-#                 sample_label_list.append(self.sample_dict(project = "down", feature = "Sample Group")["DS"])
-
-        if self.sample_type:
-            print "    The sample labels with sample type", self.sample_type, " are:", sample_label_list
-        return sample_label_list
-
-    def sample_dict(self, project, feature, nottype = None):
-        '''
-        For a particular feature (for example, disease in Down Syndrome experiments) return a dictionary
-        structured as {sample_type: sample_label} where sample_type is "control" or "diseased
-        '''
-
-        print "    Appending labels for project", project, "and", feature
-        #self.mongo.ensure_index("samples", project)    # For speed
-        #self.mongo.ensure_index("samples", feature)
-
-        if nottype != None:
-            add_query = {feature:{"$ne":nottype[0], "$ne":nottype[1]}}
-            findQuery = dict({'project': project}.items() + add_query.items())
-        else: findQuery = {'project': project}
-        returnQuery = {feature: True, '_id': False, 'sample_label': True}
-
-        samples = self.mongo.find("samples",
-                             findQuery, returnQuery).sort(feature, 1)
-                             
-        sample_dictionary = {}
-        for doc in samples:
-            stype = str(doc[feature])
-            sample = str(doc['sample_label'])
-            if stype in sample_dictionary:
-                sample_dictionary[stype].append(sample)
-            else:
-                sample_dictionary[stype] = [sample]
-        self.sample_dictionary = sample_dictionary
-        print sample_dictionary
-        return sample_dictionary
-
-    def stype(self,sample):
-        #inneficient way to look up the sample type of a sample.
-        if self.sample_dictionary:
-            for stype, sample_list in self.sample_dictionary.iteritems():
-                if sample in sample_list:
-                    return stype
-        else: return None
+        return sample_ids
+            
         
     def collectbetas(self, group_samples = True):
         '''Collects and bins methylation data'''
@@ -293,16 +221,19 @@ class MongoCurious():
         sample_peaks = {}   #contains average CpG value and std for samples from same Sample Group
         count = 0
         probes = {}
+        sample_ids = self.sample_ids_list
         for doc in self.docs:
             probes[str(doc['targetid'])] = doc['mapinfo']
             
-        probedata = self.finddocs(probe_id = {'$in':probes.keys()}, collection = self.collection)
+        probedata = self.finddocs(sample_ids_list = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, collection = self.collection)
         for methyldata in probedata:
-            sample = str(methyldata['sampleid'])
+            sample_id = str(methyldata['sampleid'])
+            sample = sample_ids[sample_id][0]
+            stype = sample_ids[sample_id][1]
             beta = methyldata['beta']
+            mval = methyldata['mval'] #unused currently
             pos = probes[methyldata['probeid']]
-            print pos, sample, beta
-            stype = self.stype(sample) #not very efficient since iterating through the dictionary to get key from value.
+            print pos, sample, stype, beta
             if pos in pos_betas_dict:
                 pos_betas_dict[pos].append((beta, sample, stype))
             else:
@@ -333,7 +264,7 @@ class MongoCurious():
         self.sample_peaks = sample_peaks
 
         if self.start == None:
-            self.start = min(pos_betas_dict.keys()) #slow and could be improve upon
+            self.start = min(pos_betas_dict.keys()) #slow and could be improve
             #This might work instead: self.start = pos_betas_dict.keys()[0]
             
             print "    New start position:", self.start
