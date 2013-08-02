@@ -4,7 +4,7 @@ Converts CEL files to Bed file.
     robjects.r(' ') is used to talk to R. 
 @author: apfejes
 '''
-
+import sys
 import time
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
@@ -18,7 +18,7 @@ def rreplace(s, old, new, occurrence):
     return new.join(li)
 
 
-def ConvertToBedViaR():
+def ConvertToBedViaR(cel_file):
 
 # original script - minus redundant variables.
 # library(rMAT)
@@ -34,13 +34,13 @@ def ConvertToBedViaR():
 
 
 
-    celfile = "/home/afejes/Downloads/Phoebe_CEL/CEL/09-08-01_Z_set2_T7_IP.CEL"
+    #celfile = "/home/afejes/Downloads/Phoebe_CEL/CEL/09-08-01_Z_set2_T7_IP.CEL"
     bpmapfile = "/home/afejes/Chip-chip/Sc03b_MR_v04.bpmap"
-    bedfile = rreplace(celfile, 'CEL', 'BED', 2)
+    bedfile = rreplace(cel_file, 'CEL', 'BED', 2)
+    bedfile = bedfile + "like"
 
-    print "input file: %s" % (celfile)
+    print "input file: %s" % (cel_file)
     print "Will be writing out to %s" % (bedfile)
-    time0 = time.time()
     print "importing rMat and Biobase libraries"
 
     importr('rMAT')
@@ -51,19 +51,17 @@ def ConvertToBedViaR():
     print "creating scSet"
     robjects.r('ScSet <- BPMAPCelParser(\"' +
          bpmapfile + '\", c(\"' +
-         celfile + '\"), verbose = FALSE, groupName = "Sc", seqName="chr")')
+         cel_file + '\"), verbose = FALSE, groupName = "Sc", seqName="chr")')
     print "creating data"
     robjects.r('data <- list(chrNo = ScSet@featureChromosome, probePos = ScSet@featurePosition, MATScore = exprs(ScSet))')    # last parameter is the raw data.
     print "writing table"
     robjects.r('write.table(data, file = \"' + bedfile + '\", append = FALSE, quote = FALSE, row.names = FALSE, sep = "\t")')
-    time1 = time.time()
-    print "Done in %i seconds" % (time1 - time0)
 
 if __name__ == "__main__":
-#     if len(sys.argv) < 2:
-#         print('RData filename must be given.')
-#         sys.exit()
+    if len(sys.argv) < 1:
+         print('CEL filename must be given.')
+         sys.exit()
     starttime = time.time()
-    # rdata_file = sys.argv[1]
-    ConvertToBedViaR()
+    rdata_file = sys.argv[1]
+    ConvertToBedViaR(rdata_file)
     print('Completed %s seconds') % int((time.time() - starttime))
