@@ -22,7 +22,7 @@ start = 3076408
 end = 3245687
 
 t0 = time()
-query = m.query(collection = 'methylation', project = 'down', chromosome = chr, start = start, end = end)
+query = m.query(collection = 'methylation', project = 'down syndrome', sample_type = 'Control', chromosome = chr, start = start, end = end)
 print "Extract %.3f" % (time() - t0)
 
 t0 = time()

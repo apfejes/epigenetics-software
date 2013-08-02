@@ -54,6 +54,10 @@ class MongoCurious():
         Query['sample id'] = sample_id
         self.sample_id = sample_id
         self.sample_dictionary = None
+        
+        if self.collection == 'methylation':
+            collection = 'annotations'
+            
         if collection != 'samples':
             if start:
                 Query['start'] = int(start)
@@ -66,25 +70,18 @@ class MongoCurious():
                 self.end = None
             if chromosome == None:
                 raise ValueError("Please specificy a chromosome.")
-            if isinstance(chromosome, int):
-                chromosome = str(chromosome)
-            if collection == 'methylation' and chromosome[0:3] == 'chr':
-                    chromosome = chromosome[3] #should just be the chromosome number without the 'chr'
-            if collection == 'waves' and chromosome[0:3] != 'chr' :
-                    chromosome = 'chr' + str(chromosome)
+            if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
+                chromosome = 'chr' + str(chromosome)
             Query['chromosome'] = chromosome
             self.chromosome = chromosome
 
         self.Query = Query
         
-        
-        if self.collection == 'methylation':
-            collection = 'annotations'
-        
         self.docs = self.finddocs(collection = collection)
         
-        self.sample_ids_list = self.samples_organizer()
-        Query['sample label list'] = self.sample_ids_list
+        if self.collection == 'methylation':
+            self.sample_ids_list = self.samples_organizer()
+            Query['sample label list'] = self.sample_ids_list
         
         if self.errorcount > 0:
             return self.docs #return error message
@@ -121,7 +118,7 @@ class MongoCurious():
     def finddocs(self, sample_ids_list = None, probe_id = None, collection = None):
         '''Finds probes or documents corresponding to query'''
         #self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
-        query_chr, query_location, query_samplabel, query_pos, query_sampgroup, query_project, query_probe = {}, {}, {}, {}, {}, {}, {}
+        query_chr, query_location, query_samplabel, query_pos, query_sampgroup, query_project, query_probe, query_samplist = {}, {}, {}, {}, {}, {}, {}, {}
 
         # Preparing the different parameters of the query depending on the collection chosen
         if collection ==  "annotations":
@@ -153,10 +150,10 @@ class MongoCurious():
         elif collection =="samples":
             if self.project: query_project = {"project":self.project}
             if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
-            if self.sample_group: query_sampgroup = {"sample_group":self.sample_group}
-            return_chr = {'_id': True, 'sample_label': True,
+            if self.sample_type: query_sampgroup = {"sample_group":self.sample_type}
+            return_chr = {'_id': True, 'samplelabel': True, 
                           'project': True, 'sample_group': True}
-            sortby, sortorder = 'sample_label', 1
+            sortby, sortorder = 'sample_group', 1
 
         elif collection ==  "methylation":
             if sample_ids_list:
@@ -173,7 +170,7 @@ class MongoCurious():
             sys.exit()
             
         query = dict(query_chr.items() + query_location.items() + query_probe.items()
-                     + query_samplabel.items() + query_pos.items()
+                     + query_samplabel.items() + query_pos.items() + query_samplist.items()
                      + query_sampgroup.items() + query_project.items())
         print "\n Conducting query: "
         print "   From the database '{0}', and collection '{1}', ".format(self.database, collection)
@@ -208,7 +205,7 @@ class MongoCurious():
             sample_label = doc['samplelabel']
             if (self.sample_type and sample_group == self.sample_type) or self.sample_type == None: 
                 if self.sample_label == sample_label or self.sample_label == None:
-                    sample_ids[sample_id] = (sample_group, sample_label)
+                    sample_ids[sample_id] = (sample_label, sample_group)
             
         return sample_ids
             
@@ -233,7 +230,7 @@ class MongoCurious():
             beta = methyldata['beta']
             mval = methyldata['mval'] #unused currently
             pos = probes[methyldata['probeid']]
-            print pos, sample, stype, beta
+            #print pos, sample, stype, beta
             if pos in pos_betas_dict:
                 pos_betas_dict[pos].append((beta, sample, stype))
             else:
@@ -341,14 +338,12 @@ class MongoCurious():
         elif not get_elements: filename = "test.svg"
 
         if self.collection == "methylation":
-            if color == None: color = "royalblue"
             drawing = methylationplot.MethylationPlot(filename, title, self.sample_peaks,
                                                       self.pos_betas_dict, self.annotations,
                                                       color, self.start, self.end,
                                                       length, margin, width)
             drawing.build()
         if self.collection == "waves":
-            if color == None: color = "indigo"
             drawing = chipseqplot.ChipseqPlot(filename, title, self.waves,
                                               self.start, self.end, self.annotations,
                                               length, margin, width)
