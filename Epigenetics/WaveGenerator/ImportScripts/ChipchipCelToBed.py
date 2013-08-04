@@ -59,8 +59,8 @@ def ConvertToBedViaR(cel_file):
 
 if __name__ == "__main__":
     if len(sys.argv) < 1:
-         print('CEL filename must be given.')
-         sys.exit()
+        print('CEL filename must be given.')
+        sys.exit()
     starttime = time.time()
     rdata_file = sys.argv[1]
     ConvertToBedViaR(rdata_file)
