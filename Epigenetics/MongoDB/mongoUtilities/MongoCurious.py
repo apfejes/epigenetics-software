@@ -330,7 +330,7 @@ class MongoCurious():
             annotations['strand_direction'].append(str(doc['strand']))
             tss1 = int(doc['closest_tss'])
             tss2 = int(doc['closest_tss_1'])
-            gene = doc['ucsc_refgene_name']
+            gene = str(doc['ucsc_refgene_name'])
             if gene: gene = list(set(str(gene).split(';')))
             geneclosest = str(doc["closest_tss_gene_name"])
             if geneclosest : geneclosest = list(set(str(geneclosest).split(';')))
@@ -338,11 +338,10 @@ class MongoCurious():
             feature_coord = str(doc['regulatory_feature_name'])
             if feature_coord: feature_coord.split(':')[1].split('-')
             
-            if tss1 in range(self.start, self.end) and tss1 not in annotations['TSS']:
-                annotations['TSS'].append(tss1)
-            
             for genename in gene:
-                if (genename,tss1) not in annotations['genes']:
+                if tss1 in range(self.start, self.end) and (genename,tss1) not in annotations['TSS']:
+                    annotations['TSS'].append((genename,tss1))
+                elif (genename,tss1) not in annotations['genes']:
                     annotations['genes'].append((genename, tss1))
             for genenameclosest in geneclosest:
                 if (genenameclosest,tss2) not in annotations['genes']:

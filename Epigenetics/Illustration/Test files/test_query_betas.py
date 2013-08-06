@@ -17,6 +17,7 @@ m = MongoCurious.MongoCurious(database = database)
 #for htt
 chr = '4'
 start = 3076408 
+start = 2800000
 end = 3245687
 
 t0 = time()

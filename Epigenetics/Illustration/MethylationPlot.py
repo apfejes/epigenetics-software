@@ -103,13 +103,15 @@ class MethylationPlot(object):
         annotations = self.annotations
         margin = self.margin
         width = self.width
+        spacing = 9
+        offset = 0 
         
         
         #Add TSS line if there is in fact a TSS in this region
-        for tss in annotations['TSS']:
-            print 'TSS', tss
+        for (gene,tss) in annotations['TSS']:
+            print 'TSS:', gene, tss
             x1 = margin + (tss-self.start)*self.scale_x
-            y1 = self.axis_y_margin
+            y1 = self.axis_y_margin + offset
             length = width + margin*3
             thickness = 0.3
             color = 'dodgerblue'
@@ -117,9 +119,14 @@ class MethylationPlot(object):
             TSSline = Rect(insert = (x1, y1), 
                            size = (thickness, length),
                            fill = color)
-            TSS = (Text(str(tss), insert = (x1+2, length+y1), fill = color, font_size = "4"))
-        self.elements.append(TSSline)
-        self.elements.append(TSS)
+            TSS = (Text((str(tss)), insert = (x1+1, length+y1), fill = color, font_size = "4"))
+            gene = (Text("--> " + gene + " gene", insert = (x1, length+y1-spacing/2), fill = color, font_size = "4"))
+            offset += spacing
+            if offset > spacing*6:
+                offset = 0
+            self.elements.append(TSSline)
+            self.elements.append(TSS)
+            self.elements.append(gene)
         
         return None
         
