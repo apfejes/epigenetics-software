@@ -111,7 +111,7 @@ class MethylationPlot(object):
         for (gene,tss) in annotations['TSS']:
             print 'TSS:', gene, tss
             x1 = margin + (tss-self.start)*self.scale_x
-            y1 = self.axis_y_margin + offset
+            y1 = self.axis_y_margin
             length = width + margin*3
             thickness = 0.3
             color = 'dodgerblue'
@@ -122,8 +122,7 @@ class MethylationPlot(object):
             TSS = (Text((str(tss)), insert = (x1+1, length+y1), fill = color, font_size = "4"))
             gene = (Text("--> " + gene + " gene", insert = (x1, length+y1-spacing/2), fill = color, font_size = "4"))
             offset += spacing
-            if offset > spacing*6:
-                offset = 0
+            if offset > spacing*5: offset = 0
             self.elements.append(TSSline)
             self.elements.append(TSS)
             self.elements.append(gene)
