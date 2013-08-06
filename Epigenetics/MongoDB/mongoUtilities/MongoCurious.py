@@ -21,6 +21,8 @@ import MethylationPlot as methylationplot
 
 from bson.objectid import ObjectId
 
+directory_for_svgs = "/home/sperez/Documents/svg_temp/"
+
 class MongoCurious():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
     def __init__(self,
@@ -269,8 +271,9 @@ class MongoCurious():
             self.end = max(pos_betas_dict.keys()) #slow and could be improved
             print "    New end position:", self.end
          
-        #self.annotations = self.getannotations() 
-        return self.pos_betas_dict, self.sample_peaks
+        self.annotations = self.getannotations() 
+        
+        return self.pos_betas_dict, self.sample_peaks, self.annotations
 
 
     def getwaves(self):
@@ -312,40 +315,37 @@ class MongoCurious():
 
     def getannotations(self):
         docs = self.finddocs(collection = 'annotations')
-        TSS = []
-        TSSclosest = []
-        Islands = []
-        genes = {}
-        strand_direction = None
+        annotations = {}
+        annotations['TSS'] = []
+        annotations['TSSclosest'] = []
+        annotations['Islands'] = []
+        annotations['genes'] = []
+        annotations['strand_direction'] = None
+
         
         for doc in docs:
+            annotations['strand_direction'] = doc['strand']
+            
             tss1 = int(doc['closest_tss'])
             tss2 = int(doc['closest_tss_1'])
             genename = doc["ucsc_refgene_name"]
             genenameclosest = doc["closest_tss_gene_name"]
-            strand_direction = doc['strand']
-            if tss1 in range(self.start, self.end) and not in TSS:
-                TSS.append(tss1)
-            elif not in TSSclosest: TSSclosest.append(tss1)
-            if tss2 not in TSSclosest: TSSclosest.append(tss2)
             
-            if genename not in genes:
-                genes[genename] = tss1
-            if genenameclosest not in genes:
-                genes[genename] = tss2
+            if tss1 in range(self.start, self.end) and tss1 not in annotations['TSS']:
+                annotations['TSS'].append(tss1)
+            elif tss1 not in annotations['TSSclosest']: annotations['TSSclosest'].append(tss1)
+            if tss2 not in annotations['TSSclosest']: annotations['TSSclosest'].append(tss2)
+            
+            if (genename, tss1) not in annotations['genes']:
+                annotations['genes'].append((genename, tss1))
+            if (genenameclosest,tss2) not in annotations['genes']:
+                annotations['genes'].append((genename,tss2))
                 
             coord = doc['hi1_cpg_island_name'].split(':')[1].split('-')
             island  = (coord[0], coord[1])
-            if island not in Island: Island.append(island)
+            if island not in annotations['Islands']: annotations['Islands'].append(island)
             
-            
-            
-                
-            start = int(doc['distanceCpGI']) + doc['mapinfo']
-            end = int(doc['lengthCpGI']) + start
-            if end < self.end or start > self.start:
-                Islands.append((start,end))
-        return (TSSes, Islands)
+        return annotations
 
 
     def svg(self, filename = None, title = None,
@@ -358,7 +358,7 @@ class MongoCurious():
         if filename:
             if filename[-4:len(filename)] != '.svg':
                 filename += '.svg'
-            filename = "/home/sperez/Documents/svg_temp/" + filename
+            filename = directory_for_svgs + filename
         elif not get_elements: filename = "test.svg"
 
         if self.collection == "methylation":
