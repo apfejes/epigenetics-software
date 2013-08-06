@@ -50,30 +50,27 @@ class MongoCurious():
         self.sample_label = sample_label
         self.sample_type = sample_type
         self.sample_id = sample_id
-        self.sample_dictionary = None
+        self.end = end
+        self.start = start
             
-        #Check input parameters
-        if collection != 'samples':
-            if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
-                chromosome = 'chr' + str(chromosome)
-            self.chromosome = chromosome
+        if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
+            chromosome = 'chr' + str(chromosome)
+        self.chromosome = chromosome
         
         #Conduct query and collect the data depending on which collection was chosen.
         if collection == 'methylation':
             self.sample_ids_list = self.organize_samples()
             docs = self.finddocs(collection = 'annotations')
-            self.docs = docs
-            self.annotations = self.getannotations()
-            self.collectbetas(docs)
+            self.getprobes(docs)
+            self.annotations = self.getannotations(docs)
+            self.collectbetas()
         elif collection == 'waves':
-            self.docs = self.finddocs(collection = collection)
+            self.finddocs(collection = collection)
             self.annotations = self.getannotations()
             self.getwaves()
         
-        if self.errorcount > 0:
-            return self.docs #return error message
         
-        return self.docs
+        return None
 
     def checkquery(self):
         '''Checks that query inputs are valid'''
@@ -170,19 +167,17 @@ class MongoCurious():
 
         print "    --> Found %i documents." % docs.count()
         self.count = docs.count()
+        self.docs = docs
         return docs
 
-    def getannotations(self):
+    def getannotations(self,docs):
         annotations = {}
         annotations['TSS'] = []
         annotations['Islands'] = []
         annotations['genes'] = []
         annotations['feature'] = []
         probes = {}
-        docs  = self.docs
         for doc in docs:
-            if self.collection == 'methylation':
-                probes[str(doc['targetid'])] = doc['mapinfo']
             tss1 = int(doc['closest_tss'])
             tss2 = int(doc['closest_tss_1'])
             gene = str(doc['ucsc_refgene_name'])
@@ -232,8 +227,15 @@ class MongoCurious():
             
         return sample_ids
         
+    def getprobes(self,docs):
+        probes = {}
+        for doc in docs:
+            if self.collection == 'methylation':
+                probes[str(doc['targetid'])] = doc['mapinfo']
+        self.probes = probes
+        return None
         
-    def collectbetas(self, docs):
+    def collectbetas(self):
         '''Collects and bins methylation data'''
 
         # Bin the beta values and collect their position
