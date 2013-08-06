@@ -14,7 +14,7 @@ _root_dir = os.path.dirname(_cur_dir)
 _root_dir = os.path.dirname(_root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
-import MongoQuery
+
 sys.path.insert(0, _root_dir + os.sep + "Illustration")
 import ChipseqPlot as chipseqplot
 import MethylationPlot as methylationplot
@@ -35,8 +35,8 @@ class MongoCurious():
         self.errorcount = 0
 
     def query(self,
-                collection = None,
-                chromosome = None,
+                collection,
+                chromosome,
                 start = None,
                 end = None,
                 sample_type = None,
@@ -44,45 +44,27 @@ class MongoCurious():
                 sample_id = None,
                 project = None):
         '''Stores query inputs and parameters as an instance of MongoQuery'''
-        Query = MongoQuery.MongoQuery()
-        if collection == None:
-            raise ValueError("Please specify a collection.")
+
         self.collection = collection
         self.project = project
-        Query['sample label'] = sample_label
         self.sample_label = sample_label
-        Query['sample type'] = sample_type
         self.sample_type = sample_type
-        Query['sample id'] = sample_id
         self.sample_id = sample_id
         self.sample_dictionary = None
             
         #Check input parameters
         if collection != 'samples':
-            if start:
-                Query['start'] = int(start)
-                self.start = int(start)
-            else: self.start =None
-            if end:
-                Query['end'] = int(end)
-                self.end = int(end)
-            else:
-                self.end = None
-            if chromosome == None:
-                raise ValueError("Please specificy a chromosome.")
             if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
                 chromosome = 'chr' + str(chromosome)
-            Query['chromosome'] = chromosome
             self.chromosome = chromosome
-
-        self.Query = Query
         
         #Conduct query and collect the data depending on which collection was chosen.
         if collection == 'methylation':
             self.sample_ids_list = self.organize_samples()
-            Query['sample label list'] = self.sample_ids_list
+            docs = self.finddocs(collection = 'annotations')
+            self.docs = docs
             self.annotations = self.getannotations()
-            self.collectbetas()
+            self.collectbetas(docs)
         elif collection == 'waves':
             self.docs = self.finddocs(collection = collection)
             self.annotations = self.getannotations()
@@ -112,7 +94,7 @@ class MongoCurious():
         return None
 
 
-    def finddocs(self, sample_ids_list = None, probe_id = None, collection = None):
+    def finddocs(self, collection, sample_ids_list = None, probe_id = None):
         '''Finds probes or documents corresponding to query'''
         #self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
         query_chr, query_location, query_samplabel, query_pos, query_sampgroup, query_project, query_probe, query_samplist = {}, {}, {}, {}, {}, {}, {}, {}
@@ -188,21 +170,19 @@ class MongoCurious():
 
         print "    --> Found %i documents." % docs.count()
         self.count = docs.count()
-        self.Query['cursor'] = docs
         return docs
 
     def getannotations(self):
-        docs = self.finddocs(collection = 'annotations')
-        self.docs = docs
         annotations = {}
         annotations['TSS'] = []
         annotations['Islands'] = []
         annotations['genes'] = []
         annotations['feature'] = []
         probes = {}
-        
-        for doc in self.docs:
-            probes[str(doc['targetid'])] = doc['mapinfo']
+        docs  = self.docs
+        for doc in docs:
+            if self.collection == 'methylation':
+                probes[str(doc['targetid'])] = doc['mapinfo']
             tss1 = int(doc['closest_tss'])
             tss2 = int(doc['closest_tss_1'])
             gene = str(doc['ucsc_refgene_name'])
@@ -229,9 +209,10 @@ class MongoCurious():
             if feature and (feature, feature_coord) not in annotations['feature']:
                 annotations['feature'].append((feature, feature_coord))
                 
+        print "\n    Annotations found:"
         for key,value in annotations.iteritems():
-            print key, len(value), value
-        
+            print "        ", key, len(value), value
+            
         self.probes = probes
         return annotations
     
@@ -250,10 +231,9 @@ class MongoCurious():
                     sample_ids[sample_id] = (sample_label, sample_group)
             
         return sample_ids
-            
         
-    def collectbetas(self, group_samples = True):
-        print '\n collectbetasssssssssssssssssssssssss'
+        
+    def collectbetas(self, docs):
         '''Collects and bins methylation data'''
 
         # Bin the beta values and collect their position
@@ -261,9 +241,9 @@ class MongoCurious():
         sample_peaks = {}   #contains average CpG value and std for samples from same Sample Group
         count = 0
         sample_ids = self.sample_ids_list
-        probes = self.probes.keys()
+        probes = self.probes
         
-        probedata = self.finddocs(sample_ids_list = {"$in":sample_ids.keys()}, probe_id = {'$in':probes}, collection = self.collection)
+        probedata = self.finddocs(sample_ids_list = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, collection = self.collection)
         for methyldata in probedata:
             sample_id = str(methyldata['sampleid'])
             sample = sample_ids[sample_id][0]
