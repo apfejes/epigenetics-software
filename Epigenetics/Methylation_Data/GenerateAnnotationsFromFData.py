@@ -54,7 +54,7 @@ def ReadRObject(mongo, rdatafile):
         end = (batch + 1) * batch_size
         if end > rows_fdata:
             end = rows_fdata
-        items = [{} for k in range(start, end + 1)]    # zero to batch_size-1
+        items = [{} for _k in range(start, end + 1)]    # zero to batch_size-1
         for x in range(1, cols_fdata + 1):    # one to cols_fdata  - the column number - iterate.
             column = robjects.r('fData(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + ',drop=FALSE]')
             lev = False
@@ -80,6 +80,6 @@ if __name__ == "__main__":
     db_name = "human_epigenetics"
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
     starttime = time.time()
-    rdatafile = sys.argv[1]
-    ReadRObject(mongo, rdatafile)
+    rfile = sys.argv[1]
+    ReadRObject(mongo, rfile)
     print('Done in %s seconds') % int((time.time() - starttime))

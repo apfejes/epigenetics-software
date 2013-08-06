@@ -7,7 +7,6 @@ Created on 2013-03-06
 
 
 import multiprocessing
-import tempfile
 import Tkinter as tk
 import tkFileDialog
 import os
@@ -53,7 +52,7 @@ class Application(tk.Tk):
         wg_proc.start()
 
     def launchParametersEditor(self):
-        parameters_editor = ParametersEditor(self, self.parameters)
+        _parameters_editor = ParametersEditor(self, self.parameters)
 
     def askopenfilename(self):
         filename = tkFileDialog.askopenfilename(defaultextension = '.input', title = 'Open File')
