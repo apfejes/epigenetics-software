@@ -133,8 +133,8 @@ class MongoCurious():
             #              'start_position': True, 'end_position': True,
             #              'sample_label': True}
             return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hmm_island': True,
-                          'closest_tss_1': True, ' ucsc_refgene_name':True, 'closest_tss_gene_name':True,
-                          'regulatory_feature_group':True, 'regulatory_feature_name':True} 
+                          'closest_tss_1': True, 'ucsc_refgene_name':True, 'closest_tss_gene_name':True,
+                          'regulatory_feature_group':True, 'regulatory_feature_name':True,'strand':True} 
             sortby, sortorder = 'mapinfo', 1
             
             
@@ -233,7 +233,7 @@ class MongoCurious():
             sample = sample_ids[sample_id][0]
             stype = sample_ids[sample_id][1]
             beta = methyldata['beta']
-            mval = methyldata['mval'] #unused currently
+            #mval = methyldata['mval'] #unused currently
             pos = probes[methyldata['probeid']]
             #print pos, sample, stype, beta
             if pos in pos_betas_dict:
@@ -320,38 +320,44 @@ class MongoCurious():
         docs = self.finddocs(collection = 'annotations')
         annotations = {}
         annotations['TSS'] = []
-        annotations['TSSclosest'] = []
         annotations['Islands'] = []
         annotations['genes'] = []
-        annotations['strand_direction'] = None
+        annotations['strand_direction'] = []
+        annotations['feature'] = []
 
         
         for doc in docs:
-            annotations['strand_direction'] = doc['strand']
-            
+            annotations['strand_direction'].append(str(doc['strand']))
             tss1 = int(doc['closest_tss'])
             tss2 = int(doc['closest_tss_1'])
-            genename = doc["ucsc_refgene_name"]
-            genenameclosest = doc["closest_tss_gene_name"]
-            feature = doc['regulatory_feature_group']
-            feature_coord = doc['regulatory_feature_name'].split(':')[1].split('-')
+            gene = doc['ucsc_refgene_name']
+            if gene: gene = list(set(str(gene).split(';')))
+            geneclosest = str(doc["closest_tss_gene_name"])
+            if geneclosest : geneclosest = list(set(str(geneclosest).split(';')))
+            feature = str(doc['regulatory_feature_group'])
+            feature_coord = str(doc['regulatory_feature_name'])
+            if feature_coord: feature_coord.split(':')[1].split('-')
             
             if tss1 in range(self.start, self.end) and tss1 not in annotations['TSS']:
                 annotations['TSS'].append(tss1)
-            elif tss1 not in annotations['TSSclosest']: annotations['TSSclosest'].append(tss1)
-            if tss2 not in annotations['TSSclosest']: annotations['TSSclosest'].append(tss2)
             
-            if (genename, tss1) not in annotations['genes']:
-                annotations['genes'].append((genename, tss1))
-            if (genenameclosest,tss2) not in annotations['genes']:
-                annotations['genes'].append((genename,tss2))
+            for genename in gene:
+                if (genename,tss1) not in annotations['genes']:
+                    annotations['genes'].append((genename, tss1))
+            for genenameclosest in geneclosest:
+                if (genenameclosest,tss2) not in annotations['genes']:
+                    annotations['genes'].append((genenameclosest,tss2))
+            if doc['hmm_island']:
+                coord = doc['hmm_island'].split(':')[1].split('-')
+                island  = (coord[0], coord[1])
+                if island not in annotations['Islands']: annotations['Islands'].append(island)
+            
+            if feature and (feature, feature_coord) not in annotations['feature']:
+                annotations['feature'].append((feature, feature_coord))
                 
-            coord = doc['hmm_island'].split(':')[1].split('-')
-            island  = (coord[0], coord[1])
-            if island not in annotations['Islands']: annotations['Islands'].append(island)
-            
-            if (feature, feature_coord) not in annotations['feature']:
-                annotations['feature'] = (feature, feature_coord)
+        for key,value in annotations.iteritems():
+            print key, len(value), value
+        
         return annotations
 
 
