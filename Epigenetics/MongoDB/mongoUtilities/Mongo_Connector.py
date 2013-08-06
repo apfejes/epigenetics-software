@@ -65,13 +65,13 @@ class MongoConnector():
         collection = self.db[collection_name]
         return collection.distinct(field)
 
-    def InsertBatchToDB(self, collection_name, annotationdata):
+    def InsertBatchToDB(self, collection_name, data):
         collection = self.db[collection_name]
         BulkInsert = []
         number_of_inserts = 0
 
-        for probe_dict in annotationdata:    # for each row in array of annotations
-            BulkInsert.append(probe_dict)
+        for document in data:    # for each row in array of annotations
+            BulkInsert.append(document)
 
             if len(BulkInsert) % self.BULKINSERTSIZE == 0:
                 number_of_inserts += len(BulkInsert)
@@ -81,6 +81,24 @@ class MongoConnector():
         if len(BulkInsert) > 0:
             number_of_inserts += len(BulkInsert)
             collection.insert(BulkInsert)
+        return number_of_inserts
+
+    def UpdateBatchToDB(self, collection_name, data):
+        collection = self.db[collection_name]
+        BulkUpdate = []
+        number_of_inserts = 0
+
+        for document in data:    # for each row in array of annotations
+            BulkUpdate.append(document)
+
+            if len(BulkUpdate) % self.BULKINSERTSIZE == 0:
+                number_of_inserts += len(BulkUpdate)
+                collection.update(BulkUpdate)
+                BulkUpdate = []
+
+        if len(BulkUpdate) > 0:
+            number_of_inserts += len(BulkUpdate)
+            collection.update(BulkUpdate)
         return number_of_inserts
 
 

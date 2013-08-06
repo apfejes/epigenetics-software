@@ -10,10 +10,10 @@ import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
 
 
-''' Nice implementation via http://stackoverflow.com/questions/2556108/
-    how-to-replace-the-last-occurence-of-an-expression-in-a-string
-'''
+
 def rreplace(s, old, new, occurrence):
+    ''' Nice implementation via http://stackoverflow.com/questions/2556108/
+    how-to-replace-the-last-occurence-of-an-expression-in-a-string'''
     li = s.rsplit(old, occurrence)
     return new.join(li)
 
@@ -34,7 +34,7 @@ def ConvertToBedViaR(cel_file):
 
 
 
-    #celfile = "/home/afejes/Downloads/Phoebe_CEL/CEL/09-08-01_Z_set2_T7_IP.CEL"
+    # celfile = "/home/afejes/Downloads/Phoebe_CEL/CEL/09-08-01_Z_set2_T7_IP.CEL"
     bpmapfile = "/home/afejes/Chip-chip/Sc03b_MR_v04.bpmap"
     bedfile = rreplace(cel_file, 'CEL', 'BED', 2)
     bedfile = bedfile + "like"
