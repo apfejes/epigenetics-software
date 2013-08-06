@@ -72,6 +72,87 @@ def create_param_obj(param_file):
         sys.exit()
     return PARAM
 
+def process_reads(mapmaker, map_queues, print_queue, wigfile, worker_processes):
+    current_chromosome = None
+    count = 0
+    new_block = True
+    block_left = 0
+    block_right = 0
+    reads_list = LinkedList.LL()
+    readahead = ReadAheadIteratorPET.ReadAheadIteratorPET(
+                    PARAM.get_parameter("input_file"),
+                    PARAM.get_parameter("fragment_length"), "rb", False)
+    while True:
+        # print count, "reads processed"
+        alignedreadobjpet = readahead.getNext()
+        if not readahead.isReadValid:
+            break
+        if (alignedreadobjpet == None) :
+            # flush chromosomome related objects, then continue
+            continue
+        chromosome = readahead.get_ref_name(alignedreadobjpet.read1.tid)
+        if current_chromosome != chromosome:
+            '''push currently buffered reads to map maker, so mapping can begin 
+            again from the start of the next chromosome.'''
+            read_left = alignedreadobjpet.get_left_end()
+            read_right = alignedreadobjpet.get_right_end()
+            if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get_parameter("max_pet_length"):
+                continue    # simply move to the
+            if not new_block:    # flush current reads to map
+                coverage_map = mapmaker.makeIslands(block_left, block_right,
+                                                    reads_list)
+                # print "adding map: ", current_chromosome, block_left
+                put_assigned(map_queues,
+                             MappingItem.Item(coverage_map, current_chromosome,
+                                              block_left),
+                             worker_processes)
+                if PARAM.get_parameter("make_wig"):
+                    wigfile.add_map(coverage_map, current_chromosome,
+                                    block_left)
+            '''reset all variables to move onto new chromosome'''
+            if current_chromosome != None:
+                print_queue.put("chromosome %s had %i reads" % (current_chromosome, count))
+            current_chromosome = chromosome
+            reads_list.destroy()
+            new_block = True
+            count = 0
+            ''' end new chromosome '''
+        count += 1
+    
+        read_left = alignedreadobjpet.get_left_end()
+        read_right = alignedreadobjpet.get_right_end()
+        if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get_parameter("max_pet_length"):
+            continue
+        if new_block:
+            reads_list = LinkedList.LL()
+            block_left = read_left
+            block_right = read_right
+            new_block = False
+            reads_list.append(alignedreadobjpet)
+        else:
+            if block_right >= read_left:
+                reads_list.append(alignedreadobjpet)
+                if block_right < read_right:
+                    block_right = read_right
+            else:
+                coverage_map = mapmaker.makeIslands(block_left, block_right,
+                                                    reads_list)
+    
+                put_assigned(map_queues, MappingItem.Item(coverage_map, chromosome, block_left), worker_processes)
+                # mapprocessor.add_map(coverage_map, current_chromosome, block_left)
+                if PARAM.get_parameter("make_wig"):
+                    wigfile.add_map(coverage_map, current_chromosome,
+                                    block_left)
+                reads_list.destroy()
+                new_block = True
+                ''' push back the current read, so we can start again with a 
+                new block'''
+                readahead.pushback(alignedreadobjpet)
+    print_queue.put("chromosome " + current_chromosome + " had " +
+                        str(count) + " reads")
+    readahead.close()
+
+
 
 def main(PARAM):
     '''This is the main command for running the Wave Generator peak finder.'''
@@ -84,18 +165,10 @@ def main(PARAM):
         wavefile = None    # otherwise, they are closed, but never initialized
         print_thread = None
 
-
-
         '''launch thread to read and process the print queue'''
         print_thread = PrintThread.StringWriter(print_queue)
         print_queue.put("Print queue and thread have started")
 
-        current_chromosome = None
-        count = 0
-        new_block = True
-        block_left = 0
-        block_right = 0
-        reads_list = LinkedList.LL()
         mapmaker = MapMaker.MapMaker(PARAM)
         if PARAM.get_parameter("make_wig"):    # processor threads
             wigfile = WigFileThread.WigFileWriter(None)
@@ -136,78 +209,13 @@ def main(PARAM):
         specified region using fetch(). Each iteration returns a AlignedRead object 
         which represents a single read along with its fields and optional tags:
         '''
-        readahead = ReadAheadIteratorPET.ReadAheadIteratorPET(
-                    PARAM.get_parameter("input_file"),
-                    PARAM.get_parameter("fragment_length"), "rb", False)
-        while True:
-            # print count, "reads processed"
-            alignedreadobjpet = readahead.getNext()
-            if not readahead.isReadValid:
-                break
-            if (alignedreadobjpet == None) :
-                # flush chromosomome related objects, then continue
-                continue
-            chromosome = readahead.get_ref_name(alignedreadobjpet.read1.tid)
-            if current_chromosome != chromosome:
-                '''push currently buffered reads to map maker, so mapping can begin 
-                again from the start of the next chromosome.'''
-                read_left = alignedreadobjpet.get_left_end()
-                read_right = alignedreadobjpet.get_right_end()
-                if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get_parameter("max_pet_length"):
-                    continue    # simply move to the
-                if not new_block:    # flush current reads to map
-                    coverage_map = mapmaker.makeIslands(block_left, block_right,
-                                                        reads_list)
-                    # print "adding map: ", current_chromosome, block_left
-                    put_assigned(map_queues,
-                                 MappingItem.Item(coverage_map, current_chromosome,
-                                                  block_left),
-                                 worker_processes)
-                    if PARAM.get_parameter("make_wig"):
-                        wigfile.add_map(coverage_map, current_chromosome,
-                                        block_left)
-                '''reset all variables to move onto new chromosome'''
-                if current_chromosome != None:
-                    print_queue.put("chromosome %s had %i reads" % (current_chromosome, count))
-                current_chromosome = chromosome
-                reads_list.destroy()
-                new_block = True
-                count = 0
-                ''' end new chromosome '''
-            count += 1
+        
+        
+        
+        process_reads(mapmaker, map_queues, print_queue, wigfile, worker_processes)
+        
 
-            read_left = alignedreadobjpet.get_left_end()
-            read_right = alignedreadobjpet.get_right_end()
-            if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get_parameter("max_pet_length"):
-                continue
-            if new_block:
-                reads_list = LinkedList.LL()
-                block_left = read_left
-                block_right = read_right
-                new_block = False
-                reads_list.append(alignedreadobjpet)
-            else:
-                if block_right >= read_left:
-                    reads_list.append(alignedreadobjpet)
-                    if block_right < read_right:
-                        block_right = read_right
-                else:
-                    coverage_map = mapmaker.makeIslands(block_left, block_right,
-                                                        reads_list)
-
-                    put_assigned(map_queues, MappingItem.Item(coverage_map, chromosome, block_left), worker_processes)
-                    # mapprocessor.add_map(coverage_map, current_chromosome, block_left)
-                    if PARAM.get_parameter("make_wig"):
-                        wigfile.add_map(coverage_map, current_chromosome,
-                                        block_left)
-                    reads_list.destroy()
-                    new_block = True
-                    ''' push back the current read, so we can start again with a 
-                    new block'''
-                    readahead.pushback(alignedreadobjpet)
-
-        print_queue.put("chromosome " + current_chromosome + " had " +
-                        str(count) + " reads")
+        
         print_queue.put("Completed all Processing - Shutting down.")
 
     except KeyboardInterrupt:
@@ -250,7 +258,7 @@ def main(PARAM):
                 time.sleep(1)
             print_thread.END_PROCESSES = True
         print  ("print_queue closed")
-        readahead.close()
+        
         print "Shutdown complete"
 
 counter = 0
