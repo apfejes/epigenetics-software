@@ -15,10 +15,10 @@ class ParametersEditor (tk.Toplevel):
         self.createWidgets()
 
     def createWidgets(self):
-        '''Input Options'''
+        # Input Options
         self.input_options_frame = tk.LabelFrame(self, text = "Input Options", padx = 5, pady = 5)
         self.input_options_frame.grid(row = 0, column = 0, sticky = tk.EW)
-        self.input_options_frame.columnconfigure(0, weight=1)
+        self.input_options_frame.columnconfigure(0, weight = 1)
         self.input_file_lab = tk.Label(self.input_options_frame, text = "Input File:")
         self.input_file_lab.grid(row = 0, column = 0, sticky = tk.W)
         self.input_file_entry = tk.Entry(self.input_options_frame)
@@ -26,10 +26,10 @@ class ParametersEditor (tk.Toplevel):
         self.input_file_but = tk.Button(self.input_options_frame, text = "Browse...", command = self.askinputfile)
         self.input_file_but.grid(row = 0, column = 2, sticky = tk.E)
 
-        '''Extension Options'''
+        # Extension Options
         self.extension_options_frame = tk.LabelFrame(self, text = "Extension Options", padx = 5, pady = 5)
         self.extension_options_frame.grid(row = 1, column = 0, sticky = tk.EW)
-        self.extension_options_frame.columnconfigure(0, weight=1)
+        self.extension_options_frame.columnconfigure(0, weight = 1)
         self.map_type_lab = tk.Label(self.extension_options_frame, text = "Map Type:")
         self.map_type_lab.grid(row = 0, column = 0, sticky = tk.W)
         self.choices = ['Native',
@@ -69,28 +69,28 @@ class ParametersEditor (tk.Toplevel):
                                                         offvalue = False)
         self.round_leading_edge_button.grid(row = 5, column = 1)
 
-        '''Wave Calling Options'''
+        # Wave Calling Options
         self.wave_calling_options_frame = tk.LabelFrame(self, text = "Wave Calling Options", padx = 5, pady = 5)
         self.wave_calling_options_frame.grid(row = 2, column = 0, sticky = tk.EW)
-        self.wave_calling_options_frame.columnconfigure(0, weight=1)
+        self.wave_calling_options_frame.columnconfigure(0, weight = 1)
         self.min_height_lab = tk.Label(self.wave_calling_options_frame, text = "Minimum Height:")
         self.min_height_lab.grid(row = 0, column = 0, sticky = tk.W)
         self.min_height_entry = tk.Entry(self.wave_calling_options_frame)
         self.min_height_entry.grid(row = 0, column = 1)
 
-        '''Runtime Configuration Options'''
+        # Runtime Configuration Options
         self.runtime_configuration_options_frame = tk.LabelFrame(self, text = "Run Time Configuration", padx = 5, pady = 5)
         self.runtime_configuration_options_frame.grid(row = 3, column = 0, sticky = tk.EW)
-        self.runtime_configuration_options_frame.columnconfigure(0, weight=1)
+        self.runtime_configuration_options_frame.columnconfigure(0, weight = 1)
         self.processor_threads_lab = tk.Label(self.runtime_configuration_options_frame, text = "Processor Threads:")
         self.processor_threads_lab.grid(row = 0, column = 0, sticky = tk.W)
         self.processor_threads_entry = tk.Entry(self.runtime_configuration_options_frame)
-        self.processor_threads_entry.grid(row = 0, column = 1, sticky=tk.EW)
+        self.processor_threads_entry.grid(row = 0, column = 1, sticky = tk.EW)
 
-        '''Output Options'''
+        # Output Options
         self.output_options_frame = tk.LabelFrame(self, text = "Output Options", padx = 5, pady = 5)
         self.output_options_frame.grid(row = 4, column = 0, sticky = tk.EW)
-        self.output_options_frame.columnconfigure(0, weight=1)
+        self.output_options_frame.columnconfigure(0, weight = 1)
         self.output_path_lab = tk.Label(self.output_options_frame, text = "Output Path:")
         self.output_path_lab.grid(row = 0, column = 0, sticky = tk.W)
         self.output_path_entry = tk.Entry(self.output_options_frame)
@@ -114,7 +114,7 @@ class ParametersEditor (tk.Toplevel):
                                               offvalue = False)
         self.make_wig_button.grid(row = 3, column = 1, sticky = tk.W)
 
-        '''Bottom buttons (Apply, Load..., Save As..., Cancel)'''
+        # Bottom buttons (Apply, Load..., Save As..., Cancel)
         self.bottom_button_frame = tk.Frame(self, padx = 5, pady = 5)
         self.bottom_button_frame.grid(row = 5, column = 0)
         self.apply_but = tk.Button(self.bottom_button_frame, text = "Apply", command = self.apply_parameters)
@@ -136,10 +136,10 @@ class ParametersEditor (tk.Toplevel):
             f.close()
 
     def apply_parameters(self):
-        '''Input Options'''
+        # Input Options
         self.parameters.set_parameter('input_file', self.input_file_entry.get())
 
-        '''Extension Options'''
+        # Extension Options
         self.parameters.set_parameter('map_type', self.map_type_selected.get())
         self.parameters.set_parameter('triangle_min', self.triangle_min_scale.get())
         self.parameters.set_parameter('triangle_median', self.triangle_median_scale.get())
@@ -147,13 +147,13 @@ class ParametersEditor (tk.Toplevel):
         self.parameters.set_parameter('round_leading_edge', int(self.round_leading_edge.get()))
         self.parameters.set_parameter('max_pet_length', int(self.max_pet_length_entry.get()))
 
-        '''Wave Calling Options'''
+        # Wave Calling Options
         self.parameters.set_parameter('min_height', int(self.min_height_entry.get()))
 
-        '''Runtime Configuration Options'''
+        # Runtime Configuration Options
         self.parameters.set_parameter('processor_threads', int(self.processor_threads_entry.get()))
 
-        '''Output Options'''
+        # Output Options
         self.parameters.set_parameter('output_path', self.output_path_entry.get())
         self.parameters.set_parameter('file_name', self.file_name_entry.get())
         if (self.number_waves.get() == 0):
@@ -169,7 +169,7 @@ class ParametersEditor (tk.Toplevel):
         elif (self.round_leading_edge.get() == 1):
             self.parameters.set_parameter('round_leading_edge', True)
 
-        '''Close the Parameter Editor Window'''
+        # Close the Parameter Editor Window
         self.withdraw()
 
     def askopenfile(self):
@@ -202,11 +202,11 @@ class ParametersEditor (tk.Toplevel):
                 print "Reading parameters failed."
                 print traceback.format_exc()
 
-            '''Input Options'''
+            # Input Options
             self.input_file_entry.delete(0, tk.END)
             self.input_file_entry.insert(0, self.parameters.get_parameter('input_file'))
 
-            '''Extension Options'''
+            # Extension Options
             self.map_type_selected.set(self.parameters.get_parameter('map_type'))
             self.triangle_min_scale.set(self.parameters.get_parameter('triangle_min'))
             self.triangle_median_scale.set(self.parameters.get_parameter('triangle_median'))
@@ -220,15 +220,15 @@ class ParametersEditor (tk.Toplevel):
             self.max_pet_length_entry.delete(0, tk.END)
             self.max_pet_length_entry.insert(0, str(self.parameters.get_parameter('max_pet_length')))
 
-            '''Wave Calling Options'''
+            # Wave Calling Options
             self.min_height_entry.delete(0, tk.END)
             self.min_height_entry.insert(0, str(self.parameters.get_parameter('min_height')))
 
-            '''Runtime Configuration Options'''
+            # Runtime Configuration Options
             self.processor_threads_entry.delete(0, tk.END)
             self.processor_threads_entry.insert(0, str(self.parameters.get_parameter('processor_threads')))
 
-            '''Output Options'''
+            # Output Options
             self.output_path_entry.delete(0, tk.END)
             self.output_path_entry.insert(0, self.parameters.get_parameter('output_path'))
             self.file_name_entry.delete(0, tk.END)
