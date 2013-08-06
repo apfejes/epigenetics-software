@@ -94,7 +94,7 @@ class MongoCurious():
         if self.collection == 'methylation':
             self.collectbetas()
             
-        self.annotations = None
+        self.annotations = self.getannotations()
         
         return self.docs
 

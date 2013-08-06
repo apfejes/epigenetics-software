@@ -12,9 +12,7 @@ from MongoDB.mongoUtilities import MongoCurious
 
 database = "human_epigenetics"
 # Tell the database which collection you want to query from
-t0 = time()
 m = MongoCurious.MongoCurious(database = database)
-print " Query %.3f" % (time() - t0)
 
 #for htt
 chr = '4'
@@ -23,7 +21,7 @@ end = 3245687
 
 t0 = time()
 query = m.query(collection = 'methylation', project = 'down syndrome', sample_type = 'Control', chromosome = chr, start = start, end = end)
-print "Extract %.3f" % (time() - t0)
+print "Query %.3f" % (time() - t0)
 
 t0 = time()
 m.svg(filename = "test_gaussian_meth.svg", title = "Huntington gene")

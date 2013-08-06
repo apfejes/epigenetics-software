@@ -9,7 +9,6 @@ from svgwrite.text import Text
 from svgwrite.drawing import Drawing
 from svgwrite.path import Path
 from math import fabs, exp, sqrt, log
-from numpy import mean
 import Color_Palette 
 palette = Color_Palette.ColorPalette()
 
@@ -33,6 +32,7 @@ class MethylationPlot(object):
         self.pos_betas_dict = pos_betas_dict
         self.sample_peaks = sample_peaks
         self.Y = []
+        self.annotations = annotations
         
         for position in self.pos_betas_dict.keys():
             for y, sample, sample_type in pos_betas_dict[position]:
@@ -97,7 +97,32 @@ class MethylationPlot(object):
                     self.elements.append(gaussian)
                     
         #self.samples_color = samples_color
-
+        
+        
+    def add_annotations(self):
+        annotations = self.annotations
+        margin = self.margin
+        width = self.width
+        
+        
+        #Add TSS line if there is in fact a TSS in this region
+        for tss in annotations['TSS']:
+            print 'TSS', tss
+            x1 = margin + (tss-self.start)*self.scale_x
+            y1 = self.axis_y_margin
+            length = width + margin*3
+            thickness = 0.3
+            color = 'dodgerblue'
+        
+            TSSline = Rect(insert = (x1, y1), 
+                           size = (thickness, length),
+                           fill = color)
+            TSS = (Text(str(tss), insert = (x1+2, length+y1), fill = color, font_size = "4"))
+        self.elements.append(TSSline)
+        self.elements.append(TSS)
+        
+        return None
+        
     def save(self):
         for element in self.elements:
             self.plot.add(element)
@@ -118,14 +143,12 @@ class MethylationPlot(object):
 
     def add_data(self, elements = None):
         elements_to_add = elements
-        if not isinstance(elements_to_add, list):
-            raise ValueError("Data to add to plot should be stored in a list, not a {}".format(type(elements)))
         for element in elements_to_add:
             self.plot.add(element)
         print "% i svg elements have been added to the current svg object." % len(elements)
 
     def add_legends(self):
-        ''' Add title, axis, tic marks and labels '''
+        ''' Add annotations, title, axis, tic marks and labels '''
         if self.title == None:
             self.title = "Methylation PLot"
         Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
@@ -136,6 +159,7 @@ class MethylationPlot(object):
         self.add_ytics()
         self.add_axis()
         self.add_sample_labels(self.margin*2 + self.length)
+        self.add_annotations()
 
     def add_sample_labels(self,x_position):
         samples_color = palette.colors_dict()
@@ -182,7 +206,7 @@ class MethylationPlot(object):
             self.elements.append(ticmarker)
 
     def add_ytics(self):
-        maxh, margin = max(self.Y), self.margin
+        margin = self.margin
         scale_y, offset_y = self.scale_y, self.offset_y
         ytics = [0, 0.2, 0.4, 0.6, 0.8, 1]
         ytics = [round(offset_y - y * scale_y, 3) for y in ytics]
@@ -205,10 +229,14 @@ class MethylationPlot(object):
     def add_axis(self):
         margin = self.margin
         width = self.width
-        x_axis = Rect(insert = (margin - 5, width + margin * 2 - 5),
+        axis_x_margin = margin - 5
+        self.axis_x_margin = axis_x_margin
+        axis_y_margin = margin - 8
+        self.axis_y_margin = axis_y_margin 
+        x_axis = Rect(insert = (axis_x_margin, width + margin + axis_x_margin),
                 size = ((self.end - self.start) * self.scale_x + 10, 0.1),
                 fill = "midnightblue")
-        y_axis = Rect(insert = (margin - 5, margin - 8),
+        y_axis = Rect(insert = (axis_x_margin, axis_y_margin),
             size = (0.1, width + margin + 3),
             fill = "midnightblue")
         self.elements.append(x_axis)
