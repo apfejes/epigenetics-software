@@ -21,6 +21,8 @@ import MethylationPlot as methylationplot
 
 from bson.objectid import ObjectId
 
+directory_for_svgs = "/home/sperez/Documents/svg_temp/"
+
 class MongoCurious():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
     def __init__(self,
@@ -356,7 +358,7 @@ class MongoCurious():
         if filename:
             if filename[-4:len(filename)] != '.svg':
                 filename += '.svg'
-            filename = "/home/sperez/Documents/svg_temp/" + filename
+            filename = directory_for_svgs + filename
         elif not get_elements: filename = "test.svg"
 
         if self.collection == "methylation":
