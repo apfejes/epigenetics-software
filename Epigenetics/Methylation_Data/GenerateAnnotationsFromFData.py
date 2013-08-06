@@ -78,8 +78,8 @@ if __name__ == "__main__":
         print "eg. python GenerateAnnotationFromFData.py /directory/database.RDATA"
         sys.exit()
     db_name = "human_epigenetics"
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
+    db = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
     starttime = time.time()
     rfile = sys.argv[1]
-    ReadRObject(mongo, rfile)
+    ReadRObject(db, rfile)
     print('Done in %s seconds') % int((time.time() - starttime))
