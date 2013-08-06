@@ -132,9 +132,12 @@ class MongoCurious():
             #return_chr = {'_id': False, 'beta_value': True,
             #              'start_position': True, 'end_position': True,
             #              'sample_label': True}
-            return_chr = {'targetid': True, 'mapinfo':True, 'distanceTSS':True, 'Islands': True} 
+            return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hmm_island': True,
+                          'closest_tss_1': True, ' ucsc_refgene_name':True, 'closest_tss_gene_name':True,
+                          'regulatory_feature_group':True, 'regulatory_feature_name':True} 
             sortby, sortorder = 'mapinfo', 1
-
+            
+            
         elif collection == "waves":
             collection = 'waves'
             query_chr = {'chr':self.chromosome}
@@ -188,7 +191,7 @@ class MongoCurious():
             sys.exit()
             
 
-        print " Found %i documents." % docs.count()
+        print "    --> Found %i documents." % docs.count()
         self.count = docs.count()
         self.Query['cursor'] = docs
         return docs
@@ -330,6 +333,8 @@ class MongoCurious():
             tss2 = int(doc['closest_tss_1'])
             genename = doc["ucsc_refgene_name"]
             genenameclosest = doc["closest_tss_gene_name"]
+            feature = doc['regulatory_feature_group']
+            feature_coord = doc['regulatory_feature_name'].split(':')[1].split('-')
             
             if tss1 in range(self.start, self.end) and tss1 not in annotations['TSS']:
                 annotations['TSS'].append(tss1)
@@ -341,10 +346,12 @@ class MongoCurious():
             if (genenameclosest,tss2) not in annotations['genes']:
                 annotations['genes'].append((genename,tss2))
                 
-            coord = doc['hi1_cpg_island_name'].split(':')[1].split('-')
+            coord = doc['hmm_island'].split(':')[1].split('-')
             island  = (coord[0], coord[1])
             if island not in annotations['Islands']: annotations['Islands'].append(island)
             
+            if (feature, feature_coord) not in annotations['feature']:
+                annotations['feature'] = (feature, feature_coord)
         return annotations
 
 
