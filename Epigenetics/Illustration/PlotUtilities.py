@@ -55,7 +55,7 @@ def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_marg
         elements.append(gene)
     
     for (a,b) in annotations['Islands']:
-        print 'island', a,b
+        #print 'island', a,b
         if a < start: a = start
         if b > end: b = end
         height = 3

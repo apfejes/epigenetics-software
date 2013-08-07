@@ -108,9 +108,11 @@ class MongoCurious():
             query_parameters["chr"] = self.chromosome
             if self.end and self.start: 
                 query_parameters["mapinfo"] = {"$gte":self.start, "$lte":self.end }
+            #Decide which parameters to return
             return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hmm_island': True,
                           'closest_tss_1': True, 'ucsc_refgene_name':True, 'closest_tss_gene_name':True,
                           'regulatory_feature_group':True, 'regulatory_feature_name':True,'strand':True} 
+            #Decide how to sort the returned entries (make sure there is an index on the chosen sorting parameter)
             sortby, sortorder = 'mapinfo', 1
             
         elif collection == 'waves':
@@ -149,32 +151,30 @@ class MongoCurious():
             return_chr = {'mval':True, 'sampleid': True, 'beta':True, 
                           'probeid':True}
             sortby, sortorder = 'sampleid', 1
-
-
+            
         else: 
             print "Collection queried is either not supported or not in the database. Exiting..."
             sys.exit()
-            
+        
         print "\n Conducting query: "
         print "   From the database '{0}', and collection '{1}', ".format(self.database, collection)
         print "   Find(", query_parameters, ")"
-        # Get probes corresponding to query and sort by starting positions for beta value binning
+        # Get documents corresponding to query and sort by sorting parameter
         docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
 
         if docs.count() == 0:
             message  = "    WARNING: The following query return zero probes or documents!" 
             message  += "\n    ---> Find(" + str(query_parameters) + ")"
             message  += "\n     use the checkquery() method to validate the inputs of your query."
-            self.errorlog(message)
+            #self.errorlog(message)
             sys.exit()
             
-
         print "    --> Found %i documents." % docs.count()
-        self.count = docs.count()
-        self.docs = docs
+        #return documents found
         return docs
 
     def getprobes(self,docs):
+        '''Organises the probe locations/ids into a dictionary'''
         probes = {}
         for doc in docs:
             if self.collection == 'methylation':
@@ -182,6 +182,7 @@ class MongoCurious():
         return probes
     
     def getannotations(self,docs):
+        '''Organizes the annotation information into a dictionary'''
         annotations = {}
         annotations['TSS'] = []
         annotations['Islands'] = []
@@ -265,7 +266,6 @@ class MongoCurious():
             beta = methyldata['beta']
             #mval = methyldata['mval'] #unused currently
             pos = probes[methyldata['probeid']]
-            #print pos, sample, stype, beta
             if pos in pos_betas_dict:
                 pos_betas_dict[pos].append((beta, sample, stype))
             else:
@@ -283,7 +283,6 @@ class MongoCurious():
         print '\n    %s probes\' beta values were extracted.' % count
         print "    %i CpGs locations were found" % len(pos_betas_dict)
         
-        #print pos_betas_dict
         self.pos_betas_dict = pos_betas_dict
 
         for pos, type_dict in sample_peaks.iteritems():
@@ -292,7 +291,6 @@ class MongoCurious():
                 s = std(betas)
                 sample_peaks[pos].update({stype : (m,s)})
                         
-        #print sample_peaks
         self.sample_peaks = sample_peaks
 
         if self.start == None:
@@ -331,7 +329,7 @@ class MongoCurious():
                 
         if count == 0:
             message = "    WARNING: None of peaks found in the query lie in the region!"
-            self.errorlog(message)
+            #self.errorlog(message)
         else:
             print "   Only %i peaks were found to occur in region." % count
             self.waves = waves
@@ -386,9 +384,10 @@ class MongoCurious():
             drawing = None
         return z
     
-    def errorlog(self, errormessage): 
+#Error function below needs testing
+'''    def errorlog(self, errormessage): 
         #returns error message to server
         self.errorcount +=1
         print errormessage
-        return errormessage
+        return errormessage '''
         
