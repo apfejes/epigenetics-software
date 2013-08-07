@@ -14,6 +14,7 @@ _root_dir = os.path.dirname(_cur_dir)
 _root_dir = os.path.dirname(_root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
+from common_utilities import *
 
 sys.path.insert(0, _root_dir + os.sep + "Illustration")
 import ChipseqPlot as chipseqplot
@@ -58,7 +59,7 @@ class MongoCurious():
         #Conduct query and collect the data depending on which collection was chosen.
         if self.collection == 'methylation':
             cursor = self.finddocs(collection = 'annotations')
-            docs = MongoCurious.parse_cursor(cursor)
+            docs = CreateListFromCursor(cursor)
             probes = self.getprobes(docs)
             self.getannotations(docs)
             self.collectbetas(sample_ids, probes)
@@ -70,13 +71,6 @@ class MongoCurious():
             self.getannotations(annotations_docs)
         
         return None
-    
-    @staticmethod
-    def parse_cursor(cursor):
-        docs =[]
-        for doc in cursor:
-            docs.append(doc)
-        return docs
 
     def checkquery(self, project, chromosome):
         '''Checks that query inputs are valid'''

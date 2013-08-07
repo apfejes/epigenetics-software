@@ -12,6 +12,9 @@ from math import fabs, exp, sqrt, log
 import Color_Palette 
 palette = Color_Palette.ColorPalette()
 
+from PlotUtilities import *
+
+
 class MethylationPlot(object):
     '''
     classdocs
@@ -33,6 +36,12 @@ class MethylationPlot(object):
         self.sample_peaks = sample_peaks
         self.Y = []
         self.annotations = annotations
+        
+        #Default legend coordinates below
+        self.axis_x_margin = margin - 5
+        self.axis_y_margin = margin - 8
+
+        
         
         for position in self.pos_betas_dict.keys():
             for y, sample, sample_type in pos_betas_dict[position]:
@@ -58,7 +67,7 @@ class MethylationPlot(object):
         scale_y = (width + margin) * 0.8 / max(self.Y)
         self.scale_y = scale_y
         
-        colors, color_wheel = palette.Colors()       #blue, red, green, purple palettes
+        #colors, color_wheel = palette.Colors()       #blue, red, green, purple palettes
 
         for position in self.pos_betas_dict.keys():
             x = round(float(position - offset_x) * scale_x, 2) + margin
@@ -99,52 +108,6 @@ class MethylationPlot(object):
         #self.samples_color = samples_color
         
         
-    def add_annotations(self):
-        annotations = self.annotations
-        margin = self.margin
-        width = self.width
-        spacing = 9
-        offset = 0 
-        
-        
-        #Add TSS line if there is in fact a TSS in this region
-        for (gene,tss) in annotations['TSS']:
-            #print 'TSS:', gene, tss
-            x1 = margin + (tss-self.start)*self.scale_x
-            y1 = self.axis_y_margin
-            length = width + margin*3
-            thickness = 0.3
-            color = 'dodgerblue'
-        
-            TSSline = Rect(insert = (x1, y1), 
-                           size = (thickness, length),
-                           fill = color)
-            TSS = (Text((str(tss)), insert = (x1+1, length+y1), fill = color, font_size = "4"))
-            gene = (Text("--> " + gene + " gene", insert = (x1, length+y1-spacing/2), fill = color, font_size = "4"))
-            offset += spacing
-            if offset > spacing*5: offset = 0
-            self.elements.append(TSSline)
-            self.elements.append(TSS)
-            self.elements.append(gene)
-        
-        for (a,b) in annotations['Islands']:
-            print 'island', a,b
-            if a < self.start: a = self.start
-            if b > self.end: b = self.end
-            height = 3
-            length = (b-a)*self.scale_x
-            x1 = margin + (a-self.start)*self.scale_x
-            y1 = width + margin*2 -height - 5
-            #print x1, length, y1
-            color = 'hotpink'
-        
-            island = Rect(insert = (x1, y1), 
-                           size = (length,height),
-                           fill = color)
-            self.elements.append(island)
-        
-        return None
-        
     def save(self):
         for element in self.elements:
             self.plot.add(element)
@@ -179,9 +142,11 @@ class MethylationPlot(object):
         self.elements.append(Title)
         self.add_xtics()
         self.add_ytics()
-        self.add_axis()
         self.add_sample_labels(self.margin*2 + self.length)
-        self.add_annotations()
+        for axis in get_axis(self.end, self.start, self.margin, self.width, self.axis_x_margin, self.axis_y_margin, self.scale_x):
+            self.elements.append(axis)
+        for annotation in get_annotations(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+            self.elements.append(annotation)
 
     def add_sample_labels(self,x_position):
         samples_color = palette.colors_dict()
@@ -248,21 +213,6 @@ class MethylationPlot(object):
             self.elements.append(ticline2)
             self.elements.append(ticmarker)
 
-    def add_axis(self):
-        margin = self.margin
-        width = self.width
-        axis_x_margin = margin - 5
-        self.axis_x_margin = axis_x_margin
-        axis_y_margin = margin - 8
-        self.axis_y_margin = axis_y_margin 
-        x_axis = Rect(insert = (axis_x_margin, width + margin + axis_x_margin),
-                size = ((self.end - self.start) * self.scale_x + 10, 0.1),
-                fill = "midnightblue")
-        y_axis = Rect(insert = (axis_x_margin, axis_y_margin),
-            size = (0.1, width + margin + 3),
-            fill = "midnightblue")
-        self.elements.append(x_axis)
-        self.elements.append(y_axis)
         
     def makegaussian(self, mean, stddev, height):
         endpts = (sqrt((-2) * stddev * stddev * log(1.0/ height)))

@@ -10,6 +10,8 @@ from svgwrite.path import Path
 
 from math import exp, sqrt, fabs, log
 
+from PlotUtilities import *
+
 class ChipseqPlot(object):
     '''
     classdocs
@@ -28,6 +30,7 @@ class ChipseqPlot(object):
         self.length = length    # default = 200.0
         self.margin = margin    # default = 20.0
         self.width = width    # default = 60.0
+        self.annotations = annotations
 
         self.colors = [('indigo', 'slateblue'), ('red', 'orange'),
                   ('green', 'limegreen'), ('orange', 'yellow')]
@@ -93,7 +96,52 @@ class ChipseqPlot(object):
             self.elements.append(peak)
         self.samples_color = samples_color
 
-
+    def add_annotations(self):
+        annotations = self.annotations
+        margin = self.margin
+        width = self.width
+        spacing = 9
+        offset = 0 
+        
+        
+        #Add TSS line if there is in fact a TSS in this region
+        for (gene,tss) in annotations['TSS']:
+            #print 'TSS:', gene, tss
+            x1 = margin + (tss-self.start)*self.scale_x
+            y1 = self.axis_y_margin
+            length = width + margin*3
+            thickness = 0.3
+            color = 'dodgerblue'
+        
+            TSSline = Rect(insert = (x1, y1), 
+                           size = (thickness, length),
+                           fill = color)
+            TSS = (Text((str(tss)), insert = (x1+1, length+y1), fill = color, font_size = "4"))
+            gene = (Text("--> " + gene + " gene", insert = (x1, length+y1-spacing/2), fill = color, font_size = "4"))
+            offset += spacing
+            if offset > spacing*5: offset = 0
+            self.elements.append(TSSline)
+            self.elements.append(TSS)
+            self.elements.append(gene)
+        
+        for (a,b) in annotations['Islands']:
+            print 'island', a,b
+            if a < self.start: a = self.start
+            if b > self.end: b = self.end
+            height = 3
+            length = (b-a)*self.scale_x
+            x1 = margin + (a-self.start)*self.scale_x
+            y1 = width + margin*2 -height - 5
+            #print x1, length, y1
+            color = 'hotpink'
+        
+            island = Rect(insert = (x1, y1), 
+                           size = (length,height),
+                           fill = color)
+            self.elements.append(island)
+        
+        return None
+    
     def save(self):
         for element in self.elements:
             self.plot.add(element)
@@ -132,6 +180,10 @@ class ChipseqPlot(object):
         self.add_ytics()
         self.add_axis()
         self.add_sample_labels(self.margin*2 + self.length)
+        for axis in get_axis(self.end, self.start, self.margin, self.width, self.axis_x_margin, self.axis_y_margin, self.scale_x):
+            self.elements.append(axis)
+        for annotation in get_annotations(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+            self.elements.append(annotation)
 
     def add_sample_labels(self,x_position):
         if len(self.samples_color)>20: 
@@ -149,7 +201,7 @@ class ChipseqPlot(object):
             y_position += float(fontsize)+spacing
             self.elements.append(label)
         return None
-
+    
     def makegaussian(self, start,
                      end, margin, length,
                      pos, tail, offset,
@@ -229,10 +281,14 @@ class ChipseqPlot(object):
     def add_axis(self):
         margin = self.margin
         width = self.width
-        x_axis = Rect(insert = (margin - 5, width + margin * 2 - 5),
+        axis_x_margin = margin - 5
+        self.axis_x_margin = axis_x_margin
+        axis_y_margin = margin - 8
+        self.axis_y_margin = axis_y_margin 
+        x_axis = Rect(insert = (axis_x_margin, width + margin + axis_x_margin),
                 size = ((self.end - self.start) * self.scale_x + 10, 0.1),
                 fill = "midnightblue")
-        y_axis = Rect(insert = (margin - 5, margin - 8),
+        y_axis = Rect(insert = (axis_x_margin, axis_y_margin),
             size = (0.1, width + margin + 3),
             fill = "midnightblue")
         self.elements.append(x_axis)
