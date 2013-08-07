@@ -57,20 +57,30 @@ class MongoCurious():
             chromosome = 'chr' + str(chromosome)
         self.chromosome = chromosome
         
-        #Conduct query and collect the data depending on which collection was chosen.
-        if collection == 'methylation':
-            self.sample_ids_list = self.organize_samples()
-            docs = self.finddocs(collection = 'annotations')
-            #self.getprobes(docs)
-            self.annotations = self.getannotations(docs)
-            self.collectbetas()
-        elif collection == 'waves':
-            self.finddocs(collection = collection)
-            self.annotations = self.getannotations()
-            self.getwaves()
+        #First we collect the list of samples the user is interested in:
+        self.sample_ids_list = self.organize_samples()
         
+        #Conduct query and collect the data depending on which collection was chosen.
+        if self.collection == 'methylation':
+            cursor = self.finddocs(collection = 'annotations')
+            docs = MongoCurious.parse_cursor(cursor)
+            self.getprobes(docs)
+            self.getannotations(docs)
+            self.collectbetas()
+        
+        if self.collection == 'waves':
+            docs = self.finddocs(collection = collection)
+            MongoCurious.parse_cursor(docs)
+            self.getwaves(docs)            
         
         return None
+    
+    @staticmethod
+    def parse_cursor(cursor):
+        docs =[]
+        for doc in cursor:
+            docs.append(doc)
+        return docs
 
     def checkquery(self):
         '''Checks that query inputs are valid'''
@@ -176,9 +186,7 @@ class MongoCurious():
         annotations['Islands'] = []
         annotations['genes'] = []
         annotations['feature'] = []
-        probes = {}
         for doc in docs:
-            probes[str(doc['targetid'])] = doc['mapinfo']
             tss1 = int(doc['closest_tss'])
             tss2 = int(doc['closest_tss_1'])
             gene = str(doc['ucsc_refgene_name'])
@@ -208,9 +216,9 @@ class MongoCurious():
         print "\n    Annotations found:"
         for key,value in annotations.iteritems():
             print "        ", key, len(value), value
-            
-        self.probes = probes
-        return annotations
+
+        self.annotations = annotations
+        return None
     
     def organize_samples(self):
         #Finds the sample_ids of the project and sample group user is interested in
@@ -294,7 +302,7 @@ class MongoCurious():
             print "    New end position:", self.end
          
         
-        return self.pos_betas_dict, self.sample_peaks, self.annotations
+        return None
 
 
     def getwaves(self):

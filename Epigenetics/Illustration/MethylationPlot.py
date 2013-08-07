@@ -128,12 +128,12 @@ class MethylationPlot(object):
             self.elements.append(gene)
         
         for (a,b) in annotations['Islands']:
-            print 'island', a,b
+            #print 'island', a,b
             x1 = margin + (a-self.start)*self.scale_x
             y1 = width + margin*2
             length = (b-a)*self.scale_x
             thickness = 0.5
-            print x1, length, y1
+            #print x1, length, y1
             color = 'hotpink'
         
             island = Rect(insert = (x1, y1), 
