@@ -35,13 +35,13 @@ class MongoCurious():
     def query(self,
                 collection,
                 chromosome,
+                chip = None,
                 project = None,
                 start = None,
                 end = None,
                 sample_type = None,
                 sample_label = None,
                 sample_id = None):
-        '''Stores query inputs and parameters as an instance of MongoQuery'''
 
         self.collection = collection
         self.end = end
@@ -52,20 +52,21 @@ class MongoCurious():
         self.chromosome = chromosome
         
         #First we collect the list of samples the user is interested in:
-        self.sample_ids_list = self.organize_samples(project, sample_type, sample_label)
+        self.sample_ids_list = self.organize_samples(project,sample_label, sample_type, chip)
         
         #Conduct query and collect the data depending on which collection was chosen.
         if self.collection == 'methylation':
-            cursor = self.finddocs(collection = 'annotations', project = project, sample_label = sample_label)
+            cursor = self.finddocs(collection = 'annotations')
             docs = MongoCurious.parse_cursor(cursor)
             self.getprobes(docs)
             self.getannotations(docs)
             self.collectbetas()
         
         if self.collection == 'waves':
-            docs = self.finddocs(collection = collection, project = project, sample_label = sample_label)
-            MongoCurious.parse_cursor(docs)
-            self.getwaves(docs)            
+            docs = self.finddocs(collection = collection, chip = chip)
+            self.getwaves(docs)
+            annotations_docs = self.finddocs(collection = 'annotations')
+            self.getannotations(annotations_docs)
         
         return None
     
@@ -95,10 +96,12 @@ class MongoCurious():
         return None
 
 
-    def finddocs(self, collection, sample_ids_list = None, probe_id = None, project = None, sample_label = None, sample_type = None):
+    def finddocs(self, collection, sample_ids_list = None, 
+                 probe_id = None, project = None, sample_label = None, 
+                 sample_type = None, chip = None):
         '''Finds probes or documents corresponding to query'''
-        #self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
-        query_chr, query_location, query_samplabel, query_pos, query_sampgroup, query_project, query_probe, query_samplist = {}, {}, {}, {}, {}, {}, {}, {}
+        query_chr, query_location, query_samplabel, query_pos, query_sampgroup = {}, {}, {}, {}, {}
+        query_project, query_probe, query_samplist, query_chip = {}, {}, {}, {}
 
         # Preparing the different parameters of the query depending on the collection chosen
         if collection ==  "annotations":
@@ -130,13 +133,17 @@ class MongoCurious():
             sortby, sortorder = 'height', (-1)
 
         elif collection =="samples":
-            if project: query_project = {"project":project}
-            if sample_label: query_samplabel = {"sample_label":sample_label}
-            if sample_type: query_sampgroup = {"sample_group":sample_type}
+            if self.collection == 'waves':
+                if chip: query_chip = {"chip":chip}
+                else: query_chip  = {'chip':{"$exists":True}}
+            elif self.collection == 'methylation':
+                if project: query_project = {"project":project}
+                if sample_label: query_samplabel = {"sample_label":sample_label}
+                if sample_type: query_sampgroup = {"sample_group":sample_type}
             return_chr = {'_id': True, 'samplelabel': True, 
-                          'project': True, 'sample_group': True}
+                              'project': True, 'sample_group': True, 'chip':True}
             sortby, sortorder = 'sample_group', 1
-
+            
         elif collection ==  "methylation":
             if sample_ids_list:
                 query_samplist = {"sampleid":sample_ids_list}
@@ -153,7 +160,7 @@ class MongoCurious():
             
         query = dict(query_chr.items() + query_location.items() + query_probe.items()
                      + query_samplabel.items() + query_pos.items() + query_samplist.items()
-                     + query_sampgroup.items() + query_project.items())
+                     + query_sampgroup.items() + query_project.items() + query_chip.items())
         print "\n Conducting query: "
         print "   From the database '{0}', and collection '{1}', ".format(self.database, collection)
         print "   Find(", query, ")"
@@ -214,20 +221,31 @@ class MongoCurious():
         self.annotations = annotations
         return None
     
-    def organize_samples(self, project, queried_sample_type, queried_sample_label):
+    def organize_samples(self, project, sample_type, sample_label, chip):
         #Finds the sample_ids of the project and sample group user is interested in
         #saves a dictionary of the form {sample_id: (sample_label, sample_type)
         
-        samplesdocs = self.finddocs(collection = 'samples', project = project, sample_label = queried_sample_label, sample_type = queried_sample_type)
+        samplesdocs = self.finddocs(collection = 'samples', project = project, 
+                                    sample_label = sample_label, 
+                                    sample_type = sample_type, 
+                                    chip = chip)
         
         sample_ids = {}
         for doc in samplesdocs:
+            print doc
             sample_id = str(doc['_id'])
-            sample_type = doc['sample_group']
-            sample_label = doc['samplelabel']
-            if sample_type == queried_sample_type or queried_sample_type == None: 
-                if queried_sample_label == sample_label or queried_sample_label == None:
-                    sample_ids[sample_id] = (sample_label, sample_type)
+            
+            if self.collection == 'waves':
+                doc_chip = str(doc['chip'])
+                if doc_chip == chip or chip == None:
+                    sample_ids[sample_id] = chip
+                
+            if self.collection == 'methylation':
+                doc_sample_type = doc['sample_group']
+                doc_sample_label = doc['samplelabel']
+                if doc_sample_type == sample_type or sample_type == None: 
+                    if doc_sample_label == sample_label or sample_label == None:
+                        sample_ids[sample_id] = (doc_sample_label, doc_sample_type)
             
         return sample_ids
         
@@ -300,15 +318,14 @@ class MongoCurious():
         return None
 
 
-    def getwaves(self):
+    def getwaves(self, docs):
         count = 0
         tail = 1
         # This list will store the tuple (pos,height, std dev, sample id) as a value.
         waves = []
         # "tail" is min height of a tail to be included in the plot for a peak
         # which doesn't have its center in the region
-        for doc in self.docs:
-#            if isinstance(doc['stddev'], basestring): int()
+        for doc in docs:
             pos, height, stddev, sample_id = doc['pos'], doc['height'], int(doc['stddev']), doc['sample_id']
             #search for sample label name:
             sample_id = ObjectId(sample_id)
@@ -331,9 +348,6 @@ class MongoCurious():
         else:
             print "   Only %i peaks were found to occur in region." % count
             self.waves = waves
-            self.Query['waves'] = waves
-        
-        #self.annotations = self.getannotations() 
         
         return None
 
