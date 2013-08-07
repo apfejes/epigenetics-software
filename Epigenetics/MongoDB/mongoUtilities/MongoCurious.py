@@ -9,7 +9,7 @@ import os, sys
 from numpy import log, mean, std
 from math import sqrt
 
-_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
+_cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
 _root_dir = os.path.dirname(_root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
@@ -26,30 +26,24 @@ directory_for_svgs = "/home/sperez/Documents/svg_temp/"
 class MongoCurious():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
     def __init__(self,
-                database = None):
+                database):
         '''Connects to database'''
-        if database == None:
-            raise ValueError("Please specify a database.")
-        else: self.database = database
-        self.mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, self.database)
+        self.database = database
+        self.mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database)
         self.errorcount = 0
 
     def query(self,
                 collection,
                 chromosome,
+                project = None,
                 start = None,
                 end = None,
                 sample_type = None,
                 sample_label = None,
-                sample_id = None,
-                project = None):
+                sample_id = None):
         '''Stores query inputs and parameters as an instance of MongoQuery'''
 
         self.collection = collection
-        self.project = project
-        self.sample_label = sample_label
-        self.sample_type = sample_type
-        self.sample_id = sample_id
         self.end = end
         self.start = start
             
@@ -58,18 +52,18 @@ class MongoCurious():
         self.chromosome = chromosome
         
         #First we collect the list of samples the user is interested in:
-        self.sample_ids_list = self.organize_samples()
+        self.sample_ids_list = self.organize_samples(project, sample_type, sample_label)
         
         #Conduct query and collect the data depending on which collection was chosen.
         if self.collection == 'methylation':
-            cursor = self.finddocs(collection = 'annotations')
+            cursor = self.finddocs(collection = 'annotations', project = project, sample_label = sample_label)
             docs = MongoCurious.parse_cursor(cursor)
             self.getprobes(docs)
             self.getannotations(docs)
             self.collectbetas()
         
         if self.collection == 'waves':
-            docs = self.finddocs(collection = collection)
+            docs = self.finddocs(collection = collection, project = project, sample_label = sample_label)
             MongoCurious.parse_cursor(docs)
             self.getwaves(docs)            
         
@@ -82,26 +76,26 @@ class MongoCurious():
             docs.append(doc)
         return docs
 
-    def checkquery(self):
+    def checkquery(self, project, chromosome):
         '''Checks that query inputs are valid'''
         t0 = time()
         self.mongo.ensure_index(self.collection, 'chr')
         print "Checking validity of query inputs..."
 
         Chromosomes = self.mongo.distinct(self.collection, 'chr')
-        if self.chromosome not in Chromosomes:
+        if chromosome not in Chromosomes:
             raise ValueError("Invalid chromosome name. Please choose from the following possible inputs:",
                              Chromosomes.encode("utf-8"))
 
-        if self.project != None:
+        if project != None:
             Projects = self.mongo.distinct(self.collection, "project")
-            if self.project not in Projects:
+            if project not in Projects:
                 raise ValueError("Invalid project. Please choose from the following:", Projects)
         print "Input check done in %i seconds." % round(time() - t0, 1)
         return None
 
 
-    def finddocs(self, collection, sample_ids_list = None, probe_id = None):
+    def finddocs(self, collection, sample_ids_list = None, probe_id = None, project = None, sample_label = None, sample_type = None):
         '''Finds probes or documents corresponding to query'''
         #self.mongo.ensure_index(self.collection, 'start_position')    # for speed? to be tested...
         query_chr, query_location, query_samplabel, query_pos, query_sampgroup, query_project, query_probe, query_samplist = {}, {}, {}, {}, {}, {}, {}, {}
@@ -109,10 +103,10 @@ class MongoCurious():
         # Preparing the different parameters of the query depending on the collection chosen
         if collection ==  "annotations":
             query_chr = {"chr":self.chromosome}
-            #if self.project: query_project = {'project': self.project}
+            #if project: query_project = {'project': project}
             if self.end and self.start: 
                 query_location = {"mapinfo":{"$gte":self.start, "$lte":self.end }}
-            #if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
+            #if sample_label: query_samplabel = {"sample_label":sample_label}
             #return_chr = {'_id': False, 'beta_value': True,
             #              'start_position': True, 'end_position': True,
             #              'sample_label': True}
@@ -122,14 +116,13 @@ class MongoCurious():
             sortby, sortorder = 'mapinfo', 1
             
             
-        elif collection == "waves":
-            collection = 'waves'
+        elif collection == 'waves':
             query_chr = {'chr':self.chromosome}
-            if self.project: query_project = {'project': self.project}
+            if project: query_project = {'project': project}
             if self.start and self.end:
                 extension = 500    # extend the region of query to catch peaks with tails in the region
                 query_pos = {"pos":{"$lte":self.end + extension, "$gte":self.start - extension}}
-            if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
+            if sample_label: query_samplabel = {"sample_label":sample_label}
             #if self.sample_group: query_sampgroup = {"Sample Group":self.sample_group}
             return_chr = {'_id': False, 'pos': True,
                           'height': True, 'stddev': True,
@@ -137,9 +130,9 @@ class MongoCurious():
             sortby, sortorder = 'height', (-1)
 
         elif collection =="samples":
-            if self.project: query_project = {"project":self.project}
-            if self.sample_label: query_samplabel = {"sample_label":self.sample_label}
-            if self.sample_type: query_sampgroup = {"sample_group":self.sample_type}
+            if project: query_project = {"project":project}
+            if sample_label: query_samplabel = {"sample_label":sample_label}
+            if sample_type: query_sampgroup = {"sample_group":sample_type}
             return_chr = {'_id': True, 'samplelabel': True, 
                           'project': True, 'sample_group': True}
             sortby, sortorder = 'sample_group', 1
@@ -205,6 +198,7 @@ class MongoCurious():
             for genenameclosest in geneclosest:
                 if (genenameclosest,tss2) not in annotations['genes']:
                     annotations['genes'].append((genenameclosest,tss2))
+                    
             if doc['hmm_island']:
                 coord = doc['hmm_island'].split(':')[1].split('-')
                 island  = (int(coord[0]), int(coord[1]))
@@ -220,19 +214,20 @@ class MongoCurious():
         self.annotations = annotations
         return None
     
-    def organize_samples(self):
+    def organize_samples(self, project, queried_sample_type, queried_sample_label):
         #Finds the sample_ids of the project and sample group user is interested in
+        #saves a dictionary of the form {sample_id: (sample_label, sample_type)
         
-        samplesdocs = self.finddocs(collection = 'samples')
+        samplesdocs = self.finddocs(collection = 'samples', project = project, sample_label = queried_sample_label, sample_type = queried_sample_type)
         
         sample_ids = {}
         for doc in samplesdocs:
             sample_id = str(doc['_id'])
-            sample_group = doc['sample_group']
+            sample_type = doc['sample_group']
             sample_label = doc['samplelabel']
-            if (self.sample_type and sample_group == self.sample_type) or self.sample_type == None: 
-                if self.sample_label == sample_label or self.sample_label == None:
-                    sample_ids[sample_id] = (sample_label, sample_group)
+            if sample_type == queried_sample_type or queried_sample_type == None: 
+                if queried_sample_label == sample_label or queried_sample_label == None:
+                    sample_ids[sample_id] = (sample_label, sample_type)
             
         return sample_ids
         

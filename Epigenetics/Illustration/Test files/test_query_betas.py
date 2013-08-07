@@ -17,11 +17,12 @@ m = MongoCurious.MongoCurious(database = database)
 #for htt
 chr = '4'
 start = 3076408 
-#start = 2800000
+start = 3175000
 end = 3245687
+#end  = 3225000
 
 t0 = time()
-query = m.query(collection = 'methylation', project = 'down syndrome', chromosome = chr, start = start, end = end)
+query = m.query(collection = 'methylation', project = 'down syndrome', sample_type = 'Control', chromosome = chr, start = start, end = end)
 print "Query %.3f" % (time() - t0)
 
 t0 = time()
