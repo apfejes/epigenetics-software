@@ -109,7 +109,7 @@ class MethylationPlot(object):
         
         #Add TSS line if there is in fact a TSS in this region
         for (gene,tss) in annotations['TSS']:
-            print 'TSS:', gene, tss
+            #print 'TSS:', gene, tss
             x1 = margin + (tss-self.start)*self.scale_x
             y1 = self.axis_y_margin
             length = width + margin*3
@@ -126,6 +126,20 @@ class MethylationPlot(object):
             self.elements.append(TSSline)
             self.elements.append(TSS)
             self.elements.append(gene)
+        
+        for (a,b) in annotations['Islands']:
+            print 'island', a,b
+            x1 = margin + (a-self.start)*self.scale_x
+            y1 = width + margin*2
+            length = (b-a)*self.scale_x
+            thickness = 0.5
+            print x1, length, y1
+            color = 'hotpink'
+        
+            island = Rect(insert = (x1, y1), 
+                           size = (length,thickness),
+                           fill = color)
+            self.elements.append(island)
         
         return None
         

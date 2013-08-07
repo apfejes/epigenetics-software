@@ -61,7 +61,7 @@ class MongoCurious():
         if collection == 'methylation':
             self.sample_ids_list = self.organize_samples()
             docs = self.finddocs(collection = 'annotations')
-            self.getprobes(docs)
+            #self.getprobes(docs)
             self.annotations = self.getannotations(docs)
             self.collectbetas()
         elif collection == 'waves':
@@ -178,6 +178,7 @@ class MongoCurious():
         annotations['feature'] = []
         probes = {}
         for doc in docs:
+            probes[str(doc['targetid'])] = doc['mapinfo']
             tss1 = int(doc['closest_tss'])
             tss2 = int(doc['closest_tss_1'])
             gene = str(doc['ucsc_refgene_name'])
@@ -198,7 +199,7 @@ class MongoCurious():
                     annotations['genes'].append((genenameclosest,tss2))
             if doc['hmm_island']:
                 coord = doc['hmm_island'].split(':')[1].split('-')
-                island  = (coord[0], coord[1])
+                island  = (int(coord[0]), int(coord[1]))
                 if island not in annotations['Islands']: annotations['Islands'].append(island)
             
             if feature and (feature, feature_coord) not in annotations['feature']:
@@ -292,7 +293,6 @@ class MongoCurious():
             self.end = max(pos_betas_dict.keys()) #slow and could be improved
             print "    New end position:", self.end
          
-        self.annotations = self.getannotations() 
         
         return self.pos_betas_dict, self.sample_peaks, self.annotations
 
