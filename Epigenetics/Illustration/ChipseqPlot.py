@@ -180,7 +180,7 @@ class ChipseqPlot(object):
         self.add_ytics()
         self.add_axis()
         self.add_sample_labels(self.margin*2 + self.length)
-        for axis in get_axis(self.end, self.start, self.margin, self.width, self.axis_x_margin, self.axis_y_margin, self.scale_x):
+        for axis in get_axis(self.start, self.end, self.margin, self.width, self.axis_x_margin, self.axis_y_margin, self.scale_x):
             self.elements.append(axis)
         for annotation in get_annotations(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
             self.elements.append(annotation)

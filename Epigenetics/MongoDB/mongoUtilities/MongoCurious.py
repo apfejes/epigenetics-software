@@ -14,7 +14,7 @@ _root_dir = os.path.dirname(_cur_dir)
 _root_dir = os.path.dirname(_root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
-from common_utilities import CreateListFromCursor
+from common_utilities import CreateListFromCursor 
 
 sys.path.insert(0, _root_dir + os.sep + "Illustration")
 import ChipseqPlot as chipseqplot
@@ -38,10 +38,10 @@ class MongoCurious():
     def query(self,
                 collection,
                 chromosome,
+                start,
+                end,
                 chip = None,
                 project = None,
-                start = None,
-                end = None,
                 sample_group = None,
                 sample_label = None,
                 sample_id = None):
@@ -51,9 +51,10 @@ class MongoCurious():
         self.start = start
             
         #Make sure chr variable is in the right format
-        if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
-            chromosome = 'chr' + str(chromosome)
-        self.chromosome = chromosome
+        if self.database == 'human_epigenetics':
+            if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
+                chromosome = 'chr' + str(chromosome)
+            self.chromosome = chromosome
         
         #First we collect the list of samples the user is interested in:
         sample_ids = self.organize_samples(project, sample_label, sample_group, chip)
@@ -61,7 +62,7 @@ class MongoCurious():
         
         #Conduct query and collect the data depending on which collection was chosen.
         if self.collection == 'methylation':
-            cursor = self.finddocs(collection = 'annotations') #get probe and annotation info for region queried
+            cursor = self.finddocs('annotations') #get probe and annotation info for region queried
             docs = CreateListFromCursor(cursor) 
             probes = self.getprobes(docs) #get list of probe ids
             self.collectbetas(sample_ids, probes) #organize the beta values with sample info into a dictionary
@@ -111,7 +112,7 @@ class MongoCurious():
             #Decide which parameters to return
             return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hmm_island': True,
                           'closest_tss_1': True, 'ucsc_refgene_name':True, 'closest_tss_gene_name':True,
-                          'regulatory_feature_group':True, 'regulatory_feature_name':True,'strand':True} 
+                          'regulatory_feature_group':True, 'regulatory_feature_name':True} 
             #Decide how to sort the returned entries (make sure there is an index on the chosen sorting parameter)
             sortby, sortorder = 'mapinfo', 1
             
@@ -259,6 +260,7 @@ class MongoCurious():
         count = 0
         
         probedata = self.finddocs(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, collection = self.collection)
+        
         for methyldata in probedata:
             sample_id = str(methyldata['sampleid'])
             sample = sample_ids[sample_id][0]
@@ -329,6 +331,7 @@ class MongoCurious():
                 
         if count == 0:
             message = "    WARNING: None of peaks found in the query lie in the region!"
+            print message
             #self.errorlog(message)
         else:
             print "   Only %i peaks were found to occur in region." % count
@@ -385,9 +388,15 @@ class MongoCurious():
         return z
     
 #Error function below needs testing
-'''    def errorlog(self, errormessage): 
+
+
+
+
+    def errorlog(self, errormessage): 
+        pass
         #returns error message to server
         self.errorcount +=1
         print errormessage
-        return errormessage '''
+        
+        return errormessage
         

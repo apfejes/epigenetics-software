@@ -8,7 +8,7 @@ from svgwrite.shapes import Rect
 from svgwrite.text import Text
 
 
-def get_axis(end, start, margin, width, axis_x_margin, axis_y_margin, scale_x):
+def get_axis(start, end, margin, width, axis_x_margin, axis_y_margin, scale_x):
     margin = margin
     width = width
     axis_x_margin = margin - 5
