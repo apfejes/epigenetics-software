@@ -52,19 +52,20 @@ class MongoCurious():
         self.chromosome = chromosome
         
         #First we collect the list of samples the user is interested in:
-        sample_ids_list = self.organize_samples(project, sample_label, sample_group, chip)
+        sample_ids = self.organize_samples(project, sample_label, sample_group, chip)
+        print '\n    Sample_ids list:', sample_ids
         
         #Conduct query and collect the data depending on which collection was chosen.
         if self.collection == 'methylation':
             cursor = self.finddocs(collection = 'annotations')
             docs = MongoCurious.parse_cursor(cursor)
-            probe_list = self.getprobes(docs)
+            probes = self.getprobes(docs)
             self.getannotations(docs)
-            self.collectbetas(sample_ids_list, probe_list)
+            self.collectbetas(sample_ids, probes)
         
         if self.collection == 'waves':
-            docs = self.finddocs(collection = collection, chip = chip)
-            self.getwaves(docs, sample_ids_list)
+            docs = self.finddocs(collection = collection, chip = chip, sample_ids = sample_ids)
+            self.getwaves(docs,sample_ids)
             annotations_docs = self.finddocs(collection = 'annotations')
             self.getannotations(annotations_docs)
         
@@ -96,12 +97,12 @@ class MongoCurious():
         return None
 
 
-    def finddocs(self, collection, sample_ids_list = None, 
+    def finddocs(self, collection, sample_ids = None, 
                  probe_id = None, project = None, sample_label = None, 
                  sample_group = None, chip = None):
         '''Finds probes or documents corresponding to query'''
         query_chr, query_location, query_samplabel, query_pos, query_sampgroup = {}, {}, {}, {}, {}
-        query_project, query_probe, query_samplist, query_chip = {}, {}, {}, {}
+        query_project, query_probe, query_samps, query_chip = {}, {}, {}, {}
 
         # Preparing the different parameters of the query depending on the collection chosen
         if collection ==  "annotations":
@@ -121,6 +122,11 @@ class MongoCurious():
             
         elif collection == 'waves':
             query_chr = {'chr':self.chromosome}
+            if sample_ids:
+                ids = []
+                for item in sample_ids.keys():
+                    ids.append(ObjectId(item))
+                query_samps = {"sample_id":{"$in":ids}}
             if project: query_project = {'project': project}
             if self.start and self.end:
                 extension = 500    # extend the region of query to catch peaks with tails in the region
@@ -145,8 +151,8 @@ class MongoCurious():
             sortby, sortorder = 'sample_group', 1
             
         elif collection ==  "methylation":
-            if sample_ids_list:
-                query_samplist = {"sampleid":sample_ids_list}
+            if sample_ids:
+                query_samps = {"sampleid":sample_ids}
             if probe_id: 
                 query_probe = {"probeid":probe_id}
             return_chr = {'mval':True, 'sampleid': True, 'beta':True, 
@@ -159,7 +165,7 @@ class MongoCurious():
             sys.exit()
             
         query = dict(query_chr.items() + query_location.items() + query_probe.items()
-                     + query_samplabel.items() + query_pos.items() + query_samplist.items()
+                     + query_samplabel.items() + query_pos.items() + query_samps.items()
                      + query_sampgroup.items() + query_project.items() + query_chip.items())
         print "\n Conducting query: "
         print "   From the database '{0}', and collection '{1}', ".format(self.database, collection)
@@ -232,7 +238,6 @@ class MongoCurious():
         
         sample_ids = {}
         for doc in samplesdocs:
-            print doc
             sample_id = str(doc['_id'])
             
             if self.collection == 'waves':
@@ -264,7 +269,7 @@ class MongoCurious():
         sample_peaks = {}   #contains average CpG value and std for samples from same Sample Group
         count = 0
         
-        probedata = self.finddocs(sample_ids_list = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, collection = self.collection)
+        probedata = self.finddocs(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, collection = self.collection)
         for methyldata in probedata:
             sample_id = str(methyldata['sampleid'])
             sample = sample_ids[sample_id][0]
@@ -315,7 +320,7 @@ class MongoCurious():
         return None
 
 
-    def getwaves(self, docs):
+    def getwaves(self, docs, sample_ids):
         count = 0
         tail = 1
         # This list will store the tuple (pos,height, std dev, sample id) as a value.
@@ -323,22 +328,19 @@ class MongoCurious():
         # "tail" is min height of a tail to be included in the plot for a peak
         # which doesn't have its center in the region
         for doc in docs:
-            pos, height, stddev, sample_id = doc['pos'], doc['height'], int(doc['stddev']), doc['sample_id']
+            pos, height, stddev, sample_id = doc['pos'], doc['height'], int(doc['stddev']), str(doc['sample_id'])
             #search for sample label name:
-            sample_id = ObjectId(sample_id)
-            sample_label = self.mongo.find('samples', {'_id':sample_id},{'chip':True})[0]['chip']
-            #print sample_label
-            # append all peaks with a center in the region
+            doc_sample_group = sample_ids[sample_id]
             if self.start <= pos <= self.end:
-                waves.append((pos, height, stddev, sample_label))
+                waves.append((pos, height, stddev, doc_sample_group))
                 count += 1
             else:
                 dist_to_region = min(abs(pos - self.end), abs(self.start - pos))
                 dist_from_peak_to_tail = sqrt((-2) * stddev * stddev * log(tail / height))
                 if dist_from_peak_to_tail - dist_to_region >= 0:
-                    waves.append((pos, height, stddev, sample_label))
+                    waves.append((pos, height, stddev, doc_sample_group))
                     count += 1
-                # else: print "         Not included:    ", pos, height, stddev,
+                
         if count == 0:
             message = "    WARNING: None of peaks found in the query lie in the region!"
             self.errorlog(message)

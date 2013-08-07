@@ -14,7 +14,7 @@ t0 = time()
 m = MongoCurious.MongoCurious(database = "human_epigenetics")
 # Query the database
 
-query1 = m.query(collection = "waves", chromosome = "chr4", chip = 'Iggrab', start = 3005000, end = 3211000)
+query1 = m.query(collection = "waves", chromosome = "chr4", chip = 'Mafkab50322', start = 3005000, end = 3211000)
 # Make the svg file called "peaks.svg" in the /SVGs folder
 m.svg(filename = "test_peak.svg", title = "Huntington gene", color = 'indigo')
 
