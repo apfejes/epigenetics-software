@@ -58,16 +58,17 @@ def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_marg
         #print 'island', a,b
         if a < start: a = start
         if b > end: b = end
-        height = 3
-        length = (b-a)*scale_x
         x1 = margin + (a-start)*scale_x
-        y1 = width + margin*2 -height - 5
+        y1 = axis_y_margin
+        height = y1 + width + margin -10
+        length = (b-a)*scale_x
         #print x1, length, y1
-        color = 'hotpink'
+        color = 'limegreen'
     
         island = Rect(insert = (x1, y1), 
                        size = (length,height),
-                       fill = color)
+                       fill = color, 
+                       fill_opacity = 0.3)
         elements.append(island)
     
     return elements
