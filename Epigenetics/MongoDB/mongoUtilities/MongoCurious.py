@@ -14,7 +14,7 @@ _root_dir = os.path.dirname(_cur_dir)
 _root_dir = os.path.dirname(_root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
-from common_utilities import *
+from common_utilities import CreateListFromCursor
 
 sys.path.insert(0, _root_dir + os.sep + "Illustration")
 import ChipseqPlot as chipseqplot
@@ -24,6 +24,8 @@ from bson.objectid import ObjectId
 
 directory_for_svgs = "/home/sperez/Documents/svg_temp/"
 
+
+
 class MongoCurious():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
     def __init__(self,
@@ -31,7 +33,7 @@ class MongoCurious():
         '''Connects to database'''
         self.database = database
         self.mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database)
-        self.errorcount = 0
+        #self.errorcount = 0
 
     def query(self,
                 collection,
@@ -48,6 +50,7 @@ class MongoCurious():
         self.end = end
         self.start = start
             
+        #Make sure chr variable is in the right format
         if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
             chromosome = 'chr' + str(chromosome)
         self.chromosome = chromosome
@@ -58,17 +61,17 @@ class MongoCurious():
         
         #Conduct query and collect the data depending on which collection was chosen.
         if self.collection == 'methylation':
-            cursor = self.finddocs(collection = 'annotations')
-            docs = CreateListFromCursor(cursor)
-            probes = self.getprobes(docs)
-            self.getannotations(docs)
-            self.collectbetas(sample_ids, probes)
+            cursor = self.finddocs(collection = 'annotations') #get probe and annotation info for region queried
+            docs = CreateListFromCursor(cursor) 
+            probes = self.getprobes(docs) #get list of probe ids
+            self.collectbetas(sample_ids, probes) #organize the beta values with sample info into a dictionary
+            self.getannotations(docs) #organize the gene annotations in a dictionary 
         
         if self.collection == 'waves':
-            docs = self.finddocs(collection = collection, chip = chip, sample_ids = sample_ids)
-            self.getwaves(docs,sample_ids)
-            annotations_docs = self.finddocs(collection = 'annotations')
-            self.getannotations(annotations_docs)
+            docs = self.finddocs(collection = collection, chip = chip, sample_ids = sample_ids) #get peak info for region queried
+            self.getwaves(docs,sample_ids) #organize peak info into a dictionary
+            annotations_docs = self.finddocs(collection = 'annotations') # get the gene annotations info 
+            self.getannotations(annotations_docs) #organize the gene annotations in a dictionary 
         
         return None
 
@@ -94,39 +97,33 @@ class MongoCurious():
     def finddocs(self, collection, sample_ids = None, 
                  probe_id = None, project = None, sample_label = None, 
                  sample_group = None, chip = None):
-        '''Finds probes or documents corresponding to query'''
-        query_chr, query_location, query_samplabel, query_pos, query_sampgroup = {}, {}, {}, {}, {}
-        query_project, query_probe, query_samps, query_chip = {}, {}, {}, {}
 
-        # Preparing the different parameters of the query depending on the collection chosen
+        '''Finds documents corresponding to collection and type of query'''
+        
+        #This dictionary will store all the query parameters
+        query_parameters = {}
+
+        # Adding the different parameters of the query depending on the collection chosen
         if collection ==  "annotations":
-            query_chr = {"chr":self.chromosome}
-            #if project: query_project = {'project': project}
+            query_parameters["chr"] = self.chromosome
             if self.end and self.start: 
-                query_location = {"mapinfo":{"$gte":self.start, "$lte":self.end }}
-            #if sample_label: query_samplabel = {"sample_label":sample_label}
-            #return_chr = {'_id': False, 'beta_value': True,
-            #              'start_position': True, 'end_position': True,
-            #              'sample_label': True}
+                query_parameters["mapinfo"] = {"$gte":self.start, "$lte":self.end }
             return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hmm_island': True,
                           'closest_tss_1': True, 'ucsc_refgene_name':True, 'closest_tss_gene_name':True,
                           'regulatory_feature_group':True, 'regulatory_feature_name':True,'strand':True} 
             sortby, sortorder = 'mapinfo', 1
             
-            
         elif collection == 'waves':
-            query_chr = {'chr':self.chromosome}
+            query_parameters['chr'] = self.chromosome
             if sample_ids:
                 ids = []
                 for item in sample_ids.keys():
                     ids.append(ObjectId(item))
-                query_samps = {"sample_id":{"$in":ids}}
-            if project: query_project = {'project': project}
+                query_parameters["sample_id"] = {"$in":ids}
+            if project: query_parameters['project'] = project
             if self.start and self.end:
                 extension = 500    # extend the region of query to catch peaks with tails in the region
-                query_pos = {"pos":{"$lte":self.end + extension, "$gte":self.start - extension}}
-            if sample_label: query_samplabel = {"sample_label":sample_label}
-            #if self.sample_group: query_sampgroup = {"Sample Group":self.sample_group}
+                query_parameters["pos"] = {"$lte":self.end + extension, "$gte":self.start - extension}
             return_chr = {'_id': False, 'pos': True,
                           'height': True, 'stddev': True,
                           'sample_id': True}
@@ -134,21 +131,21 @@ class MongoCurious():
 
         elif collection =="samples":
             if self.collection == 'waves':
-                if chip: query_chip = {"chip":chip}
-                else: query_chip  = {'chip':{"$exists":True}}
+                if chip: query_parameters["chip"] = chip
+                else: query_parameters['chip'] = {"$exists":True}
             elif self.collection == 'methylation':
-                if project: query_project = {"project":project}
-                if sample_label: query_samplabel = {"sample_label":sample_label}
-                if sample_group: query_sampgroup = {"sample_group":sample_group}
+                if project: query_parameters["project"] = project
+                if sample_label: query_parameters["sample_label"] = sample_label
+                if sample_group: query_parameters["sample_group"] = sample_group
             return_chr = {'_id': True, 'samplelabel': True, 
                               'project': True, 'sample_group': True, 'chip':True}
             sortby, sortorder = 'sample_group', 1
             
         elif collection ==  "methylation":
             if sample_ids:
-                query_samps = {"sampleid":sample_ids}
+                query_parameters["sampleid"] = sample_ids
             if probe_id: 
-                query_probe = {"probeid":probe_id}
+                query_parameters["probeid"] = probe_id
             return_chr = {'mval':True, 'sampleid': True, 'beta':True, 
                           'probeid':True}
             sortby, sortorder = 'sampleid', 1
@@ -158,18 +155,15 @@ class MongoCurious():
             print "Collection queried is either not supported or not in the database. Exiting..."
             sys.exit()
             
-        query = dict(query_chr.items() + query_location.items() + query_probe.items()
-                     + query_samplabel.items() + query_pos.items() + query_samps.items()
-                     + query_sampgroup.items() + query_project.items() + query_chip.items())
         print "\n Conducting query: "
         print "   From the database '{0}', and collection '{1}', ".format(self.database, collection)
-        print "   Find(", query, ")"
+        print "   Find(", query_parameters, ")"
         # Get probes corresponding to query and sort by starting positions for beta value binning
-        docs = self.mongo.find(collection, query, return_chr).sort(sortby, sortorder)
+        docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
 
         if docs.count() == 0:
             message  = "    WARNING: The following query return zero probes or documents!" 
-            message  += "\n    ---> Find(" + str(query) + ")"
+            message  += "\n    ---> Find(" + str(query_parameters) + ")"
             message  += "\n     use the checkquery() method to validate the inputs of your query."
             self.errorlog(message)
             sys.exit()
@@ -180,6 +174,13 @@ class MongoCurious():
         self.docs = docs
         return docs
 
+    def getprobes(self,docs):
+        probes = {}
+        for doc in docs:
+            if self.collection == 'methylation':
+                probes[str(doc['targetid'])] = doc['mapinfo']
+        return probes
+    
     def getannotations(self,docs):
         annotations = {}
         annotations['TSS'] = []
@@ -247,13 +248,6 @@ class MongoCurious():
                         sample_ids[sample_id] = (doc_sample_label, doc_sample_group)
             
         return sample_ids
-        
-    def getprobes(self,docs):
-        probes = {}
-        for doc in docs:
-            if self.collection == 'methylation':
-                probes[str(doc['targetid'])] = doc['mapinfo']
-        return probes
         
     def collectbetas(self,sample_ids, probes):
         '''Collects and bins methylation data'''

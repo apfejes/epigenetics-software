@@ -12,7 +12,8 @@ from math import fabs, exp, sqrt, log
 import Color_Palette 
 palette = Color_Palette.ColorPalette()
 
-from PlotUtilities import *
+from PlotUtilities import get_annotations, get_axis
+
 
 
 class MethylationPlot(object):
@@ -67,7 +68,7 @@ class MethylationPlot(object):
         scale_y = (width + margin) * 0.8 / max(self.Y)
         self.scale_y = scale_y
         
-        #colors, color_wheel = palette.Colors()       #blue, red, green, purple palettes
+        palette.Colors()       #blue, red, green, purple palettes
 
         for position in self.pos_betas_dict.keys():
             x = round(float(position - offset_x) * scale_x, 2) + margin
