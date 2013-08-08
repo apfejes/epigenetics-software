@@ -58,7 +58,7 @@ class MongoCurious():
         
         #First we collect the list of samples the user is interested in:
         sample_ids = self.organize_samples(project, sample_label, sample_group, chip)
-        print '\n    Sample_ids list:', sample_ids
+        #print '\n    Sample_ids list:', sample_ids
         
         #Conduct query and collect the data depending on which collection was chosen.
         if self.collection == 'methylation':
@@ -212,14 +212,19 @@ class MongoCurious():
             if doc['hmm_island']:
                 coord = doc['hmm_island'].split(':')[1].split('-')
                 island  = (int(coord[0]), int(coord[1]))
-                if island not in annotations['Islands']: annotations['Islands'].append(island)
+                if island not in annotations['Islands']: 
+                    annotations['Islands'].append(island)
+#                     k = ''
+#                     if doc['mapinfo'] in range(island[0], island[1]): k = 'yes'
+#                     else: k = 'no'
+#                     print 'island', island, k, doc['mapinfo'], str(doc['targetid'])
             
             if feature and (feature, feature_coord) not in annotations['feature']:
                 annotations['feature'].append((feature, feature_coord))
                 
         print "\n    Annotations found:"
-        for key,value in annotations.iteritems():
-            print "        ", key, len(value), value
+#         for key,value in annotations.iteritems():
+#             print "        ", key, len(value), value
 
         self.annotations = annotations
         return None
@@ -296,8 +301,7 @@ class MongoCurious():
         self.sample_peaks = sample_peaks
 
         if self.start == None:
-            self.start = min(pos_betas_dict.keys()) #slow and could be improve
-            #This might work instead: self.start = pos_betas_dict.keys()[0]
+            self.start = 0
             
             print "    New start position:", self.start
         if self.end == None:
