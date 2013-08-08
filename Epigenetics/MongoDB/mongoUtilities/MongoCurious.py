@@ -97,6 +97,34 @@ class MongoCurious():
         return None
 
 
+    def organize_samples(self, project, sample_label, sample_group, chip):
+        #Finds the sample_ids of the project and sample group user is interested in
+        #saves a dictionary of the form {sample_id: (sample_label, sample_group)
+        
+        samplesdocs = self.finddocs(collection = 'samples', project = project, 
+                                    sample_label = sample_label, 
+                                    sample_group = sample_group, 
+                                    chip = chip)
+        
+        sample_ids = {}
+        for doc in samplesdocs:
+            sample_id = str(doc['_id'])
+            
+            if self.collection == 'waves':
+                doc_chip = str(doc['chip'])
+                if doc_chip == chip or chip == None:
+                    sample_ids[sample_id] = doc_chip
+                
+            if self.collection == 'methylation':
+                doc_sample_group = doc['sample_group']
+                doc_sample_label = doc['samplelabel']
+                if doc_sample_group == sample_group or sample_group == None: 
+                    if doc_sample_label == sample_label or sample_label == None:
+                        sample_ids[sample_id] = (doc_sample_label, doc_sample_group)
+            
+        return sample_ids
+
+
     def finddocs(self, collection, sample_ids = None, 
                  probe_id = None, project = None, sample_label = None, 
                  sample_group = None, chip = None):
@@ -189,74 +217,6 @@ class MongoCurious():
                 probes[str(doc['targetid'])] = doc['mapinfo']
         return probes
     
-    def getannotations(self,docs):
-        '''Organizes the annotation information into a dictionary'''
-        annotations = {}
-        annotations['TSS'] = set([])
-        annotations['Islands'] = set([])
-        annotations['genes'] = set([])
-        annotations['feature'] = set([])
-        
-        for doc in docs:
-            tss1 = int(doc['closest_tss'])
-            tss2 = int(doc['closest_tss_1'])
-            gene = str(doc['ucsc_refgene_name'])
-            if gene: gene = list(set(str(gene).split(';')))
-            geneclosest = str(doc["closest_tss_gene_name"])
-            if geneclosest : geneclosest = list(set(str(geneclosest).split(';')))
-            feature = str(doc['regulatory_feature_group'])
-            feature_coord = str(doc['regulatory_feature_name'])
-            if feature and feature_coord: feature_coord.split(':')[1].split('-')
-            
-            for genename in gene:
-                if tss1 in range(self.start, self.end):
-                    annotations['TSS'].add((genename,tss1))
-                else: annotations['genes'].add((genename, tss1))
-            for genenameclosest in geneclosest:
-                annotations['genes'].add((genenameclosest,tss2))
-                    
-            if doc['hmm_island']:
-                coord = doc['hmm_island'].split(':')[1].split('-')
-                island  = (int(coord[0]), int(coord[1]))
-                annotations['Islands'].add(island)
-            
-            annotations['feature'].add((feature, feature_coord))
-                
-        print "\n    Annotations found:"
-#         for key,value in annotations.iteritems():
-#             print "        ", key, len(value), value
-
-        self.annotations = annotations
-        return None
-
-    
-    def organize_samples(self, project, sample_label, sample_group, chip):
-        #Finds the sample_ids of the project and sample group user is interested in
-        #saves a dictionary of the form {sample_id: (sample_label, sample_group)
-        
-        samplesdocs = self.finddocs(collection = 'samples', project = project, 
-                                    sample_label = sample_label, 
-                                    sample_group = sample_group, 
-                                    chip = chip)
-        
-        sample_ids = {}
-        for doc in samplesdocs:
-            sample_id = str(doc['_id'])
-            
-            if self.collection == 'waves':
-                doc_chip = str(doc['chip'])
-                if doc_chip == chip or chip == None:
-                    sample_ids[sample_id] = doc_chip
-                
-            if self.collection == 'methylation':
-                doc_sample_group = doc['sample_group']
-                doc_sample_label = doc['samplelabel']
-                if doc_sample_group == sample_group or sample_group == None: 
-                    if doc_sample_label == sample_label or sample_label == None:
-                        sample_ids[sample_id] = (doc_sample_label, doc_sample_group)
-            
-        return sample_ids
-        
     def collectbetas(self,sample_ids, probes):
         '''Collects and bins methylation data'''
 
@@ -356,6 +316,47 @@ class MongoCurious():
         
         return None
 
+    def getannotations(self,docs):
+        '''Organizes the annotation information into a dictionary'''
+        annotations = {}
+        annotations['TSS'] = set([])
+        annotations['Islands'] = set([])
+        annotations['genes'] = set([])
+        annotations['feature'] = set([])
+        
+        for doc in docs:
+            tss1 = int(doc['closest_tss'])
+            tss2 = int(doc['closest_tss_1'])
+            gene = str(doc['ucsc_refgene_name'])
+            if gene: gene = list(set(str(gene).split(';')))
+            geneclosest = str(doc["closest_tss_gene_name"])
+            if geneclosest : geneclosest = list(set(str(geneclosest).split(';')))
+            feature = str(doc['regulatory_feature_group'])
+            feature_coord = str(doc['regulatory_feature_name'])
+            if feature and feature_coord: feature_coord.split(':')[1].split('-')
+            
+            for genename in gene:
+                if tss1 in range(self.start, self.end):
+                    annotations['TSS'].add((genename,tss1))
+                else: annotations['genes'].add((genename, tss1))
+            for genenameclosest in geneclosest:
+                annotations['genes'].add((genenameclosest,tss2))
+                    
+            if doc['hmm_island']:
+                coord = doc['hmm_island'].split(':')[1].split('-')
+                island  = (int(coord[0]), int(coord[1]))
+                annotations['Islands'].add(island)
+            
+            annotations['feature'].add((feature, feature_coord))
+                
+        print "\n    Annotations found:"
+#         for key,value in annotations.iteritems():
+#             print "        ", key, len(value), value
+
+        self.annotations = annotations
+        return None
+
+            
 
     def svg(self, filename = None, title = None,
             color = None, to_string = False,
