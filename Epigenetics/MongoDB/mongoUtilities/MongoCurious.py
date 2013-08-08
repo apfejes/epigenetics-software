@@ -67,7 +67,9 @@ class MongoCurious():
             docs = CreateListFromCursor(cursor) 
             probes = self.getprobes(docs) #get list of probe ids
             self.collectbetas(sample_ids, probes) #organize the beta values with sample info into a dictionary
-            self.getannotations(docs) #organize the gene annotations in a dictionary 
+            t0 = time()
+            self.getannotations(docs) #organize the gene annotations in a dictionary
+            print 'Annotation time:', time()-t0 
         
         if self.collection == 'waves':
             docs = self.finddocs(collection = collection, chip = chip, sample_ids = sample_ids) #get peak info for region queried
@@ -138,6 +140,7 @@ class MongoCurious():
                 if chip: query_parameters["chip"] = chip
                 else: query_parameters['chip'] = {"$exists":True}
             elif self.collection == 'methylation':
+                query_parameters['chip'] = {"$exists":False}
                 if project: query_parameters["project"] = project
                 if sample_label: query_parameters["sample_label"] = sample_label
                 if sample_group: query_parameters["sample_group"] = sample_group
@@ -152,7 +155,7 @@ class MongoCurious():
                 query_parameters["probeid"] = probe_id
             return_chr = {'mval':True, 'sampleid': True, 'beta':True, 
                           'probeid':True}
-            sortby, sortorder = 'sampleid', 1
+            sortby, sortorder = None, None
             
         else: 
             print "Collection queried is either not supported or not in the database. Exiting..."
@@ -162,13 +165,17 @@ class MongoCurious():
         print "   From the database '{0}', and collection '{1}', ".format(self.database, collection)
         print "   Find(", query_parameters, ")"
         # Get documents corresponding to query and sort by sorting parameter
-        docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
-
+        if sortby:
+            docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
+        else: 
+            docs = self.mongo.find(collection, query_parameters, return_chr)
+        
         if docs.count() == 0:
             message  = "    WARNING: The following query return zero probes or documents!" 
             message  += "\n    ---> Find(" + str(query_parameters) + ")"
             message  += "\n     use the checkquery() method to validate the inputs of your query."
             #self.errorlog(message)
+            print message
             sys.exit()
             
         print "    --> Found %i documents." % docs.count()
@@ -186,11 +193,10 @@ class MongoCurious():
     def getannotations(self,docs):
         '''Organizes the annotation information into a dictionary'''
         annotations = {}
-        annotations['TSS'] = Set([])
-        annotations['Islands'] = Set([])
-        annotations['genes'] = Set([])
-        annotations['feature'] = Set([])
-        
+        annotations['TSS'] = []
+        annotations['Islands'] = []
+        annotations['genes'] = []
+        annotations['feature'] = []
         for doc in docs:
             tss1 = int(doc['closest_tss'])
             tss2 = int(doc['closest_tss_1'])
@@ -200,21 +206,29 @@ class MongoCurious():
             if geneclosest : geneclosest = list(set(str(geneclosest).split(';')))
             feature = str(doc['regulatory_feature_group'])
             feature_coord = str(doc['regulatory_feature_name'])
-            if feature and feature_coord: feature_coord.split(':')[1].split('-')
+            if feature_coord: feature_coord.split(':')[1].split('-')
             
             for genename in gene:
-                if tss1 in range(self.start, self.end):
-                    annotations['TSS'].add((genename,tss1))
-                else: annotations['genes'].add((genename, tss1))
+                if tss1 in range(self.start, self.end) and (genename,tss1) not in annotations['TSS']:
+                    annotations['TSS'].append((genename,tss1))
+                elif (genename,tss1) not in annotations['genes']:
+                    annotations['genes'].append((genename, tss1))
             for genenameclosest in geneclosest:
-                annotations['genes'].add((genenameclosest,tss2))
+                if (genenameclosest,tss2) not in annotations['genes']:
+                    annotations['genes'].append((genenameclosest,tss2))
                     
             if doc['hmm_island']:
                 coord = doc['hmm_island'].split(':')[1].split('-')
                 island  = (int(coord[0]), int(coord[1]))
-                annotations['Islands'].add(island)
+                if island not in annotations['Islands']: 
+                    annotations['Islands'].append(island)
+#                     k = ''
+#                     if doc['mapinfo'] in range(island[0], island[1]): k = 'yes'
+#                     else: k = 'no'
+#                     print 'island', island, k, doc['mapinfo'], str(doc['targetid'])
             
-            annotations['feature'].add((feature, feature_coord))
+            if feature and (feature, feature_coord) not in annotations['feature']:
+                annotations['feature'].append((feature, feature_coord))
                 
         print "\n    Annotations found:"
 #         for key,value in annotations.iteritems():
@@ -222,6 +236,7 @@ class MongoCurious():
 
         self.annotations = annotations
         return None
+
     
     def organize_samples(self, project, sample_label, sample_group, chip):
         #Finds the sample_ids of the project and sample group user is interested in
