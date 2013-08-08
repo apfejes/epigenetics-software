@@ -21,6 +21,7 @@ import ChipseqPlot as chipseqplot
 import MethylationPlot as methylationplot
 
 from bson.objectid import ObjectId
+from sets import Set
 
 directory_for_svgs = "/home/sperez/Documents/svg_temp/"
 
@@ -185,10 +186,11 @@ class MongoCurious():
     def getannotations(self,docs):
         '''Organizes the annotation information into a dictionary'''
         annotations = {}
-        annotations['TSS'] = []
-        annotations['Islands'] = []
-        annotations['genes'] = []
-        annotations['feature'] = []
+        annotations['TSS'] = Set([])
+        annotations['Islands'] = Set([])
+        annotations['genes'] = Set([])
+        annotations['feature'] = Set([])
+        
         for doc in docs:
             tss1 = int(doc['closest_tss'])
             tss2 = int(doc['closest_tss_1'])
@@ -198,29 +200,21 @@ class MongoCurious():
             if geneclosest : geneclosest = list(set(str(geneclosest).split(';')))
             feature = str(doc['regulatory_feature_group'])
             feature_coord = str(doc['regulatory_feature_name'])
-            if feature_coord: feature_coord.split(':')[1].split('-')
+            if feature and feature_coord: feature_coord.split(':')[1].split('-')
             
             for genename in gene:
-                if tss1 in range(self.start, self.end) and (genename,tss1) not in annotations['TSS']:
-                    annotations['TSS'].append((genename,tss1))
-                elif (genename,tss1) not in annotations['genes']:
-                    annotations['genes'].append((genename, tss1))
+                if tss1 in range(self.start, self.end):
+                    annotations['TSS'].add((genename,tss1))
+                else: annotations['genes'].add((genename, tss1))
             for genenameclosest in geneclosest:
-                if (genenameclosest,tss2) not in annotations['genes']:
-                    annotations['genes'].append((genenameclosest,tss2))
+                annotations['genes'].add((genenameclosest,tss2))
                     
             if doc['hmm_island']:
                 coord = doc['hmm_island'].split(':')[1].split('-')
                 island  = (int(coord[0]), int(coord[1]))
-                if island not in annotations['Islands']: 
-                    annotations['Islands'].append(island)
-#                     k = ''
-#                     if doc['mapinfo'] in range(island[0], island[1]): k = 'yes'
-#                     else: k = 'no'
-#                     print 'island', island, k, doc['mapinfo'], str(doc['targetid'])
+                annotations['Islands'].add(island)
             
-            if feature and (feature, feature_coord) not in annotations['feature']:
-                annotations['feature'].append((feature, feature_coord))
+            annotations['feature'].add((feature, feature_coord))
                 
         print "\n    Annotations found:"
 #         for key,value in annotations.iteritems():
@@ -263,6 +257,7 @@ class MongoCurious():
         pos_betas_dict = {} #contains CpGs
         sample_peaks = {}   #contains average CpG value and std for samples from same Sample Group
         count = 0
+        maxpos = 0
         
         probedata = self.finddocs(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, collection = self.collection)
         
@@ -285,7 +280,8 @@ class MongoCurious():
                     sample_peaks[pos][stype] = [beta]
             else:
                 sample_peaks[pos]={stype:[beta]}
-                
+            if pos > maxpos:
+                maxpos = pos
                 
         print '\n    %s probes\' beta values were extracted.' % count
         print "    %i CpGs locations were found" % len(pos_betas_dict)
@@ -302,10 +298,9 @@ class MongoCurious():
 
         if self.start == None:
             self.start = 0
-            
             print "    New start position:", self.start
         if self.end == None:
-            self.end = max(pos_betas_dict.keys()) #slow and could be improved
+            self.end = maxpos
             print "    New end position:", self.end
          
         
@@ -315,6 +310,8 @@ class MongoCurious():
     def getwaves(self, docs, sample_ids):
         count = 0
         tail = 1
+        maxpos = 0
+        
         # This list will store the tuple (pos,height, std dev, sample id) as a value.
         waves = []
         # "tail" is min height of a tail to be included in the plot for a peak
@@ -332,7 +329,16 @@ class MongoCurious():
                 if dist_from_peak_to_tail - dist_to_region >= 0:
                     waves.append((pos, height, stddev, doc_sample_group))
                     count += 1
+            if pos > maxpos:
+                maxpos = pos
                 
+        if self.start == None:
+            self.start = 0
+            print "    New start position:", self.start
+        if self.end == None:
+            self.end = maxpos
+            print "    New end position:", self.end
+            
         if count == 0:
             message = "    WARNING: None of peaks found in the query lie in the region!"
             print message
