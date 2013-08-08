@@ -14,6 +14,61 @@ class ParametersEditor (tk.Toplevel):
         self.resizable(0, 0)
         self.createWidgets()
 
+
+        # initializing variatbles
+        self.cancel_but = None
+        self.input_options_frame = None
+        self.input_file_lab = None
+        self.input_file_entry = None
+        self.input_file_but = None
+        self.extension_options_frame = None
+        self.map_type_lab = None
+        self.choices = None
+        self.map_type_selected = None
+        self.map_type_option = None
+        self.triangle_min_lab = None
+        self.triangle_min_scale = None
+        self.triangle_median_lab = None
+        self.triangle_median_scale = None
+        self.fragment_length_lab = None
+        self.fragment_length_entry = None
+        self.max_pet_length_lab = None
+        self.max_pet_length_entry = None
+        self.round_leading_edge = None
+        self.round_leading_edge_button = None
+        self.wave_calling_options_frame = None
+        self.min_height_lab = None
+        self.min_height_entry = None
+        self.runtime_configuration_options_frame = None
+        self.processor_threads_lab = None
+        self.processor_threads_entry = None
+        self.output_options_frame = None
+
+        self.output_path_lab = None
+        self.output_path_entry = None
+        self.output_path_button = None
+        self.file_name_lab = None
+        self.file_name_entry = None
+
+        self.number_waves = None
+        self.number_waves_button = None
+        self.make_wig = None
+        self.make_wig_button = None
+        self.bottom_button_frame = None
+        self.apply_but = None
+        self.load_but = None
+        self.save_as_but = None
+        self.cancel_but = None
+
+
+
+
+
+
+
+
+
+
     def createWidgets(self):
         # Input Options
         self.input_options_frame = tk.LabelFrame(self, text = "Input Options", padx = 5, pady = 5)

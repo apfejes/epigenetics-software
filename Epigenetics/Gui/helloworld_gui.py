@@ -26,6 +26,10 @@ class Application(Frame):
         self.pack()
         self.createWidget()
 
+        self.hi = None
+        self.QUIT = None
+        self.Text = None
+
 
 
 root = Tk()

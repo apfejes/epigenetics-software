@@ -22,9 +22,9 @@ arrayQuery = {'array_type': 'humanmethylation450_beadchip'}
 
 
 
-def AddChrPrefix(collection_name, chromosome_list):
+def AddChrPrefix(collection_name, chr_list):
     starttime = time.time()
-    for c in chromosome_list:
+    for c in chr_list:
         chrQuery = {'chr': c}
         updateDict = {'CHR': ''.join(['chr', c])}
         setDict = {'$set': updateDict}

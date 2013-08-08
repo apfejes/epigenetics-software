@@ -7,7 +7,6 @@ Created on 2013-04-15
 
 import sys
 import os
-from string import lowercase
 
 # sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
@@ -22,8 +21,8 @@ _mgutl_dir = _root_dir + os.sep + "MongoDB"
 print "mongo util path: %s" % _mgutl_dir
 print "sys.path: %s" % sys.path
 # sys.path.insert(0, _root_dir + os.sep + "MongoDB")
-from WaveGenerator.Utilities import Parameters
-from MongoDB.mongoUtilities import Mongo_Connector
+import Parameters
+import Mongo_Connector
 
 def run():
     meta_data_file = "/home/afejes/Chip-chip/ChIPchipMetaData_v1.csv"
