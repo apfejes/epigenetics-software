@@ -21,7 +21,6 @@ import ChipseqPlot as chipseqplot
 import MethylationPlot as methylationplot
 
 from bson.objectid import ObjectId
-from sets import Set
 
 directory_for_svgs = "/home/sperez/Documents/svg_temp/"
 
@@ -193,10 +192,11 @@ class MongoCurious():
     def getannotations(self,docs):
         '''Organizes the annotation information into a dictionary'''
         annotations = {}
-        annotations['TSS'] = []
-        annotations['Islands'] = []
-        annotations['genes'] = []
-        annotations['feature'] = []
+        annotations['TSS'] = set([])
+        annotations['Islands'] = set([])
+        annotations['genes'] = set([])
+        annotations['feature'] = set([])
+        
         for doc in docs:
             tss1 = int(doc['closest_tss'])
             tss2 = int(doc['closest_tss_1'])
@@ -206,29 +206,21 @@ class MongoCurious():
             if geneclosest : geneclosest = list(set(str(geneclosest).split(';')))
             feature = str(doc['regulatory_feature_group'])
             feature_coord = str(doc['regulatory_feature_name'])
-            if feature_coord: feature_coord.split(':')[1].split('-')
+            if feature and feature_coord: feature_coord.split(':')[1].split('-')
             
             for genename in gene:
-                if tss1 in range(self.start, self.end) and (genename,tss1) not in annotations['TSS']:
-                    annotations['TSS'].append((genename,tss1))
-                elif (genename,tss1) not in annotations['genes']:
-                    annotations['genes'].append((genename, tss1))
+                if tss1 in range(self.start, self.end):
+                    annotations['TSS'].add((genename,tss1))
+                else: annotations['genes'].add((genename, tss1))
             for genenameclosest in geneclosest:
-                if (genenameclosest,tss2) not in annotations['genes']:
-                    annotations['genes'].append((genenameclosest,tss2))
+                annotations['genes'].add((genenameclosest,tss2))
                     
             if doc['hmm_island']:
                 coord = doc['hmm_island'].split(':')[1].split('-')
                 island  = (int(coord[0]), int(coord[1]))
-                if island not in annotations['Islands']: 
-                    annotations['Islands'].append(island)
-#                     k = ''
-#                     if doc['mapinfo'] in range(island[0], island[1]): k = 'yes'
-#                     else: k = 'no'
-#                     print 'island', island, k, doc['mapinfo'], str(doc['targetid'])
+                annotations['Islands'].add(island)
             
-            if feature and (feature, feature_coord) not in annotations['feature']:
-                annotations['feature'].append((feature, feature_coord))
+            annotations['feature'].add((feature, feature_coord))
                 
         print "\n    Annotations found:"
 #         for key,value in annotations.iteritems():
@@ -254,7 +246,7 @@ class MongoCurious():
             if self.collection == 'waves':
                 doc_chip = str(doc['chip'])
                 if doc_chip == chip or chip == None:
-                    sample_ids[sample_id] = chip
+                    sample_ids[sample_id] = doc_chip
                 
             if self.collection == 'methylation':
                 doc_sample_group = doc['sample_group']
