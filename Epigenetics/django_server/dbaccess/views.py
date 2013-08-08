@@ -25,6 +25,8 @@ def view_collections(request):
     return render(request, 'collections.jade')
 
 def view_query_form(request):
+    if request.method == 'POST': # If the query has been submitted...
+        query(request)
     return render(request, 'query_form.jade')
 
 def view_methylation(request):
@@ -80,7 +82,5 @@ def query(request):
                 return HttpResponse(collection + ' is an invalid collection! Please try again...')
         else:
             return HttpResponse('You query parameters were invalid! Please try again...') # Redirect after POST
-    else:
-        #form = QueryForm() # An unbound form
-        return HttpResponse('Please try again...') # Redirect after POS
+    return HttpResponse('Hey ho')
 

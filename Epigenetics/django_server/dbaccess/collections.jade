@@ -1,4 +1,4 @@
-extends base
+extends query_form
 
 block title
 	| Human Epigenetics Database
@@ -6,9 +6,5 @@ block title
 
 block content
 	article
-		header
-			h2 Query the database
-		block intro
-			p Please fill in the query parameters to launch the visualization:
 		block text
 			embed(src!='{% url 'collection_names' %}')

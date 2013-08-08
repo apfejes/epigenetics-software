@@ -1,41 +1,40 @@
 extends base
 
 block title
-	| Human Epigenetics Database
-
-
+    | Human Epigenetics Database
+    
+    
 block content
-	article
-		header
-			h2 Query the database
-		block intro
-			p Please fill in the query parameters to launch the visualization:
-
-		block form
-			form(action='/dbaccess/query/',method='post')
-				div(data-role='fieldcontain')
-					fieldset(data-role='database')
-						label(for='database') Organism:
-							select(name='database') 
-								option(value="human")="Human"
-								option(value="yeast")="Yeast"
-								option(value="arabidopsis")="Arabidopsis"
-					fieldset(data-role='collection')
-						label(for='collection') Collection:
-							select(name='collection') 
-								option(value="chipseq")="ChIP-Seq"
-								option(value="methylation")="Methylation"
-					fieldset(data-role='chromosome')
-						label(for='chromosome') Chromosome:
-							input(id='chromosome',type='text',value='',placeholder='1,2,...X,Y',name='chromosome')
-					fieldset(data-role='start')
-						label(for='start') Starting position:
-							input(id='start',type='text',value='',name='start')
-					fieldset(data-role='end')
-						label(for='end') Ending position:
-							input(id='end',type='text',value='',name='end')
-				div(data-role='fieldcontain')
-					input(type='submit',value='Query!',data-transition='fade', data-theme='c')  
-					
-					
-					
+    article
+        header
+            h2 Query Parameters
+        block intro
+        
+        block form
+            form(action='/dbaccess/query/',method='post')
+                div(data-role='fieldcontain')
+                    fieldset(data-role='database')
+                        label(for='database') Organism:
+                            select(name='database') 
+                                option(value="human")="Human"
+                                option(value="yeast")="Yeast"
+                                option(value="arabidopsis")="Arabidopsis"
+                        label(for='collection') Collection:
+                            select(name='collection') 
+                                option(value="chipseq")="ChIP-Seq"
+                                option(value="methylation")="Methylation"
+                        label(for='chromosome') Chromosome:
+                            input(id='chromosome',size = '6', type='text',value='',placeholder='1,2,...X,Y',name='chromosome')
+                        label(for='start') Start:
+                            input(id='start',size = '8', type='text',value='',name='start')
+                        label(for='end') End:
+                            input(id='end', size = '8', type='text',value='',name='end')
+                div(data-role='fieldcontain')
+                    input(type='submit',value='Query!', data-transition='fade', data-theme='c')  
+        block image
+                plot
+                    embed(src!='{% url 'query' %}', scrolling = 'no', width='1800', height = '180')
+                    
+                    
+                    
+                    
