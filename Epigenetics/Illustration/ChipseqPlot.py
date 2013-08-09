@@ -3,14 +3,14 @@ Created on 2013-06-07
 
 @author: sperez
 '''
-from svgwrite.shapes import Rect
-from svgwrite.text import Text
+# from svgwrite.shapes import Rect
+# from svgwrite.text import Text
 from svgwrite.drawing import Drawing
 from svgwrite.path import Path
 
 from math import exp, sqrt, fabs, log
 
-from PlotUtilities import *
+from PlotUtilities import Rect, Text, get_axis, get_annotations
 
 class ChipseqPlot(object):
     '''
@@ -40,8 +40,17 @@ class ChipseqPlot(object):
         self.plot = Drawing(filename, size = size,
                         viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 4)),
                         preserveAspectRatio = "xMinYMin meet")
-        background = Rect(insert = (0,0), size = size, fill = "white")
+        background = Rect(insert = (0, 0), size = size, fill = "white")
         self.plot.add(background)
+
+        self.axis_x_margin = None
+        self.scale_x = None
+        self.maxh = None
+        self.scale_y = None
+        self.offset_y = None
+        self.samples_color = None
+        self.axis_y_margin = None
+
 
     def build(self):
         length, end, start, width, margin = self.length, self.end, self.start, self. width, self.margin
@@ -101,47 +110,47 @@ class ChipseqPlot(object):
         margin = self.margin
         width = self.width
         spacing = 9
-        offset = 0 
-        
-        
-        #Add TSS line if there is in fact a TSS in this region
-        for (gene,tss) in annotations['TSS']:
-            #print 'TSS:', gene, tss
-            x1 = margin + (tss-self.start)*self.scale_x
+        offset = 0
+
+
+        # Add TSS line if there is in fact a TSS in this region
+        for (gene, tss) in annotations['TSS']:
+            # print 'TSS:', gene, tss
+            x1 = margin + (tss - self.start) * self.scale_x
             y1 = self.axis_y_margin
-            length = width + margin*3
+            length = width + margin * 3
             thickness = 0.3
             color = 'dodgerblue'
-        
-            TSSline = Rect(insert = (x1, y1), 
+
+            TSSline = Rect(insert = (x1, y1),
                            size = (thickness, length),
                            fill = color)
-            TSS = (Text((str(tss)), insert = (x1+1, length+y1), fill = color, font_size = "4"))
-            gene = (Text("--> " + gene + " gene", insert = (x1, length+y1-spacing/2), fill = color, font_size = "4"))
+            TSS = (Text((str(tss)), insert = (x1 + 1, length + y1), fill = color, font_size = "4"))
+            gene = (Text("--> " + gene + " gene", insert = (x1, length + y1 - spacing / 2), fill = color, font_size = "4"))
             offset += spacing
-            if offset > spacing*5: offset = 0
+            if offset > spacing * 5: offset = 0
             self.elements.append(TSSline)
             self.elements.append(TSS)
             self.elements.append(gene)
-        
-        for (a,b) in annotations['Islands']:
-            print 'island', a,b
+
+        for (a, b) in annotations['Islands']:
+            print 'island', a, b
             if a < self.start: a = self.start
             if b > self.end: b = self.end
             height = 3
-            length = (b-a)*self.scale_x
-            x1 = margin + (a-self.start)*self.scale_x
-            y1 = width + margin*2 -height - 5
-            #print x1, length, y1
+            length = (b - a) * self.scale_x
+            x1 = margin + (a - self.start) * self.scale_x
+            y1 = width + margin * 2 - height - 5
+            # print x1, length, y1
             color = 'hotpink'
-        
-            island = Rect(insert = (x1, y1), 
-                           size = (length,height),
+
+            island = Rect(insert = (x1, y1),
+                           size = (length, height),
                            fill = color)
             self.elements.append(island)
-        
+
         return None
-    
+
     def save(self):
         for element in self.elements:
             self.plot.add(element)
@@ -155,7 +164,7 @@ class ChipseqPlot(object):
         return z
 
     def get_elements(self):
-        self.add_sample_labels(self.margin*3.2 + self.length)
+        self.add_sample_labels(self.margin * 3.2 + self.length)
         z = self.elements
         self.elements = None
         return z
@@ -175,37 +184,38 @@ class ChipseqPlot(object):
         Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5")
         self.elements.append(Title)
-            
+
         self.add_xtics()
         self.add_ytics()
         self.add_axis()
-        self.add_sample_labels(self.margin*2 + self.length)
+        self.add_sample_labels(self.margin * 2 + self.length)
         for axis in get_axis(self.start, self.end, self.margin, self.width, self.axis_x_margin, self.axis_y_margin, self.scale_x):
             self.elements.append(axis)
         for annotation in get_annotations(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
             self.elements.append(annotation)
 
-    def add_sample_labels(self,x_position):
-        if len(self.samples_color)>20: 
+    def add_sample_labels(self, x_position):
+        if len(self.samples_color) > 20:
             fontsize = '2.5'
-        elif len(self.samples_color)<5: 
+        elif len(self.samples_color) < 5:
             fontsize = '3.5'
         else: fontsize = '3'
-        
+
         spacing = 0.1
         y_position = self.margin
-        
+
         for sample, color in self.samples_color.iteritems():
             label = Text(sample, insert = (x_position, y_position),
                                             fill = color[1], font_size = fontsize)
-            y_position += float(fontsize)+spacing
+            y_position += float(fontsize) + spacing
             self.elements.append(label)
         return None
-    
+
     def makegaussian(self, start,
                      end, margin, length,
                      pos, tail, offset,
                      height, stddev):
+        '''To do: remove length and margin, or use them'''
         endpts = int((sqrt((-2) * stddev * stddev * log(tail / height))))
         spacing = 64
         n_points = 0
@@ -230,10 +240,10 @@ class ChipseqPlot(object):
         end, start, width, margin = self.end, self.start, self. width, self.margin
         offset = start
         scale_x = self.scale_x
-        scale_tics = 1;
+        scale_tics = 1
 
         while((scale_tics * 10) < end - start):
-            scale_tics *= 10;
+            scale_tics *= 10
         xtics = [i for i in range(start, end + 1) if i % (scale_tics) == 0]
         while len(xtics) < 4:
             scale_tics /= 2
@@ -284,7 +294,7 @@ class ChipseqPlot(object):
         axis_x_margin = margin - 5
         self.axis_x_margin = axis_x_margin
         axis_y_margin = margin - 8
-        self.axis_y_margin = axis_y_margin 
+        self.axis_y_margin = axis_y_margin
         x_axis = Rect(insert = (axis_x_margin, width + margin + axis_x_margin),
                 size = ((self.end - self.start) * self.scale_x + 10, 0.1),
                 fill = "midnightblue")

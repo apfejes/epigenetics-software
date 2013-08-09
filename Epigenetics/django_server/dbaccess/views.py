@@ -5,7 +5,7 @@ Created on 2013-05-07
 '''
 from django.http import HttpResponse
 from django.shortcuts import render
-from queryforms import QueryForm
+from .queryforms import QueryForm
 # from django.views.generic import TemplateView
 
 
@@ -25,7 +25,7 @@ def view_collections(request):
     return render(request, 'collections.jade')
 
 def view_query_form(request):
-    if request.method == 'POST': # If the query has been submitted...
+    if request.method == 'POST':    # If the query has been submitted...
         query(request)
     return render(request, 'query_form.jade')
 
@@ -44,28 +44,28 @@ def collections(request):
     return HttpResponse(x)
 
 def methylation_code(request):
-    from Annotations import showmethylation
+    from .Annotations import showmethylation
     string = showmethylation.svgcode()
     return HttpResponse(string)
 
 def chipseq_code(request, database, chromosome, start, end):
-    from Annotations import showchipseq
+    from .Annotations import showchipseq
     string = showchipseq.svgcode(db = database, chromosome = chromosome, start = start, end = end)
     return HttpResponse(string)
 
 def meth_code(request, database, chromosome, start, end):
-    from Annotations import showmethylation
+    from .Annotations import showmethylation
     string = showmethylation.svgcode(db = database, chromosome = chromosome, start = start, end = end)
     return HttpResponse(string)
 
 def send_svg(request):
-    from Annotations import showgene
+    from .Annotations import showgene
     return HttpResponse(showgene.svgcode())
 
 def query(request):
-    if request.method == 'POST': # If the query has been submitted...
-        form = QueryForm(request.POST) # A form bound to the POST data
-        if form.is_valid(): # All validation rules pass
+    if request.method == 'POST':    # If the query has been submitted...
+        form = QueryForm(request.POST)    # A form bound to the POST data
+        if form.is_valid():    # All validation rules pass
             # Process the data in form.cleaned_data
             database = str(form.cleaned_data['database'])
             collection = str(form.cleaned_data['collection'])
@@ -77,10 +77,10 @@ def query(request):
                 return chipseq_code(request, database, chromosome, start, end)
             elif collection == 'methylation':
                 return meth_code(request, database, chromosome, start, end)
-                #return HttpResponse('The \'' + collection + '\' collection is not available yet.')
-            else: 
+                # return HttpResponse('The \'' + collection + '\' collection is not available yet.')
+            else:
                 return HttpResponse(collection + ' is an invalid collection! Please try again...')
         else:
-            return HttpResponse('You query parameters were invalid! Please try again...') # Redirect after POST
+            return HttpResponse('You query parameters were invalid! Please try again...')    # Redirect after POST
     return HttpResponse('Hey ho')
 

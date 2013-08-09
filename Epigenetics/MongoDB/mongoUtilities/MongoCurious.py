@@ -14,7 +14,7 @@ _root_dir = os.path.dirname(_cur_dir)
 _root_dir = os.path.dirname(_root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
-from common_utilities import CreateListFromCursor 
+from common_utilities import CreateListFromCursor
 
 sys.path.insert(0, _root_dir + os.sep + "Illustration")
 import ChipseqPlot as chipseqplot
@@ -33,7 +33,16 @@ class MongoCurious():
         '''Connects to database'''
         self.database = database
         self.mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database)
-        #self.errorcount = 0
+        # self.errorcount = 0
+
+        self.pos_betas_dict = None
+        self.collection = None
+        self.chromosome = None
+        self.sample_peaks = None
+        self.end = None
+        self.start = None
+        self.waves = None
+        self.annotations = None
 
     def query(self,
                 collection,
@@ -45,37 +54,37 @@ class MongoCurious():
                 sample_group = None,
                 sample_label = None,
                 sample_id = None):
-
+        '''remove sample_id, if not used'''
         self.collection = collection
         self.end = end
         self.start = start
-            
-        #Make sure chr variable is in the right format
+
+        # Make sure chr variable is in the right format
         if self.database == 'human_epigenetics':
             if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
                 chromosome = 'chr' + str(chromosome)
             self.chromosome = chromosome
-        
-        #First we collect the list of samples the user is interested in:
+
+        # First we collect the list of samples the user is interested in:
         sample_ids = self.organize_samples(project, sample_label, sample_group, chip)
-        #print '\n    Sample_ids list:', sample_ids
-        
-        #Conduct query and collect the data depending on which collection was chosen.
+        # print '\n    Sample_ids list:', sample_ids
+
+        # Conduct query and collect the data depending on which collection was chosen.
         if self.collection == 'methylation':
-            cursor = self.finddocs('annotations') #get probe and annotation info for region queried
-            docs = CreateListFromCursor(cursor) 
-            probes = self.getprobes(docs) #get list of probe ids
-            self.collectbetas(sample_ids, probes) #organize the beta values with sample info into a dictionary
+            cursor = self.finddocs('annotations')    # get probe and annotation info for region queried
+            docs = CreateListFromCursor(cursor)
+            probes = self.getprobes(docs)    # get list of probe ids
+            self.collectbetas(sample_ids, probes)    # organize the beta values with sample info into a dictionary
             t0 = time()
-            self.getannotations(docs) #organize the gene annotations in a dictionary
-            print 'Annotation time:', time()-t0 
-        
+            self.getannotations(docs)    # organize the gene annotations in a dictionary
+            print 'Annotation time:', time() - t0
+
         if self.collection == 'waves':
-            docs = self.finddocs(collection = collection, chip = chip, sample_ids = sample_ids) #get peak info for region queried
-            self.getwaves(docs,sample_ids) #organize peak info into a dictionary
-            annotations_docs = self.finddocs(collection = 'annotations') # get the gene annotations info 
-            self.getannotations(annotations_docs) #organize the gene annotations in a dictionary 
-        
+            docs = self.finddocs(collection = collection, chip = chip, sample_ids = sample_ids)    # get peak info for region queried
+            self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
+            annotations_docs = self.finddocs(collection = 'annotations')    # get the gene annotations info
+            self.getannotations(annotations_docs)    # organize the gene annotations in a dictionary
+
         return None
 
     def checkquery(self, project, chromosome):
@@ -98,54 +107,54 @@ class MongoCurious():
 
 
     def organize_samples(self, project, sample_label, sample_group, chip):
-        #Finds the sample_ids of the project and sample group user is interested in
-        #saves a dictionary of the form {sample_id: (sample_label, sample_group)
-        
-        samplesdocs = self.finddocs(collection = 'samples', project = project, 
-                                    sample_label = sample_label, 
-                                    sample_group = sample_group, 
+        # Finds the sample_ids of the project and sample group user is interested in
+        # saves a dictionary of the form {sample_id: (sample_label, sample_group)
+
+        samplesdocs = self.finddocs(collection = 'samples', project = project,
+                                    sample_label = sample_label,
+                                    sample_group = sample_group,
                                     chip = chip)
-        
+
         sample_ids = {}
         for doc in samplesdocs:
             sample_id = str(doc['_id'])
-            
+
             if self.collection == 'waves':
                 doc_chip = str(doc['chip'])
                 if doc_chip == chip or chip == None:
                     sample_ids[sample_id] = doc_chip
-                
+
             if self.collection == 'methylation':
                 doc_sample_group = doc['sample_group']
                 doc_sample_label = doc['samplelabel']
-                if doc_sample_group == sample_group or sample_group == None: 
+                if doc_sample_group == sample_group or sample_group == None:
                     if doc_sample_label == sample_label or sample_label == None:
                         sample_ids[sample_id] = (doc_sample_label, doc_sample_group)
-            
+
         return sample_ids
 
 
-    def finddocs(self, collection, sample_ids = None, 
-                 probe_id = None, project = None, sample_label = None, 
+    def finddocs(self, collection, sample_ids = None,
+                 probe_id = None, project = None, sample_label = None,
                  sample_group = None, chip = None):
 
         '''Finds documents corresponding to collection and type of query'''
-        
-        #This dictionary will store all the query parameters
+
+        # This dictionary will store all the query parameters
         query_parameters = {}
 
         # Adding the different parameters of the query depending on the collection chosen
-        if collection ==  "annotations":
+        if collection == "annotations":
             query_parameters["chr"] = self.chromosome
-            if self.end and self.start: 
+            if self.end and self.start:
                 query_parameters["mapinfo"] = {"$gte":self.start, "$lte":self.end }
-            #Decide which parameters to return
+            # Decide which parameters to return
             return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hmm_island': True,
                           'closest_tss_1': True, 'ucsc_refgene_name':True, 'closest_tss_gene_name':True,
-                          'regulatory_feature_group':True, 'regulatory_feature_name':True} 
-            #Decide how to sort the returned entries (make sure there is an index on the chosen sorting parameter)
+                          'regulatory_feature_group':True, 'regulatory_feature_name':True}
+            # Decide how to sort the returned entries (make sure there is an index on the chosen sorting parameter)
             sortby, sortorder = 'mapinfo', 1
-            
+
         elif collection == 'waves':
             query_parameters['chr'] = self.chromosome
             if sample_ids:
@@ -162,7 +171,7 @@ class MongoCurious():
                           'sample_id': True}
             sortby, sortorder = 'height', (-1)
 
-        elif collection =="samples":
+        elif collection == "samples":
             if self.collection == 'waves':
                 if chip: query_parameters["chip"] = chip
                 else: query_parameters['chip'] = {"$exists":True}
@@ -171,74 +180,74 @@ class MongoCurious():
                 if project: query_parameters["project"] = project
                 if sample_label: query_parameters["sample_label"] = sample_label
                 if sample_group: query_parameters["sample_group"] = sample_group
-            return_chr = {'_id': True, 'samplelabel': True, 
+            return_chr = {'_id': True, 'samplelabel': True,
                               'project': True, 'sample_group': True, 'chip':True}
             sortby, sortorder = 'sample_group', 1
-            
-        elif collection ==  "methylation":
+
+        elif collection == "methylation":
             if sample_ids:
                 query_parameters["sampleid"] = sample_ids
-            if probe_id: 
+            if probe_id:
                 query_parameters["probeid"] = probe_id
-            return_chr = {'mval':True, 'sampleid': True, 'beta':True, 
+            return_chr = {'mval':True, 'sampleid': True, 'beta':True,
                           'probeid':True}
             sortby, sortorder = None, None
-            
-        else: 
+
+        else:
             print "Collection queried is either not supported or not in the database. Exiting..."
             sys.exit()
-        
+
         print "\n Conducting query: "
         print "   From the database '{0}', and collection '{1}', ".format(self.database, collection)
         print "   Find(", query_parameters, ")"
         # Get documents corresponding to query and sort by sorting parameter
         if sortby:
             docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
-        else: 
+        else:
             docs = self.mongo.find(collection, query_parameters, return_chr)
-        
+
         if docs.count() == 0:
-            message  = "    WARNING: The following query return zero probes or documents!" 
-            message  += "\n    ---> Find(" + str(query_parameters) + ")"
-            message  += "\n     use the checkquery() method to validate the inputs of your query."
-            #self.errorlog(message)
+            message = "    WARNING: The following query return zero probes or documents!"
+            message += "\n    ---> Find(" + str(query_parameters) + ")"
+            message += "\n     use the checkquery() method to validate the inputs of your query."
+            # self.errorlog(message)
             print message
             sys.exit()
-            
+
         print "    --> Found %i documents." % docs.count()
-        #return documents found
+        # return documents found
         return docs
 
-    def getprobes(self,docs):
+    def getprobes(self, docs):
         '''Organises the probe locations/ids into a dictionary'''
         probes = {}
         for doc in docs:
             if self.collection == 'methylation':
                 probes[str(doc['targetid'])] = doc['mapinfo']
         return probes
-    
-    def collectbetas(self,sample_ids, probes):
+
+    def collectbetas(self, sample_ids, probes):
         '''Collects and bins methylation data'''
 
         # Bin the beta values and collect their position
-        pos_betas_dict = {} #contains CpGs
-        sample_peaks = {}   #contains average CpG value and std for samples from same Sample Group
+        pos_betas_dict = {}    # contains CpGs
+        sample_peaks = {}    # contains average CpG value and std for samples from same Sample Group
         count = 0
         maxpos = 0
-        
+
         probedata = self.finddocs(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, collection = self.collection)
-        
+
         for methyldata in probedata:
             sample_id = str(methyldata['sampleid'])
             sample = sample_ids[sample_id][0]
             stype = sample_ids[sample_id][1]
             beta = methyldata['beta']
-            #mval = methyldata['mval'] #unused currently
+            # mval = methyldata['mval'] #unused currently
             pos = probes[methyldata['probeid']]
             if pos in pos_betas_dict:
                 pos_betas_dict[pos].append((beta, sample, stype))
             else:
-                pos_betas_dict[pos] =[(beta, sample, stype)]
+                pos_betas_dict[pos] = [(beta, sample, stype)]
             count += 1
             if pos in sample_peaks:
                 if stype in sample_peaks[pos]:
@@ -246,21 +255,21 @@ class MongoCurious():
                 else:
                     sample_peaks[pos][stype] = [beta]
             else:
-                sample_peaks[pos]={stype:[beta]}
+                sample_peaks[pos] = {stype:[beta]}
             if pos > maxpos:
                 maxpos = pos
-                
+
         print '\n    %s probes\' beta values were extracted.' % count
         print "    %i CpGs locations were found" % len(pos_betas_dict)
-        
+
         self.pos_betas_dict = pos_betas_dict
 
         for pos, type_dict in sample_peaks.iteritems():
             for stype, betas in type_dict.iteritems():
                 m = mean(betas)
                 s = std(betas)
-                sample_peaks[pos].update({stype : (m,s)})
-                        
+                sample_peaks[pos].update({stype : (m, s)})
+
         self.sample_peaks = sample_peaks
 
         if self.start == None:
@@ -269,8 +278,8 @@ class MongoCurious():
         if self.end == None:
             self.end = maxpos
             print "    New end position:", self.end
-         
-        
+
+
         return None
 
 
@@ -278,14 +287,14 @@ class MongoCurious():
         count = 0
         tail = 1
         maxpos = 0
-        
+
         # This list will store the tuple (pos,height, std dev, sample id) as a value.
         waves = []
         # "tail" is min height of a tail to be included in the plot for a peak
         # which doesn't have its center in the region
         for doc in docs:
             pos, height, stddev, sample_id = doc['pos'], doc['height'], int(doc['stddev']), str(doc['sample_id'])
-            #search for sample label name:
+            # search for sample label name:
             doc_sample_group = sample_ids[sample_id]
             if self.start <= pos <= self.end:
                 waves.append((pos, height, stddev, doc_sample_group))
@@ -298,32 +307,32 @@ class MongoCurious():
                     count += 1
             if pos > maxpos:
                 maxpos = pos
-                
+
         if self.start == None:
             self.start = 0
             print "    New start position:", self.start
         if self.end == None:
             self.end = maxpos
             print "    New end position:", self.end
-            
+
         if count == 0:
             message = "    WARNING: None of peaks found in the query lie in the region!"
             print message
-            #self.errorlog(message)
+            # self.errorlog(message)
         else:
             print "   Only %i peaks were found to occur in region." % count
             self.waves = waves
-        
+
         return None
 
-    def getannotations(self,docs):
+    def getannotations(self, docs):
         '''Organizes the annotation information into a dictionary'''
         annotations = {}
         annotations['TSS'] = set([])
         annotations['Islands'] = set([])
         annotations['genes'] = set([])
         annotations['feature'] = set([])
-        
+
         for doc in docs:
             tss1 = int(doc['closest_tss'])
             tss2 = int(doc['closest_tss_1'])
@@ -334,21 +343,21 @@ class MongoCurious():
             feature = str(doc['regulatory_feature_group'])
             feature_coord = str(doc['regulatory_feature_name'])
             if feature and feature_coord: feature_coord.split(':')[1].split('-')
-            
+
             for genename in gene:
                 if tss1 in range(self.start, self.end):
-                    annotations['TSS'].add((genename,tss1))
+                    annotations['TSS'].add((genename, tss1))
                 else: annotations['genes'].add((genename, tss1))
             for genenameclosest in geneclosest:
-                annotations['genes'].add((genenameclosest,tss2))
-                    
+                annotations['genes'].add((genenameclosest, tss2))
+
             if doc['hmm_island']:
                 coord = doc['hmm_island'].split(':')[1].split('-')
-                island  = (int(coord[0]), int(coord[1]))
+                island = (int(coord[0]), int(coord[1]))
                 annotations['Islands'].add(island)
-            
+
             annotations['feature'].add((feature, feature_coord))
-                
+
         print "\n    Annotations found:"
 #         for key,value in annotations.iteritems():
 #             print "        ", key, len(value), value
@@ -356,7 +365,7 @@ class MongoCurious():
         self.annotations = annotations
         return None
 
-            
+
 
     def svg(self, filename = None, title = None,
             color = None, to_string = False,
@@ -387,11 +396,11 @@ class MongoCurious():
             print " Returning svg as a unicode string"
             drawing.add_legends()
             z = drawing.to_string()
-            drawing= None
+            drawing = None
         elif get_elements:
             z = drawing.get_elements()
             print " Returning %i svg elements" % len(z)
-            drawing= None
+            drawing = None
         elif filename and not to_string and not get_elements:
             print " Making svg file \"%s\"\n" % filename
             drawing.add_legends()
@@ -404,17 +413,14 @@ class MongoCurious():
             z = drawing
             drawing = None
         return z
-    
-#Error function below needs testing
+
+# Error function below needs testing
 
 
 
 
-    def errorlog(self, errormessage): 
-        pass
-        #returns error message to server
-        self.errorcount +=1
+    def errorlog(self, errormessage):
+        # returns error message to server
+        # self.errorcount += 1
         print errormessage
-        
         return errormessage
-        

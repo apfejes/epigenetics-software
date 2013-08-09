@@ -9,12 +9,10 @@ from svgwrite.text import Text
 from svgwrite.drawing import Drawing
 from svgwrite.path import Path
 from math import fabs, exp, sqrt, log
-import Color_Palette 
+import Color_Palette
 palette = Color_Palette.ColorPalette()
 
-from PlotUtilities import get_annotations, get_axis
-
-
+from .PlotUtilities import get_annotations, get_axis
 
 class MethylationPlot(object):
     '''
@@ -37,24 +35,27 @@ class MethylationPlot(object):
         self.sample_peaks = sample_peaks
         self.Y = []
         self.annotations = annotations
-        
-        #Default legend coordinates below
+
+        # Default legend coordinates below
         self.axis_x_margin = margin - 5
         self.axis_y_margin = margin - 8
 
-        
-        
+        self.offset_y = None
+        self.scale_x = None
+        self.scale_y = None
+
+
         for position in self.pos_betas_dict.keys():
-            for y, sample, sample_type in pos_betas_dict[position]:
+            for y, _sample, _sample_type in pos_betas_dict[position]:
                 self.Y.append(y)
         self.invertby = max(self.Y)
-        
+
         size = (str(self.length) + "mm" , str(self.width * 1.5) + "mm")
         # create drawing
         self.plot = Drawing(filename, size = size,
                             viewBox = ("0 0 " + str(self.length) + " " + str(self.width + self.margin * 4)),
                             preserveAspectRatio = "xMinYMin meet")
-        background = Rect(insert = (0,0), size = size, fill = "white")
+        background = Rect(insert = (0, 0), size = size, fill = "white")
         self.plot.add(background)
 
 
@@ -67,48 +68,50 @@ class MethylationPlot(object):
         self.scale_x = scale_x
         scale_y = (width + margin) * 0.8 / max(self.Y)
         self.scale_y = scale_y
-        
-        palette.Colors()       #blue, red, green, purple palettes
+
+        palette.Colors()    # blue, red, green, purple palettes
 
         for position in self.pos_betas_dict.keys():
             x = round(float(position - offset_x) * scale_x, 2) + margin
-            
+
             for beta, sample_id, sample_type in self.pos_betas_dict[position]:
                 y = round((invertby - beta) * scale_y, 2) + margin
                 type_color, sample_color = palette.sorter(sample_type, sample_id)
                 point = Circle(center = (x, y), r = 0.3, fill = sample_color)
                 self.elements.append(point)
-            
+
+
+            '''fix this: sample_id is called, but no longer initialized... this is probably a bug'''
             for sample_type in self.sample_peaks[position]:
                 type_color, sample_color = palette.sorter(sample_type, sample_id)
-                (m,s) = self.sample_peaks[position][sample_type]
-                m = round((invertby - m) * scale_y, 2) +margin
-                s = round(s * scale_y,3)
-                #point = Circle(center = (x, m), r = 0.6, fill = 'black')
+                (m, s) = self.sample_peaks[position][sample_type]
+                m = round((invertby - m) * scale_y, 2) + margin
+                s = round(s * scale_y, 3)
+                # point = Circle(center = (x, m), r = 0.6, fill = 'black')
                 self.elements.append(point)
-                
+
                 height = 3.0
-                if s!= 0.0:
-                    gaussian_y, gaussian_x = self.makegaussian(m, s, height) #reverse output arguments for sideways gaussians
-                    gaussian_x = [coord + x -1 for coord in gaussian_x]
+                if s != 0.0:
+                    gaussian_y, gaussian_x = self.makegaussian(m, s, height)    # reverse output arguments for sideways gaussians
+                    gaussian_x = [coord + x - 1 for coord in gaussian_x]
                     gaussian_y = [item + m for item in gaussian_y]
-                    #print "hello", y, gaussian_y
-                    #offset_x = max(Y)
-                    #Y = [(coord-offset_x)*0.1+offset_x for coord in Y]
+                    # print "hello", y, gaussian_y
+                    # offset_x = max(Y)
+                    # Y = [(coord-offset_x)*0.1+offset_x for coord in Y]
                     d = "M"
                     for i in range(0, len(gaussian_x)):
                         d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
-         
+
                     gaussian = (Path(stroke = type_color, stroke_width = 0.1,
                                    stroke_linecap = 'round', stroke_opacity = 0.8,
-                                   fill = type_color, fill_opacity = 0.1, 
+                                   fill = type_color, fill_opacity = 0.1,
                                    d = d))
-         
+
                     self.elements.append(gaussian)
-                    
-        #self.samples_color = samples_color
-        
-        
+
+        # self.samples_color = samples_color
+
+
     def save(self):
         for element in self.elements:
             self.plot.add(element)
@@ -122,7 +125,7 @@ class MethylationPlot(object):
         return z
 
     def get_elements(self):
-        self.add_sample_labels(self.margin*3.2 + self.length)
+        self.add_sample_labels(self.margin * 3.2 + self.length)
         z = self.elements
         self.elements = None
         return z
@@ -143,38 +146,38 @@ class MethylationPlot(object):
         self.elements.append(Title)
         self.add_xtics()
         self.add_ytics()
-        self.add_sample_labels(self.margin*2 + self.length)
+        self.add_sample_labels(self.margin * 2 + self.length)
         for axis in get_axis(self.start, self.end, self.margin, self.width, self.axis_x_margin, self.axis_y_margin, self.scale_x):
             self.elements.append(axis)
         for annotation in get_annotations(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
             self.elements.append(annotation)
 
-    def add_sample_labels(self,x_position):
+    def add_sample_labels(self, x_position):
         samples_color = palette.colors_dict()
-        if len(samples_color)>20: 
+        if len(samples_color) > 20:
             fontsize = '2.5'
-        elif len(samples_color)<5: 
+        elif len(samples_color) < 5:
             fontsize = '3.5'
         else: fontsize = '3'
-        
+
         spacing = 0.1
         y_position = self.margin
-        
+
         for sample, color in samples_color.iteritems():
             label = Text(sample, insert = (x_position, y_position),
                                             fill = color, font_size = fontsize)
-            y_position += float(fontsize)+spacing
+            y_position += float(fontsize) + spacing
             self.elements.append(label)
         return None
-    
+
     def add_xtics(self):
         end, start, width, margin = self.end, self.start, self. width, self.margin
         offset_x = start
         scale_x = self.scale_x
-        scale_tics = 1;
+        scale_tics = 1
 
         while((scale_tics * 10) < end - start):
-            scale_tics *= 10;
+            scale_tics *= 10
         xtics = [i for i in range(start, end + 1) if i % (scale_tics) == 0]
         while len(xtics) < 4:
             scale_tics /= 2
@@ -214,14 +217,15 @@ class MethylationPlot(object):
             self.elements.append(ticline2)
             self.elements.append(ticmarker)
 
-        
+
     def makegaussian(self, mean, stddev, height):
-        endpts = (sqrt((-2) * stddev * stddev * log(1.0/ height)))
+        '''remove mean, if not used'''
+        endpts = (sqrt((-2) * stddev * stddev * log(1.0 / height)))
         X = [0]
-        X.extend([round(stddev*2.0*(i/9.0)-stddev,3) for i in range(0,10)]) #add 10 points  near mean
-        X.extend([round(abs(stddev-endpts)*(i/4.0)+stddev,3) for i in range(0,5)])
-        X.extend([round(abs(stddev-endpts)*(i/4.0)-2.0*stddev,3) for i in range(0,5)])
-        
+        X.extend([round(stddev * 2.0 * (i / 9.0) - stddev, 3) for i in range(0, 10)])    # add 10 points  near mean
+        X.extend([round(abs(stddev - endpts) * (i / 4.0) + stddev, 3) for i in range(0, 5)])
+        X.extend([round(abs(stddev - endpts) * (i / 4.0) - 2.0 * stddev, 3) for i in range(0, 5)])
+
         X.sort()
         Y = [round(height * exp(-x ** 2 / (2.0 * stddev * stddev)), 3) for x in X]
         return X, Y

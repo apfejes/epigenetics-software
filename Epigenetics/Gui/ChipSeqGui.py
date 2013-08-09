@@ -52,7 +52,7 @@ class Application(tk.Tk):
         wg_proc.start()
 
     def launchParametersEditor(self):
-        _parameters_editor = ParametersEditor(self, self.parameters)
+        _parameters_editor = ParametersEditor.ParametersEditor(self, self.parameters)
 
     def askopenfilename(self):
         filename = tkFileDialog.askopenfilename(defaultextension = '.input', title = 'Open File')
