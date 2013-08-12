@@ -6,8 +6,22 @@ Converts CEL files to Bed file.
 '''
 import sys
 import time
-import StringUtils
+import os
+import gc
 
+
+_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
+_root_dir = os.path.dirname(_cur_dir)
+while ("WaveGenerator" in _root_dir):
+    _root_dir = os.path.dirname(_root_dir)
+sys.path.insert(0, _root_dir)
+sys.path.insert(0, _cur_dir)
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+sys.path.insert(0, _root_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
+
+
+import StringUtils
+import WigFileThread
 
 class row():
 
@@ -21,6 +35,9 @@ class row():
 
     def setv(self, v):
         self.value = v
+
+    def toString(self):
+        return "%s\t%i\t%f\n" % (self.chromosome, self.position, self.value)
 
 def FindBaseline(file_name):
     f = open(file_name, 'r')    # open file
@@ -68,18 +85,63 @@ def FindBaseline(file_name):
             v = 0
         data[g].setv(v)
     # create wig file
-    f_w_name = StringUtils.rreplace(file_name, 'BEDlike', 'wig', 1)
-    f = open(f_w_name, 'w')    # open file
-    for x in range(len(data)):
-        pass
+    f_w_name = StringUtils.rreplace(file_name, '.BEDlike', '', 1)
+    f_w_name = StringUtils.rreplace(f_w_name, 'BED', 'WIG', 1)
+
+    # print "Writing to %s" % (f_w_name)
+    # f = open(f_w_name, 'w')    # open file
 
 
-    # for x in range(10):
-        # print '(%s, %i, %f)' % (data[x].chromosome, data[x].position, data[x].value)
+    current_chr = data[0].chromosome
+    print "New Chromosome %s" % (current_chr)
+    last_bp = 0
+    last_ht = 0
+    wigfile = WigFileThread.WigFileWriter(None)
+    wigfile.start_wig_writer(os.path.dirname(f_w_name), os.path.basename(f_w_name))
+
+    x = 0
+    a = 0
+    # gc.disable()
+    coverage_map = []
+    l = len(data)
+    x = 0
+    while x < l:
+        # print "x of len: %i/%i" % (x, l)
+        if data[x].chromosome != current_chr:
+            # switch chromosomes,
+            # taper off chromosome
+            # taper "on" new chromosome
+            print "New Chromosome %s" % (data[x].chromosome)
+            current_chr = data[x].chromosome
+        else:
+            block_left = data[x].position
+            while x < l and data[x].value != 0:
+                diff = data[x].position - last_bp
+                if (diff > 1):
+                    # slope between the two
+                    slope = float(data[x].value - last_ht) / (diff)
+                    for y in range(1, diff):
+                        a += 1
+                        # print "%i : v:%s" % (x, last_ht + (slope * y))
+                        coverage_map.append(round(last_ht + (slope * y), 2))
+                    coverage_map.append(round(data[x].value, 2))
+                else:
+                    coverage_map.append(round(data[x].value, 2))
+                    a += 1
+                last_bp = data[x].position
+                last_ht = data[x].value
+                x += 1
+            while x < l and data[x].value == 0:
+                x += 1
+        wigfile.add_map(coverage_map, current_chr, block_left)
+        coverage_map = []
+        x += 1
+    # gc.enable()
 
 
-
-
+    print "Closing Wigwriter.  This may take some time."
+    wigfile.close_wig_writer()
+    print "Wigwriter closed."
 
 if __name__ == "__main__":
     if len(sys.argv) < 1:
@@ -88,4 +150,4 @@ if __name__ == "__main__":
     starttime = time.time()
     bedlike_file = sys.argv[1]
     FindBaseline(bedlike_file)
-    print('Completed in %s seconds') % int((time.time() - starttime))
+    print 'Completed in %s seconds' % int((time.time() - starttime))
