@@ -23,7 +23,7 @@ class StringWriter(threading.Thread):
 
 
 
-    def __init__(self, queue_var, output_path = None, file_name = None, supress_print = False, thread = False):
+    def __init__(self, queue_var, output_path = None, file_name = None, supress_print = False, thread = True):
         threading.Thread.__init__(self)
         global queue    # IGNORE:W0603 - acceptable use of a global variable.
         queue = queue_var
