@@ -72,9 +72,6 @@ def ReadBaseline(file_name, ps):
     bed.close()
 
 
-
-
-
 def ApplyBaseline(index, file_in, file_out, ps):
     bed = open(file_in, 'r')    # open file
     bout = open(file_out, 'w')
@@ -118,7 +115,7 @@ if __name__ == "__main__":
     files = os.listdir(sys.argv[1])
     num_probes = 2635715
     print "initializing array..."
-    probeset = [[0.0 for y in xrange(num_probes)] for x in xrange(0, 1)]
+    probeset = [[0.0 for y in xrange(num_probes)] for x in xrange(0, 2)]
     print "reading baseline from %s" % (sys.argv[2])
     ReadBaseline(sys.argv[2], probeset)
     # print "probeset[%i][%i]" % (len(probeset), len(probeset[0]))
