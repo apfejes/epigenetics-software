@@ -20,9 +20,6 @@ sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
 sys.path.insert(0, _root_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
 
 
-import StringUtils
-import WigFileThread
-
 
 # Works fine.
 chr_yeast = {
@@ -62,14 +59,15 @@ class row():
     def toString(self):
         return "%s\t%i\t%f\n" % (self.chromosome, self.position, self.value)
 
-def FindBaseline(file_name):
-    f = open(file_name, 'r')    # open file
 
-    print "processing data file (" + file_name + ")..."
+
+def FindBaseline(index, file_name, ps):
+    bed = open(file_name, 'r')    # open file
+
     first_line = True
     headers = []
-    data = []
-    for line in f:
+    linecount = 0
+    for line in bed:
         if (first_line):
             headers = line.split("\t")
             for h in range(len(headers)):
@@ -79,110 +77,23 @@ def FindBaseline(file_name):
             first_line = False
         else:
             a = line.split("\t")
-            r = row(a[0], int(a[1]), float(a[2]))
-            data.append(r)
-    # find most common number
-    f.close()
-    v_sum = 0
-    hist = {}
-    for x in range(len(data)):
-        v_sum += data[x].value
-        if hist.has_key(str(data[x].value)):
-            hist[str(data[x].value)] += 1
-        else:
-            hist[str(data[x].value)] = 1
-    v_avg = v_sum / len(data)
-    print "v average = %f" % (v_avg)
-    point = 0
-    largest = 0
-    for g, y in hist.iteritems():
-        if y > largest:
-            largest = y
-            point = g
-            # print "g, y (%s, %i)" % (g, y)
-    # print "point, largest (%s, %i)" % (point, largest)
-    point = float(point)
-    for g in range(len(data)):
-        v = data[g].value - point
-        if v < 0:
-            v = 0
-        data[g].setv(v)
-    # create wig file
-    f_w_name = StringUtils.rreplace(file_name, '.BEDlike', '', 1)
-    f_w_name = StringUtils.rreplace(f_w_name, 'BED', 'WIG', 1)
+            if index == 1:
+                # print "placing in to ps[0][%s] = %s\t%s" % (linecount, a[0], a[1])
+                ps[0][linecount] = "%s\t%s" % (a[0], a[1])
+            ps[index][linecount] = float(a[2])
+            linecount += 1
+    bed.close()
 
-    # print "Writing to %s" % (f_w_name)
-    # f = open(f_w_name, 'w')    # open file
-
-
-    current_chr = data[0].chromosome
-    print "New Chromosome %s (%s)" % (current_chr, chr_yeast[current_chr])
-    last_bp = 0
-    last_ht = 0
-    wigfile = WigFileThread.WigFileWriter(None)
-    wigfile.start_wig_writer(os.path.dirname(f_w_name), os.path.basename(f_w_name))
-
-
-    # for x in range (0, 5020):
-    #    print "x=%i position=%i, value=%f" % (x, data[x].position + 1, data[x].value)
-
-
-    x = 0
-    a = 0
-    # gc.disable()
-    coverage_map = []
-    l = len(data)
-    x = 1
-    block_left = 0
-    while x < l:
-        # print "x of len: %i/%i" % (x, l)
-        if data[x].chromosome != current_chr:
-            if len(coverage_map) > 0:
-                wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)
-                # wigfile.add_map(coverage_map, current_chr, block_left)
-                coverage_map = []
-            # TODO: taper off chromosome
-            # TODO: taper "on" new chromosome
-            print "New Chromosome %s (%s)" % (data[x].chromosome, chr_yeast[data[x].chromosome])
-            current_chr = data[x].chromosome    # switch chromosomes,
-        block_left = data[x - 1].position + 2    # shift by 1, and block starts after the zero.
-        last_bp = data[x - 1].position + 1
-        # print "x=%i data=%i, value=%f" % (x, data[x].position + 1, data[x].value)
-        while x < l and data[x].value != 0:
-            diff = (data[x].position + 1) - last_bp
-            if diff > 6:
-                diff = 6
-            if (diff > 1):
-                slope = float(data[x].value - last_ht) / (diff)    # slope between the two
-                for y in range(1, diff):
-                    coverage_map.append(round(last_ht + (slope * y), 2))
-                coverage_map.append(round(data[x].value, 2))
-            else:
-                coverage_map.append(round(data[x].value, 2))
-                a += 1
-            last_bp = data[x].position + 1
-            last_ht = data[x].value
-            if x < l - 1 and data[x + 1].value == 0:
-                diff = (data[x + 1].position + 1) - (data[x].position + 1)
-                slope = float(0 - data[x].value) / (diff)
-                for y in range(1, diff):
-                    coverage_map.append(round(data[x].value + (slope * y), 2))
-                last_ht = 0
-            x += 1
-
-        while x < l and data[x].value == 0:
-            x += 1
-            last_ht = 0
-        if len(coverage_map) > 0:
-            wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)
-            # wigfile.add_map(coverage_map, current_chr, block_left)
-            coverage_map = []
-    # gc.enable()
-
-
-    print "Closing Wigwriter.  This may take some time."
-    wigfile.close_wig_writer()
-    print "Wigwriter closed."
+def ProduceStats(records, ps):
+    output = open("/home/afejes/baseline.bedlike", 'w')
+    for r in range(1, len(ps[0])):
+        avg = 0.0
+        for s in range(1, len(ps)):
+            # print "%i %i" % (s, r)
+            avg += ps[s][r]
+        avg = avg / records
+        output.write("%s\t%f\n" % (ps[0][r], avg))
+    output.close()
 
 if __name__ == "__main__":
     if len(sys.argv) < 1:
@@ -191,8 +102,13 @@ if __name__ == "__main__":
     starttime = time.time()
     files = os.listdir(sys.argv[1])
     num_probes = 2635715
-    probeset = [[0 for y in range(0,len(files))] for x in range(num_probes)]
-    for f, i in enumerate(files):
-        FindBaseline(i,f)
-    
+    print "initializing array..."
+    probeset = [[0.0 for y in xrange(num_probes)] for x in xrange(0, len(files) + 1)]
+    print "probeset[%i][%i]" % (len(probeset), len(probeset[0]))
+    print "done."
+    for i, f in enumerate(files):
+        filetime = time.time()
+        FindBaseline(i + 1, "%s%s" % (sys.argv[1], f), probeset)    # first file is first file, use zero for chr/pos
+        print "File %i - %s processed in %f seconds" % (i + 1, f, time.time() - filetime)
+    ProduceStats(len(files) + 1, probeset)
     print 'Completed in %s seconds' % int((time.time() - starttime))
