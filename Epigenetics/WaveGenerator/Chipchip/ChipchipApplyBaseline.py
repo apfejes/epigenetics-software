@@ -115,7 +115,7 @@ if __name__ == "__main__":
     files = os.listdir(sys.argv[1])
     num_probes = 2635715
     print "initializing array..."
-    probeset = [[0.0 for y in xrange(num_probes)] for x in xrange(0, 2)]
+    probeset = [[0.0 for y in xrange(num_probes + 2)] for x in xrange(0, 2)]
     print "reading baseline from %s" % (sys.argv[2])
     print "probeset[%i][%i]" % (len(probeset), len(probeset[0]))
     ReadBaseline(sys.argv[2], probeset)
