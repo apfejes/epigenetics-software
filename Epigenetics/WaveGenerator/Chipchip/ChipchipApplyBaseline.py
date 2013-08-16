@@ -90,8 +90,8 @@ def ApplyBaseline(index, file_in, file_out, ps):
         else:
             a = line.split("\t")
             if ps[0][linecount] != "%s\t%s" % (a[0], a[1]):
-                print "incorrectly paired probe!"
-            bout.write("%s\t%i\t%f\n" % (a[0], a[1], float(a[2]) - float(ps[1][linecount])))
+                print "incorrectly paired probe!%s\t%i\t%f\n" % (a[0], int(a[1]), float(a[2]) - float(ps[1][linecount]))
+            bout.write("%s\t%i\t%f\n" % (a[0], int(a[1]), float(a[2]) - float(ps[1][linecount])))
             linecount += 1
 
     bed.close()
