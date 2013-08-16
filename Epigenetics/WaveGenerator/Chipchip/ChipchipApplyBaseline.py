@@ -117,8 +117,9 @@ if __name__ == "__main__":
     print "initializing array..."
     probeset = [[0.0 for y in xrange(num_probes)] for x in xrange(0, 2)]
     print "reading baseline from %s" % (sys.argv[2])
+    print "probeset[%i][%i]" % (len(probeset), len(probeset[0]))
     ReadBaseline(sys.argv[2], probeset)
-    # print "probeset[%i][%i]" % (len(probeset), len(probeset[0]))
+
     print "done."
     op = StringUtils.rreplace(sys.argv[1], 'BED', 'NORMAL', 1)
     for i, f in enumerate(files):
