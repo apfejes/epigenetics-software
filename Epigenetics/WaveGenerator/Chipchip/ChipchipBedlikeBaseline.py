@@ -88,7 +88,7 @@ def ProduceStats(records, ps):
     output = open("/home/afejes/baseline.bedlike", 'w')
     for r in range(1, len(ps[0])):
         avg = 0.0
-        for s in range(1, len(ps)):
+        for s in range(0, len(ps)):
             # print "%i %i" % (s, r)
             avg += ps[s][r]
         avg = avg / records
@@ -101,7 +101,7 @@ if __name__ == "__main__":
         sys.exit()
     starttime = time.time()
     files = os.listdir(sys.argv[1])
-    num_probes = 2635715
+    num_probes = 2635714
     print "initializing array..."
     probeset = [[0.0 for y in xrange(num_probes)] for x in xrange(0, len(files) + 1)]
     print "probeset[%i][%i]" % (len(probeset), len(probeset[0]))
