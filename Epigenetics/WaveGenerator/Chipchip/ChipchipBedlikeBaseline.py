@@ -86,9 +86,9 @@ def FindBaseline(index, file_name, ps):
 
 def ProduceStats(records, ps):
     output = open("/home/afejes/baseline.bedlike", 'w')
-    for r in range(1, len(ps[0])):
+    for r in range(0, len(ps[0])):
         avg = 0.0
-        for s in range(0, len(ps)):
+        for s in range(1, len(ps)):
             # print "%i %i" % (s, r)
             avg += ps[s][r]
         avg = avg / records
