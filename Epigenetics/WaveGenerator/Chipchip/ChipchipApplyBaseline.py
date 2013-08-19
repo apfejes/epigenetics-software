@@ -76,23 +76,16 @@ def ApplyBaseline(index, file_in, file_out, ps):
     bed = open(file_in, 'r')    # open file
     bout = open(file_out, 'w')
 
-    first_line = True
-    headers = []
+    # first_line = True
+    # headers = []
     linecount = 0
     for line in bed:
-        if (first_line):
-            headers = line.split("\t")
-            for h in range(len(headers)):
-                headers[h] = headers[h].lower()
-                if headers[h].find("\n") != -1:
-                    headers[h] = headers[h].replace("\n", "")
-            first_line = False
-        else:
-            a = line.split("\t")
-            if ps[0][linecount] != "%s\t%s" % (a[0], a[1]):
-                print "incorrectly paired probe!%s\t%i and %s\n" % (a[0], int(a[1]), ps[0][linecount])
-            bout.write("%s\t%i\t%f\n" % (a[0], int(a[1]), float(a[2]) - float(ps[1][linecount])))
-            linecount += 1
+
+        a = line.split("\t")
+        if ps[0][linecount] != "%s\t%s" % (a[0], a[1]):
+            print "incorrectly paired probe!%s\t%i and %s" % (a[0], int(a[1]), ps[0][linecount])
+        bout.write("%s\t%i\t%f\n" % (a[0], int(a[1]), float(a[2]) - float(ps[1][linecount])))
+        linecount += 1
 
     bed.close()
 
