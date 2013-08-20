@@ -12,7 +12,7 @@ from math import fabs, exp, sqrt, log
 import Color_Palette
 palette = Color_Palette.ColorPalette()
 
-from .PlotUtilities import get_annotations, get_axis
+from PlotUtilities import get_annotations, get_axis
 
 class MethylationPlot(object):
     '''
@@ -81,9 +81,8 @@ class MethylationPlot(object):
                 self.elements.append(point)
 
 
-            '''fix this: sample_id is called, but no longer initialized... this is probably a bug'''
             for sample_type in self.sample_peaks[position]:
-                type_color, sample_color = palette.sorter(sample_type, sample_id)
+                type_color, sample_color = palette.sorter(sample_type, None)
                 (m, s) = self.sample_peaks[position][sample_type]
                 m = round((invertby - m) * scale_y, 2) + margin
                 s = round(s * scale_y, 3)

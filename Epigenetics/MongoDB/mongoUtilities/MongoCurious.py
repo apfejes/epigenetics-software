@@ -149,7 +149,7 @@ class MongoCurious():
             if self.end and self.start:
                 query_parameters["mapinfo"] = {"$gte":self.start, "$lte":self.end }
             # Decide which parameters to return
-            return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hmm_island': True,
+            return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hil_cpg_island_name':True,
                           'closest_tss_1': True, 'ucsc_refgene_name':True, 'closest_tss_gene_name':True,
                           'regulatory_feature_group':True, 'regulatory_feature_name':True}
             # Decide how to sort the returned entries (make sure there is an index on the chosen sorting parameter)
@@ -361,15 +361,18 @@ class MongoCurious():
                 #Parse CpG islands info of format (chr#_class:start-end)
                 islands = doc['hil_cpg_island_name'].split(';')
                 for island in islands:
-                    cpg_class,coord = island.split(':')
-                    coord = (int(coord[0]), int(coord[1]))
-                    annotations['Islands'].add(coord, cpg_class)
+                    if island != '.':
+                        cpg_class,coord = island.split(':')
+                        coord = coord.split('-')
+                        coord = (int(coord[0]), int(coord[1]))
+                        annotations['Islands'].add((coord, cpg_class))
+
 
             annotations['feature'].add((feature, feature_coord))
 
         print "\n    Annotations found:"
-#         for key,value in annotations.iteritems():
-#             print "        ", key, len(value), value
+        for key,value in annotations.iteritems():
+            print "        ", key, len(value), value
 
         self.annotations = annotations
         return None

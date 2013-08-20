@@ -38,8 +38,8 @@ def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_marg
     for (gene,tss) in annotations['TSS']:
         #print 'TSS:', gene, tss
         x1 = margin + (tss-start)*scale_x
-        y1 = axis_y_margin
-        length = width + margin*3
+        y1 = axis_y_margin + width
+        length = margin
         thickness = 0.3
         color = 'dodgerblue'
     
@@ -55,25 +55,25 @@ def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_marg
         elements.append(gene)
     
     for ((a,b),c) in annotations['Islands']:
-        #print 'island', a,b
+        #print 'island', a,b,c
         if a < start: a = start
         if b > end: b = end
         x1 = margin + (a-start)*scale_x
         y1 = axis_y_margin
-        height = y1 + width + margin -10
-        length = (b-a)*scale_x
+        length = y1 + width + margin -10
+        thickness = (b-a)*scale_x
         #print x1, length, y1
         
         if 'IC' in c:
             color = 'limegreen'
         if 'HC' in c:
-            color = 'green'
+            color = 'darkgreen'
     
     
         island = Rect(insert = (x1, y1), 
-                       size = (length,height),
+                       size = (thickness,length),
                        fill = color, 
-                       fill_opacity = 0.3)
+                       fill_opacity = 0.4)
         elements.append(island)
     
     return elements
