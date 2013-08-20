@@ -328,7 +328,7 @@ class MongoCurious():
     def getannotations(self, docs):
         '''Organizes the annotation information into a dictionary'''
         annotations = {}
-        annotations['TSS'] = set([])
+        annotations['TSS'] = {}
         annotations['Islands'] = set([])
         annotations['genes'] = set([])
         annotations['feature'] = set([])
@@ -346,7 +346,7 @@ class MongoCurious():
 
             for genename in gene:
                 if tss1 in range(self.start, self.end):
-                    annotations['TSS'].add((genename, tss1))
+                    annotations['TSS'][tss1] = genename
                 else: annotations['genes'].add((genename, tss1))
             for genenameclosest in geneclosest:
                 annotations['genes'].add((genenameclosest, tss2))
@@ -366,8 +366,7 @@ class MongoCurious():
                         coord = coord.split('-')
                         coord = (int(coord[0]), int(coord[1]))
                         annotations['Islands'].add((coord, cpg_class))
-
-
+                        
             annotations['feature'].add((feature, feature_coord))
 
         print "\n    Annotations found:"

@@ -32,24 +32,35 @@ def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_marg
     spacing = 9
     offset = 0 
     elements = []
-    
+    x1 = 0
+    font_size = 3
+    between_tss = 12
     
     #Add TSS line if there is in fact a TSS in this region
-    for (gene,tss) in annotations['TSS']:
+    TSSs = annotations['TSS'].keys()
+    TSSs.sort()
+    for tss in TSSs:
+        gene_name = annotations['TSS'][tss]
         #print 'TSS:', gene, tss
+        previous_x1 = x1
         x1 = margin + (tss-start)*scale_x
-        y1 = axis_y_margin + width
-        length = margin
+        y1 = axis_y_margin + width + margin
+        length = margin + offset
         thickness = 0.3
         color = 'dodgerblue'
     
         TSSline = Rect(insert = (x1, y1), 
                        size = (thickness, length),
-                       fill = color)
-        TSS = (Text((str(tss)), insert = (x1+1, length+y1), fill = color, font_size = "4"))
-        gene = (Text("--> " + gene + " gene", insert = (x1, length+y1-spacing/2), fill = color, font_size = "4"))
+                       fill = color, fill_opacity = 0.4)
+        TSS = (Text((str(tss)), insert = (x1+1, length+y1), fill = color, font_size = font_size-1, fill_opacity = 0.6))
+        gene = (Text(gene_name, insert = (x1+1, length+y1-spacing/2), fill = color, font_size = font_size, fill_opacity = 0.8))
         offset += spacing
-        if offset > spacing*5: offset = 0
+
+        print gene_name, tss, len(str(tss)), previous_x1, x1, offset
+        
+        if offset > spacing*3 or (between_tss + previous_x1) < x1 :
+            print offset
+            offset = 0
         elements.append(TSSline)
         elements.append(TSS)
         elements.append(gene)

@@ -20,7 +20,7 @@ chr = '4'
 start = 3076408 
 #start = 1000000
 end = 3245687
-#end = 4000000
+end = 4000000
 
 t0 = time()
 query = m.query(collection = 'methylation', project = 'down syndrome', chromosome = chr, start = start, end = end)
