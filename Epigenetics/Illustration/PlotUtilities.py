@@ -49,6 +49,11 @@ def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_marg
         thickness = 0.3
         color = 'dodgerblue'
     
+        if offset > spacing*3 or (between_tss + previous_x1) < x1 :
+            offset = 0
+            
+        length = margin + offset
+
         TSSline = Rect(insert = (x1, y1), 
                        size = (thickness, length),
                        fill = color, fill_opacity = 0.4)
@@ -56,11 +61,6 @@ def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_marg
         gene = (Text(gene_name, insert = (x1+1, length+y1-spacing/2), fill = color, font_size = font_size, fill_opacity = 0.8))
         offset += spacing
 
-        print gene_name, tss, len(str(tss)), previous_x1, x1, offset
-        
-        if offset > spacing*3 or (between_tss + previous_x1) < x1 :
-            print offset
-            offset = 0
         elements.append(TSSline)
         elements.append(TSS)
         elements.append(gene)
