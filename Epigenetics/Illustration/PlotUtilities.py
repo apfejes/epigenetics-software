@@ -54,7 +54,7 @@ def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_marg
         elements.append(TSS)
         elements.append(gene)
     
-    for (a,b) in annotations['Islands']:
+    for ((a,b),c) in annotations['Islands']:
         #print 'island', a,b
         if a < start: a = start
         if b > end: b = end
@@ -63,7 +63,12 @@ def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_marg
         height = y1 + width + margin -10
         length = (b-a)*scale_x
         #print x1, length, y1
-        color = 'limegreen'
+        
+        if 'IC' in c:
+            color = 'limegreen'
+        if 'HC' in c:
+            color = 'green'
+    
     
         island = Rect(insert = (x1, y1), 
                        size = (length,height),
