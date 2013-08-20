@@ -23,7 +23,7 @@ class WigFileWriter(threading.Thread):
             self.f = filewriter
 
     def process_map(self, item):
-        if item.start >= 0:    # drop reads that start before the 0th position.
+        if item.start >= 0:    # drop entire maps that start before the 0th position.
             # TODO: a more elegant solution would be to trim the positions until they start at zero.
             self.f.write("\nfixedStep chrom=%s start=%i step=1\n" % (item.chr, item.start))
             self.f.write('\n'.join(map(str, item.coverage_map)))
