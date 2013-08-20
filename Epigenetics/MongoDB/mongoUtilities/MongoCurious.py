@@ -351,10 +351,19 @@ class MongoCurious():
             for genenameclosest in geneclosest:
                 annotations['genes'].add((genenameclosest, tss2))
 
-            if doc['hmm_island']:
-                coord = doc['hmm_island'].split(':')[1].split('-')
-                island = (int(coord[0]), int(coord[1]))
-                annotations['Islands'].add(island)
+            #if doc['hmm_island']:
+            #    coord = doc['hmm_island'].split(':')[1].split('-')
+            #    island = (int(coord[0]), int(coord[1]))
+            #    annotations['Islands'].add(island)
+
+            if doc['hil_cpg_island_name']:
+                #cpg_class = doc['hil_cpg_class']
+                #Parse CpG islands info of format (chr#_class:start-end)
+                islands = doc['hil_cpg_island_name'].split(';')
+                for island in islands:
+                    cpg_class,coord = island.split(':')
+                    coord = (int(coord[0]), int(coord[1]))
+                    annotations['Islands'].add(coord, cpg_class)
 
             annotations['feature'].add((feature, feature_coord))
 
