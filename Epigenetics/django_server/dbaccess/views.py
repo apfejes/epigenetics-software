@@ -70,8 +70,8 @@ def query(request):
             database = str(form.cleaned_data['database'])
             collection = str(form.cleaned_data['collection'])
             chromosome = 'chr' + str(form.cleaned_data['chromosome'])
-            start = int(form.cleaned_data['start'])
-            end = int(form.cleaned_data['end'])
+            start = form.cleaned_data['start']
+            end = form.cleaned_data['end']
             print "\n\n Received a form:", database, collection, chromosome, start, end
             if collection == 'chipseq':
                 return chipseq_code(request, database, chromosome, start, end)

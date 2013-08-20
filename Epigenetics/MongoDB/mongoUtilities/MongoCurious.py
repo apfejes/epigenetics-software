@@ -56,7 +56,11 @@ class MongoCurious():
                 sample_id = None):
         '''remove sample_id, if not used'''
         self.collection = collection
+        if end: end = int(end)
+        else: end = None
         self.end = end
+        if start: start = int(start)
+        else: start = 0
         self.start = start
 
         # Make sure chr variable is in the right format
@@ -272,9 +276,6 @@ class MongoCurious():
 
         self.sample_peaks = sample_peaks
 
-        if self.start == None:
-            self.start = 0
-            print "    New start position:", self.start
         if self.end == None:
             self.end = maxpos
             print "    New end position:", self.end
@@ -300,7 +301,8 @@ class MongoCurious():
                 waves.append((pos, height, stddev, doc_sample_group))
                 count += 1
             else:
-                dist_to_region = min(abs(pos - self.end), abs(self.start - pos))
+                if not self.end: dist_to_region = 0
+                else: dist_to_region = min(abs(pos - self.end), abs(self.start - pos))
                 dist_from_peak_to_tail = sqrt((-2) * stddev * stddev * log(tail / height))
                 if dist_from_peak_to_tail - dist_to_region >= 0:
                     waves.append((pos, height, stddev, doc_sample_group))
@@ -308,9 +310,6 @@ class MongoCurious():
             if pos > maxpos:
                 maxpos = pos
 
-        if self.start == None:
-            self.start = 0
-            print "    New start position:", self.start
         if self.end == None:
             self.end = maxpos
             print "    New end position:", self.end
