@@ -12,8 +12,9 @@ _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current fi
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir + os.sep + "Utilities")
+sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Parameters
-from MongoDB.mongoUtilities import Mongo_Connector
+import Mongo_Connector
 
 def create_param_obj(param_file):
     '''copy of function in The WaveGenerator - should be refactored to remove redundancy!!'''
@@ -54,9 +55,18 @@ def run():
                 st = str.split(line, "=", 1)
                 patient_dict[st[0]] = st[1]
 
+    db_names = {0:"arabidopsis_epigenetics",
+                1:"human_epigenetics",
+                2:"yeast_epigenetics"}
+    db_choice = -1
+    while not (db_choice >= 0 and db_choice < len(db_names)):
+        for y in db_names:
+            print "%i - %s" % (y, db_names[y])
+        db_choice = int(raw_input("select a database to insert records into."))
+    db_name = db_names[db_choice]
+
     print "Thanks - Data has been collected."
     print "opening connection(s) to MongoDB..."
-    db_name = "arabidopsis_epigenetics"
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
 
     print "processing %s..." % wave_input_file
@@ -103,10 +113,11 @@ def run():
     mongo.close()
 
 if __name__ == '__main__':
-    if len(sys.argv) < 1:
+    if len(sys.argv) <= 1:
         print ("This program requires the name of the database config file.")
-        print" eg. python ImportWaveToDB.py /directory/database.conf"
-
+        print " eg. python ImportWaveToDB.py /directory/database.conf"
+        print " for instance, you can find a demo file in Epigenetics/MongoDB/database.conf "
+        sys.exit()
     conf_file = sys.argv[1]
     p = Parameters.parameter(conf_file)
     run()
