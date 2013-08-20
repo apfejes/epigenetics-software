@@ -17,17 +17,11 @@ sample_collection = 'samples'
 from pymongo import Connection
 mongo = Connection('kruncher.cmmt.ubc.ca', 27017)
 
-
 def my_view(request):
     return render(request, 'base.jade')
 
 def view_collections(request):
     return render(request, 'collections.jade')
-
-def view_query_form(request):
-    if request.method == 'POST':    # If the query has been submitted...
-        query(request)
-    return render(request, 'query_form.jade')
 
 def view_methylation(request):
     return render(request, 'methylation.jade')
@@ -46,7 +40,7 @@ def collections(request):
 def methylation_code(request):
     from .Annotations import showmethylation
     string = showmethylation.svgcode()
-    return HttpResponse(string)
+    return string
 
 def chipseq_code(request, database, chromosome, start, end):
     from .Annotations import showchipseq
@@ -62,7 +56,15 @@ def send_svg(request):
     from .Annotations import showgene
     return HttpResponse(showgene.svgcode())
 
+def view_query_form(request):
+    print 'query_form'
+    if request.method == 'POST':    # If the query has been submitted...
+        svg = query(request)
+        return render(request, 'query_form.jade', {'svg':svg})
+    return render(request, 'query_form.jade')
+
 def query(request):
+    print 'query'
     if request.method == 'POST':    # If the query has been submitted...
         form = QueryForm(request.POST)    # A form bound to the POST data
         if form.is_valid():    # All validation rules pass
@@ -82,5 +84,7 @@ def query(request):
                 return HttpResponse(collection + ' is an invalid collection! Please try again...')
         else:
             return HttpResponse('You query parameters were invalid! Please try again...')    # Redirect after POST
-    return HttpResponse('Hey ho')
+    else: 
+        print 'try'
+        return HttpResponse('Try querying the database!')
 
