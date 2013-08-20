@@ -183,6 +183,7 @@ def process_WIG_reads(PARAM, map_queues, print_queue, worker_processes):
             if chromosome != current_chromosome:
                 print_queue.put("chromosome %s had %i regions of enrichment" % (current_chromosome, count))
                 current_chromosome = chromosome
+                count = 0
         else:
             thismap.append(float(line))
     if len(thismap) > 0:
@@ -266,12 +267,6 @@ def main(PARAM):
         # Once a file is opened you can iterate over all of the read mapping to a
         # specified region using fetch(). Each iteration returns a AlignedRead object
         # which represents a single read along with its fields and optional tags:
-
-
-        print "print_queue is :", print_queue
-        print "print_thread is :", print_thread
-
-
         if PARAM.get_parameter('type') == "WIG":
             process_WIG_reads(PARAM, map_queues, print_queue, worker_processes)
         elif PARAM.get_parameter('type') == "BAM":
@@ -295,9 +290,20 @@ def main(PARAM):
         # for x in range(PARAM.get_parameter("processor_threads")):
         for queue in map_queues:
             queue.put(None)
-        while len(map_queues > 0):
-            print_queue.put("there are %i items remaining in the map queue" % (len(map_queues)))
-            time.sleep(2)
+        temp = -1
+        print_queue.put("terminator sentinels have been added - will poll queue sizes until processing is complete ")
+        while temp != 0:
+            temp = 0
+            for x in range(len(map_queues)):
+                temp += map_queues[x].qsize()
+
+            pause = temp / 1000
+            if pause > 20:
+                pause = 20
+            if pause < 2:
+                pause = 2
+            print_queue.put("there are %i items remaining in the map queue.  will poll again in %i seconds" % (temp, pause))
+            time.sleep(pause)
         for proc in procs:
             proc.join()
         for queue in map_queues:
@@ -330,7 +336,8 @@ if __name__ == "__main__":
     if len(sys.argv) > 0 :
         for arg in sys.argv:
             print arg
-    # sys.argv[1] must be equal to the file name of the input file.
+    # sys.argv[1] must provide the file name of the input file.
+
     param = create_param_obj(sys.argv[1])
     main(param)
 
