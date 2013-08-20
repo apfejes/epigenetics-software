@@ -91,6 +91,7 @@ def ApplyBaseline(index, file_in, file_out, ps):
             a = line.split("\t")
             if ps[0][linecount] != "%s\t%s" % (a[0], a[1]):
                 print "incorrectly paired probe!%s\t%i and %s (linecount = %i)" % (a[0], int(a[1]), ps[0][linecount], linecount)
+                print "file with error: %s" % (file_in)
                 sys.exit()
             bout.write("%s\t%i\t%f\n" % (a[0], int(a[1]), float(a[2]) - float(ps[1][linecount])))
             linecount += 1
