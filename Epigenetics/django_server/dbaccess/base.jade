@@ -1,37 +1,20 @@
-!!! 5
 html
-    head
-        title #{title} - Human Epigenetics Visualization Website
-        
-        style
-            h1, h2, h3 { font-size: 32px; color: #2b34e4; }
-            h2 { font-size: 18px; color: #2b34e4; }
-            h3 { font-size: 14px; }
-            footer {
-               font-family: Verdana;
-               font-size: 10px;
-               background: #eee;
-               }
-            main {
-               font-family: Verdana;
-               font-size: 14px;
-               color: #000000;
-               }
-            a:hover { color: #F76F76; }
-            a { color: #f38227 }
-            b { color: #f38227 }
-    body
-        header
-            h1 Human Epigenetics Database Access
-            nav
-                a(href!='{% url 'base' %}') Home
-            nav
-                a(href!='{% url 'collections' %}') Collections
-            nav
-                a(href!='{% url 'query_form' %}') Query the database
-        main
-            block content
+  head
+  link(rel='stylesheet', href='/static/templatestyle.css', type='text/css' )
+  a(href='/')
+
+body
+    #header
+        h1 Human Epigenetics Database Access
+    #wrapper
+        #navigation
+                nav
+                    a(href!='{% url 'base' %}') Home
+                nav
+                    a(href!='{% url 'collections' %}') Collections
+                nav
+                    a(href!='{% url 'query_form' %}') Query the database
+        #content
                 image
                     embed(src!='{% url 'svgcode' %}', scrolling = 'no', width='1800', height = '180')
-        footer
-            p Running from the Kobor Lab @ the CMMT
+        p.footersmall Running from the Kobor Lab @ the CMMT

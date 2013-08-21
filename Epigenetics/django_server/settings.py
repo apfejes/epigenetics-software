@@ -82,7 +82,7 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    os.path.dirname(os.path.realpath(__file__)) + '/dbaccess/templates'
+    os.path.dirname(os.path.realpath(__file__)) + '/dbaccess/static',
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -132,7 +132,8 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/home/sperez/epigenetics-software/epigenetics-software/Epigenetics/django_server/dbaccess/"
+    os.path.dirname(os.path.realpath(__file__)) + "/dbaccess/",
+    os.path.dirname(os.path.realpath(__file__)) + "/dbaccess/templates",
 )
 
 # Disabled auth, session and admin in order to use Mongodb

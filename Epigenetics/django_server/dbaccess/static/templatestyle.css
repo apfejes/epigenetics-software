@@ -1,0 +1,65 @@
+body {
+width:750px;
+margin:0 auto;
+margin-top:30px;
+}
+
+h1 { font-size: 32px; color: blue; }
+h2 { font-size: 18px; color: #2b34e4; }
+h3 { font-size: 14px; }
+
+.footersmall{
+   font-family: Verdana;
+   font-size: 10px;
+   background-color: #eee;
+   }
+   
+main {
+   font-family: Verdana;
+   font-size: 14px;
+   color: #000000;
+   }
+   
+a:hover { color: #F76F76; }
+a { color: #f38227 }
+b { color: #f38227 }
+
+
+#header {
+width:750px;
+height:150px;
+background-color:#333333;
+}
+
+#wrapper{
+width:750px;
+background:url(background_3.gif) repeat-y; /* WARNING: IF YOU CHANGE THE COLORS OF THE LAYOUT YOU HAVE TO CHANGE THIS IMAGE! */
+overflow:auto; /* USE FIREFOX GUYS! WE ONLY NEED THIS LINE BECAUSE INTERNET EXPLODER ISN'T READING CODE PROPERLY */
+margin-top:10px;
+}
+
+#navigation {
+width:200px;
+min-height:500px; /* for modern browsers */
+height:auto !important; /* for modern browsers */
+height:500px; /* for IE5.x and IE6 */
+background-color:#333333;
+float:left;
+}
+
+#content { 
+margin-left:210px;
+width:540px;
+min-height:500px; /* for modern browsers */
+height:auto !important; /* for modern browsers */
+height:500px; /* for IE5.x and IE6 */
+background-color:#333333;
+margin-top:10px;
+}
+
+#footer { 
+margin-top:10px;
+width:750px;
+height:100px;
+background-color:#333333;
+}
