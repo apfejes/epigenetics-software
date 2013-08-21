@@ -6,11 +6,3 @@ class QueryForm(forms.Form):
     chromosome = forms.CharField(max_length = 2)
     start = forms.CharField(max_length = 15, required = False)
     end = forms.CharField(max_length = 15, required = False)
-
-    def __init__(self):
-        return None
-
-    def is_valid(self):
-        return None
-
-    cleaned_data = []

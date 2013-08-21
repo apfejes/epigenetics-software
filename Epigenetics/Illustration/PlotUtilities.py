@@ -32,48 +32,59 @@ def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_marg
     spacing = 9
     offset = 0 
     elements = []
-    
+    x1 = 0
+    font_size = 3
+    between_tss = 12
     
     #Add TSS line if there is in fact a TSS in this region
-    for (gene,tss) in annotations['TSS']:
+    TSSs = annotations['TSS'].keys()
+    TSSs.sort()
+    for tss in TSSs:
+        gene_name = annotations['TSS'][tss]
         #print 'TSS:', gene, tss
+        previous_x1 = x1
         x1 = margin + (tss-start)*scale_x
-        y1 = axis_y_margin
-        length = width + margin*3
+        y1 = axis_y_margin + width + margin
+        length = margin + offset
         thickness = 0.3
         color = 'dodgerblue'
     
+        if offset > spacing*3 or (between_tss + previous_x1) < x1 :
+            offset = 0
+            
+        length = margin + offset
+
         TSSline = Rect(insert = (x1, y1), 
                        size = (thickness, length),
-                       fill = color)
-        TSS = (Text((str(tss)), insert = (x1+1, length+y1), fill = color, font_size = "4"))
-        gene = (Text("--> " + gene + " gene", insert = (x1, length+y1-spacing/2), fill = color, font_size = "4"))
+                       fill = color, fill_opacity = 0.4)
+        TSS = (Text((str(tss)), insert = (x1+1, length+y1), fill = color, font_size = font_size-1, fill_opacity = 0.6))
+        gene = (Text(gene_name, insert = (x1+1, length+y1-spacing/2), fill = color, font_size = font_size, fill_opacity = 0.8))
         offset += spacing
-        if offset > spacing*5: offset = 0
+
         elements.append(TSSline)
         elements.append(TSS)
         elements.append(gene)
     
     for ((a,b),c) in annotations['Islands']:
-        #print 'island', a,b
+        #print 'island', a,b,c
         if a < start: a = start
         if b > end: b = end
         x1 = margin + (a-start)*scale_x
         y1 = axis_y_margin
-        height = y1 + width + margin -10
-        length = (b-a)*scale_x
+        length = y1 + width + margin -10
+        thickness = (b-a)*scale_x
         #print x1, length, y1
         
         if 'IC' in c:
             color = 'limegreen'
         if 'HC' in c:
-            color = 'green'
+            color = 'darkgreen'
     
     
         island = Rect(insert = (x1, y1), 
-                       size = (length,height),
+                       size = (thickness,length),
                        fill = color, 
-                       fill_opacity = 0.3)
+                       fill_opacity = 0.4)
         elements.append(island)
     
     return elements
