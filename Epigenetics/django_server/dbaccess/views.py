@@ -21,7 +21,11 @@ def my_view(request):
     return render(request, 'base.jade')
 
 def view_collections(request):
-    return render(request, 'collections.jade')
+    db = mongo[database_name]
+    collections = ""
+    for item in db.collection_names():
+        collections += item + ', '
+    return render(request, 'collections.jade', {'collections':collections})
 
 def view_methylation(request):
     return render(request, 'methylation.jade')
@@ -58,9 +62,10 @@ def send_svg(request):
 
 def view_query_form(request):
     print 'query_form'
+    svg = ''
     if request.method == 'POST':    # If the query has been submitted...
         svg = query(request)
-        return render(request, 'query_form.jade', {'svg':svg})
+    print svg
     return render(request, 'query_form.jade')
 
 def query(request):

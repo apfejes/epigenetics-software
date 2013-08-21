@@ -1,10 +1,10 @@
-extends query_form
+extends base
 
 block title
-	| Human Epigenetics Database
-
+    | Human Epigenetics Database
 
 block content
-	article
-		block text
-			embed(src!='{% url 'collection_names' %}')
+    header
+        h3 Collections available:
+    main
+        p !{collections}
