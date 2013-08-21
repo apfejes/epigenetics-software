@@ -123,6 +123,12 @@ class MethylationPlot(object):
         self.plot = None
         return z
 
+    def get_xml(self):
+        strings = ""
+        for element in self.elements:
+            strings += (element.get_xml().decode('utf-8'))
+        return strings
+
     def get_elements(self):
         self.add_sample_labels(self.margin * 3.2 + self.length)
         z = self.elements
