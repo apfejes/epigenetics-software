@@ -55,7 +55,7 @@ class StringWriter(threading.Thread):
         # global queue
         while not END_PROCESSES:
             try:
-                if queue == None:
+                if queue is None:
                     break
                 string = queue.get()    # grabs string from queue
                 self.process_string(string)    # print retrieved string

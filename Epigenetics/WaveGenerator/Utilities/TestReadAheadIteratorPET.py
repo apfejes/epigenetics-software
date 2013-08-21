@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
         while readahead.isValid():    # test if the reads are still good.
 
             alignedreadobjpet = readahead.getNext()
-            if alignedreadobjpet == None:
+            if alignedreadobjpet is None:
                 # move to next chromosome
                 chr_count = 0
                 print "returned a None!"
@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
         count = 0
         while readahead.isValid():
             alignedreadobjpet = readahead.getNext()
-            if alignedreadobjpet == None:
+            if alignedreadobjpet is None:
                 break
             count += 1
         # print "read", count, "objects"
@@ -91,7 +91,7 @@ class Test(unittest.TestCase):
                 current_chromosome = chromosome
             else:
                 self.assert_(last_read_start <= alignedreadobjpet.left_end, "reads passed out of order!")
-            if alignedreadobjpet == None:
+            if alignedreadobjpet is None:
                 break
             last_read_start = alignedreadobjpet.left_end
             count += 1

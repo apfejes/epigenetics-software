@@ -46,9 +46,10 @@ class DLL(object):
             DLL.tail = node
         self.__len += 1
 
+
+    def insert_at_head(self, thing):
         ''''thing must be of type Node.
         Adds to the front of the list'''
-    def insert_at_head(self, thing):
         newnode = Node(thing)
         if self.__len == 0:
             DLL.head = newnode
@@ -60,7 +61,7 @@ class DLL(object):
         self.__len += 1
 
     def insert_before(self, node, thing):
-        # test if first node, then use convenience method:
+        ''' test if first node, then use convenience method:'''
         if node == DLL.head:
             DLL.insert_at_head(thing)
             return None
@@ -86,9 +87,9 @@ class DLL(object):
             self.__len += 1
 
     def pop_head(self):
-        if DLL.head == None:    # empty list
+        if DLL.head is None:    # empty list
             return None
-        elif DLL.head.next == None:    # Single Item in the list
+        elif DLL.head.next is None:    # Single Item in the list
             p = DLL.head.holding
             DLL.head = None
             self.__len -= 1
@@ -105,14 +106,14 @@ class DLL(object):
     def getAll(self):
         pointer = DLL.head
         str_list = []
-        while not pointer == None:
+        while not pointer is None:
             str_list.append(pointer.holding)
             pointer = pointer.next
         return ''.join(str_list)
 
     '''destroy everything in the linked list - shouldn't be necessary'''
     def destroy(self):
-        while not DLL.head == None:
+        while not DLL.head is None:
             N = DLL.head.next
             DLL.head.next = None
             DLL.head.prev = None

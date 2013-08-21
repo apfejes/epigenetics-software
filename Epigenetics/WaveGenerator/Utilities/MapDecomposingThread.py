@@ -35,11 +35,11 @@ class MapDecomposer(multiprocessing.Process):
 
         # numpy.ndarray((max_sigma, 3 * max_sigma))
 
-        if (MapDecomposer.wave_queue == None):
+        if (MapDecomposer.wave_queue is None):
             MapDecomposer.wave_queue = wave_queue
-        if (MapDecomposer.print_queue == None):
+        if (MapDecomposer.print_queue is None):
             MapDecomposer.print_queue = print_queue
-        if (MapDecomposer.PARAM == None):
+        if (MapDecomposer.PARAM is None):
             MapDecomposer.PARAM = PARAM
 
         '''first variable is the sigma, second is the number of spaces away 
@@ -252,7 +252,7 @@ class MapDecomposer(multiprocessing.Process):
             try:
                 map_item = self.map_queue.get(True)    # grabs map from queue\
                 # print "got an item."
-                if map_item == None:
+                if map_item is None:
                     break
                 self.process_map(map_item, self.f)
                 # print "map processed"

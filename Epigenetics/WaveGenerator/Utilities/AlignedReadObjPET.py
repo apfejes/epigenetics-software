@@ -29,7 +29,7 @@ class AlignedReadObjPET():
         return "AlignedReadObjPET"
 
     def is_pet(self):
-        if self.read2 == None:
+        if self.read2 is None:
             return False
         else:
             return True
