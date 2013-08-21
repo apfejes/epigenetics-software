@@ -43,7 +43,7 @@ class ReadAheadIteratorPET():
                 while a.is_unmapped:    # ignore reads that are unmapped
                     # self.unmapped_reads += 1
                     a = self.iterator.next()
-                    if a == None:
+                    if a is None:
                         return None
                 if a.is_paired:    # if it's a PET read
                     if ReadAheadIteratorPET.reads_processed.has_key(a.qname):    # have you seen the other pair?
@@ -83,7 +83,7 @@ class ReadAheadIteratorPET():
         right_end = 0
         ''' print 'proper pairing:' + (" Yes" if alignedread1.is_proper_pair else " No") + (" Yes" if alignedread2.is_proper_pair else " No")'''
         # handling unpaired
-        if alignedread2 == None:
+        if alignedread2 is None:
             if alignedread1.is_reverse:
                 left_end = alignedread1.pos - self.fragmentLength
             else:
@@ -129,13 +129,13 @@ class ReadAheadIteratorPET():
             first_read_start = -1
             last_read_start = -1
 
-        while self.isReadValid and first_read_start + ReadAheadIteratorPET.MaxReadAhead > last_read_start and self.reserve_read == None:
+        while self.isReadValid and first_read_start + ReadAheadIteratorPET.MaxReadAhead > last_read_start and self.reserve_read is None:
 
             read = self._next()
-            if read == None:
+            if read is None:
                 return None
             else:
-                if self.current_chromosome == None:
+                if self.current_chromosome is None:
                     self.current_chromosome = read.chromosome_id
                 else:
                     if self.current_chromosome != read.chromosome_id:

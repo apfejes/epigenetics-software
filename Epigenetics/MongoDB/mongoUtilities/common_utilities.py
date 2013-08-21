@@ -26,7 +26,7 @@ class MongoUtilities(object):
 
     def get_chip_seq_sample_names(self):
         collection = "samples"
-        curs = self.mongo.find(collection, {"chip":{"$exists": True}}, {"cell_line": True, "chip": True})
+        curs = self.mongo.find(collection, {"haswaves":{"$exists": True}}, {"cell_line": True, "chip": True})
         results = []
         for c in curs:
             results.append("%s - %s" % (c['cell_line'], c['chip']))

@@ -8,6 +8,7 @@ Created on 2013-03-27
 
 from pymongo.mongo_client import MongoClient
 import sys
+import types
 
 
 class MongoConnector():
@@ -21,7 +22,7 @@ class MongoConnector():
         try:
             self.mongo = MongoClient(machine, port)
             self.db = self.mongo[database_name]    # Create a collection for inserting documents, user input.
-        except Exception, e:
+        except Exception, e:    # pylint: disable=W0703
             print e
             sys.exit("Failure to connect to database")
 
@@ -47,12 +48,18 @@ class MongoConnector():
         collection = self.db[collection_name]
         return collection.drop_index(index_or_name)
 
-    def find(self, collection_name, findQuery = None, returnQuery = None, sortField = None):
+    def find(self, collection_name, findQuery, returnQuery = None, sortField = None):
+        '''sortField should be given as a dict, with the format {"field1":sortdirection}, 
+        where sortdirection is a -1 or 1, depending on the direction of the sort,
+        (descending, ascending, respectively)'''
         collection = self.db[collection_name]
-        if sortField:
-            return collection.find(findQuery, returnQuery).sort(sortField, 1)
-        else:
+        if sortField is None:
             return collection.find(findQuery, returnQuery)
+        elif type(sortField) == types.ListType:
+            return collection.find(findQuery, returnQuery).sort(sortField)
+        else:
+            raise Exception ("Invalid query - check sort Field type")
+
 
     def update(self, collection_name, queryDict, updateDict, multiOpt = True):
         collection = self.db[collection_name]

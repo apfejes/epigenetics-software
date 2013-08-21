@@ -125,14 +125,14 @@ class MongoCurious():
 
             if self.collection == 'waves':
                 doc_chip = str(doc['chip'])
-                if doc_chip == chip or chip == None:
+                if doc_chip == chip or chip is None:
                     sample_ids[sample_id] = doc_chip
 
             if self.collection == 'methylation':
                 doc_sample_group = doc['sample_group']
                 doc_sample_label = doc['samplelabel']
-                if doc_sample_group == sample_group or sample_group == None:
-                    if doc_sample_label == sample_label or sample_label == None:
+                if doc_sample_group == sample_group or sample_group is None:
+                    if doc_sample_label == sample_label or sample_label is None:
                         sample_ids[sample_id] = (doc_sample_label, doc_sample_group)
 
         return sample_ids
@@ -276,7 +276,7 @@ class MongoCurious():
 
         self.sample_peaks = sample_peaks
 
-        if self.end == None:
+        if self.end is None:
             self.end = maxpos
             print "    New end position:", self.end
 
@@ -310,7 +310,7 @@ class MongoCurious():
             if pos > maxpos:
                 maxpos = pos
 
-        if self.end == None:
+        if self.end is None:
             self.end = maxpos
             print "    New end position:", self.end
 
@@ -350,26 +350,26 @@ class MongoCurious():
             for genenameclosest in geneclosest:
                 annotations['genes'].add((genenameclosest, tss2))
 
-            #if doc['hmm_island']:
+            # if doc['hmm_island']:
             #    coord = doc['hmm_island'].split(':')[1].split('-')
             #    island = (int(coord[0]), int(coord[1]))
             #    annotations['Islands'].add(island)
 
             if doc['hil_cpg_island_name']:
-                #cpg_class = doc['hil_cpg_class']
-                #Parse CpG islands info of format (chr#_class:start-end)
+                # cpg_class = doc['hil_cpg_class']
+                # Parse CpG islands info of format (chr#_class:start-end)
                 islands = doc['hil_cpg_island_name'].split(';')
                 for island in islands:
                     if island != '.':
-                        cpg_class,coord = island.split(':')
+                        cpg_class, coord = island.split(':')
                         coord = coord.split('-')
                         coord = (int(coord[0]), int(coord[1]))
                         annotations['Islands'].add((coord, cpg_class))
-                        
+
             annotations['feature'].add((feature, feature_coord))
 
         print "\n    Annotations found:"
-        for key,value in annotations.iteritems():
+        for key, value in annotations.iteritems():
             print "        ", key, len(value), value
 
         self.annotations = annotations

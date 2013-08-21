@@ -73,6 +73,7 @@ def run():
     sample = create_param_obj(wave_input_file)
     sample['cell_line'] = cell_line
     sample['chip'] = chip
+    sample['haswaves'] = True    # used to indicate a sample has wave data
     collection_name = "samples"
     sample_id = mongo.insert(collection_name, sample)
 

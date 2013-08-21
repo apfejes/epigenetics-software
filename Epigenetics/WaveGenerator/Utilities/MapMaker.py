@@ -38,7 +38,7 @@ class MapMaker():
 
         while p != None:
             # print p.holding.get_left_end(), "-", p.holding.get_right_end()
-            if p.holding.read2 == None:    # set tag
+            if p.holding.read2 is None:    # set tag
                 read = p.holding.read1
                 if read.is_reverse:
 

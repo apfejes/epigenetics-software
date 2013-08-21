@@ -7,6 +7,11 @@ Created on 2013-03-06
 
 
 class Distribution():
+
+    def __init__(self):
+        '''constructor'''
+        pass
+
     @staticmethod
     def Flat(length):
         a = [1] * length
@@ -28,10 +33,3 @@ class Distribution():
             array[i] = (i + 1) / (d + 1)
         return array
 
-
-
-
-
-        '''
-        Constructor
-        '''

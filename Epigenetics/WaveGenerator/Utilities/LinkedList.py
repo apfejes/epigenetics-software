@@ -58,9 +58,9 @@ class LL(object):
         self.__len += 1
 
     def pop_head(self):
-        if LL.head == None:    # empty list
+        if LL.head is None:    # empty list
             return None
-        elif LL.head.next == None:    # Single Item in the list
+        elif LL.head.next is None:    # Single Item in the list
             p = LL.head.holding
             LL.head = None
             self.__len -= 1
@@ -72,7 +72,7 @@ class LL(object):
             return p
 
     def insert_at_tail(self, thing):
-        if LL.tail == None:
+        if LL.tail is None:
             self.insert_at_head(thing)
         else:
             newnode = Node(thing)
@@ -85,14 +85,14 @@ class LL(object):
     def getAll(self):
         pointer = LL.head
         str_list = []
-        while not pointer == None:
+        while not pointer is None:
             str_list.append(pointer.holding)
             pointer = pointer.next
         return ''.join(str_list)
 
     '''destroy everything in the linked list - shouldn't be necessary'''
     def destroy(self):
-        while not LL.head == None:
+        while not LL.head is None:
             N = LL.head.next
             LL.head.next = None
             LL.head.holding = None

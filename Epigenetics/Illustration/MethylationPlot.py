@@ -143,7 +143,7 @@ class MethylationPlot(object):
 
     def add_legends(self):
         ''' Add annotations, title, axis, tic marks and labels '''
-        if self.title == None:
+        if self.title is None:
             self.title = "Methylation PLot"
         Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5")

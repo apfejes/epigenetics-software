@@ -85,7 +85,7 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
         alignedreadobjpet = readahead.getNext()
         if not readahead.isReadValid:
             break
-        if (alignedreadobjpet == None) :
+        if (alignedreadobjpet is None) :
             # flush chromosomome related objects, then continue
             continue
         chromosome = readahead.get_ref_name(alignedreadobjpet.read1.tid)
@@ -161,7 +161,7 @@ def process_WIG_reads(PARAM, map_queues, print_queue, worker_processes):
         if line.startswith('track'):
             continue
         if line.startswith('fixedStep'):
-            if firstpass == False:
+            if not firstpass:
                 count += 1
                 put_assigned(map_queues,
                              MappingItem.Item(thismap, current_chromosome,
@@ -321,7 +321,7 @@ def main(PARAM):
         wave_queue.close()
         print_queue.put("wave_queue closed")
 
-        if print_thread == None or not print_thread.is_alive():
+        if print_thread is None or not print_thread.is_alive():
             pass
         else:
             while print_queue.qsize() > 0:
