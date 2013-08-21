@@ -179,7 +179,7 @@ class ChipseqPlot(object):
 
     def add_legends(self):
         ''' Add title, axis, tic marks and labels '''
-        if self.title == None:
+        if self.title is None:
             self.title = "Chipseq Peaks"
         Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
                 fill = "midnightblue", font_size = "5")
