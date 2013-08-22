@@ -7,7 +7,7 @@ import views
 
 urlpatterns = patterns('',
 # 	url(r'^home$',views.index,name='index'),
-	url(r'^$', views.my_view, name = 'base'),
+	url(r'^$', views.home_view, name = 'base'),
 	url(r'^collections/', views.view_collections, name = 'collections'),
 	url(r'^query_form/', views.view_query_form, name = 'query_form'),
 # 	url(r'^collections/name/', views.collections, name='collectionsname'),

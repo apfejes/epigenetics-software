@@ -1,12 +1,14 @@
-link(rel='stylesheet', href='templatestyle.css', type='text/css' )
-
-block content
-    article
-        header
-            h2 Query Human Epigenetics Database
-        block intro
-        
-        block form
+html
+  head
+  link(rel='stylesheet', href='/static/templatestyle.css', type='text/css' )
+  a(href='/')
+  
+body
+    #header
+        h1 Query Human Epigenetics Database
+    
+    #wrapper
+        #content
             form(action='/dbaccess/query_form/',method='post')
                 div(data-role='fieldcontain')
                     fieldset(data-role='database')
@@ -27,7 +29,6 @@ block content
                             input(id='end', size = '8', type='text',value='',name='end')
                 div(data-role='fieldcontain')
                     input(type='submit',value='Query!', data-transition='fade', data-theme='c')  
-        block image
-            |!{abcd}
+            |!{plot}
                  
                     

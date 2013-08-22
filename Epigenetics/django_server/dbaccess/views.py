@@ -9,16 +9,12 @@ from django.shortcuts import render
 from .queryforms import QueryForm
 # from django.views.generic import TemplateView
 
-
-database_name = 'human_epigenetics'
-annotation_collection = 'annotations'
-methylation_collection = 'methylation'
-sample_collection = 'samples'
+from .Annotations import showmethylation, showchipseq
 
 from pymongo import Connection
 mongo = Connection('kruncher.cmmt.ubc.ca', 27017)
 
-def my_view(request):
+def home_view(request):
     return render(request, 'base.jade')
 
 def view_collections(request):
@@ -28,15 +24,12 @@ def view_collections(request):
         collections += item + ', '
     return render(request, 'collections.jade', {'collections':collections})
 
-def chipseq_code(request, database, chromosome, start, end):
-    from .Annotations import showchipseq
+def chipseq_code(database, chromosome, start, end):
     string = showchipseq.svgcode(db = database, chromosome = chromosome, start = start, end = end)
     return HttpResponse(string)
 
-def meth_code(request, database, chromosome, start, end):
-    from .Annotations import showmethylation
+def meth_code(database, chromosome, start, end):
     string = showmethylation.svgcode(db = database, chromosome = chromosome, start = start, end = end)
-    print string
     return string
 
 def send_svg(request):
@@ -46,28 +39,34 @@ def send_svg(request):
 def view_query_form(request):
     svg = 'Try querying the database!'
     if request.method == 'POST':    # If the query has been submitted...
-        svg = query(request)
-        print svg
-    print 'method', request.method
-    return render(request, 'query_form.jade', {'abcd':mark_safe(svg)} )
-
-def query(request):
-    form = QueryForm(request.POST)    # A form bound to the POST data
-    if form.is_valid():    # All validation rules pass
-        # Process the data in form.cleaned_data
-        database = str(form.cleaned_data['database'])
-        collection = str(form.cleaned_data['collection'])
-        chromosome = 'chr' + str(form.cleaned_data['chromosome'])
-        start = form.cleaned_data['start']
-        end = form.cleaned_data['end']
-        print "\n\n Received a form:", database, collection, chromosome, start, end
-        if collection == 'chipseq':
-            return chipseq_code(request, database, chromosome, start, end)
-        elif collection == 'methylation':
-            return meth_code(request, database, chromosome, start, end)
-            # return HttpResponse('The \'' + collection + '\' collection is not available yet.')
+        form = QueryForm(request.POST)    # A form bound to the POST data
+        if form.is_valid():    # All validation rules pass
+            svg = query(parse_form(form))
         else:
-            return HttpResponse(collection + ' is an invalid collection! Please try again...')
+            return HttpResponse('You query parameters were invalid! Please try again...')    # Redirect after POST
+    return render(request, 'query_form.jade', {'plot':mark_safe(svg)} )
+
+def zoom(zoom_factor,start,end):
+    return start,end
+
+def parse_form(form):
+    # Process the data in form.cleaned_data
+    database = str(form.cleaned_data['database'])
+    collection = str(form.cleaned_data['collection'])
+    chromosome = 'chr' + str(form.cleaned_data['chromosome'])
+    zoom_factor = int(form.cleaned_data['zoom'])
+    start = form.cleaned_data['start']
+    end = form.cleaned_data['end']
+    if zoom_factor != 1:
+        start, end = zoom(zoom_factor,start, end)
+    print "\n\n Received a form:", database, collection, chromosome, start, end
+    return  database, collection, chromosome, start, end
+
+def query(database, collection, chromosome, start, end):
+    if collection == 'chipseq':
+        return showchipseq.svgcode(db = database, chromosome = chromosome, start = start, end = end)
+    elif collection == 'methylation':
+        return showmethylation.svgcode(db = database, chromosome = chromosome, start = start, end = end)
     else:
-        return HttpResponse('You query parameters were invalid! Please try again...')    # Redirect after POST
+        return HttpResponse(collection + ' is an invalid collection! Please try again...')
 
