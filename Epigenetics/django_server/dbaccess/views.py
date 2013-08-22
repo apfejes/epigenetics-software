@@ -44,31 +44,29 @@ def view_query_form(request):
 
     o = str(q.get("organism",None))
     col = str(q.get("collection",None))
-    start = int(q.get("start",None))
-    end = int(q.get("end",None))
+    start = str(q.get("start",None))
+    end = str(q.get("end",None))
     chrom = str(q.get("chromosome",None))
-    
-    parameters = {'organism':o, 'collection': col, 'chromosome':chrom, 'start':start, 'end':end}
     action_factor = q.get("action", None)
     
-    if isinstance(action_factor, str):
+    print 'action', action_factor
+    if action_factor:
         start,end = panning(action_factor, start, end)
-    elif isinstance(action_factor, (int,long,float)):
-        start,end = zoom(action_factor, start, end)
-        
-    print '\n\n',form
+    
+    parameters = {'organism':o, 'collection': col, 'chromosome':chrom, 'start':start, 'end':end}
+    print '\n\n',form, '\n'
     #if form.is_valid():    # All validation rules pass
     #    svg = query(parameters)
     #else: 
     #    svg = "ERROR"
-    if chech(parameters):
+    if check(parameters):
         svg = query(parameters)
     return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o,
                                                'collection':col, 'chromosome':chrom, 'start':start,
                                                'end':end})
 
 def check(p):
-    if p['chromosome'] and p['organism'] and p['collection']:
+    if p['chromosome']!='None' and p['organism']!='None' and p['collection']!='None':
         return True
     else:
         return False
@@ -89,8 +87,11 @@ panning_percents = {'LessRight':0.6, 'MoreRight':0.9,
 def panning(pan_factor, start, end):
     # Adjusts start and end value for new query
     # ex: pan_factor = '>>', start = 200, end = 300
+    start, end = int(start), int(end)
     percent = panning_percents[pan_factor]    # look up percent shift in dictionary
-    shiftby = (end - start) * percent    # will be positive to go the right, negative to the left
+    print pan_factor, percent
+    shiftby = int((end - start) * percent)    # will be positive to go the right, negative to the left
+    print shiftby
     return start + shiftby, end + shiftby
 
 def parse_form(form):
