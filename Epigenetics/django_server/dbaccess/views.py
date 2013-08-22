@@ -18,19 +18,11 @@ def home_view(request):
     return render(request, 'base.jade')
 
 def view_collections(request):
-    db = mongo[database_name]
+    db = mongo['human_epigenetics']
     collections = ""
     for item in db.collection_names():
         collections += item + ', '
     return render(request, 'collections.jade', {'collections':collections})
-
-def chipseq_code(database, chromosome, start, end):
-    string = showchipseq.svgcode(db = database, chromosome = chromosome, start = start, end = end)
-    return HttpResponse(string)
-
-def meth_code(database, chromosome, start, end):
-    string = showmethylation.svgcode(db = database, chromosome = chromosome, start = start, end = end)
-    return string
 
 def send_svg(request):
     from .Annotations import showgene
