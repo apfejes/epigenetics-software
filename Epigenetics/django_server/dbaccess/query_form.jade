@@ -4,32 +4,51 @@ html
   a(href='/')
   
 body
+    input(type="hidden", name="organism", value = organism)
+    input(type="hidden", name="collection", value = collection)
+    
+    input(type="hidden", name="chromosome", value = chromosome)
+    input(type="hidden", name="start", value = start)
+    input(type="hidden", name="end", value = end)
+
     #header
         h1 Query Human Epigenetics Database
     
     #wrapper
-        #content
-            form(action='/dbaccess/query_form/',method='post')
-                div(data-role='fieldcontain')
-                    fieldset(data-role='database')
-                        label(for='database') Organism:
-                            select(name='database') 
-                                option(value="human")="Human"
-                                option(value="yeast")="Yeast"
-                                option(value="arabidopsis")="Arabidopsis"
-                        label(for='collection') Collection:
-                            select(name='collection') 
-                                option(value="methylation")="Methylation"
-                                option(value="chipseq")="ChIP-Seq"
-                        label(for='chromosome') Chromosome:
+        form(action='/dbaccess/query_form/',method='post')
+            div(data-role='fieldcontain')
+                fieldset(data-role='database')
+                    label(for='database') Organism:
+                        select(name='database') 
+                            option(value="human")="Human"
+                            option(value="yeast")="Yeast"
+                            option(value="arabidopsis")="Arabidopsis"
+                    label(for='collection') Collection:
+                        select(name='collection') 
+                            option(value="methylation")="Methylation"
+                            option(value="chipseq")="ChIP-Seq"
+                    label(for='chromosome') Chromosome:
+                        if chromosome
+                            input(id='chromosome',size = '6', type='text',name='chromosome', value = chromosome)
+                        else
                             input(id='chromosome',size = '6', type='text',value='',placeholder='1,2,...X,Y',name='chromosome')
-                        label(for='start') Start:
+                    label(for='start') Start:
+                        if start
+                            input(id='start',size = '8', type='text',value=start,name='start')
+                        else 
                             input(id='start',size = '8', type='text',value='',name='start')
-                        label(for='end') End:
+                        
+                    label(for='end') End:
+                        if end
+                            input(id='end', size = '8', type='text',value=end,name='end')
+                        else
                             input(id='end', size = '8', type='text',value='',name='end')
-                div(data-role='fieldcontain')
-                    input(type='submit',value='Query!', data-transition='fade', data-theme='c')  
-                    input(type='button',name = '<<',value='<<', data-transition='fade', data-theme='c')  
-            |!{plot}
-                 
+            div(data-role='fieldcontain')
+                input(type='submit',value='Query!', data-transition='fade', data-theme='c')  
+                input(type='button',value = '<<<',name='MoreLeft', data-transition='fade', data-theme='c')  
+                input(type='button',value = '<',name='LessLeft', data-transition='fade', data-theme='c')
+                input(type='button',value = '>',name='LessRight', data-transition='fade', data-theme='c')
+                input(type='button',value = '>>>',name='MoreRight', data-transition='fade', data-theme='c')
+        |!{plot}
+             
                     

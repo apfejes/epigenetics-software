@@ -6,5 +6,3 @@ class QueryForm(forms.Form):
     chromosome = forms.CharField(max_length = 2)
     start = forms.CharField(max_length = 15, required = False)
     end = forms.CharField(max_length = 15, required = False)
-    zoom = forms.CharField(max_length = 15, required = False)
-    pan = forms.CharField(max_length = 15, required = False)

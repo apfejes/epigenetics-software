@@ -4,6 +4,7 @@ Created on 2013-05-07
 @author: sperez
 '''
 from django.http import HttpResponse
+from django.http import QueryDict
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from .queryforms import QueryForm
@@ -12,6 +13,7 @@ from .queryforms import QueryForm
 from .Annotations import showmethylation, showchipseq
 
 from pymongo import Connection
+from django.core.context_processors import request
 mongo = Connection('kruncher.cmmt.ubc.ca', 27017)
 
 def home_view(request):
@@ -32,53 +34,61 @@ def view_query_form(request):
     svg = 'Try querying the database!'
     if request.method == 'POST':    # If the query has been submitted...
         form = QueryForm(request.POST)    # A form bound to the POST data
+        print form
         if form.is_valid():    # All validation rules pass
             svg = query(parse_form(form))
         else:
             return HttpResponse('You query parameters were invalid! Please try again...')    # Redirect after POST
-    return render(request, 'query_form.jade', {'plot':mark_safe(svg)} )
+    q = request.POST
+    o = q.get("organism", "human")
+    col = q.get("collection", "methylation")
+    start = q.get("start", "100000")
+    end = q.get("end", "120000")
+    chrom = q.get("chromosome", "1")
+    return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o,
+                                               'collection':col, 'chromosome':chrom, 'start':start,
+                                               'end':end})
 
-def zoom(zoom_factor,start,end):
-    #Adjusts start and end value for new query
-    #ex: zoomfactor = 0.1, start = 200, end = 300
-    span = (end - start) #span of 100bp
-    new_span = span*zoom_factor #span is now 10bp
-    new_start = span/2 - new_span/2 #start is now 245
-    new_end = span/2 + new_span/2 #end is now 255bp
+def zoom(zoom_factor, start, end):
+    # Adjusts start and end value for new query
+    # ex: zoomfactor = 0.1, start = 200, end = 300
+    span = (end - start)    # span of 100bp
+    new_span = span * zoom_factor    # span is now 10bp
+    new_start = span / 2 - new_span / 2    # start is now 245
+    new_end = span / 2 + new_span / 2    # end is now 255bp
     return new_start, new_end
 
-#Dictionary of panning percentages from window that is shifted aside
-panning = {'>>':0.6, '>>>':0.9,
+# Dictionary of panning percentages from window that is shifted aside
+panning_var = {'>>':0.6, '>>>':0.9,
           '<<':-0.6, '<<<':-0.9}
 
-def panning(pan_factor,start,end):
-    #Adjusts start and end value for new query
-    #ex: pan_factor = '>>', start = 200, end = 300
-    percent = panning[pan_factor]   #look up percent shift in dicionary
-    shiftby = (end-start)*percent   #will be positive to go the right, negative to the left
-    return start+shiftby, end+shiftby
+def panning(pan_factor, start, end):
+    # Adjusts start and end value for new query
+    # ex: pan_factor = '>>', start = 200, end = 300
+    percent = panning_var[pan_factor]    # look up percent shift in dicionary
+    shiftby = (end - start) * percent    # will be positive to go the right, negative to the left
+    return start + shiftby, end + shiftby
 
 def parse_form(form):
     # Process the data in form.cleaned_data
     database = str(form.cleaned_data['database'])
     collection = str(form.cleaned_data['collection'])
     chromosome = 'chr' + str(form.cleaned_data['chromosome'])
-    zoom_factor = int(form.cleaned_data['zoom'])
-    pan_factor = int(form.cleaned_data['pan'])
     start = form.cleaned_data['start']
     end = form.cleaned_data['end']
-    if zoom_factor != 1:
-        start, end = zoom(zoom_factor,start, end)
-    if '>' or '<' in pan_factor:
-        start, end = panning(pan_factor,start, end)
+#     if zoom_factor != 1:
+#         start, end = zoom(zoom_factor, start, end)
+#     if '>' or '<' in pan_factor:
+#         start, end = panning(pan_factor, start, end)
     print "\n\n Received a form:", database, collection, chromosome, start, end
-    return  database, collection, chromosome, start, end
+    parameters = {'database':database, 'collection': collection, 'chromosome':chromosome, 'start':start, 'end':end}
+    return  parameters
 
-def query(database, collection, chromosome, start, end):
-    if collection == 'chipseq':
-        return showchipseq.svgcode(db = database, chromosome = chromosome, start = start, end = end)
-    elif collection == 'methylation':
-        return showmethylation.svgcode(db = database, chromosome = chromosome, start = start, end = end)
+def query(p):
+    if p['collection'] == 'chipseq':
+        return showchipseq.svgcode(db = p['database'], chromosome = p['chromosome'], start = p['start'], end = p['end'])
+    elif p['collection'] == 'methylation':
+        return showmethylation.svgcode(db = p['database'], chromosome = p['chromosome'], start = p['start'], end = p['end'])
     else:
-        return HttpResponse(collection + ' is an invalid collection! Please try again...')
+        return HttpResponse(p['collection'] + ' is an invalid collection! Please try again...')
 
