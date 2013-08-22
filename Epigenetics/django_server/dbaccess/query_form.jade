@@ -11,9 +11,9 @@ body
     
     #wrapper
         form(action='/dbaccess/query_form/',method='post')
-            div(data-role='fieldcontain')
-                fieldset(data-role='database')
-                    label(for='database') Organism:
+            div
+                fieldset
+                    label(for='organism') Organism:
                         select(name='organism', id='organism') 
                             option(value="human")="Human"
                             option(value="yeast")="Yeast"
