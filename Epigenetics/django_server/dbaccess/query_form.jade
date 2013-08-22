@@ -40,10 +40,10 @@ body
                             input(id='end', size = '8', type='text',value='',name='end')
             div(data-role='fieldcontain')
                 input(type='submit',value='Query!', data-transition='fade', data-theme='c')  
-                input(type='button',value = '<<<',name='MoreLeft', onClick="window.open(newURL('MoreLeft'))")  
-                input(type='button',value = '<',name='LessLeft', onClick="window.open(newURL('LessLeft'));")
-                input(type='button',value = '>',name='LessRight', onClick="window.open(newURL('LessRight'));")
-                input(type='button',value = '>>>',name='MoreRight', onClick="window.open(newURL('MoreLeft'));")
+                input(type='button',value = '<<<',name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self')")  
+                input(type='button',value = '<',name='LessLeft', onClick="window.open(newURL('LessLeft'),'_self');")
+                input(type='button',value = '>',name='LessRight', onClick="window.open(newURL('LessRight'),'_self');")
+                input(type='button',value = '>>>',name='MoreRight', onClick="window.open(newURL('MoreLeft'),'_self');")
         |!{plot}
              
 
