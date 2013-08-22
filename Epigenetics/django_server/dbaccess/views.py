@@ -32,6 +32,21 @@ def send_svg(request):
 
 def view_query_form(request):
     svg = 'Try querying the database!'
+    
+    q = request.POST
+    o = q.get("organism",None)
+    col = q.get("collection",None)
+    start = q.get("start",None)
+    end = q.get("end",None)
+    chrom = q.get("chromosome",None)
+    
+    if request.method == 'GET':
+        action_factor = q.get("action", None)
+        if isinstance(action_factor, str):
+            start,end = panning(action_factor, start, end)
+        elif isinstance(action_factor, (int,long,float)):
+            start,end = zoom(action_factor, start, end)
+        
     if request.method == 'POST':    # If the query has been submitted...
         form = QueryForm(request.POST)    # A form bound to the POST data
         print form
@@ -39,12 +54,7 @@ def view_query_form(request):
             svg = query(parse_form(form))
         else:
             return HttpResponse('You query parameters were invalid! Please try again...')    # Redirect after POST
-    q = request.POST
-    o = q.get("organism", "human")
-    col = q.get("collection", "methylation")
-    start = q.get("start", "100000")
-    end = q.get("end", "120000")
-    chrom = q.get("chromosome", "1")
+
     return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o,
                                                'collection':col, 'chromosome':chrom, 'start':start,
                                                'end':end})
@@ -59,13 +69,13 @@ def zoom(zoom_factor, start, end):
     return new_start, new_end
 
 # Dictionary of panning percentages from window that is shifted aside
-panning_var = {'>>':0.6, '>>>':0.9,
-          '<<':-0.6, '<<<':-0.9}
+panning_percents = {'LessRight':0.6, 'MoreRight':0.9,
+               'LessLeft':-0.6, 'MoreLeft':-0.9}
 
 def panning(pan_factor, start, end):
     # Adjusts start and end value for new query
     # ex: pan_factor = '>>', start = 200, end = 300
-    percent = panning_var[pan_factor]    # look up percent shift in dicionary
+    percent = panning_percents[pan_factor]    # look up percent shift in dictionary
     shiftby = (end - start) * percent    # will be positive to go the right, negative to the left
     return start + shiftby, end + shiftby
 
