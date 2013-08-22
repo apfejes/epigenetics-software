@@ -47,7 +47,24 @@ def view_query_form(request):
     return render(request, 'query_form.jade', {'plot':mark_safe(svg)} )
 
 def zoom(zoom_factor,start,end):
-    return start,end
+    #Adjusts start and end value for new query
+    #ex: zoomfactor = 0.1, start = 200, end = 300
+    span = (end - start) #span of 100bp
+    new_span = span*zoom_factor #span is now 10bp
+    new_start = span/2 - new_span/2 #start is now 245
+    new_end = span/2 + new_span/2 #end is now 255bp
+    return new_start, new_end
+
+#Dictionary of panning percentages from window that is shifted aside
+panning = {'>>':0.6, '>>>':0.9,
+          '<<':-0.6, '<<<':-0.9}
+
+def panning(pan_factor,start,end):
+    #Adjusts start and end value for new query
+    #ex: pan_factor = '>>', start = 200, end = 300
+    percent = panning[pan_factor]   #look up percent shift in dicionary
+    shiftby = (end-start)*percent   #will be positive to go the right, negative to the left
+    return start+shiftby, end+shiftby
 
 def parse_form(form):
     # Process the data in form.cleaned_data
@@ -55,10 +72,13 @@ def parse_form(form):
     collection = str(form.cleaned_data['collection'])
     chromosome = 'chr' + str(form.cleaned_data['chromosome'])
     zoom_factor = int(form.cleaned_data['zoom'])
+    pan_factor = int(form.cleaned_data['pan'])
     start = form.cleaned_data['start']
     end = form.cleaned_data['end']
     if zoom_factor != 1:
         start, end = zoom(zoom_factor,start, end)
+    if '>' or '<' in pan_factor:
+        start, end = panning(pan_factor,start, end)
     print "\n\n Received a form:", database, collection, chromosome, start, end
     return  database, collection, chromosome, start, end
 
