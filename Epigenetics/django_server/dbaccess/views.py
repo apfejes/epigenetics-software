@@ -49,7 +49,6 @@ def view_query_form(request):
     chrom = str(q.get("chromosome",None))
     
     parameters = {'organism':o, 'collection': col, 'chromosome':chrom, 'start':start, 'end':end}
-    print parameters
     action_factor = q.get("action", None)
     
     if isinstance(action_factor, str):
@@ -62,11 +61,17 @@ def view_query_form(request):
     #    svg = query(parameters)
     #else: 
     #    svg = "ERROR"
-    if chrom:
+    if chech(parameters):
         svg = query(parameters)
     return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o,
                                                'collection':col, 'chromosome':chrom, 'start':start,
                                                'end':end})
+
+def check(p):
+    if p['chromosome'] and p['organism'] and p['collection']:
+        return True
+    else:
+        return False
 
 def zoom(zoom_factor, start, end):
     # Adjusts start and end value for new query
