@@ -8,13 +8,11 @@ body
         h1 Human Epigenetics Database Access
     #wrapper
         #navigation
-                nav
-                    a(href!='{% url 'base' %}') Home
-                nav
-                    a(href!='{% url 'collections' %}') Collections
-                nav
-                    a(href!='{% url 'query_form' %}') Query the database
+           ul
+             li: a(href!='{% url 'base' %}') Home
+             li: a(href!='{% url 'collections' %}') Collections
+             li: a(href!='{% url 'query_form' %}') Query the database
         #content
                 image
-                    embed(src!='{% url 'svgcode' %}', scrolling = 'no', width='1800', height = '180')
+                    embed(src!='{% url 'svgcode' %}', scrolling = 'no', width='750', height = '180')
         p.footersmall Running from the Kobor Lab @ the CMMT
