@@ -32,29 +32,38 @@ def send_svg(request):
 
 def view_query_form(request):
     svg = 'Try querying the database!'
-    
-    q = request.POST
-    o = q.get("organism",None)
-    col = q.get("collection",None)
-    start = q.get("start",None)
-    end = q.get("end",None)
-    chrom = q.get("chromosome",None)
+    q = None
+    form = None
     
     if request.method == 'GET':
-        action_factor = q.get("action", None)
-        if isinstance(action_factor, str):
-            start,end = panning(action_factor, start, end)
-        elif isinstance(action_factor, (int,long,float)):
-            start,end = zoom(action_factor, start, end)
-        
-    if request.method == 'POST':    # If the query has been submitted...
-        form = QueryForm(request.POST)    # A form bound to the POST data
-        print form
-        if form.is_valid():    # All validation rules pass
-            svg = query(parse_form(form))
-        else:
-            return HttpResponse('You query parameters were invalid! Please try again...')    # Redirect after POST
+        q = request.GET
+        form = QueryForm(request.GET)    # A form bound to the POST data
+    elif request.method == 'POST':    # If the query has been submitted...
+        q = request.POST
+        form = QueryForm(request.POST)
 
+    o = str(q.get("organism",None))
+    col = str(q.get("collection",None))
+    start = int(q.get("start",None))
+    end = int(q.get("end",None))
+    chrom = str(q.get("chromosome",None))
+    
+    parameters = {'organism':o, 'collection': col, 'chromosome':chrom, 'start':start, 'end':end}
+    print parameters
+    action_factor = q.get("action", None)
+    
+    if isinstance(action_factor, str):
+        start,end = panning(action_factor, start, end)
+    elif isinstance(action_factor, (int,long,float)):
+        start,end = zoom(action_factor, start, end)
+        
+    print '\n\n',form
+    #if form.is_valid():    # All validation rules pass
+    #    svg = query(parameters)
+    #else: 
+    #    svg = "ERROR"
+    if chrom:
+        svg = query(parameters)
     return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o,
                                                'collection':col, 'chromosome':chrom, 'start':start,
                                                'end':end})
@@ -81,7 +90,7 @@ def panning(pan_factor, start, end):
 
 def parse_form(form):
     # Process the data in form.cleaned_data
-    database = str(form.cleaned_data['database'])
+    organism = str(form.cleaned_data['organism'])
     collection = str(form.cleaned_data['collection'])
     chromosome = 'chr' + str(form.cleaned_data['chromosome'])
     start = form.cleaned_data['start']
@@ -90,15 +99,15 @@ def parse_form(form):
 #         start, end = zoom(zoom_factor, start, end)
 #     if '>' or '<' in pan_factor:
 #         start, end = panning(pan_factor, start, end)
-    print "\n\n Received a form:", database, collection, chromosome, start, end
-    parameters = {'database':database, 'collection': collection, 'chromosome':chromosome, 'start':start, 'end':end}
+    print "\n\n Received a form:", organism, collection, chromosome, start, end
+    parameters = {'organism':organism, 'collection': collection, 'chromosome':chromosome, 'start':start, 'end':end}
     return  parameters
 
 def query(p):
     if p['collection'] == 'chipseq':
-        return showchipseq.svgcode(db = p['database'], chromosome = p['chromosome'], start = p['start'], end = p['end'])
+        return showchipseq.svgcode(db = p['organism'], chromosome = p['chromosome'], start = p['start'], end = p['end'])
     elif p['collection'] == 'methylation':
-        return showmethylation.svgcode(db = p['database'], chromosome = p['chromosome'], start = p['start'], end = p['end'])
+        return showmethylation.svgcode(db = p['organism'], chromosome = p['chromosome'], start = p['start'], end = p['end'])
     else:
         return HttpResponse(p['collection'] + ' is an invalid collection! Please try again...')
 
