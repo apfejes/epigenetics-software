@@ -4,12 +4,7 @@ html
   a(href='/')
   
 body
-    input(type="hidden", name="organism", value = organism)
-    input(type="hidden", name="collection", value = collection)
-    
-    input(type="hidden", name="chromosome", value = chromosome)
-    input(type="hidden", name="start", value = start)
-    input(type="hidden", name="end", value = end)
+ 
 
     #header
         h1 Query Human Epigenetics Database
@@ -19,12 +14,12 @@ body
             div(data-role='fieldcontain')
                 fieldset(data-role='database')
                     label(for='database') Organism:
-                        select(name='database') 
+                        select(name='database', id='organism') 
                             option(value="human")="Human"
                             option(value="yeast")="Yeast"
                             option(value="arabidopsis")="Arabidopsis"
                     label(for='collection') Collection:
-                        select(name='collection') 
+                        select(name='collection', id='collection') 
                             option(value="methylation")="Methylation"
                             option(value="chipseq")="ChIP-Seq"
                     label(for='chromosome') Chromosome:
@@ -45,10 +40,26 @@ body
                             input(id='end', size = '8', type='text',value='',name='end')
             div(data-role='fieldcontain')
                 input(type='submit',value='Query!', data-transition='fade', data-theme='c')  
-                input(type='button',value = '<<<',name='MoreLeft', data-transition='fade', data-theme='c')  
-                input(type='button',value = '<',name='LessLeft', data-transition='fade', data-theme='c')
-                input(type='button',value = '>',name='LessRight', data-transition='fade', data-theme='c')
-                input(type='button',value = '>>>',name='MoreRight', data-transition='fade', data-theme='c')
+                input(type='button',value = '<<<',name='MoreLeft', onClick="window.open(newURL('MoreLeft'))")  
+                input(type='button',value = '<',name='LessLeft', onClick="window.open(newURL('LessLeft'));")
+                input(type='button',value = '>',name='LessRight', onClick="window.open(newURL('LessRight'));")
+                input(type='button',value = '>>>',name='MoreRight', onClick="window.open(newURL('MoreLeft'));")
         |!{plot}
              
-                    
+
+script(type='text/javascript')
+    function newURL(action){  
+      var base = '/dbaccess/query_form/';
+      var e = document.getElementById("organism");
+      var organism = e.options[e.selectedIndex].value;
+      var e = document.getElementById("collection");
+      var collection = e.options[e.selectedIndex].value;
+      
+      base += "?chromosome=" + chromosome.value
+      base += "&start=" + start.value
+      base += "&end=" + end.value
+      base += "&organism=" + organism
+      base += "&collection=" + collection
+      base += "&action=" + action
+      return base
+    }
