@@ -40,8 +40,8 @@ def view_query_form(request):
     end = q.get("end", None)
     chrom = q.get("chromosome", None)
     action_factor = q.get("action", None)
-    tss = q.get("tss", None)
-    cpg = q.get("cpg", None)
+    tss = q.get("tss", False)
+    cpg = q.get("cpg", False)
     
 
     if action_factor and start and end:
@@ -56,11 +56,18 @@ def view_query_form(request):
     else: 
         print 'No action specified', action_factor
 
+    if tss:
+        print tss
+        tss = True
+    if cpg:
+        print cpg
+        cpg = True
     if start:
         start = int(start)
     if end:
         end = int(end)
-    parameters = {'organism':str(o), 'collection': str(col), 'chromosome': str(chrom), 'start': start, 'end':end}
+
+    parameters = {'organism':str(o), 'collection': str(col), 'chromosome': str(chrom), 'start': start, 'end':end, 'cpg':cpg, 'tss':tss}
     print parameters
 
     if check(parameters):

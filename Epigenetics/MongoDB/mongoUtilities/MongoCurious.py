@@ -81,18 +81,14 @@ class MongoCurious():
             docs = CreateListFromCursor(cursor)
             probes = self.getprobes(docs)    # get list of probe ids
             self.collectbetas(sample_ids, probes)    # organize the beta values with sample info into a dictionary
-            t0 = time()
-            self.getannotations(docs)    # organize the gene annotations in a dictionary
-            print 'Annotation time:', time() - t0
+            annotation_docs = docs
 
         if self.collection == 'waves':
             docs = self.finddocs(collection = collection, chip = chip, sample_ids = sample_ids)    # get peak info for region queried
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
             if self.database == 'human_epigenetics':
-                annotations_docs = self.finddocs(collection = 'annotations')    # get the gene annotations info
-                self.getannotations(annotations_docs)    # organize the gene annotations in a dictionary
-
-        return None
+                annotation_docs = self.finddocs(collection = 'annotations')    # get the gene annotations info
+        return annotation_docs
 
     def checkquery(self, project, chromosome):
         '''Checks that query inputs are valid'''

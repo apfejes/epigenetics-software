@@ -24,8 +24,6 @@ def zoom(zoom_symbol, start, end):
     new_span = span * zoom_factor    # span is now 10bp
     new_start = start + span / 2 - new_span / 2    # start is now 245
     new_end = end - span / 2 + new_span / 2    # end is now 255bp
-    print 'span', span, 'factor', zoom_factor, 'new', new_span
-    print start,end, 'are now', new_start, new_end
     return int(new_start), int(new_end)
 
 # Dictionary of panning percentages from window that is shifted aside
@@ -37,9 +35,7 @@ def panning(pan_factor, start, end):
     # ex: pan_factor = '>>', start = 200, end = 300
     start, end = int(start), int(end)
     percent = panning_percents[pan_factor]    # look up percent shift in dictionary
-    print pan_factor, percent
     shiftby = int((end - start) * percent)    # will be positive to go the right, negative to the left
-    print shiftby
     return start + shiftby, end + shiftby
 
 
@@ -57,7 +53,9 @@ def query(p):
                                    end = p['end'],
                                    LENGTH = LENGTH,
                                    WIDTH = WIDTH,
-                                   MARGIN = MARGIN)
+                                   MARGIN = MARGIN,
+                                   tss = p['tss'],
+                                   cpg = p['cpg'])
     elif p['collection'] == 'methylation':
         return showmethylation.svgcode(db = p['organism'], 
                                    chromosome = p['chromosome'], 
@@ -65,6 +63,8 @@ def query(p):
                                    end = p['end'],
                                    LENGTH = LENGTH,
                                    WIDTH = WIDTH,
-                                   MARGIN = MARGIN)
+                                   MARGIN = MARGIN,
+                                   tss = p['tss'],
+                                   cpg = p['cpg'])
     else:
         return HttpResponse(p['collection'] + ' is an invalid collection! Please try again...')
