@@ -25,6 +25,7 @@ import Parameters
 import Mongo_Connector
 
 def run():
+    '''function to import chip-chip metadata to mongo database'''
     meta_data_file = "/home/afejes/Chip-chip/ChIPchipMetaData_v1.csv"
 
     # meta_data_file = raw_input('meta data file to load: ')
