@@ -4,16 +4,13 @@ Created on 2013-05-07
 @author: sperez
 '''
 from django.http import HttpResponse
-from django.http import QueryDict
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
-from .queryforms import QueryForm
 # from django.views.generic import TemplateView
 
 from .Annotations import showmethylation, showchipseq
 
 from pymongo import Connection
-from django.core.context_processors import request
 mongo = Connection('kruncher.cmmt.ubc.ca', 27017)
 
 def home_view(request):
@@ -33,28 +30,28 @@ def send_svg(request):
 def view_query_form(request):
     svg = 'Try querying the database!'
     q = None
-    
     if request.method == 'GET':
         q = request.GET
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
 
-    o = q.get("organism",None)
-    col = q.get("collection",None)
-    start = q.get("start",None)
-    end = q.get("end",None)
-    chrom = q.get("chromosome",None)
+    o = str(q.get("organism", None))
+    col = str(q.get("collection", None))
+    start = str(q.get("start", None))
+    end = str(q.get("end", None))
+    chrom = str(q.get("chromosome", None))
     action_factor = q.get("action", None)
-    
+
     if action_factor and start and end:
+
         if '>' in action_factor or '<' in action_factor:
             start,end = panning(action_factor, start, end)
         if '+' in action_factor or '-' in action_factor:
             start,end = zoom(action_factor, start, end)
-            
+
     parameters = {'organism':str(o), 'collection': str(col), 'chromosome': str(chrom), 'start': start, 'end':end}
     print parameters
-    
+
     if check(parameters):
         svg = query(parameters)
     return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o,
@@ -62,7 +59,7 @@ def view_query_form(request):
                                                'end':end})
 
 def check(p):
-    if p['chromosome']!='None' and p['organism']!='None' and p['collection']!='None':
+    if p['chromosome'] != 'None' and p['organism'] != 'None' and p['collection'] != 'None':
         return True
     else:
         return False

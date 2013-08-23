@@ -24,9 +24,9 @@ sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector, common_utilities
 import PrintThread
 from Statistics import Kolmogorov_Smirnov as stats
-sys.path.insert(0, _cur_dir + os.sep + "Illustration")
-import Histogram as histogram
-import ScatterPlot as scatterplot
+# sys.path.insert(0, _root_dir + os.sep + "Illustration")
+# import Histogram as histogram
+# import ScatterPlot as scatterplot
 
 class WavePair():
     # i, j, p, pos1, pos2, stddev1, stddev2
@@ -55,11 +55,23 @@ class WavePair():
     def get_ht2(self):
         return self.ht2
 
+    def get_ratio_max(self):
+        '''use this for calculating the ratio of the two peaks.
+        If the second peak is smaller, it's returned as a negative number'''
+
+        if (self.ht1 == self.ht2):
+            return 1
+        elif (self.ht1 > self.ht2):
+            return float(self.ht1) / self.ht2
+        else:
+            return 0 - float(self.ht2) / self.ht1
+
+
     def to_string(self):
-        return str(self.chromosome) + " " + str(self.pos1) + " " + \
-            str(self.pos2) + " " + str(self.stddev1) + " " + \
-            str(self.stddev2) + " " + str(self.ht1) + " " + \
-            str(self.ht2) + " " + str(self.p)
+        return str(self.chromosome) + "\t" + str(self.pos1) + "\t" + \
+            str(self.pos2) + "\t" + str(self.stddev1) + "\t" + \
+            str(self.stddev2) + "\t" + str(self.ht1) + "\t" + \
+            str(self.ht2) + "\t" + str(self.p)
 
     def type(self):
         return "Wavepair"
@@ -144,11 +156,11 @@ def run():
         waves2 = None
         for i in id_s:
             # print "i %s" % i
-            cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, "pos")
+            cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, [("chr", 1)])
             waves1 = common_utilities.CreateListFromCursor(cursor)
         for i in id_r:
             # print "i %s" % i
-            cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, "pos")
+            cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, [("chr", 1)])
             waves2 = common_utilities.CreateListFromCursor(cursor)
             # print "list1.length", len(list1)
             # for j in range(len(list1)):
@@ -161,6 +173,7 @@ def run():
         max_i = len(waves1)
         max_j = len(waves2)
         while (i < max_i and j < max_j):
+            chromosome = waves1[i]['chr']
             pos_i = waves1[i]['pos']
             sdv_i = waves1[i]['stddev']
             ht_i = waves1[i]['height']
@@ -186,25 +199,26 @@ def run():
             i += 1
             # print "i %s and max_i %s", i, max_i
 
+
+        # decide which peaks to use for normalization - make changes here.
         for b in both:
             ratio = float(b.get_ht1()) / b.get_ht2()
-
             if b.p < 0.0005 and ratio > (float(1) / 20) and ratio < 20:
                 x.append(b.get_ht1())
                 y.append(b.get_ht2())
 
 
-    h1 = histogram.Histogram("/home/afejes/temp/test_hist_x.svg", 100, x_max = 100)
-    h1.add_data(x)
-    h1.bin_data()
-    h1.build()
-    h1.save()
+    # h1 = histogram.Histogram("/home/afejes/temp/test_hist_x.svg", 100, x_max = 100)
+    # h1.add_data(x)
+    # h1.bin_data()
+    # h1.build()
+    # h1.save()
 
-    h2 = histogram.Histogram("/home/afejes/temp/test_hist_y.svg", 100, x_max = 100)
-    h2.add_data(y)
-    h2.bin_data()
-    h2.build()
-    h2.save()
+    # h2 = histogram.Histogram("/home/afejes/temp/test_hist_y.svg", 100, x_max = 100)
+    # h2.add_data(y)
+    # h2.bin_data()
+    # h2.build()
+    # h2.save()
 
     # NORMALIZATION
     linear = odr.Model(f)
@@ -230,17 +244,18 @@ def run():
     print "ODR - explicit fit: coeff %s err %s" % (coeff, err)
         # normalize the heights
 
-    bp = scatterplot.ScatterPlot("/home/afejes/temp/test_plot.svg", 1200, 600)
-    bp.add_and_zip_data(x, y)
-    bp.add_regression(coeff)
-    bp.build()
-    bp.save()
+    # bp = scatterplot.ScatterPlot("/home/afejes/temp/test_plot.svg", 1200, 600)
+    # bp.add_and_zip_data(x, y)
+    # bp.add_regression(coeff)
+    # bp.build()
+    # bp.save()
 
     # filter out from control
     paired_data = []
     max_i = len(waves1)
     max_j = len(waves2)
     while (i < max_i and j < max_j):
+        chromosome = waves1[i]['chr']
         pos_i = waves1[i]['pos']
         sdv_i = waves1[i]['stddev']
         ht_i = waves1[i]['height']
@@ -252,7 +267,7 @@ def run():
             pvalue = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
             if (pvalue != 0):
                 w = WavePair(chromosome, i, jt, pvalue, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
-                if best == None:
+                if best is None:
                     best = w
                     none_found = False
                 elif pvalue < best.pvalue:
@@ -264,7 +279,7 @@ def run():
             pvalue = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
             if (pvalue != 0):
                 w = WavePair(chromosome, i, j, pvalue, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
-                if best == None:
+                if best is None:
                     best = w
                     none_found = False
                 elif pvalue < best.pvalue:
@@ -282,13 +297,13 @@ def run():
     print "The list of paried data is %i:" % (len(paired_data))
     for b in paired_data:
         if (b.get_ht1 > b.get_ht2 * coeff):
-            print_queue.put(w.to_string())
+            print_queue.put(b.to_string())
 
 
 
 
         # return waves that are unique to sample
-    if print_thread == None or not print_thread.is_alive():
+    if print_thread is None or not print_thread.is_alive():
         pass
     else:
         while print_queue.qsize() > 0:
@@ -297,10 +312,10 @@ def run():
         print_thread.END_PROCESSES = True
 
 
-# derived from http://docs.scipy.org/doc/scipy-dev/reference/odr.html
-
 def f(B, x):
-    '''Linear function y = m*x + b'''
+    '''Linear function y = m*x + b
+    derived from http://docs.scipy.org/doc/scipy-dev/reference/odr.html
+    '''
     # B is a vector of the parameters.
     # x is an array of the current x values.
     # x is in the same format as the x passed to Data or RealData.
@@ -309,10 +324,10 @@ def f(B, x):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 1:
+    if len(sys.argv) <= 1:
         print ("This program requires the name of the database config file.")
         print" eg. python ImportWaveToDB.py /directory/database.conf"
-
+        sys.exit()
     conf_file = sys.argv[1]
     param = Parameters.parameter(conf_file)
     run()
