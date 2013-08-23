@@ -35,20 +35,29 @@ def view_query_form(request):
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
 
-    o = str(q.get("organism", None))
-    col = str(q.get("collection", None))
-    start = str(q.get("start", None))
-    end = str(q.get("end", None))
-    chrom = str(q.get("chromosome", None))
+    o = q.get("organism", None)
+    col = q.get("collection", None)
+    start = q.get("start", None)
+    end = q.get("end", None)
+    chrom = q.get("chromosome", None)
     action_factor = q.get("action", None)
 
     if action_factor and start and end:
+        if 'Right' in action_factor or 'Left' in action_factor:
+            print 'panning!', action_factor
+            start,end = panning(action_factor, int(start), int(end))
+        elif 'In' in action_factor or 'Out' in action_factor:
+            print 'zooming!', action_factor
+            start,end = zoom(action_factor, int(start), int(end))
+        else:
+            print 'Action not available:', action_factor
+    else: 
+        print 'No action specified', action_factor
 
-        if '>' in action_factor or '<' in action_factor:
-            start,end = panning(action_factor, start, end)
-        if '+' in action_factor or '-' in action_factor:
-            start,end = zoom(action_factor, start, end)
-
+    if start:
+        start = int(start)
+    if end:
+        end = int(end)
     parameters = {'organism':str(o), 'collection': str(col), 'chromosome': str(chrom), 'start': start, 'end':end}
     print parameters
 
@@ -70,16 +79,18 @@ def zoom(zoom_symbol, start, end):
     span = (end - start)    # span of 100bp
     zoom_factor = zoom_factors[zoom_symbol]
     new_span = span * zoom_factor    # span is now 10bp
-    new_start = span / 2 - new_span / 2    # start is now 245
-    new_end = span / 2 + new_span / 2    # end is now 255bp
+    new_start = start + span / 2 - new_span / 2    # start is now 245
+    new_end = end - span / 2 + new_span / 2    # end is now 255bp
+    print 'span', span, 'factor', zoom_factor, 'new', new_span
+    print start,end, 'are now', new_start, new_end
     return int(new_start), int(new_end)
 
 # Dictionary of panning percentages from window that is shifted aside
 panning_percents = {'LessRight':0.6, 'MoreRight':0.9,
                'LessLeft':-0.6, 'MoreLeft':-0.9}
 
-zoom_factors = {'+': 0.33, '++': 0.1,
-                '-': 3, '--': 10}
+zoom_factors = {'ZoomIn': 0.33, 'ZoomInMore': 0.1,
+                'ZoomOut': 3, 'ZoomOutMore': 10}
 
 def panning(pan_factor, start, end):
     # Adjusts start and end value for new query
