@@ -9,12 +9,17 @@ from MongoDB.mongoUtilities import MongoCurious
 
 
 
-def svgcode(db = None, chromosome = None, start = None, end = None):
+def svgcode(db = None, chromosome = None, start = None, end = None, length = None, width = None, margin = None):
     print("Connecting to database:")
     organism = str.capitalize(db)
     database = db + "_epigenetics"
     m = MongoCurious.MongoCurious(database = database)
     print("Querying...")
     m.query(collection = "waves", chromosome = chromosome, start = start, end = end)
-    return m.svg(to_string = True, title = organism + " ChIP-Seq peaks on " + str(chromosome) + " ("+str(start)+"-"+str(end) +")", color = 'indigo', length = 300.0)
+    return m.svg(to_string = True, 
+                 title = organism + " ChIP-Seq peaks on " + str(chromosome) + " ("+str(start)+"-"+str(end) +")", 
+                 color = 'indigo', 
+                 length = length,
+                 width = width,
+                 margin = margin)
 

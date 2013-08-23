@@ -118,10 +118,25 @@ def parse_form(form):
     return  parameters
 
 def query(p):
+    length = 270.0
+    width = 80.0
+    margin = 20.0
     if p['collection'] == 'chipseq':
-        return showchipseq.svgcode(db = p['organism'], chromosome = p['chromosome'], start = p['start'], end = p['end'])
+        return showchipseq.svgcode(db = p['organism'], 
+                                   chromosome = p['chromosome'], 
+                                   start = p['start'], 
+                                   end = p['end'],
+                                   length = length,
+                                   width = width,
+                                   margin = margin)
     elif p['collection'] == 'methylation':
-        return showmethylation.svgcode(db = p['organism'], chromosome = p['chromosome'], start = p['start'], end = p['end'])
+        return showmethylation.svgcode(db = p['organism'], 
+                                   chromosome = p['chromosome'], 
+                                   start = p['start'], 
+                                   end = p['end'],
+                                   length = length,
+                                   width = width,
+                                   margin = margin)
     else:
         return HttpResponse(p['collection'] + ' is an invalid collection! Please try again...')
 
