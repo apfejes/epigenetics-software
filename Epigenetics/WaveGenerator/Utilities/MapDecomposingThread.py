@@ -119,6 +119,7 @@ class MapDecomposer(multiprocessing.Process):
 
 
     def sigma_test(self, coverage_map, sigma, i, height):
+        '''find the best sigma for this particular peak'''
         area_over = 0
         area_under = 0
         s = 3 * sigma
@@ -181,7 +182,7 @@ class MapDecomposer(multiprocessing.Process):
         else :
             return (start, height)
 
-    def process_map(self, item, filename):
+    def process_map(self, item):
         '''takes in a coverage map object and begins the process of identifying
          the normal curves that best fit the map.'''
         peaks = []
@@ -235,6 +236,7 @@ class MapDecomposer(multiprocessing.Process):
 
     @staticmethod
     def print_array(n):
+        '''simple function for printing the contents of an array'''
         string = []
         for l in n:
             m = str(l)
@@ -242,12 +244,14 @@ class MapDecomposer(multiprocessing.Process):
         return "".join(string) + "last\n"
 
 
-    def run_wrapper(self, *args):
+    def run_wrapper(self):    # , *args):
+        '''wraper around the run function for profiling purposes'''
         self.print_queue.put("profiling started")
         cProfile.runctx("self.run(args)", globals(), locals())
         self.print_queue.put("finished profiling")
 
-    def run(self, *args):
+    def run(self):    # , *args):
+        '''process the maps, while the thread is running.'''
         while True:
             try:
                 map_item = self.map_queue.get(True)    # grabs map from queue\
