@@ -16,6 +16,13 @@ sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 # from platform import system
 
+def is_int(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
 
 def ReadRObject(mongo, rdatafile, proj_name, collection_name):
     '''
@@ -62,11 +69,30 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
             j = j.replace(".", "_")
         j = j.strip().lower()
         columns.append(j)
-    # print "columns = ", columns
+
+
+    sample_field = ""
+    try:
+        if columns.index("sampleid"):
+            pass
+    except ValueError:
+        print "the following columns are available.  Please pick which one you'd like to use as the sample id"
+        for i, j in enumerate(columns):
+            print "%i, %s" % (i, j)
+        sid_field = -1
+        while (sid_field < 0 or sid_field >= len(columns)):
+            sid_field = raw_input('Enter the number of the field to use:')
+            if is_int(sid_field):
+                sid_field = int(sid_field)
+                if sid_field >= 0 and sid_field < len(columns):
+                    sample_field = columns[sid_field]
+                else:
+                    sid_field = -1
+            else:
+                sid_field = -1
 
 
     samples = [{} for _k in range(1, num_samples + 1)]
-    sample_names = []
     for count in range(1, num_sample_fields + 1):
         field = robjects.r('pData(methylObj)[,' + str(count) + ',drop=FALSE]')
         if hasattr(field.rx(1, 1), "levels"):
@@ -75,13 +101,18 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
             samples[f - 1][columns[count - 1]] = field.rx(f, 1)[0]
             samples[f - 1]["project"] = proj_name
 
+    if sid_field != "":
+        for f in range(0, num_samples):
+            samples[f]["sampleid"] = samples[f][sample_field]
+
+    sample_names = []
     for i in range(0, len(samples)):
         sample_names.append(samples[i]['sampleid'])
 
     mongo.InsertBatchToDB("samples", samples)    # UNCOMMENT TO SAVE TO DB.
 
     # get sampleIDs
-    cursor = mongo.find("samples", {"sampleid": {'$in': sample_names}}, {"_id":1}, None)
+    cursor = mongo.find("samples", {"sampleid": {'$in': sample_names}, "project":proj_name}, {"_id":1}, None)
     SampleIDs = []
     for record in cursor:
         SampleIDs.append(str(record["_id"]))
