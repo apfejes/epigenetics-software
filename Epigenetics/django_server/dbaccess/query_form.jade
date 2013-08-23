@@ -56,16 +56,17 @@ body
                             input(id='end', size = '8', type='text', value='', name='end')
             
             div(data-role='fieldcontain', align='center')
-                label(for='tss') Tss:
-                    if tss
-                        input(id='tss', size = '8', type='checkbox', name="tss", value="tss", checked)
-                    else
-                        input(id='tss', size = '8', type='checkbox', name="tss", value="tss")
-                label(for='cpg') CpG Islands:
-                    if cpg
-                        input(id='cpg', size = '8', type='checkbox', name="cpg", value="cpg", checked)
-                    else
-                        input(id='cpg', size = '8', type='checkbox', name="cpg", value="cpg")
+                if organism = 'human'
+                    label(for='tss') Tss:
+                        if tss
+                            input(id='tss', size = '8', type='checkbox', name="tss", value="tss", checked)
+                        else
+                            input(id='tss', size = '8', type='checkbox', name="tss", value="tss")
+                    label(for='cpg') CpG Islands:
+                        if cpg
+                            input(id='cpg', size = '8', type='checkbox', name="cpg", value="cpg", checked)
+                        else
+                            input(id='cpg', size = '8', type='checkbox', name="cpg", value="cpg")
                     
             div(data-role='fieldcontain', align='center')
                 input(type='submit',value='Query!', data-transition='fade', data-theme='c')  
