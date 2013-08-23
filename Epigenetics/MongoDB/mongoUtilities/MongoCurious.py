@@ -187,7 +187,7 @@ class MongoCurious():
                         query_parameters["chip"] = chip
                 else: query_parameters['haswaves'] = True
             elif self.collection == 'methylation':
-                query_parameters['haswaves'] = True
+                query_parameters['haswaves'] = {'$exists':False}
                 if project: query_parameters["project"] = project
                 if sample_label: query_parameters["sample_label"] = sample_label
                 if sample_group: query_parameters["sample_group"] = sample_group
