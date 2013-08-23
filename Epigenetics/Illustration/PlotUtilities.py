@@ -25,6 +25,8 @@ def get_axis(start, end, margin, width, axis_x_margin, axis_y_margin, scale_x):
     
 
 def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_margin, axis_y_margin):
+    if annotations is None:
+        return []
     annotations = annotations
     margin = margin
     width = width

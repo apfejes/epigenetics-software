@@ -50,6 +50,7 @@ def view_query_form(request):
         start,end = panning(action_factor, start, end)
     
     parameters = {'organism':str(o), 'collection': str(col), 'chromosome': str(chrom), 'start': start, 'end':end}
+    print parameters
     
     if check(parameters):
         svg = query(parameters)

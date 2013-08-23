@@ -121,10 +121,14 @@ class MongoCurious():
 
         sample_ids = {}
         for doc in samplesdocs:
+            print 'doc', doc
             sample_id = str(doc['_id'])
 
             if self.collection == 'waves':
-                doc_chip = str(doc['chip'])
+                if self.database == 'yeast_epigenetics':
+                    doc_chip = str(doc['type  (ip, mock, input)'])
+                else:
+                    doc_chip = str(doc['chip'])
                 if doc_chip == chip or chip is None:
                     sample_ids[sample_id] = doc_chip
 
@@ -179,7 +183,7 @@ class MongoCurious():
             if self.collection == 'waves':
                 if chip: 
                     if self.database == 'yeast_epigenetics':
-                        query_parameters["type"] = chip
+                        query_parameters["type  (ip, mock, input)"] = chip
                     else: 
                         query_parameters["chip"] = chip
                 else: query_parameters['haswaves'] = True
@@ -188,7 +192,7 @@ class MongoCurious():
                 if project: query_parameters["project"] = project
                 if sample_label: query_parameters["sample_label"] = sample_label
                 if sample_group: query_parameters["sample_group"] = sample_group
-            return_chr = {'_id': True, 'samplelabel': True,
+            return_chr = {'_id': True, 'samplelabel': True, 'type  (ip, mock, input)':True,
                               'project': True, 'sample_group': True, 'chip':True}
             sortby, sortorder = 'sample_group', 1
 
