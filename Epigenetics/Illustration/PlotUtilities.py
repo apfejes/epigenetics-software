@@ -28,7 +28,7 @@ def get_axis(start, end, MARGIN, WIDTH, axis_x_margin, axis_y_margin, scale_x):
     return (x_axis, y_axis)
     
 
-def get_annotations(annotations, MARGIN, WIDTH, scale_x, start, end, axis_x_margin, axis_y_margin):
+def add_tss(annotations, MARGIN, WIDTH, scale_x, start, end, axis_x_margin, axis_y_margin):
     if annotations is None:
         return []
     annotations = annotations
@@ -44,6 +44,7 @@ def get_annotations(annotations, MARGIN, WIDTH, scale_x, start, end, axis_x_marg
     #Add TSS line if there is in fact a TSS in this region
     TSSs = annotations['TSS'].keys()
     TSSs.sort()
+    
     for tss in TSSs:
         gene_name = annotations['TSS'][tss]
         #print 'TSS:', gene, tss
@@ -69,7 +70,20 @@ def get_annotations(annotations, MARGIN, WIDTH, scale_x, start, end, axis_x_marg
         elements.append(TSSline)
         elements.append(TSS)
         elements.append(gene)
-    
+
+    return elements
+
+
+
+def add_cpg(annotations, MARGIN, WIDTH, scale_x, start, end, axis_x_margin, axis_y_margin):
+    if annotations is None:
+        return []
+    annotations = annotations
+    MARGIN = MARGIN
+    WIDTH = WIDTH
+    elements = []
+    x1 = 0
+     
     for ((a,b),c) in annotations['Islands']:
         #print 'island', a,b,c
         if a < start: a = start
@@ -93,4 +107,3 @@ def get_annotations(annotations, MARGIN, WIDTH, scale_x, start, end, axis_x_marg
         elements.append(island)
     
     return elements
-

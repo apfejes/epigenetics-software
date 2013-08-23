@@ -398,7 +398,8 @@ class MongoCurious():
     def svg(self, filename = None, title = None,
             color = None, to_string = False,
             get_elements = False, LENGTH = 200.0,
-            MARGIN = 20.0, WIDTH = 60.0):
+            MARGIN = 20.0, WIDTH = 60.0, 
+            get_tss = False, get_cpg = False):
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an .svg file or a svg string for webserver rendering
         '''
@@ -412,18 +413,18 @@ class MongoCurious():
         if self.collection == "methylation":
             drawing = methylationplot.MethylationPlot(filename, title, self.sample_peaks,
                                                       self.pos_betas_dict, self.annotations,
-                                                      color, self.start, self.end,
-                                                      LENGTH, MARGIN, WIDTH)
+                                                      color, self.start, self.end, LENGTH,
+                                                      MARGIN, WIDTH)
             drawing.build()
         if self.collection == "waves":
-            drawing = chipseqplot.ChipseqPlot(filename, title, self.waves,
-                                              self.start, self.end, self.annotations,
-                                              LENGTH, MARGIN, WIDTH)
+            drawing = chipseqplot.ChipseqPlot(filename, title, self.waves, self.start,
+                                              self.end, self.annotations, LENGTH,
+                                              MARGIN, WIDTH)
             drawing.build()
 
         if to_string:
             print " Returning svg as a unicode string"
-            drawing.add_legends()
+            drawing.add_legends(get_tss,get_cpg)
             z = drawing.to_string()
             drawing = None
         elif get_elements:

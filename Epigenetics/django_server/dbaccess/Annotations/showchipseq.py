@@ -23,5 +23,7 @@ def svgcode(db = None, chromosome = None, start = None,
                  color = 'indigo', 
                  LENGTH = LENGTH,
                  WIDTH = WIDTH,
-                 MARGIN = MARGIN)
+                 MARGIN = MARGIN,
+                 get_tss = tss,
+                 get_cpg = cpg)
 

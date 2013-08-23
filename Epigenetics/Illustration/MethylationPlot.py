@@ -12,13 +12,15 @@ from math import fabs, exp, sqrt, log
 import Color_Palette
 palette = Color_Palette.ColorPalette()
 
-from PlotUtilities import get_annotations, get_axis, bigfont, medfont, smallfont
+from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, medfont, smallfont
         
 class MethylationPlot(object):
     '''
-    classdocs
+    classdoc
     '''
-    def __init__(self, filename, title, sample_peaks, pos_betas_dict, annotations, color, start, end, LENGTH, MARGIN, WIDTH):
+    def __init__(self, filename, title, sample_peaks, 
+                 pos_betas_dict, annotations, color, start, end, 
+                 LENGTH, MARGIN, WIDTH):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -140,7 +142,7 @@ class MethylationPlot(object):
             self.plot.add(element)
         print "% i svg elements have been added to the current svg object." % len(elements)
 
-    def add_legends(self):
+    def add_legends(self,get_tss, get_cpg):
         ''' Add annotations, title, axis, tic marks and labels '''
         if self.title is None:
             self.title = "Methylation PLot"
@@ -153,8 +155,12 @@ class MethylationPlot(object):
         self.add_sample_labels(self.margin * 2 + self.length)
         for axis in get_axis(self.start, self.end, self.margin, self.width, self.axis_x_margin, self.axis_y_margin, self.scale_x):
             self.elements.append(axis)
-        for annotation in get_annotations(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
-            self.elements.append(annotation)
+        if get_tss:
+            for tss in add_tss(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+                self.elements.append(tss)
+        if get_cpg:
+            for cpg in add_cpg(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+                self.elements.append(cpg)
 
     def add_sample_labels(self, x_position):
         samples_color = palette.colors_dict()
