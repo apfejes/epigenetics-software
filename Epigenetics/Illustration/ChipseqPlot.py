@@ -10,13 +10,14 @@ from svgwrite.path import Path
 
 from math import exp, sqrt, fabs, log
 
-from PlotUtilities import get_axis, get_annotations, bigfont, medfont, smallfont
+from PlotUtilities import get_axis, add_cpg, add_tss, bigfont, medfont, smallfont
 
 class ChipseqPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, title, waves, start, end, annotations, LENGTH, MARGIN, WIDTH):
+    def __init__(self, filename, title, waves, start, end, 
+                 annotations, LENGTH, MARGIN, WIDTH):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -132,7 +133,7 @@ class ChipseqPlot(object):
             self.plot.add(element)
         print "% i svg elements have been added to the current svg object." % len(elements)
 
-    def add_legends(self):
+    def add_legends(self,get_tss, get_cpg):
         ''' Add title, axis, tic marks and labels '''
         if self.title is None:
             self.title = "Chipseq Peaks"
@@ -146,8 +147,13 @@ class ChipseqPlot(object):
         self.add_sample_labels(self.margin * 2 + self.length)
         for axis in get_axis(self.start, self.end, self.margin, self.width, self.axis_x_margin, self.axis_y_margin, self.scale_x):
             self.elements.append(axis)
-        for annotation in get_annotations(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
-            self.elements.append(annotation)
+        if get_tss:
+            for tss in add_tss(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+                self.elements.append(tss)
+        if get_cpg:
+            for cpg in add_cpg(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+                self.elements.append(cpg)
+
 
     def add_sample_labels(self, x_position):
         if len(self.samples_color) > 20:
