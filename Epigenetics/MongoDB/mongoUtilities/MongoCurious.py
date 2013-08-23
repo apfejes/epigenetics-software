@@ -386,8 +386,8 @@ class MongoCurious():
 
     def svg(self, filename = None, title = None,
             color = None, to_string = False,
-            get_elements = False, length = 200.0,
-            margin = 20.0, width = 60.0):
+            get_elements = False, LENGTH = 200.0,
+            MARGIN = 20.0, WIDTH = 60.0):
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an .svg file or a svg string for webserver rendering
         '''
@@ -401,12 +401,12 @@ class MongoCurious():
             drawing = methylationplot.MethylationPlot(filename, title, self.sample_peaks,
                                                       self.pos_betas_dict, self.annotations,
                                                       color, self.start, self.end,
-                                                      length, margin, width)
+                                                      LENGTH, MARGIN, WIDTH)
             drawing.build()
         if self.collection == "waves":
             drawing = chipseqplot.ChipseqPlot(filename, title, self.waves,
                                               self.start, self.end, self.annotations,
-                                              length, margin, width)
+                                              LENGTH, MARGIN, WIDTH)
             drawing.build()
 
         if to_string:

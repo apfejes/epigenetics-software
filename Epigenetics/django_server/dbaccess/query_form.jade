@@ -11,7 +11,7 @@ body
     
     #wrapper
         form(action='/dbaccess/query_form/',method='post')
-            div
+            div(align='center')
                 fieldset
                     label(for='organism') Organism:
                         select(name='organism', id='organism')
@@ -24,23 +24,36 @@ body
                             option(value="chipseq")="ChIP-Seq"
                     label(for='chromosome') Chromosome:
                         if chromosome
-                            input(id='chromosome',size = '6', type='text',name='chromosome', value = chromosome)
+                            input(id='chromosome',size = '6', type='text', name='chromosome', value = chromosome)
                         else
-                            input(id='chromosome',size = '6', type='text',value='',placeholder='1,2,...X,Y',name='chromosome')
+                            input(id='chromosome',size = '6', type='text', value='',placeholder='1,2,...X,Y', name='chromosome')
                     label(for='start') Start:
                         if start
-                            input(id='start',size = '8', type='text',value=start,name='start')
+                            input(id='start',size = '8', type='text', value=start,name='start')
                         else 
-                            input(id='start',size = '8', type='text',value='',name='start')
+                            input(id='start',size = '8', type='text', value='',name='start')
                         
                     label(for='end') End:
                         if end
-                            input(id='end', size = '8', type='text',value=end,name='end')
+                            input(id='end', size = '8', type='text', value=end, name='end')
                         else
-                            input(id='end', size = '8', type='text',value='',name='end')
-            div(data-role='fieldcontain')
+                            input(id='end', size = '8', type='text', value='', name='end')
+            
+            div(data-role='fieldcontain', align='center')
+                label(for='tss') Tss:
+                    if tss
+                        input(id='tss', size = '8', type='checkbox', name="tss", value="tss", checked)
+                    else
+                        input(id='tss', size = '8', type='checkbox', name="tss", value="tss")
+                label(for='cpg') CpG Islands:
+                    if cpg
+                        input(id='cpg', size = '8', type='checkbox', name="cpg", value="cpg", checked)
+                    else
+                        input(id='cpg', size = '8', type='checkbox', name="cpg", value="cpg")
+                    
+            div(data-role='fieldcontain', align='center')
                 input(type='submit',value='Query!', data-transition='fade', data-theme='c')  
-                input(type='button',value = '<<<',name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self')")  
+                input(type='button',value = '<<<',name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self');")  
                 input(type='button',value = '<<',name='LessLeft', onClick="window.open(newURL('LessLeft'),'_self');")
                 input(type='button',value = '--',name='ZoomOutMore', onClick="window.open(newURL('ZoomOutMore'),'_self');")
                 input(type='button',value = '-',name='ZoomOut', onClick="window.open(newURL('ZoomOut'),'_self');")

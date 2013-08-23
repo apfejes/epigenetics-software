@@ -7,7 +7,7 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 from MongoDB.mongoUtilities import MongoCurious
 
-def svgcode(db = None, chromosome = None, start = None, end = None, length = None, width = None, margin = None):
+def svgcode(db = None, chromosome = None, start = None, end = None, LENGTH = None, WIDTH = None, MARGIN = None):
     print("Connecting to database:")
     organism = str.capitalize(db)
     database = db + "_epigenetics"
@@ -17,7 +17,7 @@ def svgcode(db = None, chromosome = None, start = None, end = None, length = Non
     return m.svg(to_string = True, 
                  title = organism + " DNA methylation on chr"+str(chromosome)+" ("+str(start)+"-"+str(end) +")", 
                  color = 'indigo',
-                 length = length,
-                 width = width,
-                 margin = margin)
+                 LENGTH = LENGTH,
+                 WIDTH = WIDTH,
+                 MARGIN = MARGIN)
 

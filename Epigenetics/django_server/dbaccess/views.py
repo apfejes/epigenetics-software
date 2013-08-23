@@ -40,6 +40,9 @@ def view_query_form(request):
     end = q.get("end", None)
     chrom = q.get("chromosome", None)
     action_factor = q.get("action", None)
+    tss = q.get("tss", None)
+    cpg = q.get("cpg", None)
+    
 
     if action_factor and start and end:
         if 'Right' in action_factor or 'Left' in action_factor:
@@ -64,4 +67,4 @@ def view_query_form(request):
         svg = query(parameters)
     return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o,
                                                'collection':col, 'chromosome':chrom, 'start':start,
-                                               'end':end})
+                                               'end':end, 'tss':tss, 'cpg':cpg})

@@ -16,7 +16,7 @@ class ChipseqPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, title, waves, start, end, annotations, length, margin, width):
+    def __init__(self, filename, title, waves, start, end, annotations, LENGTH, MARGIN, WIDTH):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -27,9 +27,9 @@ class ChipseqPlot(object):
         self.waves = waves
         self.start = start
         self.end = end
-        self.length = length    # default = 200.0
-        self.margin = margin    # default = 20.0
-        self.width = width    # default = 60.0
+        self.length = LENGTH    # default = 200.0
+        self.margin = MARGIN    # default = 20.0
+        self.width = WIDTH    # default = 60.0
         self.annotations = annotations
 
         self.colors = [('indigo', 'slateblue'), ('red', 'orange'),
@@ -53,10 +53,10 @@ class ChipseqPlot(object):
 
 
     def build(self):
-        length, end, start, width, margin = self.length, self.end, self.start, self. width, self.margin
+        LENGTH, end, start, WIDTH, MARGIN = self.length, self.end, self.start, self. width, self.margin
         waves = self.waves
         offset = start
-        self.scale_x = length / (end - start)
+        self.scale_x = LENGTH / (end - start)
         tail = 1
 
         # create path objects for each peak
@@ -65,23 +65,23 @@ class ChipseqPlot(object):
             heights.append(height)
         maxh = max(heights)
         self.maxh = maxh
-        scale_y = (width + margin) * 0.8 / maxh
-        offset_y = (width + margin) * 0.8 + margin
+        scale_y = (WIDTH + MARGIN) * 0.8 / maxh
+        offset_y = (WIDTH + MARGIN) * 0.8 + MARGIN
         self.scale_y, self.offset_y = scale_y, offset_y
 
         sample_count = 0
         samples_color = {}
         for (pos, height, stddev, sample_id) in waves:
             print "    Peak", pos, height, stddev
-            X, Y = self.makegaussian(start, end, margin, length, pos, tail, offset, float(height), stddev)
+            X, Y = self.makegaussian(start, end, MARGIN, LENGTH, pos, tail, offset, float(height), stddev)
             X = [round((x - offset + pos) * self.scale_x, 2) + 20 for x in X]
             for x in X:
-                if x < (margin + 1):
-                    X.insert(0, margin)
+                if x < (MARGIN + 1):
+                    X.insert(0, MARGIN)
                     Y.insert(0, tail)
                     break
-                if x > (margin + length - 1):
-                    X.append(margin + length)
+                if x > (MARGIN + LENGTH - 1):
+                    X.append(MARGIN + LENGTH)
                     Y.append(tail)
                     break
             # Scale Y and inverse the coordinates
@@ -167,10 +167,10 @@ class ChipseqPlot(object):
         return None
 
     def makegaussian(self, start,
-                     end, margin, length,
+                     end, MARGIN, LENGTH,
                      pos, tail, offset,
                      height, stddev):
-        '''To do: remove length and margin, or use them'''
+        '''To do: remove LENGTH and MARGIN, or use them'''
         endpts = int((sqrt((-2) * stddev * stddev * log(tail / height))))
         spacing = 64
         n_points = 0
@@ -192,7 +192,7 @@ class ChipseqPlot(object):
         return X, Y
 
     def add_xtics(self):
-        end, start, width, margin = self.end, self.start, self. width, self.margin
+        end, start, WIDTH, MARGIN = self.end, self.start, self. width, self.margin
         offset = start
         scale_x = self.scale_x
         scale_tics = 1
@@ -204,21 +204,21 @@ class ChipseqPlot(object):
             scale_tics /= 2
             xtics += [i for i in range(start, end + 1) if i % (scale_tics) == 0 and i not in xtics]
         xtics.sort()
-        spacing = fabs((margin + (xtics[1] - offset) * scale_x) - (margin + (xtics[0] - offset) * scale_x)) / 4
+        spacing = fabs((MARGIN + (xtics[1] - offset) * scale_x) - (MARGIN + (xtics[0] - offset) * scale_x)) / 4
         for tic in xtics:
-            tic_x = (margin + (tic - offset) * scale_x)
-            tic_y = width + margin * 2
+            tic_x = (MARGIN + (tic - offset) * scale_x)
+            tic_y = WIDTH + MARGIN * 2
             ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
-            ticline = Rect(insert = (tic_x, width + margin * 2 - 5 - 1), size = (0.1, 2), fill = "midnightblue")
+            ticline = Rect(insert = (tic_x, WIDTH + MARGIN * 2 - 5 - 1), size = (0.1, 2), fill = "midnightblue")
             for i in range (1, 4):
-                if tic_x - spacing * i > margin - 5:
-                    ticline2 = Rect(insert = (tic_x - spacing * i, width + margin * 2 - 5 - 1), size = (0.1, 1), fill = "midnightblue")
+                if tic_x - spacing * i > MARGIN - 5:
+                    ticline2 = Rect(insert = (tic_x - spacing * i, WIDTH + MARGIN * 2 - 5 - 1), size = (0.1, 1), fill = "midnightblue")
                     self.elements.append(ticline2)
             self.elements.append(ticline)
             self.elements.append(ticmarker)
 
     def add_ytics(self):
-        maxh, margin = self.maxh, self.margin
+        maxh, MARGIN = self.maxh, self.margin
         scale_y, offset_y = self.scale_y, self.offset_y
 
         scale_tics = 64
@@ -229,9 +229,9 @@ class ChipseqPlot(object):
         ytics = [round(offset_y - y * scale_y, 3) for y in ytics]
         spacing = (ytics[0] - ytics[1]) / 2
         for tic in ytics:
-            ticline = Rect(insert = (margin - 5 - 1, tic), size = (2, 0.1), fill = "midnightblue")
-            ticline2 = Rect(insert = (margin - 5, tic + spacing), size = (1, 0.1), fill = "midnightblue")
-            tic_x = margin - 13
+            ticline = Rect(insert = (MARGIN - 5 - 1, tic), size = (2, 0.1), fill = "midnightblue")
+            ticline2 = Rect(insert = (MARGIN - 5, tic + spacing), size = (1, 0.1), fill = "midnightblue")
+            tic_x = MARGIN - 13
             tic_y = tic + 1
             label = str(int(round((offset_y - tic) / scale_y)))
             if len(label) == 1:
@@ -244,17 +244,17 @@ class ChipseqPlot(object):
             self.elements.append(ticmarker)
 
     def add_axis(self):
-        margin = self.margin
-        width = self.width
-        axis_x_margin = margin - 5
+        MARGIN = self.margin
+        WIDTH = self.width
+        axis_x_margin = MARGIN - 5
         self.axis_x_margin = axis_x_margin
-        axis_y_margin = margin - 8
+        axis_y_margin = MARGIN - 8
         self.axis_y_margin = axis_y_margin
-        x_axis = Rect(insert = (axis_x_margin, width + margin + axis_x_margin),
+        x_axis = Rect(insert = (axis_x_margin, WIDTH + MARGIN + axis_x_margin),
                 size = ((self.end - self.start) * self.scale_x + 10, 0.1),
                 fill = "midnightblue")
         y_axis = Rect(insert = (axis_x_margin, axis_y_margin),
-            size = (0.1, width + margin + 3),
+            size = (0.1, WIDTH + MARGIN + 3),
             fill = "midnightblue")
         self.elements.append(x_axis)
         self.elements.append(y_axis)
