@@ -224,7 +224,7 @@ class MethylationPlot(object):
 
 
     def makegaussian(self, mean, stddev, height):
-        '''remove mean, if not used'''
+        # TODO: remove mean, if not used
         endpts = (sqrt((-2) * stddev * stddev * log(1.0 / height)))
         X = [0]
         X.extend([round(stddev * 2.0 * (i / 9.0) - stddev, 3) for i in range(0, 10)])    # add 10 points  near mean
