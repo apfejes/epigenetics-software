@@ -64,10 +64,9 @@ class MongoCurious():
         self.start = start
 
         # Make sure chr variable is in the right format
-        if self.database == 'human_epigenetics':
-            if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
-                chromosome = 'chr' + str(chromosome)
-            self.chromosome = chromosome
+        if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
+            chromosome = 'chr' + str(chromosome)
+        self.chromosome = chromosome
 
         # First we collect the list of samples the user is interested in:
         sample_ids = self.organize_samples(project, sample_label, sample_group, chip)
@@ -86,8 +85,9 @@ class MongoCurious():
         if self.collection == 'waves':
             docs = self.finddocs(collection = collection, chip = chip, sample_ids = sample_ids)    # get peak info for region queried
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
-            annotations_docs = self.finddocs(collection = 'annotations')    # get the gene annotations info
-            self.getannotations(annotations_docs)    # organize the gene annotations in a dictionary
+            if self.database == 'human_epigenetics':
+                annotations_docs = self.finddocs(collection = 'annotations')    # get the gene annotations info
+                self.getannotations(annotations_docs)    # organize the gene annotations in a dictionary
 
         return None
 
@@ -121,10 +121,14 @@ class MongoCurious():
 
         sample_ids = {}
         for doc in samplesdocs:
+            print 'doc', doc
             sample_id = str(doc['_id'])
 
             if self.collection == 'waves':
-                doc_chip = str(doc['chip'])
+                if self.database == 'yeast_epigenetics':
+                    doc_chip = str(doc['type  (ip, mock, input)'])
+                else:
+                    doc_chip = str(doc['chip'])
                 if doc_chip == chip or chip is None:
                     sample_ids[sample_id] = doc_chip
 
@@ -177,14 +181,18 @@ class MongoCurious():
 
         elif collection == "samples":
             if self.collection == 'waves':
-                if chip: query_parameters["chip"] = chip
-                else: query_parameters['chip'] = {"$exists":True}
+                if chip: 
+                    if self.database == 'yeast_epigenetics':
+                        query_parameters["type  (ip, mock, input)"] = chip
+                    else: 
+                        query_parameters["chip"] = chip
+                else: query_parameters['haswaves'] = True
             elif self.collection == 'methylation':
-                query_parameters['chip'] = {"$exists":False}
+                query_parameters['haswaves'] = True
                 if project: query_parameters["project"] = project
                 if sample_label: query_parameters["sample_label"] = sample_label
                 if sample_group: query_parameters["sample_group"] = sample_group
-            return_chr = {'_id': True, 'samplelabel': True,
+            return_chr = {'_id': True, 'samplelabel': True, 'type  (ip, mock, input)':True,
                               'project': True, 'sample_group': True, 'chip':True}
             sortby, sortorder = 'sample_group', 1
 

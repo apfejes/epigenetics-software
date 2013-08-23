@@ -61,8 +61,9 @@ class row():
     def toString(self):
         return "%s\t%i\t%f\n" % (self.chromosome, self.position, self.value)
 
-def FindBaseline(file_name):
+def FindBaseline(file_name, normalize = False):
     f = open(file_name, 'r')    # open file
+
 
     print "processing data file (" + file_name + ")..."
     first_line = True
@@ -81,34 +82,39 @@ def FindBaseline(file_name):
             r = row(a[0], int(a[1]), float(a[2]))
             data.append(r)
     # find most common number
+
     f.close()
-    v_sum = 0
-    hist = {}
-    for x in range(len(data)):
-        v_sum += data[x].value
-        if hist.has_key(str(data[x].value)):
-            hist[str(data[x].value)] += 1
-        else:
-            hist[str(data[x].value)] = 1
-    v_avg = v_sum / len(data)
-    print "v average = %f" % (v_avg)
-    point = 0
-    largest = 0
-    for g, y in hist.iteritems():
-        if y > largest:
-            largest = y
-            point = g
-            # print "g, y (%s, %i)" % (g, y)
-    # print "point, largest (%s, %i)" % (point, largest)
-    point = float(point)
-    for g in range(len(data)):
-        v = data[g].value - point
-        if v < 0:
-            v = 0
-        data[g].setv(v)
+
+    if normalize:
+        v_sum = 0
+        hist = {}
+        for x in range(len(data)):
+            v_sum += data[x].value
+            if hist.has_key(str(data[x].value)):
+                hist[str(data[x].value)] += 1
+            else:
+                hist[str(data[x].value)] = 1
+        v_avg = v_sum / len(data)
+        print "v average = %f" % (v_avg)
+
+        point = 0
+        largest = 0
+        for g, y in hist.iteritems():
+            if y > largest:
+                largest = y
+                point = g
+                # print "g, y (%s, %i)" % (g, y)
+        # print "point, largest (%s, %i)" % (point, largest)
+        point = float(point)
+        for g in range(len(data)):
+            v = data[g].value - point
+            if v < 0:
+                v = 0
+            data[g].setv(v)
     # create wig file
     f_w_name = StringUtils.rreplace(file_name, '.BEDlike', '', 1)
     f_w_name = StringUtils.rreplace(f_w_name, 'BED', 'WIG', 1)
+    trackname = os.path.basename(f_w_name)
 
     # print "Writing to %s" % (f_w_name)
     # f = open(f_w_name, 'w')    # open file
@@ -119,7 +125,7 @@ def FindBaseline(file_name):
     last_bp = 0
     last_ht = 0
     wigfile = WigFileThread.WigFileWriter(None)
-    wigfile.start_wig_writer(os.path.dirname(f_w_name), os.path.basename(f_w_name))
+    wigfile.start_wig_writer(os.path.dirname(f_w_name), os.path.basename(f_w_name), trackname)
 
 
     # for x in range (0, 5020):
@@ -137,8 +143,8 @@ def FindBaseline(file_name):
         # print "x of len: %i/%i" % (x, l)
         if data[x].chromosome != current_chr:
             if len(coverage_map) > 0:
-                wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)
-                # wigfile.add_map(coverage_map, current_chr, block_left)
+                # wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)
+                wigfile.add_map(coverage_map, current_chr, block_left)
                 coverage_map = []
             # TODO: taper off chromosome
             # TODO: taper "on" new chromosome
@@ -147,7 +153,7 @@ def FindBaseline(file_name):
         block_left = data[x - 1].position + 2    # shift by 1, and block starts after the zero.
         last_bp = data[x - 1].position + 1
         # print "x=%i data=%i, value=%f" % (x, data[x].position + 1, data[x].value)
-        while x < l and data[x].value != 0:
+        while x < l and data[x].value >= 0:
             diff = (data[x].position + 1) - last_bp
             if diff > 6:
                 diff = 6
@@ -161,7 +167,7 @@ def FindBaseline(file_name):
                 a += 1
             last_bp = data[x].position + 1
             last_ht = data[x].value
-            if x < l - 1 and data[x + 1].value == 0:
+            if x < l - 1 and data[x + 1].value <= 0:
                 diff = (data[x + 1].position + 1) - (data[x].position + 1)
                 slope = float(0 - data[x].value) / (diff)
                 for y in range(1, diff):
@@ -169,12 +175,12 @@ def FindBaseline(file_name):
                 last_ht = 0
             x += 1
 
-        while x < l and data[x].value == 0:
+        while x < l and data[x].value <= 0:
             x += 1
             last_ht = 0
         if len(coverage_map) > 0:
-            wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)
-            # wigfile.add_map(coverage_map, current_chr, block_left)
+            # wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)
+            wigfile.add_map(coverage_map, current_chr, block_left)
             coverage_map = []
     # gc.enable()
 
@@ -184,8 +190,8 @@ def FindBaseline(file_name):
     print "Wigwriter closed."
 
 if __name__ == "__main__":
-    if len(sys.argv) < 1:
-        print('CEL filename must be given as a parameter.')
+    if len(sys.argv) <= 1:
+        print('BEDlike filename must be given as a parameter.')
         sys.exit()
     starttime = time.time()
     bedlike_file = sys.argv[1]

@@ -6,7 +6,6 @@ Created on 2013-05-07
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
-from .queryforms import QueryForm
 # from django.views.generic import TemplateView
 
 from .Annotations import showmethylation, showchipseq
@@ -31,14 +30,10 @@ def send_svg(request):
 def view_query_form(request):
     svg = 'Try querying the database!'
     q = None
-    form = None
-
     if request.method == 'GET':
         q = request.GET
-        form = QueryForm(request.GET)    # A form bound to the POST data
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
-        form = QueryForm(request.POST)
 
     o = str(q.get("organism", None))
     col = str(q.get("collection", None))
@@ -47,16 +42,12 @@ def view_query_form(request):
     chrom = str(q.get("chromosome", None))
     action_factor = q.get("action", None)
 
-    print 'action', action_factor
-    if action_factor:
+    if action_factor and start and end:
         start, end = panning(action_factor, start, end)
 
-    parameters = {'organism':o, 'collection': col, 'chromosome':chrom, 'start':start, 'end':end}
-    print '\n\n', form, '\n'
-    # if form.is_valid():    # All validation rules pass
-    #    svg = query(parameters)
-    # else:
-    #    svg = "ERROR"
+    parameters = {'organism':str(o), 'collection': str(col), 'chromosome': str(chrom), 'start': start, 'end':end}
+    print parameters
+
     if check(parameters):
         svg = query(parameters)
     return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o,
