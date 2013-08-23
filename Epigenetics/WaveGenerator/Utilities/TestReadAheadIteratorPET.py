@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
             alignedread1 = alignedreadobjpet.read1
             chromosome = readahead.get_ref_name(alignedread1.tid)
             if current_chromosome != chromosome:
-                last_read_start = -1000000;
+                last_read_start = -1000000
                 current_chromosome = chromosome
             else:
                 self.assert_(last_read_start <= alignedreadobjpet.left_end, "reads passed out of order!")

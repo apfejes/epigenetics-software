@@ -32,22 +32,21 @@ class LL(object):
     def size(self):
         return self.__len
 
-    ''''thing must be of type Node.
-        Adds to the end of the list'''
+
     def append(self, thing):
+        ''''thing must be of type Node.  Adds to the end of the list'''
         node = Node(thing)
         if self.__len == 0:
             LL.head = node
             LL.tail = node
         else:
-            node.prev = LL.tail
             LL.tail.next = node
             LL.tail = node
         self.__len += 1
 
-        ''''thing must be of type Node.
-        Adds to the front of the list'''
+
     def insert_at_head(self, thing):
+        ''''thing must be of type Node. Adds to the front of the list'''
         newnode = Node(thing)
         if self.__len == 0:
             LL.head = newnode
@@ -81,8 +80,8 @@ class LL(object):
             self.__len += 1
         return None
 
-    '''Walk the list and get the order of things in the list'''
     def getAll(self):
+        '''Walk the list and get the order of things in the list'''
         pointer = LL.head
         str_list = []
         while not pointer is None:
@@ -90,8 +89,9 @@ class LL(object):
             pointer = pointer.next
         return ''.join(str_list)
 
-    '''destroy everything in the linked list - shouldn't be necessary'''
+
     def destroy(self):
+        '''destroy everything in the linked list - shouldn't be necessary'''
         while not LL.head is None:
             N = LL.head.next
             LL.head.next = None

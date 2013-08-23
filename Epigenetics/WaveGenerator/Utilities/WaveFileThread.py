@@ -36,21 +36,23 @@ class WaveFileWriter(threading.Thread):
         self.queue = wave_queue
         self.f = filewriter
 
-    def process_wave(self, wave):
+        self.t = ""    # will hold threads
+
+    def process_wave(self, w):
         '''converts a wave object to a string and writes it to a file, specified
         in the __init__ function'''
-        if (wave.number != None):
-            self.f.write("%s\t%i\t%i\t%s\t%i\n" % (wave.chromosome, wave.crest,
-                                           wave.sigma, str(round(wave.height, 2)),
-                                           wave.number))
+        if (w.number != None):
+            self.f.write("%s\t%i\t%i\t%s\t%i\n" % (w.chromosome, w.crest,
+                                           w.sigma, str(round(w.height, 2)),
+                                           w.number))
         else:
-            self.f.write("%s\t%i\t%i\t%s\n" % (wave.chromosome, wave.crest,
-                                           wave.sigma, str(round(wave.height, 2))))
+            self.f.write("%s\t%i\t%i\t%s\n" % (w.chromosome, w.crest,
+                                           w.sigma, str(round(w.height, 2))))
 
     def run(self):
         while True:
-            wave = self.queue.get()
-            self.process_wave(wave)
+            w = self.queue.get()
+            self.process_wave(w)
 
     def start_wave_writer(self, output_path, file_name):
         self.f = open(output_path + '/' + file_name + '.waves', 'w')
