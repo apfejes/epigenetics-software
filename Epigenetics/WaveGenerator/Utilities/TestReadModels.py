@@ -7,17 +7,19 @@ import unittest
 import ReadModels
 
 class Test(unittest.TestCase):
-
+    '''Unit tests for Read Models'''
 
     def testFlat(self):
+        '''test out the flat model'''
         a = ReadModels.Distribution.Flat(10)
         for i in a:
             self.assert_(i == 1, "Values in Flat array are not equal to 1.")
         self.assert_(len(a) == 10, "Flat array is not the right size ")
 
     def testTriangle(self):
+        '''test the triangle model'''
         a = ReadModels.Distribution.Triangle(50, 100, 150)
-        z = 1;
+        z = 1
         for i in a:
             self.assert_(i <= z, "Values must not rise in Triangle array")
             self.assert_(i != 0 , "Zero values should not be allowed in triangle array")

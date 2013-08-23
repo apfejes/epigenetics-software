@@ -17,7 +17,8 @@ class wave():
         self.height = height
         self.number = number
 
-    def type(self):
+    @staticmethod
+    def type():
         '''Always returns "Wave"'''
         return "Wave"
 
@@ -27,7 +28,8 @@ class WaveFileWriter(threading.Thread):
     The order is not sorted, allowing for multiple wave producers to save to a
     single wave file writer.'''
 
-    def type(self):
+    @staticmethod
+    def type():
         '''Always returns "WaveFileThread"'''
         return "WaveFileThread"
 

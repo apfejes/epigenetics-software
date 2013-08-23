@@ -25,6 +25,7 @@ class Decorators(object):
         as deprecated. It will result in a warning being emmitted
         when the function is used."""
         def newFunc(*args, **kwargs):
+            '''docstring'''
             warnings.warn("Call to deprecated function %s." % func.__name__,
                           category = DeprecationWarning)
             return func(*args, **kwargs)
