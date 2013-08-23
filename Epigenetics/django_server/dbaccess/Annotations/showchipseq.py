@@ -17,7 +17,7 @@ def svgcode(db = None, chromosome = None, start = None, end = None, length = Non
     print("Querying...")
     m.query(collection = "waves", chromosome = chromosome, start = start, end = end)
     return m.svg(to_string = True, 
-                 title = organism + " ChIP-Seq peaks on " + str(chromosome) + " ("+str(start)+"-"+str(end) +")", 
+                 title = organism + " ChIP-Seq peaks on chr" + str(chromosome) + " ("+str(start)+"-"+str(end) +")", 
                  color = 'indigo', 
                  length = length,
                  width = width,

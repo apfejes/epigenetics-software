@@ -15,7 +15,7 @@ def svgcode(db = None, chromosome = None, start = None, end = None, length = Non
     print("Querying...")
     m.query(collection = "methylation", project = 'down syndrome', chromosome = chromosome, start = start, end = end)
     return m.svg(to_string = True, 
-                 title = organism + " DNA methylation on "+str(chromosome)+" ("+str(start)+"-"+str(end) +")", 
+                 title = organism + " DNA methylation on chr"+str(chromosome)+" ("+str(start)+"-"+str(end) +")", 
                  color = 'indigo',
                  length = length,
                  width = width,

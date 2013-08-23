@@ -3,14 +3,14 @@ Created on 2013-06-07
 
 @author: sperez
 '''
-# from svgwrite.shapes import Rect
-# from svgwrite.text import Text
+from svgwrite.shapes import Rect
+from svgwrite.text import Text
 from svgwrite.drawing import Drawing
 from svgwrite.path import Path
 
 from math import exp, sqrt, fabs, log
 
-from PlotUtilities import Rect, Text, get_axis, get_annotations
+from PlotUtilities import get_axis, get_annotations, bigfont, medfont, smallfont
 
 class ChipseqPlot(object):
     '''
@@ -105,51 +105,6 @@ class ChipseqPlot(object):
             self.elements.append(peak)
         self.samples_color = samples_color
 
-    def add_annotations(self):
-        annotations = self.annotations
-        margin = self.margin
-        width = self.width
-        spacing = 9
-        offset = 0
-
-
-        # Add TSS line if there is in fact a TSS in this region
-        for (gene, tss) in annotations['TSS']:
-            # print 'TSS:', gene, tss
-            x1 = margin + (tss - self.start) * self.scale_x
-            y1 = self.axis_y_margin
-            length = width + margin * 3
-            thickness = 0.3
-            color = 'dodgerblue'
-
-            TSSline = Rect(insert = (x1, y1),
-                           size = (thickness, length),
-                           fill = color)
-            TSS = (Text((str(tss)), insert = (x1 + 1, length + y1), fill = color, font_size = "4"))
-            gene = (Text("--> " + gene + " gene", insert = (x1, length + y1 - spacing / 2), fill = color, font_size = "4"))
-            offset += spacing
-            if offset > spacing * 5: offset = 0
-            self.elements.append(TSSline)
-            self.elements.append(TSS)
-            self.elements.append(gene)
-
-        for (a, b) in annotations['Islands']:
-            print 'island', a, b
-            if a < self.start: a = self.start
-            if b > self.end: b = self.end
-            height = 3
-            length = (b - a) * self.scale_x
-            x1 = margin + (a - self.start) * self.scale_x
-            y1 = width + margin * 2 - height - 5
-            # print x1, length, y1
-            color = 'hotpink'
-
-            island = Rect(insert = (x1, y1),
-                           size = (length, height),
-                           fill = color)
-            self.elements.append(island)
-
-        return None
 
     def save(self):
         for element in self.elements:
@@ -181,8 +136,8 @@ class ChipseqPlot(object):
         ''' Add title, axis, tic marks and labels '''
         if self.title is None:
             self.title = "Chipseq Peaks"
-        Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
-                fill = "midnightblue", font_size = "5")
+        Title = Text(self.title, insert = (self.margin/3, self.margin/3),
+                fill = "midnightblue", font_size = bigfont)
         self.elements.append(Title)
 
         self.add_xtics()
@@ -196,10 +151,10 @@ class ChipseqPlot(object):
 
     def add_sample_labels(self, x_position):
         if len(self.samples_color) > 20:
-            fontsize = '2.5'
+            fontsize = str(float(medfont)-0.5)
         elif len(self.samples_color) < 5:
-            fontsize = '3.5'
-        else: fontsize = '3'
+            fontsize = str(float(medfont)+0.5)
+        else: fontsize = medfont
 
         spacing = 0.1
         y_position = self.margin
@@ -253,7 +208,7 @@ class ChipseqPlot(object):
         for tic in xtics:
             tic_x = (margin + (tic - offset) * scale_x)
             tic_y = width + margin * 2
-            ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = "3"))
+            ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
             ticline = Rect(insert = (tic_x, width + margin * 2 - 5 - 1), size = (0.1, 2), fill = "midnightblue")
             for i in range (1, 4):
                 if tic_x - spacing * i > margin - 5:
@@ -283,7 +238,7 @@ class ChipseqPlot(object):
                 tic_x = tic_x + 3
             if len(label) == 2:
                 tic_x = tic_x + 2
-            ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = "3"))
+            ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
             self.elements.append(ticline)
             self.elements.append(ticline2)
             self.elements.append(ticmarker)

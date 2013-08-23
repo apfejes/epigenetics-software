@@ -118,7 +118,7 @@ def parse_form(form):
     return  parameters
 
 def query(p):
-    length = 270.0
+    length = 260.0
     width = 80.0
     margin = 20.0
     if p['collection'] == 'chipseq':

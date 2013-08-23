@@ -7,6 +7,10 @@ Created on 2013-08-07
 from svgwrite.shapes import Rect
 from svgwrite.text import Text
 
+bigfont = 7
+medfont = 4.5
+smallfont = 4
+
 def get_axis(start, end, margin, width, axis_x_margin, axis_y_margin, scale_x):
     margin = margin
     width = width
@@ -34,7 +38,7 @@ def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_marg
     offset = 0 
     elements = []
     x1 = 0
-    font_size = 3
+    font_size = smallfont
     between_tss = 12
     
     #Add TSS line if there is in fact a TSS in this region
@@ -89,3 +93,4 @@ def get_annotations(annotations, margin, width, scale_x, start, end, axis_x_marg
         elements.append(island)
     
     return elements
+
