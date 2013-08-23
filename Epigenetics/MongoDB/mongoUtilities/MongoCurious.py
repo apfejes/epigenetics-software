@@ -54,7 +54,7 @@ class MongoCurious():
                 sample_group = None,
                 sample_label = None,
                 sample_id = None):
-        '''remove sample_id, if not used'''
+        # TODO: please remove sample_id, if not used
         self.collection = collection
         if end: end = int(end)
         else: end = None
@@ -180,10 +180,10 @@ class MongoCurious():
 
         elif collection == "samples":
             if self.collection == 'waves':
-                if chip: 
+                if chip:
                     if self.database == 'yeast_epigenetics':
                         query_parameters["type  (ip, mock, input)"] = chip
-                    else: 
+                    else:
                         query_parameters["chip"] = chip
                 else: query_parameters['haswaves'] = True
             elif self.collection == 'methylation':
