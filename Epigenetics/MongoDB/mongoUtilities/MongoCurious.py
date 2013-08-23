@@ -56,10 +56,13 @@ class MongoCurious():
                 sample_id = None):
         # TODO: please remove sample_id, if not used
         self.collection = collection
-        if end: end = int(end)
-        else: end = None
+        if end:
+            end = int(end)
+        else:
+            end = None
         self.end = end
-        if start: start = int(start)
+        if start:
+            start = int(start)
         else: start = 0
         self.start = start
 
@@ -169,7 +172,8 @@ class MongoCurious():
                 for item in sample_ids.keys():
                     ids.append(ObjectId(item))
                 query_parameters["sample_id"] = {"$in":ids}
-            if project: query_parameters['project'] = project
+            if project:
+                query_parameters['project'] = project
             if self.start and self.end:
                 extension = 500    # extend the region of query to catch peaks with tails in the region
                 query_parameters["pos"] = {"$lte":self.end + extension, "$gte":self.start - extension}
@@ -185,12 +189,16 @@ class MongoCurious():
                         query_parameters["type  (ip, mock, input)"] = chip
                     else:
                         query_parameters["chip"] = chip
-                else: query_parameters['haswaves'] = True
+                else:
+                    query_parameters['haswaves'] = True
             elif self.collection == 'methylation':
                 query_parameters['haswaves'] = {'$exists':False}
-                if project: query_parameters["project"] = project
-                if sample_label: query_parameters["sample_label"] = sample_label
-                if sample_group: query_parameters["sample_group"] = sample_group
+                if project:
+                    query_parameters["project"] = project
+                if sample_label:
+                    query_parameters["sample_label"] = sample_label
+                if sample_group:
+                    query_parameters["sample_group"] = sample_group
             return_chr = {'_id': True, 'samplelabel': True, 'type (ip, mock, input)':True,
                               'project': True, 'sample_group': True, 'chip':True}
             sortby, sortorder = 'sample_group', 1
@@ -308,7 +316,8 @@ class MongoCurious():
                 waves.append((pos, height, stddev, doc_sample_group))
                 count += 1
             else:
-                if not self.end: dist_to_region = 0
+                if not self.end:
+                    dist_to_region = 0
                 else: dist_to_region = min(abs(pos - self.end), abs(self.start - pos))
                 dist_from_peak_to_tail = sqrt((-2) * stddev * stddev * log(tail / height))
                 if dist_from_peak_to_tail - dist_to_region >= 0:
@@ -343,17 +352,21 @@ class MongoCurious():
             tss1 = int(doc['closest_tss'])
             tss2 = int(doc['closest_tss_1'])
             gene = str(doc['ucsc_refgene_name'])
-            if gene: gene = list(set(str(gene).split(';')))
+            if gene:
+                gene = list(set(str(gene).split(';')))
             geneclosest = str(doc["closest_tss_gene_name"])
-            if geneclosest : geneclosest = list(set(str(geneclosest).split(';')))
+            if geneclosest:
+                geneclosest = list(set(str(geneclosest).split(';')))
             feature = str(doc['regulatory_feature_group'])
             feature_coord = str(doc['regulatory_feature_name'])
-            if feature and feature_coord: feature_coord.split(':')[1].split('-')
+            if feature and feature_coord:
+                feature_coord.split(':')[1].split('-')
 
             for genename in gene:
                 if tss1 in range(self.start, self.end):
                     annotations['TSS'][tss1] = genename
-                else: annotations['genes'].add((genename, tss1))
+                else:
+                    annotations['genes'].add((genename, tss1))
             for genenameclosest in geneclosest:
                 annotations['genes'].add((genenameclosest, tss2))
 
@@ -395,7 +408,8 @@ class MongoCurious():
             if filename[-4:len(filename)] != '.svg':
                 filename += '.svg'
             filename = directory_for_svgs + filename
-        elif not get_elements: filename = "test.svg"
+        elif not get_elements:
+            filename = "test.svg"
 
         if self.collection == "methylation":
             drawing = methylationplot.MethylationPlot(filename, title, self.sample_peaks,
