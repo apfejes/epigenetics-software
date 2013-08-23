@@ -88,6 +88,8 @@ class MongoCurious():
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
             if self.database == 'human_epigenetics':
                 annotation_docs = self.finddocs(collection = 'annotations')    # get the gene annotations info
+            else: annotation_docs = {}
+            
         return annotation_docs
 
     def checkquery(self, project, chromosome):

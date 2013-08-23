@@ -14,14 +14,30 @@ body
             div(align='center')
                 fieldset
                     label(for='organism') Organism:
-                        select(name='organism', id='organism')
-                            option(value="human")="Human"
-                            option(value="yeast")="Yeast"
-                            option(value="arabidopsis")="Arabidopsis"
+                        if organism = 'human'
+                            select(name='organism', id='organism')
+                                option(value="human")="Human"
+                                option(value="yeast")="Yeast"
+                                option(value="arabidopsis")="Arabidopsis"
+                        elif organism = 'yeast'
+                            select(name='organism', id='organism')
+                                option(value="yeast")="Yeast"
+                                option(value="human")="Human"
+                                option(value="arabidopsis")="Arabidopsis"
+                        else
+                            select(name='organism', id='organism')
+                                option(value="arabidopsis")="Arabidopsis"
+                                option(value="yeast")="Yeast"
+                                option(value="human")="Human"
                     label(for='collection') Collection:
-                        select(name='collection', id='collection') 
-                            option(value="methylation")="Methylation"
-                            option(value="chipseq")="ChIP-Seq"
+                        if collection = 'chipseq'
+                            select(name='collection', id='collection') 
+                                option(value="chipseq")="ChIP-Seq"
+                                option(value="methylation")="Methylation"
+                        else
+                            select(name='collection', id='collection') 
+                                option(value="methylation")="Methylation"
+                                option(value="chipseq")="ChIP-Seq"
                     label(for='chromosome') Chromosome:
                         if chromosome
                             input(id='chromosome',size = '6', type='text', name='chromosome', value = chromosome)
