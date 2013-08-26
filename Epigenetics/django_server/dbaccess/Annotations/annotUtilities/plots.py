@@ -9,6 +9,7 @@ from svgwrite.path import Path
 
 
 def makesmoothpath(X, Y):
+    ''' TODO: fill in docstring '''
     d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1]) + "S"
     for i in range(2, len(X)):
         d = d + (" " + str(X[i]) + "," + str(Y[i]))
@@ -16,6 +17,7 @@ def makesmoothpath(X, Y):
 
 
 def makelinepath(X, Y):
+    ''' TODO: fill in docstring '''
     d = "M" + str(X[0]) + "," + str(Y[0])
     for i in range(2, len(X)):
         d = d + (" " + str(X[i]) + "," + str(Y[i]))
