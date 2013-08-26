@@ -22,25 +22,7 @@ sys.path.insert(0, _root_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
 import StringUtils
 
 
-# Works fine.
-chr_yeast = {
-    'chr1': 'chrI',
-    'chr2': 'chrII',
-    'chr3': 'chrIII',
-    'chr4': 'chrIV',
-    'chr5': 'chrV',
-    'chr6': 'chrVI',
-    'chr7': 'chrVII',
-    'chr8': 'chrVIII',
-    'chr9': 'chrIX',
-    'chr10': 'chrX',
-    'chr11': 'chrXI',
-    'chr12': 'chrXII',
-    'chr13': 'chrXIII',
-    'chr14': 'chrXIV',
-    'chr15': 'chrXV',
-    'chr16': 'chrXVI'
-}
+
 
 probeset = []
 
@@ -73,6 +55,8 @@ def ReadBaseline(file_name, ps):
 
 
 def ApplyBaseline(index, file_in, file_out, ps):
+
+
     bed = open(file_in, 'r')    # open file
     bout = open(file_out, 'w')
 
