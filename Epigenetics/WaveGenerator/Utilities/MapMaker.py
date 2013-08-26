@@ -8,6 +8,7 @@ import sys
 import ReadModels
 
 class MapMaker():
+    '''A class that converts an array of coverage into a map object'''
 
     def __init__(self, PARAM):
         map_type = PARAM.get_parameter("map_type")
@@ -31,6 +32,7 @@ class MapMaker():
 
 
     def makeIslands(self, start, end, list_reads,):
+        '''create islands'''
 
         coverage_map = [0.0] * (end - start)
         # print "coverage_map length:", end, ":", start, "=", end - start

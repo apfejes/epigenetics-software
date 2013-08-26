@@ -5,13 +5,16 @@ Created on 2013-01-29
 '''
 
 
-
-
 class Node(object):
-    def type(self):
+    '''A simple node object used by the doubly linked list'''
+
+    @staticmethod
+    def type():
+        '''print out DoulblyLinkedList.Node when asked the type'''
         print ("DoublyLinkedList.Node")
 
     def __init__(self, thing):
+        '''initialize the linked list.'''
         self.holding = thing
         self.next = None
         self.prev = None
@@ -19,10 +22,12 @@ class Node(object):
 
 class DLL(object):
     '''
-    classdocs
+    A doubly linked list implementation.
     '''
 
-    def type(self):
+    @staticmethod
+    def type():
+        '''print out DoulblyLinkedList when asked the type'''
         print ("DoublyLinkedList")
 
     def __init__(self):
@@ -31,11 +36,11 @@ class DLL(object):
         DLL.tail = None
 
     def size(self):
+        '''get length of list'''
         return self.__len
 
-    ''''thing must be of type Node.
-        Adds to the end of the list'''
     def append(self, thing):
+        ''''thing must be of type Node.   Adds to the end of the list'''
         node = Node(thing)
         if self.__len == 0:
             DLL.head = node
@@ -48,8 +53,7 @@ class DLL(object):
 
 
     def insert_at_head(self, thing):
-        ''''thing must be of type Node.
-        Adds to the front of the list'''
+        ''''thing must be of type Node.  Adds to the front of the list'''
         newnode = Node(thing)
         if self.__len == 0:
             DLL.head = newnode
@@ -61,7 +65,8 @@ class DLL(object):
         self.__len += 1
 
     def insert_before(self, node, thing):
-        ''' test if first node, then use convenience method:'''
+        '''method for inserting an object (thing) before a specific node'''
+        # test if first node, then use convenience method:#
         if node == DLL.head:
             DLL.insert_at_head(thing)
             return None
@@ -74,7 +79,7 @@ class DLL(object):
             self.__len += 1
 
     def insert_after(self, node, thing):
-        # test if last node, then use convenience method.
+        ''' test if last node, then use convenience method.'''
         if node == DLL.tail:
             DLL.append(self, thing)
             return None
@@ -87,6 +92,7 @@ class DLL(object):
             self.__len += 1
 
     def pop_head(self):
+        '''remove the head of the list, and return it's value'''
         if DLL.head is None:    # empty list
             return None
         elif DLL.head.next is None:    # Single Item in the list
@@ -102,8 +108,9 @@ class DLL(object):
             return p
 
 
-    '''Walk the list and get the order of things in the list'''
-    def getAll(self):
+    @staticmethod
+    def getAll():
+        '''Walk the list and get the order of things in the list'''
         pointer = DLL.head
         str_list = []
         while not pointer is None:
@@ -111,8 +118,9 @@ class DLL(object):
             pointer = pointer.next
         return ''.join(str_list)
 
-    '''destroy everything in the linked list - shouldn't be necessary'''
+
     def destroy(self):
+        '''destroy everything in the linked list - shouldn't be necessary'''
         while not DLL.head is None:
             N = DLL.head.next
             DLL.head.next = None

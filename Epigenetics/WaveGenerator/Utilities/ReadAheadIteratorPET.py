@@ -19,12 +19,13 @@ class ReadAheadIteratorPET():
     only_PET_reads = False
     current_chromosome = None
 
-    def type(self):
+    @staticmethod
+    def type():
+        '''print ReadAheadIteratorPET, identify the class'''
         print ("ReadAheadIteratorPET")
 
-    '''initialize the readahead iterator with the parameters it requires'''
-
     def __init__(self, filename, fragment_length, flags, only_PET):
+        '''initialize the readahead iterator with the parameters it requires'''
         self.samfile = pysam.Samfile(filename, flags)    # @UndefinedVariable
         self.iterator = self.samfile.__iter__()
         self.isReadValid = True
@@ -34,8 +35,9 @@ class ReadAheadIteratorPET():
         # print "self.only_PET_reads", self.only_PET_reads
         return
 
-    '''private version of next - should not be used by external next calls'''
+
     def _next(self):
+        '''private version of next - should not be used by external next calls'''
         try:
             while (True):    # may only break out by hitting end of file or by finding a pair.
                 a = self.iterator.next()    # try to get the next element
@@ -66,7 +68,7 @@ class ReadAheadIteratorPET():
                         return ReadAheadIteratorPET._apply_frag_properties(self, a, None)
                     else:
                         continue
-            '''end while'''
+            # end while
         except StopIteration:    # can't retrieve next element
         #   print "Stop iteration hit -", self.buffer_reads.size(), "reads found in buffer"
         #    p = ReadAheadIteratorPET.buffer_reads.head
@@ -77,11 +79,12 @@ class ReadAheadIteratorPET():
             return None    # return an empty object
         return a    # otherwise, return the good object found.
 
-    '''private function for converting fragments to the proper read lengths'''
+
     def _apply_frag_properties(self, alignedread1, alignedread2):
+        '''private function for converting fragments to the proper read lengths'''
         left_end = 0
         right_end = 0
-        ''' print 'proper pairing:' + (" Yes" if alignedread1.is_proper_pair else " No") + (" Yes" if alignedread2.is_proper_pair else " No")'''
+        # print 'proper pairing:' + (" Yes" if alignedread1.is_proper_pair else " No") + (" Yes" if alignedread2.is_proper_pair else " No")'''
         # handling unpaired
         if alignedread2 is None:
             if alignedread1.is_reverse:
@@ -112,14 +115,15 @@ class ReadAheadIteratorPET():
             else:
                 e2 = alignedread2.pos + self.fragmentLength
             right_end = (e1 if e1 >= e2 else e2)
-            '''print "position of the mates:", alignedread1.mpos, alignedread1.mpos'''
-            '''*********************************'''
+            # print "position of the mates:", alignedread1.mpos, alignedread1.mpos
+            #*********************************
         else:
             print "These reads are not properly paired!", alignedread1, alignedread2
         return AlignedReadObjPET.AlignedReadObjPET(alignedread1.tid, left_end, right_end, alignedread1, alignedread2)
 
-    '''read ahead, go as far as needed - pushes data into the buffer'''
+
     def read_ahead(self):
+        '''read ahead, go as far as needed - pushes data into the buffer'''
         if (self.reserve_read != None):    # break when there is already a read in the reserve.  don't read ahead.
             return None
         if ReadAheadIteratorPET.buffer_reads.size() > 0:
@@ -143,8 +147,8 @@ class ReadAheadIteratorPET():
                         return None
                 if ReadAheadIteratorPET.buffer_reads.size() == 0:    # handles empty buffer.
                     ReadAheadIteratorPET.buffer_reads.insert_at_head(read)
-                    first_read_start = read.left_end;
-                    last_read_start = read.left_end;
+                    first_read_start = read.left_end
+                    last_read_start = read.left_end
                 elif read.left_end < first_read_start:
                     first_read_start = read.left_end
                     ReadAheadIteratorPET.buffer_reads.insert_at_head(read)
@@ -168,9 +172,8 @@ class ReadAheadIteratorPET():
                         print "Read was not added to buffer!!!!!!!"
         return None
 
-
-    '''function to get next - to be used externally to access the buffer'''
     def getNext(self):
+        '''function to get next - to be used externally to access the buffer'''
         if ReadAheadIteratorPET.buffer_reads.size() == 0 and not self.isReadValid:
             # End of file.
             return None
@@ -193,21 +196,24 @@ class ReadAheadIteratorPET():
             # print "buffer now contains", ReadAheadIteratorPET.buffer_reads.size(), "reads"
             return ReadAheadIteratorPET.buffer_reads.pop_head()
 
-    '''use this function to close the file after reading is complete'''
+
     def close(self):
+        '''use this function to close the file after reading is complete'''
         self.samfile.close()
         return None
 
 
-    '''function to be used to test if the current read is valid.'''
+
     def isValid(self):
+        '''function to be used to test if the current read is valid.'''
         if ReadAheadIteratorPET.buffer_reads.size() > 0 or ReadAheadIteratorPET.reserve_read != None:
             return True
         else:
             return self.isReadValid
 
+    @classmethod
+    def pushback(cls, reads):
         '''Use this function to push read(s) back into the buffer, if you've read too far'''
-    def pushback(self, reads):
         if isinstance(reads, AlignedReadObjPET.AlignedReadObjPET):
             ReadAheadIteratorPET.buffer_reads.insert_at_head(reads)
         else:    # if list of reads
@@ -216,4 +222,5 @@ class ReadAheadIteratorPET():
 
 
     def get_ref_name(self, tid):
+        '''Return reference name'''
         return self.samfile.getrname(tid)

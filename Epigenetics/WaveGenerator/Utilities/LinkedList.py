@@ -8,20 +8,27 @@ Created on 2013-01-29
 
 
 class Node(object):
-    def type(self):
+    '''A simple class describing a node in the linked list'''
+
+    @staticmethod
+    def type():
+        '''print LinkedList.Node when asked'''
         print ("LinkedList.Node")
 
     def __init__(self, thing):
+        '''initialize a node object'''
         self.holding = thing
         self.next = None
 
 
 class LL(object):
     '''
-    classdocs
+    A simple LinkedList implementation
     '''
 
-    def type(self):
+    @staticmethod
+    def type():
+        '''Print type LinkedList when asked'''
         print ("LinkedList")
 
     def __init__(self):
@@ -30,6 +37,7 @@ class LL(object):
         LL.tail = None
 
     def size(self):
+        '''return the size of the linkedlist'''
         return self.__len
 
 
@@ -57,6 +65,7 @@ class LL(object):
         self.__len += 1
 
     def pop_head(self):
+        '''remove the head value, and return it at the same time'''
         if LL.head is None:    # empty list
             return None
         elif LL.head.next is None:    # Single Item in the list
@@ -71,6 +80,7 @@ class LL(object):
             return p
 
     def insert_at_tail(self, thing):
+        '''insert an object at the end of the linked list'''
         if LL.tail is None:
             self.insert_at_head(thing)
         else:
@@ -80,7 +90,8 @@ class LL(object):
             self.__len += 1
         return None
 
-    def getAll(self):
+    @staticmethod
+    def getAll():
         '''Walk the list and get the order of things in the list'''
         pointer = LL.head
         str_list = []
