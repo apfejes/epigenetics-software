@@ -34,23 +34,23 @@ def AddAnnotations(collection_name, annotation_name, annotQuery):
     fQuery = {'array_type': 'humanmethylation450_beadchip'}
     rQuery = {'TargetID': True, 'Probe_start': True, 'Probe_end': True, 'CHR': True}
     print('Finding annotation information')
-    annot_cursor = mongo.find(annotation_name, findQuery=fQuery, returnQuery=rQuery)
-    
+    annot_cursor = mongo.find(annotation_name, findQuery = fQuery, returnQuery = rQuery)
+
     count = 0
     starttime = time.time()
     print('Updating methylation data with annotation info')
     for annot_doc in annot_cursor:
         queryDict = {'$and': [{'probe_id': annot_doc['TargetID']}, annotQuery]}
         # queryDict = [{'probe_id': annot_doc['TargetID']}, {'annotation_id': {'$exists': False}}]
-        updateDict = {'start_position': annot_doc['Probe_start'], 
-                      'end_position': annot_doc['Probe_end'], 
-                      'CHR': annot_doc['CHR'], 
+        updateDict = {'start_position': annot_doc['Probe_start'],
+                      'end_position': annot_doc['Probe_end'],
+                      'CHR': annot_doc['CHR'],
                       'annotation_id': annot_doc['_id']}
         mongoDict = {'$set': updateDict}
         mongo.update(collection_name, queryDict, mongoDict)
         count += 1
-        if count%10000==0:
-            print count, time.time()-starttime, 'seconds'
+        if count % 10000 == 0:
+            print count, time.time() - starttime, 'seconds'
 
 
 def AddProjectInfo(collection_name, projQuery, project_name):
@@ -58,7 +58,7 @@ def AddProjectInfo(collection_name, projQuery, project_name):
     print('Adding project info...')
     projDict = {'$set': {'project': project_name}}
     mongo.update(collection_name, projQuery, projDict)
-    
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
@@ -66,10 +66,10 @@ if __name__ == "__main__":
         sys.exit()
     collection_name = sys.argv[1]
     annotation_name = sys.argv[2]
-    project_name = raw_input('Enter project name to add to each un-updated document in collection: ')
+    project = raw_input('Enter project name to add to each un-updated document in collection: ')
     print('Adding annotation info to all documents without the field, "annotation_id"...')
     AddAnnotations(collection_name, annotation_name, annotQuery)
     print('Adding project name to all documents without the field, "project"...')
-    AddProjectInfo(collection_name, projQuery, project_name)
+    AddProjectInfo(collection_name, projQuery, project)
 
 
