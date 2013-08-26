@@ -16,11 +16,11 @@ from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, medfont, smallfon
 
 class MethylationPlot(object):
     '''
-    classdoc
+    Called by a MongoCurious object to plot methylation data.
     '''
     def __init__(self, filename, title, message, sample_peaks, 
                  pos_betas_dict, annotations, color, start, end, 
-                 LENGTH, MARGIN, WIDTH):
+                 length, margin, width, show_points, show_points):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -30,18 +30,16 @@ class MethylationPlot(object):
         self.color = color
         self.start = start
         self.end = end
-        self.length = LENGTH    # default = 200.0
-        self.margin = MARGIN    # default = 20.0
-        self.width = WIDTH    # default = 60.0
-        self.pos_betas_dict = pos_betas_dict
-        self.sample_peaks = sample_peaks
+        self.length = length    # default = 200.0
+        self.margin = margin    # default = 20.0
+        self.width = width    # default = 60.0
         self.Y = []
         self.annotations = annotations
         self.message = message
 
         # Default legend coordinates below
-        self.axis_x_margin = MARGIN - 5
-        self.axis_y_margin = MARGIN - 8
+        self.axis_x_margin = margin - 5
+        self.axis_y_margin = margin - 8
 
         self.offset_y = None
         self.scale_x = None
@@ -56,63 +54,61 @@ class MethylationPlot(object):
         self.plot.add(background)
         
         if message:
-            Message = Text('[ '+message+' ]', insert = ((self.margin + self.length)/3, self.margin+ self.width/2),
+            Message = Text('[ '+message+' ]', insert = ((self.margin + self.length)*2/5, self.margin+ self.width/2),
                     fill = "black", font_size = 12)
             self.elements.append(Message)
         else:
-            self.build()
+            self.build(pos_betas_dict, sample_peaks, show_points, show_points)
 
 
-    def build(self):
-        LENGTH, end, start, WIDTH, MARGIN = self.length, self.end, self.start, self.width, self. margin
+    def build(self, pos_betas_dict, sample_peaks, show_points, show_peaks):
 
-        for position in self.pos_betas_dict.keys():
+        for position in pos_betas_dict.keys():
             for y, _sample, _sample_type in self.pos_betas_dict[position]:
                 self.Y.append(y)
         self.invertby = max(self.Y)
         
-        offset_x = start
-        self.offset_y = (WIDTH + MARGIN) * 0.8 + MARGIN
-        scale_x = LENGTH / (end - start)
+        offset_x = self.start
+        self.offset_y = (self.width + self.margin) * 0.8 + self.margin
+        scale_x = self.length / (self.end - self.start)
         self.scale_x = scale_x
-        scale_y = (WIDTH + MARGIN) * 0.8 / max(self.Y)
+        scale_y = (self.width + self.margin) * 0.8 / max(self.Y)
         self.scale_y = scale_y
 
         palette.Colors()    # blue, red, green, purple palettes
 
-        for position in self.pos_betas_dict.keys():
-            x = round(float(position - offset_x) * scale_x, 2) + MARGIN
+        for position in pos_betas_dict.keys():
+            x = round(float(position - offset_x) * scale_x, 2) + self.margin
 
-            for beta, sample_id, sample_type in self.pos_betas_dict[position]:
-                y = round((self.invertby - beta) * scale_y, 2) + MARGIN
-                type_color, sample_color = palette.sorter(sample_type, sample_id)
-                point = Circle(center = (x, y), r = 0.4, fill = sample_color)
-                self.elements.append(point)
+            if show_points:
+                for beta, sample_id, sample_type in self.pos_betas_dict[position]:
+                    y = round((self.invertby - beta) * scale_y, 2) + self.margin
+                    type_color, sample_color = palette.sorter(sample_type, sample_id)
+                    point = Circle(center = (x, y), r = 0.4, fill = sample_color)
+                    self.elements.append(point)
 
-
-            for sample_type in self.sample_peaks[position]:
-                type_color, sample_color = palette.sorter(sample_type, None)
-                (m, s) = self.sample_peaks[position][sample_type]
-                m = round((self.invertby - m) * scale_y, 2) + MARGIN
-                s = round(s * scale_y, 3)
-
-                height = 3.0
-                if s != 0.0:
-                    gaussian_y, gaussian_x = self.makegaussian(s, height)    # reverse output arguments for sideways gaussians
-                    gaussian_x = [coord + x - 1 for coord in gaussian_x]
-                    gaussian_y = [item + m for item in gaussian_y]
-                    d = "M"
-                    for i in range(0, len(gaussian_x)):
-                        d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
-
-                    gaussian = (Path(stroke = type_color, stroke_width = 0.1,
-                                   stroke_linecap = 'round', stroke_opacity = 0.8,
-                                   fill = type_color, fill_opacity = 0.1,
-                                   d = d))
-
-                    self.elements.append(gaussian)
-
-        # self.samples_color = samples_color
+            if show_peaks:
+                for sample_type in sample_peaks[position]:
+                    type_color, sample_color = palette.sorter(sample_type, None)
+                    (m, s) = self.sample_peaks[position][sample_type]
+                    m = round((self.invertby - m) * scale_y, 2) + self.margin
+                    s = round(s * scale_y, 3)
+    
+                    height = 3.0
+                    if s != 0.0:
+                        gaussian_y, gaussian_x = self.makegaussian(s, height)    # reverse output arguments for sideways gaussians
+                        gaussian_x = [coord + x - 1 for coord in gaussian_x]
+                        gaussian_y = [item + m for item in gaussian_y]
+                        d = "M"
+                        for i in range(0, len(gaussian_x)):
+                            d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
+    
+                        gaussian = (Path(stroke = type_color, stroke_width = 0.1,
+                                       stroke_linecap = 'round', stroke_opacity = 0.8,
+                                       fill = type_color, fill_opacity = 0.1,
+                                       d = d))
+    
+                        self.elements.append(gaussian)
 
 
     def save(self):
@@ -195,7 +191,7 @@ class MethylationPlot(object):
 
     def add_xtics(self):
         ''' TODO: fill in docstring '''
-        end, start, WIDTH, MARGIN = self.end, self.start, self. width, self.margin
+        end, start, width, margin = self.end, self.start, self. width, self.margin
         offset_x = start
         scale_x = self.scale_x
         scale_tics = 1
@@ -207,30 +203,30 @@ class MethylationPlot(object):
             scale_tics /= 2
             xtics += [i for i in range(start, end + 1) if i % (scale_tics) == 0 and i not in xtics]
         xtics.sort()
-        spacing = fabs((MARGIN + (xtics[1] - offset_x) * scale_x) - (MARGIN + (xtics[0] - offset_x) * scale_x)) / 4
+        spacing = fabs((margin + (xtics[1] - offset_x) * scale_x) - (margin + (xtics[0] - offset_x) * scale_x)) / 4
         for tic in xtics:
-            tic_x = (MARGIN + (tic - offset_x) * scale_x)
-            tic_y = WIDTH + MARGIN * 2
+            tic_x = (margin + (tic - offset_x) * scale_x)
+            tic_y = width + margin * 2
             ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
-            ticline = Rect(insert = (tic_x, WIDTH + MARGIN * 2 - 5 - 1), size = (0.1, 2), fill = "midnightblue")
+            ticline = Rect(insert = (tic_x, width + margin * 2 - 5 - 1), size = (0.1, 2), fill = "midnightblue")
             for i in range (1, 4):
-                if tic_x - spacing * i > MARGIN - 5:
-                    ticline2 = Rect(insert = (tic_x - spacing * i, WIDTH + MARGIN * 2 - 5 - 1), size = (0.1, 1), fill = "midnightblue")
+                if tic_x - spacing * i > margin - 5:
+                    ticline2 = Rect(insert = (tic_x - spacing * i, width + margin * 2 - 5 - 1), size = (0.1, 1), fill = "midnightblue")
                     self.elements.append(ticline2)
             self.elements.append(ticline)
             self.elements.append(ticmarker)
 
     def add_ytics(self):
         ''' TODO: fill in docstring '''
-        MARGIN = self.margin
+        margin = self.margin
         scale_y, offset_y = self.scale_y, self.offset_y
         ytics = [0, 0.2, 0.4, 0.6, 0.8, 1]
         ytics = [round(offset_y - y * scale_y, 3) for y in ytics]
         spacing = (ytics[0] - ytics[1]) / 2
         for tic in ytics:
-            ticline = Rect(insert = (MARGIN - 5 - 1, tic), size = (2, 0.1), fill = "midnightblue")
-            ticline2 = Rect(insert = (MARGIN - 5, tic - spacing), size = (1, 0.1), fill = "midnightblue")
-            tic_x = MARGIN - 13
+            ticline = Rect(insert = (margin - 5 - 1, tic), size = (2, 0.1), fill = "midnightblue")
+            ticline2 = Rect(insert = (margin - 5, tic - spacing), size = (1, 0.1), fill = "midnightblue")
+            tic_x = margin - 13
             tic_y = tic + 1
             label = str(round((offset_y - tic) / scale_y, 1))
             if len(label) == 1:
