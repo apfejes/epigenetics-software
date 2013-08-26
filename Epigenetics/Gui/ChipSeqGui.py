@@ -32,6 +32,7 @@ class Application(tk.Tk):
         self.parameters = parameter(_root_dir + os.sep + '/WaveGenerator/sample_input_chipseq.input')
 
     def createWidgets(self):
+        '''Generate the widgets on the form'''
         menu_bar = tk.Menu(self)
         self.config(menu = menu_bar)
 
@@ -47,19 +48,24 @@ class Application(tk.Tk):
         run_wg_but = tk.Button(text = "Run WaveGenerator", command = lambda: self.run_wg(self.parameters))
         run_wg_but.pack()
 
-    def run_wg(self, parameters):
+    @classmethod
+    def run_wg(cls, parameters):
+        '''function to launch the wave generator'''
         wg_proc = multiprocessing.Process(target = wg_main, args = (parameters,))
         wg_proc.start()
 
     def launchParametersEditor(self):
+        '''start the parameter editor'''
         _parameters_editor = ParametersEditor.ParametersEditor(self, self.parameters)
 
     def askopenfilename(self):
+        '''dialog box for opening a new input filename'''
         filename = tkFileDialog.askopenfilename(defaultextension = '.input', title = 'Open File')
         if filename:
             self.parameters.set_parameter('input_file', filename)
 
 def main():
+    '''start the application'''
     app = Application()
     app.mainloop()
 

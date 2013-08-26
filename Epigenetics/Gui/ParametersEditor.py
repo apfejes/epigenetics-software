@@ -5,6 +5,7 @@ from tkFileDialog import askopenfilename, asksaveasfilename, askdirectory
 
 
 class ParametersEditor (tk.Toplevel):
+    '''the parameter editor'''
     def __init__(self, parent, parameters):
         tk.Toplevel.__init__(self, parent)
         self.parent = parent
@@ -61,15 +62,8 @@ class ParametersEditor (tk.Toplevel):
         self.cancel_but = None
 
 
-
-
-
-
-
-
-
-
     def createWidgets(self):
+        '''The function to create the widgets on the form'''
         # Input Options
         self.input_options_frame = tk.LabelFrame(self, text = "Input Options", padx = 5, pady = 5)
         self.input_options_frame.grid(row = 0, column = 0, sticky = tk.EW)
@@ -182,6 +176,7 @@ class ParametersEditor (tk.Toplevel):
         self.cancel_but.grid(row = 0, column = 3)
 
     def asksaveasfile(self):
+        '''function to save parameters to a file'''
         self.apply_parameters()
         filename = asksaveasfilename()
         if filename:
@@ -191,6 +186,7 @@ class ParametersEditor (tk.Toplevel):
             f.close()
 
     def apply_parameters(self):
+        '''Apply the parameters in an input file'''
         # Input Options
         self.parameters.set_parameter('input_file', self.input_file_entry.get())
 
