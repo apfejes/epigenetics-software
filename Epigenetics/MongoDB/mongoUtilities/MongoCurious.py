@@ -231,7 +231,7 @@ class MongoCurious():
             message += "\n     use the checkquery() method to validate the inputs of your query."
             # self.errorlog(message)
             print message
-            self.message = message
+            self.message = 'No Data Here. Zoom out!'
             return {}
 
         print "    --> Found %i documents." % docs.count()
@@ -414,6 +414,8 @@ class MongoCurious():
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an .svg file or a svg string for webserver rendering
         '''
+        
+        print 'message', self.message
         if filename:
             if filename[-4:len(filename)] != '.svg':
                 filename += '.svg'

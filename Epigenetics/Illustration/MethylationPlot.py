@@ -56,8 +56,8 @@ class MethylationPlot(object):
         self.plot.add(background)
         
         if self.message:
-            Message = Text('[ '+message+' ]', insert = (self.margin + self.length/2, self.margin+ self.width/2),
-                    fill = "black", font_size = 20)
+            Message = Text('[ '+message+' ]', insert = ((self.margin + self.length)/3, self.margin+ self.width/2),
+                    fill = "black", font_size = 12)
             self.elements.append(Message)
         else:
             self.build()
@@ -157,7 +157,8 @@ class MethylationPlot(object):
         for axis in get_axis(self.start, self.end, self.length, self.margin, self.width, self.axis_x_margin, self.axis_y_margin):
             self.elements.append(axis)
         
-        if self.message is None:
+        
+        if self.message is '':
             self.add_xtics()
             self.add_ytics()
             self.add_sample_labels(self.margin * 2 + self.length)
