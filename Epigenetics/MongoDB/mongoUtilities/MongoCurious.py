@@ -52,9 +52,7 @@ class MongoCurious():
                 chip = None,
                 project = None,
                 sample_group = None,
-                sample_label = None,
-                sample_id = None):
-        # TODO: please remove sample_id, if not used
+                sample_label = None):
         self.collection = collection
         if end:
             end = int(end)
@@ -65,7 +63,7 @@ class MongoCurious():
             start = int(start)
         else: start = 0
         self.start = start
-
+        self.message = "All ok" #Modified to contain error messages to pass to the server
         # Make sure chr variable is in the right format
         if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
             chromosome = 'chr' + str(chromosome)
@@ -119,6 +117,10 @@ class MongoCurious():
                                     sample_label = sample_label,
                                     sample_group = sample_group,
                                     chip = chip)
+
+        if samplesdocs is None:
+            self.message = 'No samples found'
+            return {}
 
         sample_ids = {}
         for doc in samplesdocs:
@@ -229,7 +231,8 @@ class MongoCurious():
             message += "\n     use the checkquery() method to validate the inputs of your query."
             # self.errorlog(message)
             print message
-            sys.exit()
+            self.message = message
+            return {}
 
         print "    --> Found %i documents." % docs.count()
         # return documents found
@@ -238,6 +241,9 @@ class MongoCurious():
     def getprobes(self, docs):
         '''Organises the probe locations/ids into a dictionary'''
         probes = {}
+        if docs is None:
+            self.message = 'No data here'
+            return {}
         for doc in docs:
             if self.collection == 'methylation':
                 probes[str(doc['targetid'])] = doc['mapinfo']
@@ -251,6 +257,11 @@ class MongoCurious():
         sample_peaks = {}    # contains average CpG value and std for samples from same Sample Group
         count = 0
         maxpos = 0
+
+        if sample_ids is None or probes is None:
+            self.sample_peaks = {}
+            self.pos_betas_dict = {}
+            return None
 
         probedata = self.finddocs(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, collection = self.collection)
 

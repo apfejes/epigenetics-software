@@ -6,6 +6,8 @@ Created on 2013-04-15
 
 def CreateListFromCursor(cursor):
     listitems = []
+    if cursor is None:
+        return {}
     for record in cursor:
         listitems.append(record)
     return listitems

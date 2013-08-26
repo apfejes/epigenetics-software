@@ -56,11 +56,9 @@ def view_query_form(request):
     else: 
         print 'No action specified', action_factor
 
-    if tss:
-        print tss
+    if tss == 'true':
         tss = True
-    if cpg:
-        print cpg
+    if cpg == 'true':
         cpg = True
     if start:
         start = int(start)

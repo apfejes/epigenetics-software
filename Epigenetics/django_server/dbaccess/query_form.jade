@@ -59,9 +59,9 @@ body
                 if organism = 'human'
                     label(for='tss') Tss:
                         if tss
-                            input(id='tss', size = '8', type='checkbox', name="tss", value="tss", checked)
+                            input(id='tss', size = '8', type='checkbox', name="tss", checked)
                         else
-                            input(id='tss', size = '8', type='checkbox', name="tss", value="tss")
+                            input(id='tss', size = '8', type='checkbox', name="tss")
                     label(for='cpg') CpG Islands:
                         if cpg
                             input(id='cpg', size = '8', type='checkbox', name="cpg", value="cpg", checked)
@@ -88,6 +88,8 @@ script(type='text/javascript')
       var organism = e.options[e.selectedIndex].value;
       var e = document.getElementById("collection");
       var collection = e.options[e.selectedIndex].value;
+      var e = document.getElementById("tss");
+      var tss = e.checked;
       
       base += "?chromosome=" + chromosome.value
       base += "&start=" + start.value
@@ -95,5 +97,6 @@ script(type='text/javascript')
       base += "&organism=" + organism
       base += "&collection=" + collection
       base += "&action=" + action
+      base += "&tss=" + tss
       return base
     }

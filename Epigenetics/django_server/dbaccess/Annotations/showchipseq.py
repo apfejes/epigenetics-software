@@ -18,8 +18,10 @@ def svgcode(db = None, chromosome = None, start = None,
     docs = m.query(collection = "waves", chromosome = chromosome, start = start, end = end)
     if tss or cpg:
         m.getannotations(docs)
+    if chromosome[0:3] != 'chr':
+        chromosome = 'chr'+str(chromosome)
     return m.svg(to_string = True, 
-                 title = organism + " ChIP-Seq peaks on chr" + str(chromosome) + " ("+str(start)+"-"+str(end) +")", 
+                 title = organism + " ChIP-Seq peaks on " + chromosome + " ("+str(start)+"-"+str(end) +")", 
                  color = 'indigo', 
                  LENGTH = LENGTH,
                  WIDTH = WIDTH,
