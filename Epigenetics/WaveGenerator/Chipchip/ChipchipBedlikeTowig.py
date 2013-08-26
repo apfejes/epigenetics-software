@@ -46,24 +46,30 @@ chr_yeast = {
 
 
 class row():
+    '''a method for storing information based on a single row from a bedlike/bed file'''
 
-    def type(self):
+    @staticmethod
+    def type():
+        '''Print type name'''
         print ("Row")
 
     def __init__(self, chrom, pos, v):
+        '''initialize the row with the values provided'''
         self.chromosome = chrom
         self.position = pos
         self.value = v
 
     def setv(self, v):
+        '''A simple setter function for value v'''
         self.value = v
 
     def toString(self):
+        '''convert the row to a string'''
         return "%s\t%i\t%f\n" % (self.chromosome, self.position, self.value)
 
 def FindBaseline(file_name, normalize = False):
+    '''Find the baseline - TODO: break this into smaller functions'''
     f = open(file_name, 'r')    # open file
-
 
     print "processing data file (" + file_name + ")..."
     first_line = True

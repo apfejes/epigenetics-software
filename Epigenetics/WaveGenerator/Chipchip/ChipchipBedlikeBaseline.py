@@ -45,7 +45,9 @@ probeset = []
 
 class row():
 
-    def type(self):
+    @staticmethod
+    def type():
+        '''return the name of the object - mostly for debugging purposes'''
         print ("Row")
 
     def __init__(self, chrom, pos, v):
@@ -54,14 +56,17 @@ class row():
         self.value = v
 
     def setv(self, v):
+        '''simple (unnecessary) setter function'''
         self.value = v
 
     def toString(self):
+        '''format the row object as a string'''
         return "%s\t%i\t%f\n" % (self.chromosome, self.position, self.value)
 
 
 
 def FindBaseline(index, file_name, ps):
+    '''Identify the baseline value for each probe, using the average value across the whole data set.'''
     bed = open(file_name, 'r')    # open file
 
     first_line = True
@@ -85,6 +90,7 @@ def FindBaseline(index, file_name, ps):
     bed.close()
 
 def ProduceStats(records, ps):
+    '''write out the baseline values for each probe'''
     output = open("/home/afejes/baseline.bedlike", 'w')
     for r in range(0, len(ps[0])):
         avg = 0.0

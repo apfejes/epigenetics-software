@@ -13,7 +13,7 @@ import Color_Palette
 palette = Color_Palette.ColorPalette()
 
 from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, medfont, smallfont
-        
+
 class MethylationPlot(object):
     '''
     classdoc
@@ -116,11 +116,13 @@ class MethylationPlot(object):
 
 
     def save(self):
+        ''' TODO: fill in docstring '''
         for element in self.elements:
             self.plot.add(element)
         self.plot.save()
 
     def to_string(self):
+        ''' TODO: fill in docstring '''
         for element in self.elements:
             self.plot.add(element)
         z = self.plot.tostring()
@@ -128,28 +130,31 @@ class MethylationPlot(object):
         return z
 
     def get_xml(self):
+        ''' TODO: fill in docstring '''
         strings = ""
         for element in self.elements:
             strings += (element.get_xml().decode('utf-8'))
         return strings
 
     def get_elements(self):
+        ''' TODO: fill in docstring '''
         self.add_sample_labels(self.margin * 3.2 + self.length)
         z = self.elements
         self.elements = None
         return z
 
     def add_data(self, elements = None):
+        ''' TODO: fill in docstring '''
         elements_to_add = elements
         for element in elements_to_add:
             self.plot.add(element)
         print "% i svg elements have been added to the current svg object." % len(elements)
 
-    def add_legends(self,get_tss, get_cpg):
+    def add_legends(self, get_tss, get_cpg):
         ''' Add annotations, title, axis, tic marks and labels '''
         if self.title is None:
             self.title = "Methylation PLot"
-        Title = Text(self.title, insert = (self.margin/3, self.margin/3),
+        Title = Text(self.title, insert = (self.margin / 3, self.margin / 3),
                 fill = "midnightblue", font_size = bigfont)
         self.plot.add(Title)
         self.elements.append(Title)
@@ -170,11 +175,12 @@ class MethylationPlot(object):
                     self.elements.append(cpg)
 
     def add_sample_labels(self, x_position):
+        ''' TODO: fill in docstring '''
         samples_color = palette.colors_dict()
         if len(samples_color) > 20:
-            fontsize = str(float(medfont)-0.5)
+            fontsize = str(float(medfont) - 0.5)
         elif len(samples_color) < 5:
-            fontsize = str(float(medfont)+0.5)
+            fontsize = str(float(medfont) + 0.5)
         else: fontsize = medfont
 
         spacing = 0.1
@@ -188,6 +194,7 @@ class MethylationPlot(object):
         return None
 
     def add_xtics(self):
+        ''' TODO: fill in docstring '''
         end, start, WIDTH, MARGIN = self.end, self.start, self. width, self.margin
         offset_x = start
         scale_x = self.scale_x
@@ -214,6 +221,7 @@ class MethylationPlot(object):
             self.elements.append(ticmarker)
 
     def add_ytics(self):
+        ''' TODO: fill in docstring '''
         MARGIN = self.margin
         scale_y, offset_y = self.scale_y, self.offset_y
         ytics = [0, 0.2, 0.4, 0.6, 0.8, 1]
@@ -236,6 +244,7 @@ class MethylationPlot(object):
 
 
     def makegaussian(self, mean, stddev, height):
+        ''' TODO: fill in docstring '''
         # TODO: remove mean, if not used
         endpts = (sqrt((-2) * stddev * stddev * log(1.0 / height)))
         X = [0]

@@ -11,22 +11,21 @@ from rpy2.robjects.packages import importr
 import StringUtils
 
 def ConvertToBedViaR(cel_file):
+    '''function for t calling R to get Bed-like values'''
 
-# original script - minus redundant variables.
-# library(rMAT)
-# library(Biobase)
-#
-# expName    <- "2012-07-12_SIR2_IP";  # cell file name
-# bpmapFile  <- "Sc03b_MR_v04.bpmap";  # the mapping!
-# seqHeader  <- ReadBPMAPAllSeqHeader(bpmapFile);
-# arrayFile1 <- c("2012-07-12_SIR2_IP.CEL");
-# ScSet      <- BPMAPCelParser(bpmapFile, arrayFile1, verbose = FALSE, groupName = "Sc", seqName="chr");
-# data       <- list(chrNo = ScSet1@featureChromosome, probePos = ScSet1@featurePosition, MATScore = exprs(ScSet1));  # last parameter is the raw data.
-# write.table(data, file = paste(expName,"_exp1_AllData.txt",sep=''), append = FALSE, row.names = FALSE, sep = "\t");
+    # original script - minus redundant variables.
+    # library(rMAT)
+    # library(Biobase)
+    #
+    # expName    <- "2012-07-12_SIR2_IP";  # cell file name
+    # bpmapFile  <- "Sc03b_MR_v04.bpmap";  # the mapping!
+    # seqHeader  <- ReadBPMAPAllSeqHeader(bpmapFile);
+    # arrayFile1 <- c("2012-07-12_SIR2_IP.CEL");
+    # ScSet      <- BPMAPCelParser(bpmapFile, arrayFile1, verbose = FALSE, groupName = "Sc", seqName="chr");
+    # data       <- list(chrNo = ScSet1@featureChromosome, probePos = ScSet1@featurePosition, MATScore = exprs(ScSet1));  # last parameter is the raw data.
+    # write.table(data, file = paste(expName,"_exp1_AllData.txt",sep=''), append = FALSE, row.names = FALSE, sep = "\t");
 
 
-
-    # celfile = "/home/afejes/Downloads/Phoebe_CEL/CEL/09-08-01_Z_set2_T7_IP.CEL"
     bpmapfile = "/home/afejes/Chip-chip/Sc03b_MR_v04.bpmap"
     bedfile = StringUtils.rreplace(cel_file, 'CEL', 'BED', 2)
     bedfile = bedfile + "like"

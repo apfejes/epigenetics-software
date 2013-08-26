@@ -91,7 +91,7 @@ class MongoCurious():
             if self.database == 'human_epigenetics':
                 annotation_docs = self.finddocs(collection = 'annotations')    # get the gene annotations info
             else: annotation_docs = {}
-            
+
         return annotation_docs
 
     def checkquery(self, project, chromosome):
@@ -114,8 +114,10 @@ class MongoCurious():
 
 
     def organize_samples(self, project, sample_label, sample_group, chip):
-        # Finds the sample_ids of the project and sample group user is interested in
-        # saves a dictionary of the form {sample_id: (sample_label, sample_group)
+        '''
+        Finds the sample_ids of the project and sample group user is interested in
+        saves a dictionary of the form {sample_id: (sample_label, sample_group)
+        '''
 
         samplesdocs = self.finddocs(collection = 'samples', project = project,
                                     sample_label = sample_label,
@@ -314,6 +316,7 @@ class MongoCurious():
 
 
     def getwaves(self, docs, sample_ids):
+        ''' TODO: fill in docstring '''
         count = 0
         tail = 1
         maxpos = 0
@@ -414,7 +417,7 @@ class MongoCurious():
     def svg(self, filename = None, title = None,
             color = None, to_string = False,
             get_elements = False, LENGTH = 200.0,
-            MARGIN = 20.0, WIDTH = 60.0, 
+            MARGIN = 20.0, WIDTH = 60.0,
             get_tss = False, get_cpg = False):
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an .svg file or a svg string for webserver rendering
@@ -440,7 +443,7 @@ class MongoCurious():
 
         if to_string:
             print " Returning svg as a unicode string"
-            drawing.add_legends(get_tss,get_cpg)
+            drawing.add_legends(get_tss, get_cpg)
             z = drawing.to_string()
             drawing = None
         elif get_elements:
@@ -464,9 +467,9 @@ class MongoCurious():
 
 
 
-
-    def errorlog(self, errormessage):
-        # returns error message to server
+    @staticmethod
+    def errorlog(errormessage):
+        '''returns error message to server'''
         # self.errorcount += 1
         print errormessage
         return errormessage

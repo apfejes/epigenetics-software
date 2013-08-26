@@ -14,14 +14,10 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
+import CommonUtils.Types as ty
 # from platform import system
 
-def is_int(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
+
 
 
 def ReadRObject(mongo, rdatafile, proj_name, collection_name):
@@ -82,7 +78,7 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
         sid_field = -1
         while (sid_field < 0 or sid_field >= len(columns)):
             sid_field = raw_input('Enter the number of the field to use:')
-            if is_int(sid_field):
+            if ty.is_int(sid_field):
                 sid_field = int(sid_field)
                 if sid_field >= 0 and sid_field < len(columns):
                     sample_field = columns[sid_field]
