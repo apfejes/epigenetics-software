@@ -12,13 +12,15 @@ from math import fabs, exp, sqrt, log
 import Color_Palette
 palette = Color_Palette.ColorPalette()
 
-from PlotUtilities import get_annotations, get_axis
-
+from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, medfont, smallfont
+        
 class MethylationPlot(object):
     '''
-    classdocs
+    classdoc
     '''
-    def __init__(self, filename, title, sample_peaks, pos_betas_dict, annotations, color, start, end, length, margin, width):
+    def __init__(self, filename, title, sample_peaks, 
+                 pos_betas_dict, annotations, color, start, end, 
+                 LENGTH, MARGIN, WIDTH):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -28,22 +30,21 @@ class MethylationPlot(object):
         self.color = color
         self.start = start
         self.end = end
-        self.length = length    # default = 200.0
-        self.margin = margin    # default = 20.0
-        self.width = width    # default = 60.0
+        self.length = LENGTH    # default = 200.0
+        self.margin = MARGIN    # default = 20.0
+        self.width = WIDTH    # default = 60.0
         self.pos_betas_dict = pos_betas_dict
         self.sample_peaks = sample_peaks
         self.Y = []
         self.annotations = annotations
 
         # Default legend coordinates below
-        self.axis_x_margin = margin - 5
-        self.axis_y_margin = margin - 8
+        self.axis_x_margin = MARGIN - 5
+        self.axis_y_margin = MARGIN - 8
 
         self.offset_y = None
         self.scale_x = None
         self.scale_y = None
-
 
         for position in self.pos_betas_dict.keys():
             for y, _sample, _sample_type in pos_betas_dict[position]:
@@ -60,22 +61,22 @@ class MethylationPlot(object):
 
 
     def build(self):
-        length, end, start, width, margin, invertby = self.length, self.end, self.start, self.width, self. margin, self.invertby
+        LENGTH, end, start, WIDTH, MARGIN, invertby = self.length, self.end, self.start, self.width, self. margin, self.invertby
 
         offset_x = start
-        self.offset_y = (width + margin) * 0.8 + margin
-        scale_x = length / (end - start)
+        self.offset_y = (WIDTH + MARGIN) * 0.8 + MARGIN
+        scale_x = LENGTH / (end - start)
         self.scale_x = scale_x
-        scale_y = (width + margin) * 0.8 / max(self.Y)
+        scale_y = (WIDTH + MARGIN) * 0.8 / max(self.Y)
         self.scale_y = scale_y
 
         palette.Colors()    # blue, red, green, purple palettes
 
         for position in self.pos_betas_dict.keys():
-            x = round(float(position - offset_x) * scale_x, 2) + margin
+            x = round(float(position - offset_x) * scale_x, 2) + MARGIN
 
             for beta, sample_id, sample_type in self.pos_betas_dict[position]:
-                y = round((invertby - beta) * scale_y, 2) + margin
+                y = round((invertby - beta) * scale_y, 2) + MARGIN
                 type_color, sample_color = palette.sorter(sample_type, sample_id)
                 point = Circle(center = (x, y), r = 0.3, fill = sample_color)
                 self.elements.append(point)
@@ -84,7 +85,7 @@ class MethylationPlot(object):
             for sample_type in self.sample_peaks[position]:
                 type_color, sample_color = palette.sorter(sample_type, None)
                 (m, s) = self.sample_peaks[position][sample_type]
-                m = round((invertby - m) * scale_y, 2) + margin
+                m = round((invertby - m) * scale_y, 2) + MARGIN
                 s = round(s * scale_y, 3)
                 # point = Circle(center = (x, m), r = 0.6, fill = 'black')
                 self.elements.append(point)
@@ -141,12 +142,12 @@ class MethylationPlot(object):
             self.plot.add(element)
         print "% i svg elements have been added to the current svg object." % len(elements)
 
-    def add_legends(self):
+    def add_legends(self,get_tss, get_cpg):
         ''' Add annotations, title, axis, tic marks and labels '''
         if self.title is None:
             self.title = "Methylation PLot"
-        Title = Text(self.title, insert = (self.margin, self.margin - 10.0),
-                fill = "midnightblue", font_size = "5")
+        Title = Text(self.title, insert = (self.margin/3, self.margin/3),
+                fill = "midnightblue", font_size = bigfont)
         self.plot.add(Title)
         self.elements.append(Title)
         self.add_xtics()
@@ -154,16 +155,20 @@ class MethylationPlot(object):
         self.add_sample_labels(self.margin * 2 + self.length)
         for axis in get_axis(self.start, self.end, self.margin, self.width, self.axis_x_margin, self.axis_y_margin, self.scale_x):
             self.elements.append(axis)
-        for annotation in get_annotations(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
-            self.elements.append(annotation)
+        if get_tss:
+            for tss in add_tss(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+                self.elements.append(tss)
+        if get_cpg:
+            for cpg in add_cpg(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+                self.elements.append(cpg)
 
     def add_sample_labels(self, x_position):
         samples_color = palette.colors_dict()
         if len(samples_color) > 20:
-            fontsize = '2.5'
+            fontsize = str(float(medfont)-0.5)
         elif len(samples_color) < 5:
-            fontsize = '3.5'
-        else: fontsize = '3'
+            fontsize = str(float(medfont)+0.5)
+        else: fontsize = medfont
 
         spacing = 0.1
         y_position = self.margin
@@ -176,7 +181,7 @@ class MethylationPlot(object):
         return None
 
     def add_xtics(self):
-        end, start, width, margin = self.end, self.start, self. width, self.margin
+        end, start, WIDTH, MARGIN = self.end, self.start, self. width, self.margin
         offset_x = start
         scale_x = self.scale_x
         scale_tics = 1
@@ -188,36 +193,36 @@ class MethylationPlot(object):
             scale_tics /= 2
             xtics += [i for i in range(start, end + 1) if i % (scale_tics) == 0 and i not in xtics]
         xtics.sort()
-        spacing = fabs((margin + (xtics[1] - offset_x) * scale_x) - (margin + (xtics[0] - offset_x) * scale_x)) / 4
+        spacing = fabs((MARGIN + (xtics[1] - offset_x) * scale_x) - (MARGIN + (xtics[0] - offset_x) * scale_x)) / 4
         for tic in xtics:
-            tic_x = (margin + (tic - offset_x) * scale_x)
-            tic_y = width + margin * 2
-            ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = "3"))
-            ticline = Rect(insert = (tic_x, width + margin * 2 - 5 - 1), size = (0.1, 2), fill = "midnightblue")
+            tic_x = (MARGIN + (tic - offset_x) * scale_x)
+            tic_y = WIDTH + MARGIN * 2
+            ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
+            ticline = Rect(insert = (tic_x, WIDTH + MARGIN * 2 - 5 - 1), size = (0.1, 2), fill = "midnightblue")
             for i in range (1, 4):
-                if tic_x - spacing * i > margin - 5:
-                    ticline2 = Rect(insert = (tic_x - spacing * i, width + margin * 2 - 5 - 1), size = (0.1, 1), fill = "midnightblue")
+                if tic_x - spacing * i > MARGIN - 5:
+                    ticline2 = Rect(insert = (tic_x - spacing * i, WIDTH + MARGIN * 2 - 5 - 1), size = (0.1, 1), fill = "midnightblue")
                     self.elements.append(ticline2)
             self.elements.append(ticline)
             self.elements.append(ticmarker)
 
     def add_ytics(self):
-        margin = self.margin
+        MARGIN = self.margin
         scale_y, offset_y = self.scale_y, self.offset_y
         ytics = [0, 0.2, 0.4, 0.6, 0.8, 1]
         ytics = [round(offset_y - y * scale_y, 3) for y in ytics]
         spacing = (ytics[0] - ytics[1]) / 2
         for tic in ytics:
-            ticline = Rect(insert = (margin - 5 - 1, tic), size = (2, 0.1), fill = "midnightblue")
-            ticline2 = Rect(insert = (margin - 5, tic - spacing), size = (1, 0.1), fill = "midnightblue")
-            tic_x = margin - 13
+            ticline = Rect(insert = (MARGIN - 5 - 1, tic), size = (2, 0.1), fill = "midnightblue")
+            ticline2 = Rect(insert = (MARGIN - 5, tic - spacing), size = (1, 0.1), fill = "midnightblue")
+            tic_x = MARGIN - 13
             tic_y = tic + 1
             label = str(round((offset_y - tic) / scale_y, 1))
             if len(label) == 1:
                 tic_x = tic_x + 3
             if len(label) == 2:
                 tic_x = tic_x + 2
-            ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = "3"))
+            ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
             self.elements.append(ticline)
             self.elements.append(ticline2)
             self.elements.append(ticmarker)

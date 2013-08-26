@@ -20,7 +20,7 @@ sys.path.insert(0, _cur_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
 
 from TheWaveGenerator import main as wg_main
 from Parameters import parameter
-import ParametersEditor
+from . import ParametersEditor
 
 class Application(tk.Tk):
     """Main Application Class"""
