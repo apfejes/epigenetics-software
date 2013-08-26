@@ -63,7 +63,11 @@ class MongoCurious():
             start = int(start)
         else: start = 0
         self.start = start
-        self.message = "" #Modified to contain error messages to pass to the server
+        
+        if start == end or start > end or start<0 or end<0:
+            self.message = 'Invalid start and end points.'
+        else: self.message = "" #contains error messages to pass to the server
+        
         # Make sure chr variable is in the right format
         if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
             chromosome = 'chr' + str(chromosome)
@@ -226,12 +230,13 @@ class MongoCurious():
             docs = self.mongo.find(collection, query_parameters, return_chr)
 
         if docs.count() == 0:
-            message = "    WARNING: The following query return zero probes or documents!"
-            message += "\n    ---> Find(" + str(query_parameters) + ")"
-            message += "\n     use the checkquery() method to validate the inputs of your query."
+            warning = "    WARNING: The following query return zero probes or documents!"
+            warning += "\n    ---> Find(" + str(query_parameters) + ")"
+            warning += "\n     use the checkquery() method to validate the inputs of your query."
             # self.errorlog(message)
-            print message
-            self.message = 'No Data Here. Zoom out!'
+            print warning
+            if self.message == '':
+                self.message = 'No data here!'
             return {}
 
         print "    --> Found %i documents." % docs.count()
