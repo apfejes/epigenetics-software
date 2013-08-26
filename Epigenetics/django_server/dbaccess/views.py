@@ -45,13 +45,13 @@ def view_query_form(request):
     if action_factor and start and end:
         if 'Right' in action_factor or 'Left' in action_factor:
             print 'panning!', action_factor
-            start,end = panning(action_factor, int(start), int(end))
+            start, end = panning(action_factor, int(start), int(end))
         elif 'In' in action_factor or 'Out' in action_factor:
             print 'zooming!', action_factor
-            start,end = zoom(action_factor, int(start), int(end))
+            start, end = zoom(action_factor, int(start), int(end))
         else:
             print 'Action not available:', action_factor
-    else: 
+    else:
         print 'No action specified', action_factor
 
     if start:
@@ -82,7 +82,7 @@ def zoom(zoom_symbol, start, end):
     new_start = start + span / 2 - new_span / 2    # start is now 245
     new_end = end - span / 2 + new_span / 2    # end is now 255bp
     print 'span', span, 'factor', zoom_factor, 'new', new_span
-    print start,end, 'are now', new_start, new_end
+    print start, end, 'are now', new_start, new_end
     return int(new_start), int(new_end)
 
 # Dictionary of panning percentages from window that is shifted aside
