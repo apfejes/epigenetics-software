@@ -63,7 +63,7 @@ class MongoCurious():
             start = int(start)
         else: start = 0
         self.start = start
-        self.message = "All ok" #Modified to contain error messages to pass to the server
+        self.message = "" #Modified to contain error messages to pass to the server
         # Make sure chr variable is in the right format
         if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
             chromosome = 'chr' + str(chromosome)

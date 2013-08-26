@@ -11,7 +11,7 @@ bigfont = 7
 medfont = 4.5
 smallfont = 4
 
-def get_axis(start, end, MARGIN, WIDTH, axis_x_margin, axis_y_margin, scale_x):
+def get_axis(start, end, LENGTH, MARGIN, WIDTH, axis_x_margin, axis_y_margin):
     MARGIN = MARGIN
     WIDTH = WIDTH
     axis_x_margin = MARGIN - 5
@@ -19,7 +19,7 @@ def get_axis(start, end, MARGIN, WIDTH, axis_x_margin, axis_y_margin, scale_x):
     axis_y_margin = MARGIN - 8
     axis_y_margin = axis_y_margin 
     x_axis = Rect(insert = (axis_x_margin, WIDTH + MARGIN + axis_x_margin),
-            size = ((end - start) * scale_x + 10, 0.1),
+            size = (LENGTH + 10, 0.1),
             fill = "midnightblue")
     y_axis = Rect(insert = (axis_x_margin, axis_y_margin),
         size = (0.1, WIDTH + MARGIN + 3),

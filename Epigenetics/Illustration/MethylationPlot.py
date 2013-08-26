@@ -47,11 +47,6 @@ class MethylationPlot(object):
         self.scale_x = None
         self.scale_y = None
 
-        for position in self.pos_betas_dict.keys():
-            for y, _sample, _sample_type in pos_betas_dict[position]:
-                self.Y.append(y)
-        self.invertby = max(self.Y)
-
         size = (str(self.length) + "mm" , str(self.width * 1.5) + "mm")
         # create drawing
         self.plot = Drawing(filename, size = size,
@@ -59,12 +54,23 @@ class MethylationPlot(object):
                             preserveAspectRatio = "xMinYMin meet")
         background = Rect(insert = (0, 0), size = size, fill = "white")
         self.plot.add(background)
-        self.build()
+        
+        if self.message:
+            Message = Text('[ '+message+' ]', insert = (self.margin + self.length/2, self.margin+ self.width/2),
+                    fill = "black", font_size = 20)
+            self.elements.append(Message)
+        else:
+            self.build()
 
 
     def build(self):
-        LENGTH, end, start, WIDTH, MARGIN, invertby = self.length, self.end, self.start, self.width, self. margin, self.invertby
+        LENGTH, end, start, WIDTH, MARGIN = self.length, self.end, self.start, self.width, self. margin
 
+        for position in self.pos_betas_dict.keys():
+            for y, _sample, _sample_type in self.pos_betas_dict[position]:
+                self.Y.append(y)
+        self.invertby = max(self.Y)
+        
         offset_x = start
         self.offset_y = (WIDTH + MARGIN) * 0.8 + MARGIN
         scale_x = LENGTH / (end - start)
@@ -78,28 +84,23 @@ class MethylationPlot(object):
             x = round(float(position - offset_x) * scale_x, 2) + MARGIN
 
             for beta, sample_id, sample_type in self.pos_betas_dict[position]:
-                y = round((invertby - beta) * scale_y, 2) + MARGIN
+                y = round((self.invertby - beta) * scale_y, 2) + MARGIN
                 type_color, sample_color = palette.sorter(sample_type, sample_id)
-                point = Circle(center = (x, y), r = 0.3, fill = sample_color)
+                point = Circle(center = (x, y), r = 0.4, fill = sample_color)
                 self.elements.append(point)
 
 
             for sample_type in self.sample_peaks[position]:
                 type_color, sample_color = palette.sorter(sample_type, None)
                 (m, s) = self.sample_peaks[position][sample_type]
-                m = round((invertby - m) * scale_y, 2) + MARGIN
+                m = round((self.invertby - m) * scale_y, 2) + MARGIN
                 s = round(s * scale_y, 3)
-                # point = Circle(center = (x, m), r = 0.6, fill = 'black')
-                self.elements.append(point)
 
                 height = 3.0
                 if s != 0.0:
                     gaussian_y, gaussian_x = self.makegaussian(m, s, height)    # reverse output arguments for sideways gaussians
                     gaussian_x = [coord + x - 1 for coord in gaussian_x]
                     gaussian_y = [item + m for item in gaussian_y]
-                    # print "hello", y, gaussian_y
-                    # offset_x = max(Y)
-                    # Y = [(coord-offset_x)*0.1+offset_x for coord in Y]
                     d = "M"
                     for i in range(0, len(gaussian_x)):
                         d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
@@ -152,17 +153,20 @@ class MethylationPlot(object):
                 fill = "midnightblue", font_size = bigfont)
         self.plot.add(Title)
         self.elements.append(Title)
-        self.add_xtics()
-        self.add_ytics()
-        self.add_sample_labels(self.margin * 2 + self.length)
-        for axis in get_axis(self.start, self.end, self.margin, self.width, self.axis_x_margin, self.axis_y_margin, self.scale_x):
+        
+        for axis in get_axis(self.start, self.end, self.length, self.margin, self.width, self.axis_x_margin, self.axis_y_margin):
             self.elements.append(axis)
-        if get_tss:
-            for tss in add_tss(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
-                self.elements.append(tss)
-        if get_cpg:
-            for cpg in add_cpg(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
-                self.elements.append(cpg)
+        
+        if self.message is None:
+            self.add_xtics()
+            self.add_ytics()
+            self.add_sample_labels(self.margin * 2 + self.length)
+            if get_tss:
+                for tss in add_tss(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+                    self.elements.append(tss)
+            if get_cpg:
+                for cpg in add_cpg(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+                    self.elements.append(cpg)
 
     def add_sample_labels(self, x_position):
         samples_color = palette.colors_dict()
