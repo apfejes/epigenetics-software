@@ -422,16 +422,14 @@ class MongoCurious():
             filename = "test.svg"
 
         if self.collection == "methylation":
-            drawing = methylationplot.MethylationPlot(filename, title, self.sample_peaks,
+            drawing = methylationplot.MethylationPlot(filename, title, self.message, self.sample_peaks,
                                                       self.pos_betas_dict, self.annotations,
                                                       color, self.start, self.end, LENGTH,
                                                       MARGIN, WIDTH)
-            drawing.build()
         if self.collection == "waves":
             drawing = chipseqplot.ChipseqPlot(filename, title, self.waves, self.start,
                                               self.end, self.annotations, LENGTH,
                                               MARGIN, WIDTH)
-            drawing.build()
 
         if to_string:
             print " Returning svg as a unicode string"

@@ -18,7 +18,7 @@ class MethylationPlot(object):
     '''
     classdoc
     '''
-    def __init__(self, filename, title, sample_peaks, 
+    def __init__(self, filename, title, message, sample_peaks, 
                  pos_betas_dict, annotations, color, start, end, 
                  LENGTH, MARGIN, WIDTH):
         '''
@@ -37,6 +37,7 @@ class MethylationPlot(object):
         self.sample_peaks = sample_peaks
         self.Y = []
         self.annotations = annotations
+        self.message = message
 
         # Default legend coordinates below
         self.axis_x_margin = MARGIN - 5
@@ -58,6 +59,7 @@ class MethylationPlot(object):
                             preserveAspectRatio = "xMinYMin meet")
         background = Rect(insert = (0, 0), size = size, fill = "white")
         self.plot.add(background)
+        self.build()
 
 
     def build(self):

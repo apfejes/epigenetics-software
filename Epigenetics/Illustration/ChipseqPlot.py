@@ -51,6 +51,8 @@ class ChipseqPlot(object):
         self.offset_y = None
         self.samples_color = None
         self.axis_y_margin = None
+        
+        self.build()
 
 
     def build(self):
