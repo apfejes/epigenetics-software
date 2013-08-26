@@ -1,3 +1,6 @@
+''' This is a django config file, which controls traffic on the web server,
+connecting functions in the view file with specific URLs '''
+
 from django.conf.urls import patterns, url
 # from django.views.generic import TemplateView
 import views
