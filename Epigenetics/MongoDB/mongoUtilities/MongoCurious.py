@@ -424,12 +424,14 @@ class MongoCurious():
             color = None, to_string = False,
             get_elements = False, length = 200.0,
             margin = 20.0, width = 60.0,
-            get_tss = False, get_cpg = False):
+            get_tss = False, get_cpg = False,
+            show_points = False, show_peaks = False):
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an .svg file or a svg string for webserver rendering
         '''
         
-        print 'message', self.message
+        print '\nmessage:', str(self.message)
+        print show_points, show_peaks
         if filename:
             if filename[-4:len(filename)] != '.svg':
                 filename += '.svg'
@@ -441,7 +443,7 @@ class MongoCurious():
             drawing = methylationplot.MethylationPlot(filename, title, self.message, self.sample_peaks,
                                                       self.pos_betas_dict, self.annotations,
                                                       color, self.start, self.end, length,
-                                                      margin, width)
+                                                      margin, width, show_points, show_peaks)
         if self.collection == "waves":
             drawing = chipseqplot.ChipseqPlot(filename, title, self.message, self.waves, self.start,
                                               self.end, self.annotations, length,

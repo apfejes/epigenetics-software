@@ -20,7 +20,7 @@ class MethylationPlot(object):
     '''
     def __init__(self, filename, title, message, sample_peaks, 
                  pos_betas_dict, annotations, color, start, end, 
-                 length, margin, width, show_points, show_points):
+                 length, margin, width, show_points, show_peaks):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -58,13 +58,13 @@ class MethylationPlot(object):
                     fill = "black", font_size = 12)
             self.elements.append(Message)
         else:
-            self.build(pos_betas_dict, sample_peaks, show_points, show_points)
+            self.build(pos_betas_dict, sample_peaks, show_points, show_peaks)
 
 
     def build(self, pos_betas_dict, sample_peaks, show_points, show_peaks):
 
         for position in pos_betas_dict.keys():
-            for y, _sample, _sample_type in self.pos_betas_dict[position]:
+            for y, _sample, _sample_type in pos_betas_dict[position]:
                 self.Y.append(y)
         self.invertby = max(self.Y)
         
@@ -81,7 +81,7 @@ class MethylationPlot(object):
             x = round(float(position - offset_x) * scale_x, 2) + self.margin
 
             if show_points:
-                for beta, sample_id, sample_type in self.pos_betas_dict[position]:
+                for beta, sample_id, sample_type in pos_betas_dict[position]:
                     y = round((self.invertby - beta) * scale_y, 2) + self.margin
                     type_color, sample_color = palette.sorter(sample_type, sample_id)
                     point = Circle(center = (x, y), r = 0.4, fill = sample_color)
@@ -90,7 +90,7 @@ class MethylationPlot(object):
             if show_peaks:
                 for sample_type in sample_peaks[position]:
                     type_color, sample_color = palette.sorter(sample_type, None)
-                    (m, s) = self.sample_peaks[position][sample_type]
+                    (m, s) = sample_peaks[position][sample_type]
                     m = round((self.invertby - m) * scale_y, 2) + self.margin
                     s = round(s * scale_y, 3)
     

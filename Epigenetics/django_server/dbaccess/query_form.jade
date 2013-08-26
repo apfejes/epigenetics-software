@@ -14,11 +14,11 @@ body
             div(align='center')
                 fieldset
                     label(for='organism') Organism:
-                        if organism = 'human'
+                        if organism = 'arabidopsis'
                             select(name='organism', id='organism')
+                                option(value="arabidopsis")="Arabidopsis"
                                 option(value="human")="Human"
                                 option(value="yeast")="Yeast"
-                                option(value="arabidopsis")="Arabidopsis"
                         elif organism = 'yeast'
                             select(name='organism', id='organism')
                                 option(value="yeast")="Yeast"
@@ -26,9 +26,9 @@ body
                                 option(value="arabidopsis")="Arabidopsis"
                         else
                             select(name='organism', id='organism')
+                                option(value="human")="Human"
                                 option(value="arabidopsis")="Arabidopsis"
                                 option(value="yeast")="Yeast"
-                                option(value="human")="Human"
                     label(for='collection') Collection:
                         if collection = 'chipseq'
                             select(name='collection', id='collection') 
@@ -64,20 +64,20 @@ body
                             input(id='tss', size = '8', type='checkbox', name="tss")
                     label(for='cpg') CpG Islands:
                         if cpg
-                            input(id='cpg', size = '8', type='checkbox', name="cpg", value="cpg", checked)
+                            input(id='cpg', size = '8', type='checkbox', name="cpg", checked)
                         else
-                            input(id='cpg', size = '8', type='checkbox', name="cpg", value="cpg")
+                            input(id='cpg', size = '8', type='checkbox', name="cpg")
                 if collection = 'methylation'
                     label(for='datapoints') Show data points:
                         if datapoints
-                            input(id='datapoints', size = '8', type='checkbox', name="datapoints", value="datapoints", checked)
+                            input(id='datapoints', size = '8', type='checkbox', name="datapoints", checked)
                         else
-                            input(id='datapoints', size = '8', type='checkbox', name="datapoints", value="datapoints")
-                    label(for='peaks') Show data points:
+                            input(id='datapoints', size = '8', type='checkbox', name="datapoints")
+                    label(for='peaks') Show sample type distribution:
                         if peaks
-                            input(id='peaks', size = '8', type='checkbox', name="peaks", value="peaks", checked)
+                            input(id='peaks', size = '8', type='checkbox', name="peaks", checked)
                         else
-                            input(id='peaks', size = '8', type='checkbox', name="peaks", value="peaks")
+                            input(id='peaks', size = '8', type='checkbox', name="peaks")
                     
             div(data-role='fieldcontain', align='center')
                 input(type='submit',value='Query!', data-transition='fade', data-theme='c')  
@@ -101,6 +101,12 @@ script(type='text/javascript')
       var collection = e.options[e.selectedIndex].value;
       var e = document.getElementById("tss");
       var tss = e.checked;
+      var e = document.getElementById("cpg");
+      var cpg = e.checked;
+      var e = document.getElementById("datapoints");
+      var datapoints = e.checked;
+      var e = document.getElementById("peaks");
+      var peaks = e.checked;
       
       base += "?chromosome=" + chromosome.value
       base += "&start=" + start.value
@@ -109,5 +115,9 @@ script(type='text/javascript')
       base += "&collection=" + collection
       base += "&action=" + action
       base += "&tss=" + tss
+      base += "&cpg=" + cpg
+      base += "&datapoints=" + datapoints
+      base += "&peaks=" + peaks
+      
       return base
     }

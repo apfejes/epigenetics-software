@@ -9,7 +9,7 @@ from MongoDB.mongoUtilities import MongoCurious
 
 def svgcode(db = None, chromosome = None, start = None,
             end = None, length = None, width = None, 
-            margin = None, tss = False, cpg = False):
+            margin = None, tss = False, cpg = False, datapoints = False, peaks = False):
     print("Connecting to database:")
     organism = str.capitalize(db)
     database = db + "_epigenetics"
@@ -27,5 +27,7 @@ def svgcode(db = None, chromosome = None, start = None,
                  width = width,
                  margin = margin,
                  get_tss = tss,
-                 get_cpg = cpg)
+                 get_cpg = cpg,
+                 show_points = datapoints,
+                 show_peaks = peaks)
 

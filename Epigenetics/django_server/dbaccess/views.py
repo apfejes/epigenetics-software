@@ -46,10 +46,9 @@ def view_query_form(request):
     action_factor = q.get("action", None)
     tss = q.get("tss", False)
     cpg = q.get("cpg", False)
-    if col == 'methylation':
-        datapoints = q.get("datapoints", False)
-        peaks = q.get("peaks", False)
-
+    peaks = q.get("peaks", False)
+    datapoints = q.get("datapoints", True)
+    print '\n', datapoints, peaks
 
     if action_factor and start and end:
         if 'Right' in action_factor or 'Left' in action_factor:
@@ -63,13 +62,13 @@ def view_query_form(request):
     else:
         print 'No action specified', action_factor
 
-    if tss == 'true':
+    if tss == 'on':
         tss = True
-    if cpg == 'true':
+    if cpg == 'on':
         cpg = True
-    if datapoints == 'true':
+    if datapoints or datapoints == 'on':
         datapoints = True
-    if peaks == 'true':
+    if peaks == 'on':
         peaks = True
     if start:
         start = int(start)
@@ -79,7 +78,7 @@ def view_query_form(request):
     parameters = {'organism':str(o), 'collection': str(col), 
                   'chromosome': str(chrom), 'start': start, 'end':end, 
                   'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks}
-    print parameters
+    print 'parameters = ', parameters
 
     if check(parameters):
         svg = query(parameters)
