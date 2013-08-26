@@ -67,6 +67,17 @@ body
                             input(id='cpg', size = '8', type='checkbox', name="cpg", value="cpg", checked)
                         else
                             input(id='cpg', size = '8', type='checkbox', name="cpg", value="cpg")
+                if collection = 'methylation'
+                    label(for='datapoints') Show data points:
+                        if datapoints
+                            input(id='datapoints', size = '8', type='checkbox', name="datapoints", value="datapoints", checked)
+                        else
+                            input(id='datapoints', size = '8', type='checkbox', name="datapoints", value="datapoints")
+                    label(for='peaks') Show data points:
+                        if peaks
+                            input(id='peaks', size = '8', type='checkbox', name="peaks", value="peaks", checked)
+                        else
+                            input(id='peaks', size = '8', type='checkbox', name="peaks", value="peaks")
                     
             div(data-role='fieldcontain', align='center')
                 input(type='submit',value='Query!', data-transition='fade', data-theme='c')  

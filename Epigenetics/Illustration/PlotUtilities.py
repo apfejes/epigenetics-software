@@ -11,29 +11,29 @@ bigfont = 7
 medfont = 4.5
 smallfont = 4
 
-def get_axis(start, end, LENGTH, MARGIN, WIDTH, axis_x_margin, axis_y_margin):
-    MARGIN = MARGIN
-    WIDTH = WIDTH
-    axis_x_margin = MARGIN - 5
+def get_axis(start, end, length, margin, width, axis_x_margin, axis_y_margin):
+    margin = margin
+    width = width
+    axis_x_margin = margin - 5
     axis_x_margin = axis_x_margin
-    axis_y_margin = MARGIN - 8
+    axis_y_margin = margin - 8
     axis_y_margin = axis_y_margin 
-    x_axis = Rect(insert = (axis_x_margin, WIDTH + MARGIN + axis_x_margin),
-            size = (LENGTH + 10, 0.1),
+    x_axis = Rect(insert = (axis_x_margin, width + margin + axis_x_margin),
+            size = (length + 10, 0.1),
             fill = "midnightblue")
     y_axis = Rect(insert = (axis_x_margin, axis_y_margin),
-        size = (0.1, WIDTH + MARGIN + 3),
+        size = (0.1, width + margin + 3),
         fill = "midnightblue")
     
     return (x_axis, y_axis)
     
 
-def add_tss(annotations, MARGIN, WIDTH, scale_x, start, end, axis_x_margin, axis_y_margin):
+def add_tss(annotations, margin, width, scale_x, start, end, axis_x_margin, axis_y_margin):
     if annotations is None:
         return []
     annotations = annotations
-    MARGIN = MARGIN
-    WIDTH = WIDTH
+    margin = margin
+    width = width
     spacing = 9
     offset = 0 
     elements = []
@@ -49,22 +49,22 @@ def add_tss(annotations, MARGIN, WIDTH, scale_x, start, end, axis_x_margin, axis
         gene_name = annotations['TSS'][tss]
         #print 'TSS:', gene, tss
         previous_x1 = x1
-        x1 = MARGIN + (tss-start)*scale_x
-        y1 = axis_y_margin + WIDTH + MARGIN
-        LENGTH = MARGIN + offset
+        x1 = margin + (tss-start)*scale_x
+        y1 = axis_y_margin + width + margin
+        length = margin + offset
         thickness = 0.3
         color = 'dodgerblue'
     
         if offset > spacing*3 or (between_tss + previous_x1) < x1 :
             offset = 0
             
-        LENGTH = MARGIN + offset
+        length = margin + offset
 
         TSSline = Rect(insert = (x1, y1), 
-                       size = (thickness, LENGTH),
+                       size = (thickness, length),
                        fill = color, fill_opacity = 0.4)
-        TSS = (Text((str(tss)), insert = (x1+1, LENGTH+y1), fill = color, font_size = font_size-1, fill_opacity = 0.6))
-        gene = (Text(gene_name, insert = (x1+1, LENGTH+y1-spacing/2), fill = color, font_size = font_size, fill_opacity = 0.8))
+        TSS = (Text((str(tss)), insert = (x1+1, length+y1), fill = color, font_size = font_size-1, fill_opacity = 0.6))
+        gene = (Text(gene_name, insert = (x1+1, length+y1-spacing/2), fill = color, font_size = font_size, fill_opacity = 0.8))
         offset += spacing
 
         elements.append(TSSline)
@@ -75,12 +75,12 @@ def add_tss(annotations, MARGIN, WIDTH, scale_x, start, end, axis_x_margin, axis
 
 
 
-def add_cpg(annotations, MARGIN, WIDTH, scale_x, start, end, axis_x_margin, axis_y_margin):
+def add_cpg(annotations, margin, width, scale_x, start, end, axis_x_margin, axis_y_margin):
     if annotations is None:
         return []
     annotations = annotations
-    MARGIN = MARGIN
-    WIDTH = WIDTH
+    margin = margin
+    width = width
     elements = []
     x1 = 0
      
@@ -88,11 +88,11 @@ def add_cpg(annotations, MARGIN, WIDTH, scale_x, start, end, axis_x_margin, axis
         #print 'island', a,b,c
         if a < start: a = start
         if b > end: b = end
-        x1 = MARGIN + (a-start)*scale_x
+        x1 = margin + (a-start)*scale_x
         y1 = axis_y_margin
-        LENGTH = y1 + WIDTH + MARGIN -10
+        length = y1 + width + margin -10
         thickness = (b-a)*scale_x
-        #print x1, LENGTH, y1
+        #print x1, length, y1
         
         if 'IC' in c:
             color = 'limegreen'
@@ -101,7 +101,7 @@ def add_cpg(annotations, MARGIN, WIDTH, scale_x, start, end, axis_x_margin, axis
     
     
         island = Rect(insert = (x1, y1), 
-                       size = (thickness,LENGTH),
+                       size = (thickness,length),
                        fill = color, 
                        fill_opacity = 0.4)
         elements.append(island)

@@ -8,9 +8,9 @@ Tools used by views.py
 from .Annotations import showmethylation, showchipseq
 from django.http import HttpResponse
 
-LENGTH = 260.0
-WIDTH = 80.0
-MARGIN = 20.0
+length = 260.0
+width = 80.0
+margin = 20.0
 
 #Dictionary of zoom values
 zoom_factors = {'ZoomIn': 1/1.5, 'ZoomInMore': 1/3,
@@ -51,9 +51,9 @@ def query(p):
                                    chromosome = p['chromosome'], 
                                    start = p['start'], 
                                    end = p['end'],
-                                   LENGTH = LENGTH,
-                                   WIDTH = WIDTH,
-                                   MARGIN = MARGIN,
+                                   length = length,
+                                   width = width,
+                                   margin = margin,
                                    tss = p['tss'],
                                    cpg = p['cpg'])
     elif p['collection'] == 'methylation':
@@ -61,10 +61,12 @@ def query(p):
                                    chromosome = p['chromosome'], 
                                    start = p['start'], 
                                    end = p['end'],
-                                   LENGTH = LENGTH,
-                                   WIDTH = WIDTH,
-                                   MARGIN = MARGIN,
+                                   length = length,
+                                   width = width,
+                                   margin = margin,
                                    tss = p['tss'],
-                                   cpg = p['cpg'])
+                                   cpg = p['cpg'],
+                                   datapoints = p['datapoints'],
+                                   peaks = p['peaks'])
     else:
         return HttpResponse(p['collection'] + ' is an invalid collection! Please try again...')

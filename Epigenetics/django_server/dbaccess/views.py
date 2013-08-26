@@ -46,6 +46,9 @@ def view_query_form(request):
     action_factor = q.get("action", None)
     tss = q.get("tss", False)
     cpg = q.get("cpg", False)
+    if col == 'methylation':
+        datapoints = q.get("datapoints", False)
+        peaks = q.get("peaks", False)
 
 
     if action_factor and start and end:
@@ -64,16 +67,22 @@ def view_query_form(request):
         tss = True
     if cpg == 'true':
         cpg = True
+    if datapoints == 'true':
+        datapoints = True
+    if peaks == 'true':
+        peaks = True
     if start:
         start = int(start)
     if end:
         end = int(end)
 
-    parameters = {'organism':str(o), 'collection': str(col), 'chromosome': str(chrom), 'start': start, 'end':end, 'cpg':cpg, 'tss':tss}
+    parameters = {'organism':str(o), 'collection': str(col), 
+                  'chromosome': str(chrom), 'start': start, 'end':end, 
+                  'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks}
     print parameters
 
     if check(parameters):
         svg = query(parameters)
     return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o,
                                                'collection':col, 'chromosome':chrom, 'start':start,
-                                               'end':end, 'tss':tss, 'cpg':cpg})
+                                               'end':end, 'tss':tss, 'cpg':cpg, 'datapoints': datapoints, 'peaks':peaks})
