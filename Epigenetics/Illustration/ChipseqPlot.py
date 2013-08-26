@@ -16,7 +16,7 @@ class ChipseqPlot(object):
     '''
     classdocs
     '''
-    def __init__(self, filename, title, waves, start, end, 
+    def __init__(self, filename, title, message, waves, start, end, 
                  annotations, LENGTH, MARGIN, WIDTH):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
@@ -32,6 +32,7 @@ class ChipseqPlot(object):
         self.margin = MARGIN    # default = 20.0
         self.width = WIDTH    # default = 60.0
         self.annotations = annotations
+        self.message = message
 
         self.colors = [('indigo', 'slateblue'), ('red', 'orange'),
                   ('green', 'limegreen'), ('orange', 'yellow')]
@@ -52,7 +53,12 @@ class ChipseqPlot(object):
         self.samples_color = None
         self.axis_y_margin = None
         
-        self.build()
+        if message:
+            Message = Text('[ '+message+' ]', insert = ((self.margin + self.length)/3, self.margin+ self.width/2),
+                    fill = "black", font_size = 12)
+            self.elements.append(Message)
+        else:
+            self.build()
 
 
     def build(self):
@@ -143,18 +149,19 @@ class ChipseqPlot(object):
                 fill = "midnightblue", font_size = bigfont)
         self.elements.append(Title)
 
-        self.add_xtics()
-        self.add_ytics()
-        self.add_axis()
-        self.add_sample_labels(self.margin * 2 + self.length)
         for axis in get_axis(self.start, self.end, self.length, self.margin, self.width, self.axis_x_margin, self.axis_y_margin):
             self.elements.append(axis)
-        if get_tss:
-            for tss in add_tss(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
-                self.elements.append(tss)
-        if get_cpg:
-            for cpg in add_cpg(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
-                self.elements.append(cpg)
+            
+        if self.message is '':
+            self.add_xtics()
+            self.add_ytics()
+            self.add_sample_labels(self.margin * 2 + self.length)
+            if get_tss:
+                for tss in add_tss(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+                    self.elements.append(tss)
+            if get_cpg:
+                for cpg in add_cpg(self.annotations, self.margin, self.width, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+                    self.elements.append(cpg)
 
 
     def add_sample_labels(self, x_position):
@@ -250,20 +257,3 @@ class ChipseqPlot(object):
             self.elements.append(ticline)
             self.elements.append(ticline2)
             self.elements.append(ticmarker)
-
-    def add_axis(self):
-        MARGIN = self.margin
-        WIDTH = self.width
-        axis_x_margin = MARGIN - 5
-        self.axis_x_margin = axis_x_margin
-        axis_y_margin = MARGIN - 8
-        self.axis_y_margin = axis_y_margin
-        x_axis = Rect(insert = (axis_x_margin, WIDTH + MARGIN + axis_x_margin),
-                size = ((self.end - self.start) * self.scale_x + 10, 0.1),
-                fill = "midnightblue")
-        y_axis = Rect(insert = (axis_x_margin, axis_y_margin),
-            size = (0.1, WIDTH + MARGIN + 3),
-            fill = "midnightblue")
-        self.elements.append(x_axis)
-        self.elements.append(y_axis)
-

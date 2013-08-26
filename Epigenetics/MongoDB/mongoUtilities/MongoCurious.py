@@ -156,6 +156,9 @@ class MongoCurious():
 
         '''Finds documents corresponding to collection and type of query'''
 
+        if self.message != '':
+            return {}
+                
         # This dictionary will store all the query parameters
         query_parameters = {}
 
@@ -237,8 +240,7 @@ class MongoCurious():
             warning += "\n     use the checkquery() method to validate the inputs of your query."
             # self.errorlog(message)
             print warning
-            if self.message == '':
-                self.message = 'No data here!'
+            self.message = 'No data here!'
             return {}
 
         print "    --> Found %i documents." % docs.count()
@@ -265,7 +267,7 @@ class MongoCurious():
         count = 0
         maxpos = 0
 
-        if sample_ids is None or probes is None:
+        if probes == {}:
             self.sample_peaks = {}
             self.pos_betas_dict = {}
             return None
@@ -321,6 +323,10 @@ class MongoCurious():
         tail = 1
         maxpos = 0
 
+        if docs == {}:
+            self.waves = {}
+            return None
+        
         # This list will store the tuple (pos,height, std dev, sample id) as a value.
         waves = []
         # "tail" is min height of a tail to be included in the plot for a peak
@@ -437,7 +443,7 @@ class MongoCurious():
                                                       color, self.start, self.end, LENGTH,
                                                       MARGIN, WIDTH)
         if self.collection == "waves":
-            drawing = chipseqplot.ChipseqPlot(filename, title, self.waves, self.start,
+            drawing = chipseqplot.ChipseqPlot(filename, title, self.message, self.waves, self.start,
                                               self.end, self.annotations, LENGTH,
                                               MARGIN, WIDTH)
 

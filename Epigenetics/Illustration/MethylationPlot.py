@@ -55,7 +55,7 @@ class MethylationPlot(object):
         background = Rect(insert = (0, 0), size = size, fill = "white")
         self.plot.add(background)
         
-        if self.message:
+        if message:
             Message = Text('[ '+message+' ]', insert = ((self.margin + self.length)/3, self.margin+ self.width/2),
                     fill = "black", font_size = 12)
             self.elements.append(Message)
@@ -98,7 +98,7 @@ class MethylationPlot(object):
 
                 height = 3.0
                 if s != 0.0:
-                    gaussian_y, gaussian_x = self.makegaussian(m, s, height)    # reverse output arguments for sideways gaussians
+                    gaussian_y, gaussian_x = self.makegaussian(s, height)    # reverse output arguments for sideways gaussians
                     gaussian_x = [coord + x - 1 for coord in gaussian_x]
                     gaussian_y = [item + m for item in gaussian_y]
                     d = "M"
@@ -243,9 +243,8 @@ class MethylationPlot(object):
             self.elements.append(ticmarker)
 
 
-    def makegaussian(self, mean, stddev, height):
+    def makegaussian(self, stddev, height):
         ''' TODO: fill in docstring '''
-        # TODO: remove mean, if not used
         endpts = (sqrt((-2) * stddev * stddev * log(1.0 / height)))
         X = [0]
         X.extend([round(stddev * 2.0 * (i / 9.0) - stddev, 3) for i in range(0, 10)])    # add 10 points  near mean
