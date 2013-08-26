@@ -224,6 +224,7 @@ class ParametersEditor (tk.Toplevel):
         self.withdraw()
 
     def askopenfile(self):
+        '''get a file, open it and apply the parameters'''
         filename = askopenfilename()
         if filename:
             try:
@@ -294,6 +295,7 @@ class ParametersEditor (tk.Toplevel):
                 self.make_wig_button.deselect()
 
     def askdirectory(self):
+        '''get path for files'''
         path = askdirectory()
         if path:
             self.parameters.set_parameter('output_path', path)
@@ -301,6 +303,7 @@ class ParametersEditor (tk.Toplevel):
             self.output_path_entry.insert(0, self.parameters.get_parameter('output_path'))
 
     def askinputfile(self):
+        '''get input file'''
         filename = askopenfilename()
         if filename:
             self.parameters.set_parameter('input_file', filename)
