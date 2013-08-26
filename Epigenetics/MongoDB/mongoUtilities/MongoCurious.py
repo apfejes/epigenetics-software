@@ -452,10 +452,9 @@ class MongoCurious():
 
 
 
-
-    def errorlog(self, errormessage):
-        '''returns error message to server
-        self.errorcount += 1
-        '''
+    @staticmethod
+    def errorlog(errormessage):
+        '''returns error message to server'''
+        # self.errorcount += 1
         print errormessage
         return errormessage
