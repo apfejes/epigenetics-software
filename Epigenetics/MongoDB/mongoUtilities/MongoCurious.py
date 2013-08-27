@@ -170,7 +170,7 @@ class MongoCurious():
                 query_location["$lte"] = self.end
             if self.start >=0:
                 query_location["$gte"] = self.start
-            query_parameters["mapinfo"] = query_location.items()
+            query_parameters["mapinfo"] = dict(query_location.items())
             # Decide which parameters to return
             return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hil_cpg_island_name':True,
                           'closest_tss_1': True, 'ucsc_refgene_name':True, 'closest_tss_gene_name':True,
@@ -385,8 +385,10 @@ class MongoCurious():
             genes = zip(tss1, geneclosest)
                 
             for tss, gene in genes:
-                if tss1 in range(self.start, self.end):
-                    annotations['TSS'][tss] = gene
+                tss = int(tss)
+                if tss >= self.start:
+                    if tss <= self.end:
+                        annotations['TSS'][tss] = gene
                 else:
                     annotations['genes'].add((gene, tss))
 
