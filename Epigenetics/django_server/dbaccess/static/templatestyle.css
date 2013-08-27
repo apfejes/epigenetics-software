@@ -4,9 +4,19 @@ body {
   margin-top:30px;
 }
 
-h1 { font-size: 50px; color: linen; margin-top:5px; }
-h2 { font-size: 18px; color: #2b34e4; }
-h3 { font-size: 14px; }
+h1 {
+  font-size: 50px;
+  color: linen;
+  margin-top:5px;
+}
+
+h2 { 
+  font-size: 18px; 
+  color: #2b34e4; 
+}
+h3 { 
+  font-size: 14px; 
+}
 
 .footersmall{
    font-family: Verdana;
@@ -58,6 +68,25 @@ b { color: #f38227 }
   height:500px; /* for IE5.x and IE6 */
   background-color:#333333;
   /*margin-top:10px;*/
+}
+
+
+#option_elements {
+  overflow:auto;
+  text-align:center;
+  width:100%
+}
+
+#zoompan {
+  overflow:auto;
+  text-align:center;
+  width:100%
+}
+
+#selection_element {
+  padding-left: 10px;
+  padding-right: 10px;
+  display:inline-block;
 }
 
 #footer { 
