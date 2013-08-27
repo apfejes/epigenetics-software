@@ -130,17 +130,15 @@ class ChipseqPlot(object):
     def get_elements(self):
         '''TODO: add docstring'''
         self.add_sample_labels(self.margin * 3.2 + self.length)
-        z = self.elements
-        self.elements = None
-        return z
+        return self.elements
 
-    def add_data(self, elements):
+    def add_data(self, foreign_elements):
         '''TODO: add docstring'''
-        if not isinstance(elements, list):
-            raise ValueError("Data to add to plot should be stored in a list, not a {}".format(type(elements)))
-        for element in elements:
-            self.plot.add(element)
-        print "% i svg elements have been added to the current svg object." % len(elements)
+        if not isinstance(foreign_elements, list):
+            raise ValueError("Data to add to plot should be stored in a list, not a {}".format(type(foreign_elements)))
+        for element in foreign_elements:
+            self.elements.append(element)
+        print "% i svg elements have been added to the current svg object." % len(foreign_elements)
 
     def add_legends(self, get_tss, get_cpg):
         ''' Add title, axis, tic marks and labels '''

@@ -5,12 +5,12 @@ Created on 2013-08-23
 
 Tools used by views.py
 '''
-from .Annotations import showmethylation, showchipseq
+from .Annotations import showmethylation, showchipseq, showchipandmeth
 from django.http import HttpResponse
 
-length = 260.0
-width = 80.0
-margin = 20.0
+LENGTH = 300.0
+WIDTH = 100.0
+MARGIN = 20.0
 
 #Dictionary of zoom values
 zoom_factors = {'ZoomIn': 1/1.5, 'ZoomInMore': 1/3,
@@ -51,9 +51,9 @@ def query(p):
                                    chromosome = p['chromosome'], 
                                    start = p['start'], 
                                    end = p['end'],
-                                   length = length,
-                                   width = width,
-                                   margin = margin,
+                                   length = LENGTH,
+                                   width = WIDTH,
+                                   margin = MARGIN,
                                    tss = p['tss'],
                                    cpg = p['cpg'])
     elif p['collection'] == 'methylation':
@@ -61,9 +61,21 @@ def query(p):
                                    chromosome = p['chromosome'], 
                                    start = p['start'], 
                                    end = p['end'],
-                                   length = length,
-                                   width = width,
-                                   margin = margin,
+                                   length = LENGTH,
+                                   width = WIDTH,
+                                   margin = MARGIN,
+                                   tss = p['tss'],
+                                   cpg = p['cpg'],
+                                   datapoints = p['datapoints'],
+                                   peaks = p['peaks'])
+    elif p['collection'] == 'meth+chip':
+        return showchipandmeth.svgcode(db = p['organism'], 
+                                   chromosome = p['chromosome'], 
+                                   start = p['start'], 
+                                   end = p['end'],
+                                   length = LENGTH,
+                                   width = WIDTH,
+                                   margin = MARGIN,
                                    tss = p['tss'],
                                    cpg = p['cpg'],
                                    datapoints = p['datapoints'],

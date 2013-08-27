@@ -429,15 +429,10 @@ class MongoCurious():
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an .svg file or a svg string for webserver rendering
         '''
-        
-        print '\nmessage:', str(self.message)
-        print show_points, show_peaks
         if filename:
             if filename[-4:len(filename)] != '.svg':
                 filename += '.svg'
             filename = directory_for_svgs + filename
-        elif not get_elements:
-            filename = "test.svg"
 
         if self.collection == "methylation":
             drawing = methylationplot.MethylationPlot(filename, title, self.message, self.sample_peaks,
@@ -460,13 +455,13 @@ class MongoCurious():
             drawing = None
         elif filename and not to_string and not get_elements:
             print " Making svg file \"%s\"\n" % filename
-            drawing.add_legends()
+            drawing.add_legends(get_tss, get_cpg)
             z = drawing
             z.save()
             drawing = None
         else:
-            print "No filename specified. Returning the SVG object with legends"
-            drawing.add_legends()
+            print "No filename specified. Returning the SVG object without legends"
+            drawing.add_legends(get_tss, get_cpg)
             z = drawing
             drawing = None
         return z
