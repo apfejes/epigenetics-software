@@ -2,10 +2,12 @@ html
   head
   link(rel='stylesheet', href='/static/templatestyle.css', type='text/css' )
   a(href='/')
+
   
 body
- 
-
+    input(type="hidden", id="width", name="width")
+    script(type='text/javascript')
+      document.getElementById('width').value = window.screen.width;
     #header
         h1 Query Human Epigenetics Database
     
@@ -54,40 +56,51 @@ body
                             input(id='end', size = '8', type='text', value=end, name='end')
                         else
                             input(id='end', size = '8', type='text', value='', name='end')
-            
-            div(data-role='fieldcontain', align='center')
+                    input(type='submit',value='Query!', data-transition='fade', data-theme='c')
+            #option_elements
                 if organism = 'human'
+                  #selection_element
                     label(for='tss') Tss:
                         if tss
                             input(id='tss', size = '8', type='checkbox', name="tss", checked)
                         else
                             input(id='tss', size = '8', type='checkbox', name="tss")
+                  #selection_element
                     label(for='cpg') CpG Islands:
                         if cpg
                             input(id='cpg', size = '8', type='checkbox', name="cpg", checked)
                         else
                             input(id='cpg', size = '8', type='checkbox', name="cpg")
                 if collection = 'methylation'
+                  #selection_element
                     label(for='datapoints') Show data points:
                         if datapoints
                             input(id='datapoints', size = '8', type='checkbox', name="datapoints", checked)
                         else
                             input(id='datapoints', size = '8', type='checkbox', name="datapoints")
+                  #selection_element
                     label(for='peaks') Show sample type distribution:
                         if peaks
                             input(id='peaks', size = '8', type='checkbox', name="peaks", checked)
                         else
                             input(id='peaks', size = '8', type='checkbox', name="peaks")
                     
-            div(data-role='fieldcontain', align='center')
-                input(type='submit',value='Query!', data-transition='fade', data-theme='c')  
-                input(type='button',value = '<<<',name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self');")  
+            #zoompan
+              #selection_element
+                input(type='button',value = '<<<',name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self');")
+              #selection_element
                 input(type='button',value = '<<',name='LessLeft', onClick="window.open(newURL('LessLeft'),'_self');")
+              #selection_element
                 input(type='button',value = '--',name='ZoomOutMore', onClick="window.open(newURL('ZoomOutMore'),'_self');")
+              #selection_element
                 input(type='button',value = '-',name='ZoomOut', onClick="window.open(newURL('ZoomOut'),'_self');")
+              #selection_element
                 input(type='button',value = '+',name='ZoomIn', onClick="window.open(newURL('ZoomIn'),'_self');")
+              #selection_element
                 input(type='button',value = '++',name='ZoomInMore', onClick="window.open(newURL('ZoomInMore'),'_self');")
+              #selection_element
                 input(type='button',value = '>>',name='LessRight', onClick="window.open(newURL('LessRight'),'_self');")
+              #selection_element
                 input(type='button',value = '>>>',name='MoreRight', onClick="window.open(newURL('MoreRight'),'_self');")
         |!{plot}
              
@@ -118,6 +131,7 @@ script(type='text/javascript')
       base += "&cpg=" + cpg
       base += "&datapoints=" + datapoints
       base += "&peaks=" + peaks
+      base += "&width=" + screen.width
       
       return base
     }
