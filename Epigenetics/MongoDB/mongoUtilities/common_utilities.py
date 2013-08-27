@@ -4,12 +4,17 @@ Created on 2013-04-15
 @author: afejes
 '''
 
+import gc
+
 def CreateListFromCursor(cursor):
+    '''convert a cursor to a full list of items'''
+    gc.disable()
     listitems = []
     if cursor is None:
         return {}
     for record in cursor:
         listitems.append(record)
+    gc.enable()
     return listitems
 
 
