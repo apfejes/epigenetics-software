@@ -50,14 +50,13 @@ def view_query_form(request):
     width = q.get("width", 1000)
     height = q.get("height", 600)
     datapoints = q.get("datapoints", True)
-    print '\n', datapoints, peaks
 
     if action_factor and start and end:
         if 'Right' in action_factor or 'Left' in action_factor:
-            print 'panning!', action_factor
+            print 'Action: panning!', action_factor
             start, end = panning(action_factor, int(start), int(end))
         elif 'In' in action_factor or 'Out' in action_factor:
-            print 'zooming!', action_factor
+            print 'Action: zooming!', action_factor
             start, end = zoom(action_factor, int(start), int(end))
         else:
             print 'Action not available:', action_factor

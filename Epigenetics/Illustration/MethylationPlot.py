@@ -48,8 +48,6 @@ class MethylationPlot(object):
         self.message = message
 
         self.dimension_y = self.height - self.margin - self.BOTTOM_MARGIN    # this is the size of the y field
-        self.offset_x = self.start
-
         self.dimension_x = self.width - self.margin - self.RIGHT_MARGIN
         self.scale_x = float(self.dimension_x) / (self.end - self.start)    # this is a scaling variable
 
@@ -63,8 +61,8 @@ class MethylationPlot(object):
         self.plot.add(background)
 
         if message:
-            Message = Text('[ ' + message + ' ]', insert = ((self.margin + self.width) * 2.5, self.margin + (self.height / 2.0)),
-                    fill = "black", font_size = 12)
+            Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
+                    fill = "black", font_size = bigfont*2)
             self.elements.append(Message)
         else:
             self.build(pos_betas_dict, sample_peaks, show_points, show_peaks)
@@ -81,7 +79,7 @@ class MethylationPlot(object):
         palette.Colors()    # blue, red, green, purple palettes
 
         for position in pos_betas_dict.keys():
-            x = round(float(position - self.offset_x) * self.scale_x, 2) + self.margin
+            x = round(float(position - self.start) * self.scale_x, 2) + self.margin
 
             if show_points:
                 for beta, sample_id, sample_type in pos_betas_dict[position]:
@@ -159,7 +157,6 @@ class MethylationPlot(object):
         Title = Text(self.title, insert = (bigfont + ((float(self.margin) - bigfont) / 2),
                                            bigfont + ((float(self.margin) - bigfont) / 2)),
                 fill = "midnightblue", font_size = bigfont)
-        self.plot.add(Title)
         self.elements.append(Title)
 
         for axis in get_axis(self.start, self.end, self.width, self.margin, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
@@ -240,7 +237,7 @@ class MethylationPlot(object):
             self.elements.append(ticline2)
             self.elements.append(ticmarker)
 
-
+    @staticmethod
     def makegaussian(self, stddev, innerheight):
         ''' TODO: fill in docstring '''
         endpts = (sqrt((-2) * stddev * stddev * log(1.0 / innerheight)))

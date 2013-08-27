@@ -79,4 +79,4 @@ def query(p):
                                    datapoints = p['datapoints'],
                                    peaks = p['peaks'])
     else:
-        return HttpResponse(p['collection'] + ' is an invalid collection! Please try again...')
+        return p['collection'] + ' is an invalid collection! Please try again...'

@@ -14,11 +14,17 @@ from PlotUtilities import get_axis, add_cpg, add_tss, bigfont, medfont, smallfon
 
 class ChipseqPlot(object):
     '''
-    classdocs
+    Called by a MongoCurious object to plot ChIP-Seq data.
     '''
+    
+    DISTR_STROKE = 0.5
+    BOTTOM_MARGIN = 100    # 100 pixels
+    RIGHT_MARGIN = 70
+    
+    
     def __init__(self, filename, title, message, waves, start, end,
 
-                 annotations, length, margin, width):
+                 annotations, width, margin, height):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -29,42 +35,40 @@ class ChipseqPlot(object):
         self.waves = waves
         self.start = start
         self.end = end
-        self.width = length    # default = 200.0
+        self.width = width    # default = 200.0
         self.margin = margin    # default = 20.0
-        self.height = width    # default = 60.0
+        if self.margin < 30:    # pixels
+            self.margin = 30
         self.annotations = annotations
         self.message = message
 
+        self.height = height    # default = 60.0
         self.colors = [('indigo', 'slateblue'), ('red', 'orange'),
                   ('green', 'limegreen'), ('orange', 'yellow')]
 
+        self.dimension_y = self.height - self.margin - self.BOTTOM_MARGIN    # this is the size of the y field
+        self.dimension_x = self.width - self.margin - self.RIGHT_MARGIN
+        self.scale_x = float(self.dimension_x) / (self.end - self.start)    # this is a scaling variable
+
+
+        size = (str(self.width) + "px" , str(self.height) + "px")
         # create drawing
-        size = (str(self.width) + "mm" , str(self.height * 1.5) + "mm")
-        self.plot = Drawing(filename, size = size,
-                        viewBox = ("0 0 " + str(self.width) + " " + str(self.height + self.margin * 4)),
-                        preserveAspectRatio = "xMinYMin meet")
+        self.plot = Drawing(filename, size = size
+                            # , viewBox = ("0 0 " + str(self.height) + " " + str(self.width + (self.margin * 2)))
+                            # , preserveAspectRatio = "xMinYMin meet"
+                            )
         background = Rect(insert = (0, 0), size = size, fill = "white")
         self.plot.add(background)
 
-        self.axis_x_margin = None
-        self.scale_x = None
-        self.maxh = None
-        self.dimension_y = None
-        self.offset_y = None
-        self.samples_color = None
-        self.axis_y_margin = None
-
         if message:
-            Message = Text('[ ' + message + ' ]', insert = ((self.margin + self.width) / 3, self.margin + self.height / 2),
-                    fill = "black", font_size = 12)
+            Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
+                    fill = "black", font_size = bigfont*2)
             self.elements.append(Message)
         else:
             self.build()
 
 
     def build(self):
-
-        self.scale_x = self.width / (self.end - self.start)
         tail = 1
 
         # create path objects for each peak
@@ -72,26 +76,26 @@ class ChipseqPlot(object):
         for (pos, height, stddev, sample_id) in self.waves:
             heights.append(height)
         self.maxh = max(heights)
-        self.dimension_y = (self.height + self.margin) * 0.8 / self.maxh
-        self.offset_y = (self.height + self.margin) * 0.8 + self.margin
+        self.scale_y = self.dimension_y  / self.maxh
+        self.offset_y = self.height - self.margin
 
         sample_count = 0
         samples_color = {}
         for (pos, height, stddev, sample_id) in self.waves:
-            print "    Peak", pos, height, stddev
+            #print "    Peak", pos, height, stddev
             X, Y = self.makegaussian(self.start, self.end, pos, tail, self.start, float(height), stddev)
-            X = [round((x - self.start + pos) * self.scale_x, 2) + 20 for x in X]
-            for x in X:
+            X = [round((x - self.start + pos) * self.scale_x, 2) + self.margin for x in X]
+            for x in X: #Adjust peaks on the edge of the plotting area so they don't look skewed.
                 if x < (self.margin + 1):
                     X.insert(0, self.margin)
                     Y.insert(0, tail)
                     break
-                if x > (self.margin + self.width - 1):
-                    X.append(self.margin + self.width)
+                if x > (self.width - 1):
+                    X.append(self.width)
                     Y.append(tail)
                     break
             # Scale Y and inverse the coordinates
-            Y = [round(y * self.dimension_y, 2) for y in Y]
+            Y = [round(y * self.scale_y, 2) for y in Y]
             Y = [(self.offset_y - y) for y in Y]
             # d is the list of coordinates with commands such as
             # M for "move to' to initiate curve and S for smooth curve
@@ -139,25 +143,26 @@ class ChipseqPlot(object):
         print "% i svg elements have been added to the current svg object." % len(foreign_elements)
 
     def add_legends(self, get_tss, get_cpg):
-        ''' Add title, axis, tic marks and labels '''
+        ''' Add annotations, title, axis, tic marks and labels '''
         if self.title is None:
-            self.title = "Chipseq Peaks"
-        Title = Text(self.title, insert = (self.margin / 3, self.margin / 3),
+            self.title = "ChIP-Seq PLot"
+        Title = Text(self.title, insert = (bigfont + ((float(self.margin) - bigfont) / 2),
+                                           bigfont + ((float(self.margin) - bigfont) / 2)),
                 fill = "midnightblue", font_size = bigfont)
         self.elements.append(Title)
 
-        for axis in get_axis(self.start, self.end, self.width, self.margin, self.height, self.axis_x_margin, self.axis_y_margin):
+        for axis in get_axis(self.start, self.end, self.width, self.margin, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
             self.elements.append(axis)
 
         if self.message is '':
             self.add_xtics()
             self.add_ytics()
-            self.add_sample_labels(self.margin * 2 + self.width)
+            self.add_sample_labels(self.width - self.RIGHT_MARGIN + 10)
             if get_tss:
-                for tss in add_tss(self.annotations, self.margin, self.height, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+                for tss in add_tss(self.annotations, self.margin, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
                     self.elements.append(tss)
             if get_cpg:
-                for cpg in add_cpg(self.annotations, self.margin, self.height, self.scale_x, self.start, self.end, self.axis_x_margin, self.axis_y_margin):
+                for cpg in add_cpg(self.annotations, self.margin, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
                     self.elements.append(cpg)
 
 
@@ -179,6 +184,56 @@ class ChipseqPlot(object):
             self.elements.append(label)
         return None
 
+    def add_xtics(self):
+        '''TODO: add docstring'''
+        # offset is self.start
+        scale_tics = 1
+
+        while((scale_tics * 10) < self.end - self.start):
+            scale_tics *= 10
+        # TODO: fix the line below.
+        xtics = [i for i in range(self.start, self.end + 1) if i % (scale_tics) == 0]
+        while len(xtics) < 4:
+            scale_tics /= 2
+            # TODO: fix the line below.
+            xtics += [i for i in range(self.start, self.end + 1) if i % (scale_tics) == 0 and i not in xtics]
+        xtics.sort()
+        spacing = fabs((self.margin + (xtics[1] - self.start) * self.scale_x) - (self.margin + (xtics[0] - self.start) * self.scale_x)) / 4
+        for tic in xtics:
+            tic_x = (self.margin + (tic - self.start) * self.scale_x)
+            tic_y = self.height - self.BOTTOM_MARGIN + smallfont
+            ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
+            ticline = Rect(insert = (tic_x, self.height - self.BOTTOM_MARGIN - 2), size = (1, 5), fill = "midnightblue")
+            for i in range (1, 4):
+                if tic_x - spacing * i > self.margin - 5:
+                    ticline2 = Rect(insert = (tic_x - spacing * i, self.height - self.BOTTOM_MARGIN - 2), size = (1, 2), fill = "midnightblue")
+                    self.elements.append(ticline2)
+            self.elements.append(ticline)
+            self.elements.append(ticmarker)
+
+    def add_ytics(self):
+        '''TODO: add docstring'''
+        scale_tics = 64
+        labels = [i for i in range(0, int(self.maxh) + 1, scale_tics)]
+        while len(labels) < 4:
+            scale_tics /= 2
+            labels += [i for i in range(0, int(self.maxh) + 1, scale_tics) if i not in labels]
+        ytics = [round(self.offset_y - y * self.scale_y, 3) for y in labels]
+        spacing = (ytics[0] - ytics[1]) / 2
+        
+        for tic,label in zip(ytics,labels):
+            ticline = Rect(insert = (self.margin - 2, tic), size = (5, 1), fill = "midnightblue")
+            ticline2 = Rect(insert = (self.margin - 2, tic - spacing), size = (2, 1), fill = "midnightblue")
+            tic_x = self.margin - smallfont * 2
+            tic_y = tic + 1
+            if len(str(label)) == 1:
+                tic_x = tic_x + 3
+            if len(str(label)) == 2:
+                tic_x = tic_x + 2
+            ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
+            self.elements.append(ticline)
+            self.elements.append(ticline2)
+            self.elements.append(ticmarker)
 
     @staticmethod
     def makegaussian(start, end, pos, tail, offset, innerheight, stddev):
@@ -203,53 +258,3 @@ class ChipseqPlot(object):
         stddev = float(stddev)
         Y = [round(innerheight * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
         return X, Y
-
-    def add_xtics(self):
-        '''TODO: add docstring'''
-        # offset is self.start
-        scale_tics = 1
-
-        while((scale_tics * 10) < self.end - self.start):
-            scale_tics *= 10
-        xtics = [i for i in range(self.start, self.end + 1) if i % (scale_tics) == 0]
-        while len(xtics) < 4:
-            scale_tics /= 2
-            xtics += [i for i in range(self.start, self.end + 1) if i % (scale_tics) == 0 and i not in xtics]
-        xtics.sort()
-        spacing = fabs((self.margin + (xtics[1] - self.start) * self.scale_x) - (self.margin + (xtics[0] - self.start) * self.scale_x)) / 4
-        for tic in xtics:
-            tic_x = (self.margin + (tic - self.start) * self.scale_x)
-            tic_y = self.height + self.margin * 2
-            ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
-            ticline = Rect(insert = (tic_x, self.margin + self.margin * 2 - 5 - 1), size = (0.1, 2), fill = "midnightblue")
-            for i in range (1, 4):
-
-                if tic_x - spacing * i > self.margin - 5:
-                    ticline2 = Rect(insert = (tic_x - spacing * i, self.height + self.margin * 2 - 5 - 1), size = (0.1, 1), fill = "midnightblue")
-                    self.elements.append(ticline2)
-            self.elements.append(ticline)
-            self.elements.append(ticmarker)
-
-    def add_ytics(self):
-        '''TODO: add docstring'''
-        scale_tics = 64
-        ytics = [i for i in range(0, int(self.maxh) + 1, scale_tics)]
-        while len(ytics) < 4:
-            scale_tics /= 2
-            ytics += [i for i in range(0, int(self.maxh) + 1, scale_tics) if i not in ytics]
-        ytics = [round(self.offset_y - y * self.dimension_y, 3) for y in ytics]
-        spacing = (ytics[0] - ytics[1]) / 2
-        for tic in ytics:
-            ticline = Rect(insert = (self.margin - 5 - 1, tic), size = (2, 0.1), fill = "midnightblue")
-            ticline2 = Rect(insert = (self.margin - 5, tic + spacing), size = (1, 0.1), fill = "midnightblue")
-            tic_x = self.margin - 13
-            tic_y = tic + 1
-            label = str(int(round((self.offset_y - tic) / self.dimension_y)))
-            if len(label) == 1:
-                tic_x += 3
-            if len(label) == 2:
-                tic_x += 2
-            ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
-            self.elements.append(ticline)
-            self.elements.append(ticline2)
-            self.elements.append(ticmarker)
