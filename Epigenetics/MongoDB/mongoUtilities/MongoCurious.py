@@ -165,8 +165,12 @@ class MongoCurious():
         # Adding the different parameters of the query depending on the collection chosen
         if collection == "annotations":
             query_parameters["chr"] = self.chromosome
-            if self.end and self.start:
-                query_parameters["mapinfo"] = {"$gte":self.start, "$lte":self.end }
+            query_location = {}
+            if self.end >= 0:
+                query_location["$lte"] = self.end
+            if self.start >=0:
+                query_location["$gte"] = self.start
+            query_parameters["mapinfo"] = query_location.items()
             # Decide which parameters to return
             return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hil_cpg_island_name':True,
                           'closest_tss_1': True, 'ucsc_refgene_name':True, 'closest_tss_gene_name':True,
@@ -372,31 +376,25 @@ class MongoCurious():
         annotations['feature'] = set([])
 
         for doc in docs:
-            tss1 = int(doc['closest_tss'])
-            tss2 = int(doc['closest_tss_1'])
-            gene = str(doc['ucsc_refgene_name'])
-            if gene:
-                gene = list(set(str(gene).split(';')))
+            tss1 = str(doc['closest_tss'])
+            if tss1:
+                tss1 = list(set(tss1.split(';')))
             geneclosest = str(doc["closest_tss_gene_name"])
             if geneclosest:
-                geneclosest = list(set(str(geneclosest).split(';')))
+                geneclosest = list(set(geneclosest.split(';')))
+            genes = zip(tss1, geneclosest)
+                
+            for tss, gene in genes:
+                if tss1 in range(self.start, self.end):
+                    annotations['TSS'][tss] = gene
+                else:
+                    annotations['genes'].add((gene, tss))
+
+            #Pull regulatory features' coordinate. Not plotting these yet.
             feature = str(doc['regulatory_feature_group'])
             feature_coord = str(doc['regulatory_feature_name'])
             if feature and feature_coord:
                 feature_coord.split(':')[1].split('-')
-
-            for genename in gene:
-                if tss1 in range(self.start, self.end):
-                    annotations['TSS'][tss1] = genename
-                else:
-                    annotations['genes'].add((genename, tss1))
-            for genenameclosest in geneclosest:
-                annotations['genes'].add((genenameclosest, tss2))
-
-            # if doc['hmm_island']:
-            #    coord = doc['hmm_island'].split(':')[1].split('-')
-            #    island = (int(coord[0]), int(coord[1]))
-            #    annotations['Islands'].add(island)
 
             if doc['hil_cpg_island_name']:
                 # cpg_class = doc['hil_cpg_class']

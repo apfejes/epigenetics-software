@@ -45,11 +45,8 @@ if chip_first:
 else:
     # Collect methylation data
     query_betas = m.query(collection = "methylation", project = project, chromosome = chromosome, start = start, end = end)
-    m.finddocs()
-    m.collectbetas()
     # Store elements of the svg methylation points in a list called points
     points = m.svg(get_elements = True)
-
     # Collecting the methylation data
     query_waves = m.query(collection = "waves", chromosome = chromosome, start = start, end = end)
     m.finddocs()
