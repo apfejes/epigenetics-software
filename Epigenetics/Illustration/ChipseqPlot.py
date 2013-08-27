@@ -224,6 +224,7 @@ class ChipseqPlot(object):
             ticline = Rect(insert = (self.margin - 2, tic), size = (5, 1), fill = "midnightblue")
             if tic-spacing > self.margin: 
                 ticline2 = Rect(insert = (self.margin - 2, tic - spacing), size = (2, 1), fill = "midnightblue")
+                self.elements.append(ticline2)
             tic_x = self.margin - smallfont * 2
             tic_y = tic + 1
             if len(str(label)) == 1:
@@ -232,7 +233,6 @@ class ChipseqPlot(object):
                 tic_x = tic_x + 2
             ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
             self.elements.append(ticline)
-            self.elements.append(ticline2)
             self.elements.append(ticmarker)
 
     @staticmethod
