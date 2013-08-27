@@ -1,3 +1,6 @@
+'''parameter editor for the gui application'''
+
+
 import sys
 import traceback
 import Tkinter as tk
@@ -16,7 +19,7 @@ class ParametersEditor (tk.Toplevel):
         self.createWidgets()
 
 
-        # initializing variatbles
+        # initializing variables
         self.cancel_but = None
         self.input_options_frame = None
         self.input_file_lab = None

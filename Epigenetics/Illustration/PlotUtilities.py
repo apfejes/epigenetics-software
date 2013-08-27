@@ -44,7 +44,7 @@ def add_tss(annotations, margin, height, scale_x, offset_x, end, bottom_margin):
 
     for tss in TSSs:
         gene_name = annotations['TSS'][tss]
-        print 'TSS:', gene_name, tss
+        #print 'TSS:', gene_name, tss
         previous_x1 = x1
         x1 = margin + (tss - offset_x) * scale_x
         y1 = height - bottom_margin
