@@ -77,7 +77,6 @@ class ChipseqPlot(object):
             heights.append(height)
         self.maxh = max(heights)
         self.scale_y = self.dimension_y  / self.maxh
-        self.offset_y = self.height - self.margin
 
         sample_count = 0
         samples_color = {}
@@ -96,7 +95,7 @@ class ChipseqPlot(object):
                     break
             # Scale Y and inverse the coordinates
             Y = [round(y * self.scale_y, 2) for y in Y]
-            Y = [(self.offset_y - y) for y in Y]
+            Y = [(self.height-self.BOTTOM_MARGIN - y) for y in Y]
             # d is the list of coordinates with commands such as
             # M for "move to' to initiate curve and S for smooth curve
             d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
@@ -186,7 +185,6 @@ class ChipseqPlot(object):
 
     def add_xtics(self):
         '''TODO: add docstring'''
-        # offset is self.start
         scale_tics = 1
 
         while((scale_tics * 10) < self.end - self.start):
@@ -218,12 +216,14 @@ class ChipseqPlot(object):
         while len(labels) < 4:
             scale_tics /= 2
             labels += [i for i in range(0, int(self.maxh) + 1, scale_tics) if i not in labels]
-        ytics = [round(self.offset_y - y * self.scale_y, 3) for y in labels]
+        ytics = [round(self.height-self.BOTTOM_MARGIN - y * self.scale_y, 3) for y in labels]
         spacing = (ytics[0] - ytics[1]) / 2
+        
         
         for tic,label in zip(ytics,labels):
             ticline = Rect(insert = (self.margin - 2, tic), size = (5, 1), fill = "midnightblue")
-            ticline2 = Rect(insert = (self.margin - 2, tic - spacing), size = (2, 1), fill = "midnightblue")
+            if tic-spacing > self.margin: 
+                ticline2 = Rect(insert = (self.margin - 2, tic - spacing), size = (2, 1), fill = "midnightblue")
             tic_x = self.margin - smallfont * 2
             tic_y = tic + 1
             if len(str(label)) == 1:

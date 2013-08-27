@@ -225,7 +225,8 @@ class MethylationPlot(object):
         spacing = (ytics[0] - ytics[1]) / 2
         for tic, label in zip(ytics, labels):
             ticline = Rect(insert = (self.margin - 2, tic), size = (5, 1), fill = "midnightblue")
-            ticline2 = Rect(insert = (self.margin - 2, tic - spacing), size = (2, 1), fill = "midnightblue")
+            if tic-spacing > self.margin: 
+                ticline2 = Rect(insert = (self.margin - 2, tic - spacing), size = (2, 1), fill = "midnightblue")
             tic_x = self.margin - smallfont * 2
             tic_y = tic + 1
             if len(str(label)) == 1:

@@ -8,7 +8,7 @@ Tools used by views.py
 from .Annotations import showmethylation, showchipseq, showchipandmeth
 from django.http import HttpResponse
 
-MARGIN = 20.0
+MARGIN = 40.0
 
 # Dictionary of zoom values
 zoom_factors = {'ZoomIn': 1 / 1.5, 'ZoomInMore': 1 / 3,
