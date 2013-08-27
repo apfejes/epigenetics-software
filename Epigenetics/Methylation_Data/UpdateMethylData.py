@@ -17,17 +17,11 @@ sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 
 
-# database_name = 'human_epigenetics'
-database_name = 'jake_test'
-collection_name = 'methylation'
-annotation_name = 'annotations'
-annotQuery = {'annotation_id': {'$exists': False}}    # Search for un-updated docs (AddAnnotations)
-projQuery = {'project': {'$exists': False}}    # Seach for un-updated docs (AddProjectInfo)
-# project_name = 'kollman'
-# project_name = 'down'
+
 
 
 def AddAnnotations(collection_name, annotation_name, annotQuery):
+    '''Updates methylation data with annotation information'''
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
     mongo.ensure_index(annotation_name, 'array_type')
     mongo.ensure_index(collection_name, 'probe_id')    # Speed
@@ -53,11 +47,12 @@ def AddAnnotations(collection_name, annotation_name, annotQuery):
             print count, time.time() - starttime, 'seconds'
 
 
-def AddProjectInfo(collection_name, projQuery, project_name):
+def AddProjectInfo(collection, Query, project):
+    '''function that adds project information to a sample'''
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
     print('Adding project info...')
-    projDict = {'$set': {'project': project_name}}
-    mongo.update(collection_name, projQuery, projDict)
+    projDict = {'$set': {'project': project}}
+    mongo.update(collection, Query, projDict)
 
 
 if __name__ == "__main__":
@@ -66,10 +61,21 @@ if __name__ == "__main__":
         sys.exit()
     collection_name = sys.argv[1]
     annotation_name = sys.argv[2]
-    project = raw_input('Enter project name to add to each un-updated document in collection: ')
+
+
+    # database_name = 'human_epigenetics'
+    database_name = 'jake_test'
+    collection_name = 'methylation'
+    annotation_name = 'annotations'
+    annotQuery = {'annotation_id': {'$exists': False}}    # Search for un-updated docs (AddAnnotations)
+    projQuery = {'project': {'$exists': False}}    # Seach for un-updated docs (AddProjectInfo)
+    # project_name = 'kollman'
+    # project_name = 'down'
+
+    project_name = raw_input('Enter project name to add to each un-updated document in collection: ')
     print('Adding annotation info to all documents without the field, "annotation_id"...')
     AddAnnotations(collection_name, annotation_name, annotQuery)
     print('Adding project name to all documents without the field, "project"...')
-    AddProjectInfo(collection_name, projQuery, project)
+    AddProjectInfo(collection_name, projQuery, project_name)
 
 

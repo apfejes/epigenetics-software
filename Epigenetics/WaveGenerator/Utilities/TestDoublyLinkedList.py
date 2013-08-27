@@ -8,7 +8,7 @@ import DoublyLinkedList
 
 
 class Test(unittest.TestCase):
-
+    '''This is a set of tests for a local implementation of a doubly linked list'''
 
 
     def setUp(self):
@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
 
 
     def test_append(self):
-        '''setup'''
+        '''test that you can append to the end of the list'''
         DLL = DoublyLinkedList.DLL()
         DLL.append("thing1")
         DLL.append("thing2")
@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
         self.assertEqual(DLL.size(), 3)
 
     def test_insert_before(self):
-        '''setup'''
+        '''test you can insert an item at any point in the list.'''
         DLL = DoublyLinkedList.DLL()
         DLL.append("thing1")
         DLL.append("thing2")
@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
         self.assertEqual(DLL.size(), 4)
 
     def test_insert_at_head(self):
-        '''setup'''
+        '''test that you can insert one item at the head of the list.'''
         DLL = DoublyLinkedList.DLL()
         DLL.append("thing1")
         DLL.append("thing2")
@@ -58,7 +58,7 @@ class Test(unittest.TestCase):
         self.assertEqual(DLL.size(), 4)
 
     def test_pop_head(self):
-        '''setup'''
+        '''Test that you can remove one element from the head of the list'''
         DLL = DoublyLinkedList.DLL()
         DLL.append("thing1")
         DLL.append("thing2")

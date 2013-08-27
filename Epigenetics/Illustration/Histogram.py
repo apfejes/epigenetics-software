@@ -1,3 +1,5 @@
+'''Class for generating in-house Histograms'''
+
 from svgwrite.shapes import Rect
 from svgwrite.shapes import Line
 # from svgwrite.shapes import Circle
@@ -41,10 +43,10 @@ class Histogram(object):
             self.height = kwargs['height']
         else:
             self.height = 600
-        if 'width' in kwargs:
-            self.width = kwargs['width']
+        if 'height' in kwargs:
+            self.height = kwargs['height']
         else:
-            self.width = 1200
+            self.height = 1200
         if 'debug' in kwargs:
             self.debug = kwargs['debug']
         else:
@@ -70,7 +72,7 @@ class Histogram(object):
 
         # start drawing object
         self.plot = Drawing(self.filename, debug = self.debug,
-                            size = (self.width + self.margin_left + self.margin_right,
+                            size = (self.height + self.margin_left + self.margin_right,
                                     self.height + self.margin_top + self.margin_bottom),
                             # viewBox = ("0 0 " + str(float(length) + 10) + " " + str(float(width) + 10)),
                             preserveAspectRatio = "xMinYMin meet")    # , size=('200mm', '150mm'), viewBox=('0 0 200 150'))
@@ -78,7 +80,7 @@ class Histogram(object):
                            end = (self.margin_left - 4, self.margin_top + self.height),
                            stroke_width = 0.5, stroke = "black"))
         self.plot.add(Line(start = (self.margin_left, self.margin_top + self.height + 4),
-                           end = (self.margin_left + self.width, self.margin_top + self.height + 4),
+                           end = (self.margin_left + self.height, self.margin_top + self.height + 4),
                            stroke_width = 0.5, stroke = "black"))
 
     def add_data(self, x):
@@ -115,11 +117,11 @@ class Histogram(object):
             print "%i %i" % (i, self.binned_data[i])
 
     def x_to_printx(self, x):
-        return self.margin_left + ((float(x) / self.x_max) * self.width)
+        return self.margin_left + ((float(x) / self.x_max) * self.height)
 
 
     def build(self):
-        bin_width = (self.width - ((self.bins + 1) * self.gap)) // self.bins    # floored division
+        bin_width = (self.height - ((self.bins + 1) * self.gap)) // self.bins    # floored division
         for i in range(self.bins):
             self.plot.add(Rect(insert = (self.margin_left + self.gap + (i * (bin_width + self.gap)),
                                        (self.margin_top + self.height) - ((float(self.binned_data[i]) / self.data_max) * self.height)),

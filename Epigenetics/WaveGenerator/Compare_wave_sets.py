@@ -29,9 +29,11 @@ from Statistics import Kolmogorov_Smirnov as stats
 # import ScatterPlot as scatterplot
 
 class WavePair():
+    '''An object for holding a pair of waves simultaneously'''
     # i, j, p, pos1, pos2, stddev1, stddev2
 
     def __init__(self, chromosome, i, j, p, pos1, pos2, stddev1, stddev2, height1, height2):
+        '''set initial values of the two waves'''
         self.chromosome = chromosome
         self.i = i
         self.j = j
@@ -42,18 +44,6 @@ class WavePair():
         self.stddev2 = stddev2
         self.ht1 = height1
         self.ht2 = height2
-
-    def get_i(self):
-        return self.i
-
-    def get_j(self):
-        return self.j
-
-    def get_ht1(self):
-        return self.ht1
-
-    def get_ht2(self):
-        return self.ht2
 
     def get_ratio_max(self):
         '''use this for calculating the ratio of the two peaks.
@@ -68,16 +58,20 @@ class WavePair():
 
 
     def to_string(self):
+        '''convet a wave pair to a string for printing.'''
         return str(self.chromosome) + "\t" + str(self.pos1) + "\t" + \
             str(self.pos2) + "\t" + str(self.stddev1) + "\t" + \
             str(self.stddev2) + "\t" + str(self.ht1) + "\t" + \
             str(self.ht2) + "\t" + str(self.p)
 
-    def type(self):
+    @staticmethod
+    def type():
+        '''return Wavepair when asked'''
         return "Wavepair"
 
 
 def run():
+    '''Main module to run the compare'''
     # build mongo connection
     print "opening connection(s) to MongoDB..."
     db_name = "human_epigenetics"
@@ -202,10 +196,10 @@ def run():
 
         # decide which peaks to use for normalization - make changes here.
         for b in both:
-            ratio = float(b.get_ht1()) / b.get_ht2()
+            ratio = float(b.ht1) / b.ht2
             if b.p < 0.0005 and ratio > (float(1) / 20) and ratio < 20:
-                x.append(b.get_ht1())
-                y.append(b.get_ht2())
+                x.append(b.ht1)
+                y.append(b.ht2)
 
 
     # h1 = histogram.Histogram("/home/afejes/temp/test_hist_x.svg", 100, x_max = 100)

@@ -7,65 +7,62 @@ Created on 2013-08-07
 from svgwrite.shapes import Rect
 from svgwrite.text import Text
 
-bigfont = 7
-medfont = 4.5
-smallfont = 4
+bigfont = 20
+medfont = 14
+smallfont = 10
 
-def get_axis(start, end, length, margin, width, axis_x_margin, axis_y_margin):
+def get_axis(start, end, width, margin, height, bottom_margin, right_margin):
+    '''leave "margin" on either side of the image, draw the axes along the 
+    boundaries of the margin.'''
     margin = margin
-    width = width
-    axis_x_margin = margin - 5
-    axis_x_margin = axis_x_margin
-    axis_y_margin = margin - 8
-    axis_y_margin = axis_y_margin 
-    x_axis = Rect(insert = (axis_x_margin, width + margin + axis_x_margin),
-            size = (length + 10, 0.1),
+    height = height
+    x_axis = Rect(insert = (margin, height - bottom_margin),
+            size = (width - (margin + right_margin), 1),
             fill = "midnightblue")
-    y_axis = Rect(insert = (axis_x_margin, axis_y_margin),
-        size = (0.1, width + margin + 3),
+    y_axis = Rect(insert = (margin, margin),
+        size = (1, height - (margin + bottom_margin)),    # viewing area is the height, minus the top margin and bottom margin.
         fill = "midnightblue")
-    
     return (x_axis, y_axis)
-    
 
-def add_tss(annotations, margin, width, scale_x, start, end, axis_x_margin, axis_y_margin):
+
+def add_tss(annotations, margin, height, scale_x, offset_x, end, bottom_margin):
     if annotations is None:
         return []
     annotations = annotations
-    margin = margin
-    width = width
-    spacing = 9
-    offset = 0 
+    spacing_gene = smallfont
+    spacing_tss = smallfont * 2.5
+
+    offset_y = 0
     elements = []
     x1 = 0
     font_size = smallfont
-    between_tss = 13
-    
-    #Add TSS line if there is in fact a TSS in this region
+    between_tss = font_size * 7
+
+    # Add TSS line if there is in fact a TSS in this region
     TSSs = annotations['TSS'].keys()
     TSSs.sort()
-    
+
     for tss in TSSs:
         gene_name = annotations['TSS'][tss]
         print 'TSS:', gene_name, tss
         previous_x1 = x1
-        x1 = margin + (tss-start)*scale_x
-        y1 = axis_y_margin + width + margin
-        length = margin + offset
-        thickness = 0.3
+        x1 = margin + (tss - offset_x) * scale_x
+        y1 = height - bottom_margin
+        length = margin + offset_y
+        thickness = 0.8
         color = 'dodgerblue'
-    
-        if offset > spacing*3 or (between_tss + previous_x1) < x1 :
-            offset = 0
-            
-        length = margin + offset
 
-        TSSline = Rect(insert = (x1, y1), 
+        if offset_y > spacing_tss * 2 or (between_tss + previous_x1) < x1 :
+            offset_y = 0
+
+        length = margin + offset_y + smallfont
+
+        TSSline = Rect(insert = (x1, y1),
                        size = (thickness, length),
                        fill = color, fill_opacity = 0.4)
-        TSS = (Text((str(tss)), insert = (x1+1, length+y1), fill = color, font_size = font_size-1, fill_opacity = 0.6))
-        gene = (Text(gene_name, insert = (x1+1, length+y1-spacing/2), fill = color, font_size = font_size, fill_opacity = 0.8))
-        offset += spacing
+        TSS = (Text((str(tss)), insert = (x1 + 1, length + y1), fill = color, font_size = font_size - 1, fill_opacity = 0.6))
+        gene = (Text(gene_name, insert = (x1 + 1, length + y1 - spacing_gene), fill = color, font_size = font_size, fill_opacity = 0.8))
+        offset_y += spacing_tss
 
         elements.append(TSSline)
         elements.append(TSS)
@@ -75,35 +72,28 @@ def add_tss(annotations, margin, width, scale_x, start, end, axis_x_margin, axis
 
 
 
-def add_cpg(annotations, margin, width, scale_x, start, end, axis_x_margin, axis_y_margin):
+def add_cpg(annotations, margin, height, scale_x, start, end, bottom_margin):
+    '''draw the cpg islands on the svg graph.'''
     if annotations is None:
         return []
-    annotations = annotations
-    margin = margin
-    width = width
     elements = []
-    x1 = 0
-     
-    for ((a,b),c) in annotations['Islands']:
-        #print 'island', a,b,c
-        if a < start: a = start
-        if b > end: b = end
-        x1 = margin + (a-start)*scale_x
-        y1 = axis_y_margin
-        length = y1 + width + margin -10
-        thickness = (b-a)*scale_x
-        #print x1, length, y1
-        
+
+    for ((a, b), c) in annotations['Islands']:
+        if a < start:
+            a = start
+        if b > end:
+            b = end
+        x1 = margin + (a - start) * scale_x
+        thickness = (b - a) * scale_x
+
         if 'IC' in c:
             color = 'limegreen'
         if 'HC' in c:
             color = 'darkgreen'
-    
-    
-        island = Rect(insert = (x1, y1), 
-                       size = (thickness,length),
-                       fill = color, 
+        island = Rect(insert = (x1, margin),
+                       size = (thickness, height - margin - bottom_margin),
+                       fill = color,
                        fill_opacity = 0.4)
         elements.append(island)
-    
+
     return elements

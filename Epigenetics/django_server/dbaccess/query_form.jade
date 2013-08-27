@@ -6,8 +6,10 @@ html
   
 body
     input(type="hidden", id="width", name="width")
+    input(type="hidden", id="height", name="height")
     script(type='text/javascript')
-      document.getElementById('width').value = window.screen.width;
+      document.getElementById('width').value = window.innerWidth;
+      document.getElementById('height').value = window.innerHeight;
     #header
         h1 Query Human Epigenetics Database
     
@@ -131,7 +133,9 @@ script(type='text/javascript')
       base += "&cpg=" + cpg
       base += "&datapoints=" + datapoints
       base += "&peaks=" + peaks
-      base += "&width=" + screen.width
+      base += "&width=" + window.innerWidth
+      base += "&height=" + window.innerHeight
+      
       
       return base
     }

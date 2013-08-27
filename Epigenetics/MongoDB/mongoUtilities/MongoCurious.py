@@ -63,11 +63,11 @@ class MongoCurious():
             start = int(start)
         else: start = 0
         self.start = start
-        
-        if start == end or start > end or start<0 or end<0:
+
+        if start == end or start > end or start < 0 or end < 0:
             self.message = 'Invalid start and end points.'
-        else: self.message = "" #contains error messages to pass to the server
-        
+        else: self.message = ""    # contains error messages to pass to the server
+
         # Make sure chr variable is in the right format
         if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
             chromosome = 'chr' + str(chromosome)
@@ -158,7 +158,7 @@ class MongoCurious():
 
         if self.message != '':
             return {}
-                
+
         # This dictionary will store all the query parameters
         query_parameters = {}
 
@@ -168,7 +168,7 @@ class MongoCurious():
             query_location = {}
             if self.end >= 0:
                 query_location["$lte"] = self.end
-            if self.start >=0:
+            if self.start >= 0:
                 query_location["$gte"] = self.start
             query_parameters["mapinfo"] = dict(query_location.items())
             # Decide which parameters to return
@@ -330,7 +330,7 @@ class MongoCurious():
         if docs == {}:
             self.waves = {}
             return None
-        
+
         # This list will store the tuple (pos,height, std dev, sample id) as a value.
         waves = []
         # "tail" is min height of a tail to be included in the plot for a peak
@@ -383,7 +383,7 @@ class MongoCurious():
             if geneclosest:
                 geneclosest = list(set(geneclosest.split(';')))
             genes = zip(tss1, geneclosest)
-                
+
             for tss, gene in genes:
                 tss = int(tss)
                 if tss >= self.start:
@@ -392,7 +392,7 @@ class MongoCurious():
                 else:
                     annotations['genes'].add((gene, tss))
 
-            #Pull regulatory features' coordinate. Not plotting these yet.
+            # Pull regulatory features' coordinate. Not plotting these yet.
             feature = str(doc['regulatory_feature_group'])
             feature_coord = str(doc['regulatory_feature_name'])
             if feature and feature_coord:
@@ -422,14 +422,14 @@ class MongoCurious():
 
     def svg(self, filename = None, title = None,
             color = None, to_string = False,
-            get_elements = False, length = 200.0,
+            get_elements = False, height = 200.0,
             margin = 20.0, width = 60.0,
             get_tss = False, get_cpg = False,
             show_points = False, show_peaks = False):
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an .svg file or a svg string for webserver rendering
         '''
-        
+
         print '\nmessage:', str(self.message)
         print show_points, show_peaks
         if filename:
@@ -442,12 +442,12 @@ class MongoCurious():
         if self.collection == "methylation":
             drawing = methylationplot.MethylationPlot(filename, title, self.message, self.sample_peaks,
                                                       self.pos_betas_dict, self.annotations,
-                                                      color, self.start, self.end, length,
-                                                      margin, width, show_points, show_peaks)
+                                                      color, self.start, self.end, width,
+                                                      margin, height, show_points, show_peaks)
         if self.collection == "waves":
             drawing = chipseqplot.ChipseqPlot(filename, title, self.message, self.waves, self.start,
-                                              self.end, self.annotations, length,
-                                              margin, width)
+                                              self.end, self.annotations, width,
+                                              margin, height)
 
         if to_string:
             print " Returning svg as a unicode string"

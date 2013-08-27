@@ -8,12 +8,10 @@ Tools used by views.py
 from .Annotations import showmethylation, showchipseq
 from django.http import HttpResponse
 
-length = 260.0
-width = 80.0
 margin = 20.0
 
-#Dictionary of zoom values
-zoom_factors = {'ZoomIn': 1/1.5, 'ZoomInMore': 1/3,
+# Dictionary of zoom values
+zoom_factors = {'ZoomIn': 1 / 1.5, 'ZoomInMore': 1 / 3,
                 'ZoomOut': 1.5, 'ZoomOutMore': 3.0}
 
 def zoom(zoom_symbol, start, end):
@@ -47,22 +45,22 @@ def check(p):
 
 def query(p):
     if p['collection'] == 'chipseq':
-        return showchipseq.svgcode(db = p['organism'], 
-                                   chromosome = p['chromosome'], 
-                                   start = p['start'], 
+        return showchipseq.svgcode(db = p['organism'],
+                                   chromosome = p['chromosome'],
+                                   start = p['start'],
                                    end = p['end'],
-                                   length = length,
-                                   width = width,
+                                   height = p['height'],
+                                   width = p['width'],
                                    margin = margin,
                                    tss = p['tss'],
                                    cpg = p['cpg'])
     elif p['collection'] == 'methylation':
-        return showmethylation.svgcode(db = p['organism'], 
-                                   chromosome = p['chromosome'], 
-                                   start = p['start'], 
+        return showmethylation.svgcode(db = p['organism'],
+                                   chromosome = p['chromosome'],
+                                   start = p['start'],
                                    end = p['end'],
-                                   length = length,
-                                   width = width,
+                                   height = p['height'],
+                                   width = p['width'],
                                    margin = margin,
                                    tss = p['tss'],
                                    cpg = p['cpg'],

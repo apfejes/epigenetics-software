@@ -47,6 +47,8 @@ def view_query_form(request):
     tss = q.get("tss", False)
     cpg = q.get("cpg", False)
     peaks = q.get("peaks", False)
+    width = q.get("width", 1000)
+    height = q.get("height", 600)
     datapoints = q.get("datapoints", True)
     print '\n', datapoints, peaks
 
@@ -70,18 +72,37 @@ def view_query_form(request):
         datapoints = True
     if peaks == 'on':
         peaks = True
-    if start:
-        start = int(start)
-    if end:
-        end = int(end)
 
-    parameters = {'organism':str(o), 'collection': str(col), 
-                  'chromosome': str(chrom), 'start': start, 'end':end, 
-                  'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks}
+    if start is None:
+        pass
+    elif start >= 0:
+        start = int(start)
+    else:
+        start = 0
+
+    if end is None:
+        pass
+    elif end > start:
+        end = int(end)
+    else:
+        end = start + 1
+
+    width = int(width)
+    if width < 600:
+        width = 600
+
+    height = int(height) - 250
+    if height < 400:
+        height = 400
+    parameters = {'organism':str(o), 'collection': str(col),
+                  'chromosome': str(chrom), 'start': start, 'end':end,
+                  'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks,
+                  'width':width, 'height':height }
     print 'parameters = ', parameters
 
     if check(parameters):
         svg = query(parameters)
     return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o,
                                                'collection':col, 'chromosome':chrom, 'start':start,
-                                               'end':end, 'tss':tss, 'cpg':cpg, 'datapoints': datapoints, 'peaks':peaks})
+                                               'end':end, 'tss':tss, 'cpg':cpg, 'datapoints': datapoints,
+                                                'peaks':peaks, 'width':width, 'height':height})

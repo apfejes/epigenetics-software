@@ -42,8 +42,8 @@ class MapDecomposer(multiprocessing.Process):
         if (MapDecomposer.PARAM is None):
             MapDecomposer.PARAM = PARAM
 
-        '''first variable is the sigma, second is the number of spaces away 
-            from the centre of the peak'''
+        # first variable is the sigma, second is the number of spaces away
+        # from the centre of the peak
         for i in xrange(1, max_sigma):    # sigma - which can't be = to zero
             for j in xrange(1, 3 * max_sigma):    # distance from peak
                 self.sigma_height_table[i][j] = \
@@ -141,7 +141,9 @@ class MapDecomposer(multiprocessing.Process):
             return False
         return True
 
-    def to_be_tested(self, sample):
+    @staticmethod
+    def to_be_tested(sample):
+        '''decide which samples are to be tested'''
         sample.sort()
         to_be_tested = set()
         for i in range(len(sample) - 1):
@@ -166,7 +168,9 @@ class MapDecomposer(multiprocessing.Process):
                         to_be_tested.add(t)
         return to_be_tested
 
-    def get_mu(self, testing):
+    @staticmethod
+    def get_mu(testing):
+        '''returns the best mu from the possible list'''
         start = 0
         end = 0
         height = 0    # this is actually the best sigma value
@@ -258,7 +262,7 @@ class MapDecomposer(multiprocessing.Process):
                 # print "got an item."
                 if map_item is None:
                     break
-                self.process_map(map_item, self.f)
+                self.process_map(map_item)
                 # print "map processed"
             except KeyboardInterrupt:
                 self.print_queue.put("ignoring Ctrl-C for worker process")
