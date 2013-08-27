@@ -38,15 +38,15 @@ body
                             select(name='collection', id='collection') 
                                 option(value="chipseq")="ChIP-Seq"
                                 option(value="methylation")="Methylation"
-                                option(value="meth+chip")="Both"
+                                option(value="methchip")="Both"
                         elif collection = "methylation"
                             select(name='collection', id='collection') 
                                 option(value="methylation")="Methylation"
                                 option(value="chipseq")="ChIP-Seq"
-                                option(value="meth+chip")="Both"
+                                option(value="methchip")="Both"
                         else 
                             select(name='collection', id='collection') 
-                                option(value="meth+chip")="Both"
+                                option(value="methchip")="Both"
                                 option(value="methylation")="Methylation"
                                 option(value="chipseq")="ChIP-Seq"
                     label(for='chromosome') Chromosome:
@@ -80,7 +80,7 @@ body
                             input(id='cpg', size = '8', type='checkbox', name="cpg", checked)
                         else
                             input(id='cpg', size = '8', type='checkbox', name="cpg")
-                if collection = 'methylation' or collection = "meth+chip"
+                if collection = 'methylation' or collection = "methchip"
                   #selection_element
                     label(for='datapoints') Show data points:
                         if datapoints

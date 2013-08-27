@@ -48,14 +48,13 @@ def add_tss(annotations, margin, height, scale_x, offset_x, end, bottom_margin):
         previous_x1 = x1
         x1 = margin + (tss - offset_x) * scale_x
         y1 = height - bottom_margin
-        length = margin + offset_y
         thickness = 0.8
         color = 'dodgerblue'
 
         if offset_y > spacing_tss * 2 or (between_tss + previous_x1) < x1 :
             offset_y = 0
 
-        length = margin + offset_y + smallfont
+        length = float(bottom_margin)/3.0 + offset_y + smallfont
 
         TSSline = Rect(insert = (x1, y1),
                        size = (thickness, length),
@@ -87,13 +86,15 @@ def add_cpg(annotations, margin, height, scale_x, start, end, bottom_margin):
         thickness = (b - a) * scale_x
 
         if 'IC' in c:
-            color = 'limegreen'
+            color = 'deepskyblue'
+            opacity = 0.2
         if 'HC' in c:
-            color = 'darkgreen'
+            color = 'darkseagreen'
+            opacity = 0.4
         island = Rect(insert = (x1, margin),
                        size = (thickness, height - margin - bottom_margin),
                        fill = color,
-                       fill_opacity = 0.4)
+                       fill_opacity = opacity)
         elements.append(island)
 
     return elements

@@ -11,7 +11,7 @@ from django.http import HttpResponse
 MARGIN = 60.0
 
 # Dictionary of zoom values
-zoom_factors = {'ZoomIn': 1 / 1.5, 'ZoomInMore': 1 / 3,
+zoom_factors = {'ZoomIn': 1.0 / 1.5, 'ZoomInMore': 1.0 / 3.0,
                 'ZoomOut': 1.5, 'ZoomOutMore': 3.0}
 
 def zoom(zoom_symbol, start, end):
@@ -66,7 +66,7 @@ def query(p):
                                    cpg = p['cpg'],
                                    datapoints = p['datapoints'],
                                    peaks = p['peaks'])
-    elif p['collection'] == 'meth+chip':
+    elif p['collection'] == 'methchip':
         return showchipandmeth.svgcode(db = p['organism'],
                                    chromosome = p['chromosome'],
                                    start = p['start'],

@@ -154,9 +154,9 @@ class MethylationPlot(object):
         ''' Add annotations, title, axis, tic marks and labels '''
         if self.title is None:
             self.title = "Methylation PLot"
-        Title = Text(self.title, insert = (bigfont + ((float(self.margin) - bigfont) / 2),
-                                           bigfont + ((float(self.margin) - bigfont) / 2)),
-                fill = "midnightblue", font_size = bigfont)
+        Title = Text(self.title, insert = (bigfont + ((float(self.margin) - bigfont) / 3),
+                                           bigfont + ((float(self.margin) - bigfont) / 3)),
+                                           fill = "midnightblue", font_size = bigfont)
         self.elements.append(Title)
 
         for axis in get_axis(self.start, self.end, self.width, self.margin, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
@@ -208,7 +208,7 @@ class MethylationPlot(object):
         spacing = fabs((self.margin + (xtics[1] - self.start) * self.scale_x) - (self.margin + (xtics[0] - self.start) * self.scale_x)) / 4
         for tic in xtics:
             tic_x = (self.margin + (tic - self.start) * self.scale_x)
-            tic_y = self.height - self.BOTTOM_MARGIN + smallfont
+            tic_y = self.height - self.BOTTOM_MARGIN + smallfont*1.5
             ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
             ticline = Rect(insert = (tic_x, self.height - self.BOTTOM_MARGIN - 2), size = (1, 5), fill = "midnightblue")
             for i in range (1, 4):
@@ -240,7 +240,7 @@ class MethylationPlot(object):
             self.elements.append(ticmarker)
 
     @staticmethod
-    def makegaussian(self, stddev, innerheight):
+    def makegaussian(stddev, innerheight):
         ''' TODO: fill in docstring '''
         endpts = (sqrt((-2) * stddev * stddev * log(1.0 / innerheight)))
         X = [0]
