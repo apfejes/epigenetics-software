@@ -1,3 +1,8 @@
+'''
+Mongo Query
+
+'''
+
 # from collections import OrderedDict #with Python 2.7 and above
 
 class MongoQuery():
@@ -33,7 +38,8 @@ class MongoQuery():
         lines = 0
         for key, value in self._data.iteritems():
             if value != None:
-                if lines % 2 == 0 and lines > 0: output += "\n    "
+                if lines % 2 == 0 and lines > 0:
+                    output += "\n    "
                 output += key + " : " + format(value) + ", "
                 lines += 1
         output += "\n    }"
