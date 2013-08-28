@@ -10,7 +10,7 @@ from MongoDB.mongoUtilities import MongoCurious
 
 def svgcode(db = None, chromosome = None, start = None,
             end = None, height = None, width = None,
-            margin = None, tss = False, cpg = False, datapoints = False, peaks = False):
+            tss = False, cpg = False, datapoints = False, peaks = False):
     '''TODO:missing docstring'''
     print("Connecting to database:")
     organism = str.capitalize(db)

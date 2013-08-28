@@ -147,7 +147,7 @@ class ChipseqPlot(object):
                                            fill = legend_color, font_size = bigfont)
         self.elements.append(Title)
 
-        for axis in get_axis(self.start, self.end, self.width, self.MARGIN, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
+        for axis in get_axis(self.width, self.MARGIN, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
             self.elements.append(axis)
 
         if self.message is '':

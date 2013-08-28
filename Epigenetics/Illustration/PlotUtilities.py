@@ -12,7 +12,7 @@ medfont = 14
 smallfont = 10
 legend_color = 'black'
 
-def get_axis(start, end, width, margin, height, bottom_margin, right_margin):
+def get_axis(width, margin, height, bottom_margin, right_margin):
     '''leave "margin" on either side of the image, draw the axes along the 
     boundaries of the margin.'''
     margin = margin
@@ -45,7 +45,7 @@ def add_tss(annotations, margin, height, scale_x, offset_x, end, bottom_margin):
 
     for tss in TSSs:
         gene_name = annotations['TSS'][tss]
-        #print 'TSS:', gene_name, tss
+        # print 'TSS:', gene_name, tss
         previous_x1 = x1
         x1 = margin + (tss - offset_x) * scale_x
         y1 = height - bottom_margin
@@ -55,7 +55,7 @@ def add_tss(annotations, margin, height, scale_x, offset_x, end, bottom_margin):
         if offset_y > spacing_tss * 2 or (between_tss + previous_x1) < x1 :
             offset_y = 0
 
-        length = float(bottom_margin)/3.0 + offset_y + smallfont
+        length = float(bottom_margin) / 3.0 + offset_y + smallfont
 
         TSSline = Rect(insert = (x1, y1),
                        size = (thickness, length),

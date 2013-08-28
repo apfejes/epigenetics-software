@@ -23,7 +23,7 @@ class MethylationPlot(object):
     DISTR_HT = 12.0
     DISTR_STROKE = 0.5
     BOTTOM_MARGIN = 120    # 120 pixels
-    RIGHT_MARGIN = 70
+    RIGHT_MARGIN = 100
     MARGIN = 30
 
 
@@ -157,7 +157,7 @@ class MethylationPlot(object):
                                            fill = legend_color, font_size = bigfont)
         self.elements.append(Title)
 
-        for axis in get_axis(self.start, self.end, self.width, self.MARGIN, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
+        for axis in get_axis(self.width, self.MARGIN, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
             self.elements.append(axis)
 
         if self.message is '':
