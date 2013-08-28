@@ -44,6 +44,7 @@ chr_yeast = {
 probeset = []
 
 class row():
+    '''Simple object that  holds a triplex of data from a bed file'''
 
     @staticmethod
     def type():
@@ -51,6 +52,7 @@ class row():
         print ("Row")
 
     def __init__(self, chrom, pos, v):
+        '''initialize row object'''
         self.chromosome = chrom
         self.position = pos
         self.value = v

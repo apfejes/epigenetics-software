@@ -20,28 +20,28 @@ import Mongo_Connector
 
 
 
-def AddAnnotations(collection_name, annotation_name, annotQuery):
+def AddAnnotations(collection, annotation, Query):
     '''Updates methylation data with annotation information'''
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
-    mongo.ensure_index(annotation_name, 'array_type')
-    mongo.ensure_index(collection_name, 'probe_id')    # Speed
+    mongo.ensure_index(annotation, 'array_type')
+    mongo.ensure_index(collection, 'probe_id')    # Speed
     fQuery = {'array_type': 'humanmethylation450_beadchip'}
     rQuery = {'TargetID': True, 'Probe_start': True, 'Probe_end': True, 'CHR': True}
     print('Finding annotation information')
-    annot_cursor = mongo.find(annotation_name, findQuery = fQuery, returnQuery = rQuery)
+    annot_cursor = mongo.find(annotation, findQuery = fQuery, returnQuery = rQuery)
 
     count = 0
     starttime = time.time()
     print('Updating methylation data with annotation info')
     for annot_doc in annot_cursor:
-        queryDict = {'$and': [{'probe_id': annot_doc['TargetID']}, annotQuery]}
+        queryDict = {'$and': [{'probe_id': annot_doc['TargetID']}, Query]}
         # queryDict = [{'probe_id': annot_doc['TargetID']}, {'annotation_id': {'$exists': False}}]
         updateDict = {'start_position': annot_doc['Probe_start'],
                       'end_position': annot_doc['Probe_end'],
                       'CHR': annot_doc['CHR'],
                       'annotation_id': annot_doc['_id']}
         mongoDict = {'$set': updateDict}
-        mongo.update(collection_name, queryDict, mongoDict)
+        mongo.update(collection, queryDict, mongoDict)
         count += 1
         if count % 10000 == 0:
             print count, time.time() - starttime, 'seconds'

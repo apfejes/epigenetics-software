@@ -19,9 +19,7 @@ def CreateListFromCursor(cursor):
 
 
 class MongoUtilities(object):
-    '''
-    classdocs
-    '''
+    '''TODO:missing docstring'''
 
 
     def __init__(self, mongo):
@@ -32,6 +30,7 @@ class MongoUtilities(object):
         self.mongo = mongo
 
     def get_chip_seq_sample_names(self):
+        '''TODO:missing docstring'''
         collection = "samples"
         curs = self.mongo.find(collection, {"haswaves":{"$exists": True}}, {"cell_line": True, "chip": True})
         results = []
@@ -40,6 +39,7 @@ class MongoUtilities(object):
         return results
 
     def get_chromosome_names(self):
+        '''TODO:missing docstring'''
         collection = "chromosomes"
         curs = self.mongo.find(collection, {"_id":{"$exists": True}})
         results = []
@@ -48,6 +48,7 @@ class MongoUtilities(object):
         return results
 
     def get_sample_id_from_name(self, name):
+        '''TODO:missing docstring'''
         collection = "samples"
         results = []
         if " - " in name:

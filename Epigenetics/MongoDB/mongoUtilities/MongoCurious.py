@@ -53,6 +53,7 @@ class MongoCurious():
                 project = None,
                 sample_group = None,
                 sample_label = None):
+        '''TODO:missing docstring'''
         self.collection = collection
         if end:
             end = int(end)
