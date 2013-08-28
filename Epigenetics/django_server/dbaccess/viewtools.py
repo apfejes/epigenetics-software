@@ -7,7 +7,7 @@ Tools used by views.py
 '''
 from .Annotations import showmethylation, showchipseq, showchipandmeth
 
-MARGIN = 60.0
+MARGIN = 30.0
 
 # Dictionary of zoom values
 zoom_factors = {'ZoomIn': 1.0 / 1.5, 'ZoomInMore': 1.0 / 3.0,

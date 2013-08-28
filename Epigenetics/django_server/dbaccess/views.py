@@ -86,13 +86,15 @@ def view_query_form(request):
     else:
         end = start + 1
 
-    width = int(width)
+
+    width = int(width) - 100
     if width < 600:
         width = 600
 
-    height = int(height) - 250
+    height = int(height) - 300
     if height < 400:
         height = 400
+
     parameters = {'organism':str(o), 'collection': str(col),
                   'chromosome': str(chrom), 'start': start, 'end':end,
                   'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks,

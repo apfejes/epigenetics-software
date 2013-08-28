@@ -1,3 +1,4 @@
+'''Library to generate svg views of methylation data'''
 import os, sys
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
@@ -10,6 +11,7 @@ from MongoDB.mongoUtilities import MongoCurious
 def svgcode(db = None, chromosome = None, start = None,
             end = None, height = None, width = None,
             margin = None, tss = False, cpg = False, datapoints = False, peaks = False):
+    '''TODO:missing docstring'''
     print("Connecting to database:")
     organism = str.capitalize(db)
     database = db + "_epigenetics"
