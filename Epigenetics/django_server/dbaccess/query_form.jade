@@ -66,7 +66,7 @@ body
                             input(id='end', size = '8', type='text', value=end, name='end')
                         else
                             input(id='end', size = '8', type='text', value='', name='end')
-                    input(type='submit',value='Query!', data-transition='fade', data-theme='c')
+                    input(type='submit',value='Query!', class ="bigbutton")
             #option_elements
                 if organism = 'human'
                   #selection_element
@@ -97,21 +97,21 @@ body
                     
             #zoompan
               #selection_element
-                input(type='button',value = '<<<',name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self');")
+                input(type='button',value = '<<<', title="Pan left 90%", name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self');", class = "medbutton")
               #selection_element
-                input(type='button',value = '<<',name='LessLeft', onClick="window.open(newURL('LessLeft'),'_self');")
+                input(type='button',value = '<<',title="Pan left 60%", name='LessLeft', onClick="window.open(newURL('LessLeft'),'_self');", class = "medbutton")
               #selection_element
-                input(type='button',value = '--',name='ZoomOutMore', onClick="window.open(newURL('ZoomOutMore'),'_self');")
+                input(type='button',value = '--', title="Zoom Out x3", name='ZoomOutMore', onClick="window.open(newURL('ZoomOutMore'),'_self');", class = "medbutton")
               #selection_element
-                input(type='button',value = '-',name='ZoomOut', onClick="window.open(newURL('ZoomOut'),'_self');")
+                input(type='button',value = '-',title='Zoom Out x1.5', name='ZoomOut', onClick="window.open(newURL('ZoomOut'),'_self');", class = "medbutton")
               #selection_element
-                input(type='button',value = '+',name='ZoomIn', onClick="window.open(newURL('ZoomIn'),'_self');")
+                input(type='button',value = '+',title='Zoom In x1.5', name='ZoomIn', onClick="window.open(newURL('ZoomIn'),'_self');", class = "medbutton")
               #selection_element
-                input(type='button',value = '++',name='ZoomInMore', onClick="window.open(newURL('ZoomInMore'),'_self');")
+                input(type='button',value = '++',title='Zoom In x3', name='ZoomInMore', onClick="window.open(newURL('ZoomInMore'),'_self');", class = "medbutton")
               #selection_element
-                input(type='button',value = '>>',name='LessRight', onClick="window.open(newURL('LessRight'),'_self');")
+                input(type='button',value = '>>', title="Pan right 60%", name='LessRight', onClick="window.open(newURL('LessRight'),'_self');", class = "medbutton")
               #selection_element
-                input(type='button',value = '>>>',name='MoreRight', onClick="window.open(newURL('MoreRight'),'_self');")
+                input(type='button',value = '>>>', title="Pan right 90%", name='MoreRight', onClick="window.open(newURL('MoreRight'),'_self');", class = "medbutton")
         |!{plot}
              
 

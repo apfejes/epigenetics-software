@@ -10,7 +10,7 @@ from svgwrite.path import Path
 
 from math import exp, sqrt, fabs, log
 
-from PlotUtilities import get_axis, add_cpg, add_tss, bigfont, medfont, smallfont
+from PlotUtilities import get_axis, add_cpg, add_tss, bigfont, medfont, smallfont, legend_color
 
 class ChipseqPlot(object):
     '''
@@ -59,7 +59,7 @@ class ChipseqPlot(object):
 
         if message:
             Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
-                    fill = "black", font_size = bigfont * 2)
+                    fill = legend_color, font_size = bigfont * 2)
             self.elements.append(Message)
         else:
             self.build()
@@ -142,9 +142,9 @@ class ChipseqPlot(object):
         ''' Add annotations, title, axis, tic marks and labels '''
         if self.title is None:
             self.title = "ChIP-Seq PLot"
-        Title = Text(self.title, insert = (bigfont + ((float(self.MARGIN) - bigfont) / 3),
-                                           bigfont + ((float(self.MARGIN) - bigfont) / 3)),
-                                           fill = "midnightblue", font_size = bigfont)
+        Title = Text(self.title, insert = (bigfont + ((float(self.margin) - bigfont) / 3),
+                                           bigfont + ((float(self.margin) - bigfont) / 3)),
+                                           fill = legend_color, font_size = bigfont)
         self.elements.append(Title)
 
         for axis in get_axis(self.start, self.end, self.width, self.MARGIN, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
@@ -197,11 +197,11 @@ class ChipseqPlot(object):
         for tic in xtics:
             tic_x = (self.MARGIN + (tic - self.start) * self.scale_x)
             tic_y = self.height - self.BOTTOM_MARGIN + smallfont * 1.5
-            ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
-            ticline = Rect(insert = (tic_x, self.height - self.BOTTOM_MARGIN - 2), size = (1, 5), fill = "midnightblue")
+            ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
+            ticline = Rect(insert = (tic_x, self.height - self.BOTTOM_MARGIN - 2), size = (1, 5), fill = legend_color)
             for i in range (1, 4):
                 if tic_x - spacing * i > self.MARGIN - 5:
-                    ticline2 = Rect(insert = (tic_x - spacing * i, self.height - self.BOTTOM_MARGIN - 2), size = (1, 2), fill = "midnightblue")
+                    ticline2 = Rect(insert = (tic_x - spacing * i, self.height - self.BOTTOM_MARGIN - 2), size = (1, 2), fill = legend_color)
                     self.elements.append(ticline2)
             self.elements.append(ticline)
             self.elements.append(ticmarker)
@@ -215,12 +215,10 @@ class ChipseqPlot(object):
             labels += [i for i in range(0, int(self.maxh) + 1, scale_tics) if i not in labels]
         ytics = [round(self.height - self.BOTTOM_MARGIN - y * self.scale_y, 3) for y in labels]
         spacing = (ytics[0] - ytics[1]) / 2
-
-
         for tic, label in zip(ytics, labels):
-            ticline = Rect(insert = (self.MARGIN - 2, tic), size = (5, 1), fill = "midnightblue")
+            ticline = Rect(insert = (self.MARGIN - 2, tic), size = (5, 1), fill = legend_color)
             if tic - spacing > self.MARGIN:
-                ticline2 = Rect(insert = (self.MARGIN - 2, tic - spacing), size = (2, 1), fill = "midnightblue")
+                ticline2 = Rect(insert = (self.MARGIN - 2, tic - spacing), size = (2, 1), fill = legend_color)
                 self.elements.append(ticline2)
             tic_x = self.MARGIN - smallfont * 2
             tic_y = tic + 1
@@ -228,7 +226,7 @@ class ChipseqPlot(object):
                 tic_x = tic_x + 3
             if len(str(label)) == 2:
                 tic_x = tic_x + 2
-            ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
+            ticmarker = (Text(label, insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
             self.elements.append(ticline)
             self.elements.append(ticmarker)
 
