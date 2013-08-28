@@ -68,7 +68,7 @@ def AskTopBtmRdn():
 
     return tb, skip
 
-def GetProbesFromHits(probe_list_fname, skip_rows):
+def GetProbesFromHits(pr_list_fname, skip_rows):
     '''
     Get list of probes from probe_list_fname, also get other values such as 
     expected difference in beta values. 
@@ -78,26 +78,26 @@ def GetProbesFromHits(probe_list_fname, skip_rows):
     if the directionality of the difference between blood and buccal could
     be informative/predictive. 
     '''
-    probe_list = []
+    pr_list = []
     take_top_n_hits = 50    # Take top n hits.
-    count = 0
+    c = 0
     # Grab information regarding buccal vs. blood.
-    with open(probe_list_fname, 'rb') as hit_file:
+    with open(pr_list_fname, 'rb') as hit_file:
         probe_reader = csv.reader(hit_file, delimiter = '\t')
         for _ in xrange(skip_rows):
             probe_reader.next()
         for row in probe_reader:
-            probe_list.append(row[23])    # Probe_iD
+            pr_list.append(row[23])    # Probe_iD
             # delta_beta.append(row[5])    # Expected beta diff btwn buccal vs blood
             # cg_no.append(row[23])    # cg_no (x-axis of the plot)
-            count += 1
-            if count > take_top_n_hits:
+            c += 1
+            if c > take_top_n_hits:
                 break
     hit_file.close()
 
-    return probe_list
+    return pr_list
 
-def GetRandomProbesFromHits(probe_list_fname, random_probes):
+def GetRandomProbesFromHits(pr_list_fname, random_probes):
     '''
     Get a random list of probes from probe_list_fname, also get other values such as 
     expected difference in beta values. 
@@ -107,19 +107,19 @@ def GetRandomProbesFromHits(probe_list_fname, random_probes):
     if the directionality of the difference between blood and buccal could
     be informative/predictive. 
     '''
-    probe_list = []
-    count = 0
+    p_list = []
+    # count = 0
     # Grab information regarding buccal vs. blood.
-    with open(probe_list_fname, 'rb') as hit_file:
+    with open(pr_list_fname, 'rb') as hit_file:
         probe_reader = csv.reader(hit_file, delimiter = '\t')
         for row in probe_reader:
-            probe_list.append(row[23])    # ProbeID for methyl450k
-            count += 1
+            p_list.append(row[23])    # ProbeID for methyl450k
+            # count += 1
     hit_file.close()
 
     # Get 50 random probes from probe_list.
     random_indices = random.sample(xrange(0, len(probe_list)), random_probes)
-    probe_list_subset = [probe_list[i] for i in random_indices]
+    probe_list_subset = [p_list[j] for j in random_indices]
 
     return probe_list_subset
 
@@ -130,20 +130,19 @@ def GetDataFromProbeList(probe_list):
 
     # Attach prefix to probename for searching in methylation collection
     probe_list_prefixed = []
-    for p in probe_list:
-        probe_list_prefixed.append(''.join((prefix, p)))
+    for pr in probe_list:
+        probe_list_prefixed.append(''.join((prefix, pr)))
         # probe_list.append(''. join((prefix, probe_dic['cg_no'])))
     print probe_list_prefixed
 
-    '''
-    From probe_list, get sample data. Then find number of samples.
-    '''
+    # From probe_list, get sample data. Then find number of samples.
+
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
     mongo.ensure_index(methylation_collection, 'annotation_id')    # For speed
 
     fQuery = {'$and': [{'annotation_id': {'$in': probe_list_prefixed}}, {'project': 'down'}]}
     rQuery = {'sample_label': True, 'start_position': True, 'beta_value': True,
-              'beta_value': True, 'CHR': True, '_id': False, 'annotation_id': True}
+              'CHR': True, '_id': False, 'annotation_id': True}
     data_cursor = mongo.find(methylation_collection, findQuery = fQuery,
                              returnQuery = rQuery).sort([('annotation_id', pymongo.ASCENDING),
                                                         ('sample_label', pymongo.ASCENDING)])
@@ -157,26 +156,26 @@ def GetDataFromProbeList(probe_list):
     samples_list = list(samples_cursor)
 
 
-    '''
-    Purpose of this for loop:
-        Create a dictionary where keys are probe ids, values is list of M-values.
-        We also want to create a list of sample_ids that should match the M-values.
-        
-    How I did it:
-        First, define current probe of doc.
-        Second, extend a list of M-values, but don't insert it into dictionary
-        until we have found all the M-values in that probe.
-        Third, check if current probe equals previous probe (from prev doc).
-            Note: this if only applies after the first iteration (count != 0)
-            If current probe != previous probe, we have found all M-vals for
-            that probe. So we will create a key:value pair where key is probe_id
-            and value is list of M-values. 
-        Fourth, make a sample_list so we can correspond M-vals to sample. But we
-        only want to make this list once, so after we have iterated through all the
-        samples in the first probe, stop doing this. 
-    '''
+
+#     Purpose of this for loop:
+#         Create a dictionary where keys are probe ids, values is list of M-values.
+#         We also want to create a list of sample_ids that should match the M-values.
+#
+#     How I did it:
+#         First, define current probe of doc.
+#         Second, extend a list of M-values, but don't insert it into dictionary
+#         until we have found all the M-values in that probe.
+#         Third, check if current probe equals previous probe (from prev doc).
+#             Note: this if only applies after the first iteration (count != 0)
+#             If current probe != previous probe, we have found all M-vals for
+#             that probe. So we will create a key:value pair where key is probe_id
+#             and value is list of M-values.
+#         Fourth, make a sample_list so we can correspond M-vals to sample. But we
+#         only want to make this list once, so after we have iterated through all the
+#         samples in the first probe, stop doing this.
+#
     exprs_list = []
-    sample_list = []
+    samp_list = []
     check_samples = []
     dataDict = {}
     prev_probe = None
@@ -193,16 +192,16 @@ def GetDataFromProbeList(probe_list):
             dataDict[probe_no_prefix] = exprs_list
             exprs_list = []
             # Check if samples are in right order
-            if sample_list == check_samples:
+            if samp_list == check_samples:
                 pass
             else:
                 print('Warning, samples arent in right order.')
-                print sample_list
+                print samp_list
                 print check_samples
             check_samples = []
             probe_count += 1
         if probe_count == 0:
-            sample_list.append(doc['sample_label'])
+            samp_list.append(doc['sample_label'])
         check_samples.append(doc['sample_label'])    # Check if samples are in right order
         exprs_list.append(doc['beta_value'])
         prev_probe = doc['annotation_id']
@@ -210,9 +209,8 @@ def GetDataFromProbeList(probe_list):
     probe_no_prefix = prev_probe.replace(prefix, "")
     dataDict[probe_no_prefix] = exprs_list
 
-    '''
-    Three if conditions for sanity check. Maybe make this into unit test?
-    '''
+#     Three if conditions for sanity check. Maybe make this into unit test?
+
     if len(dataDict.keys()) != len(probe_list):
         print('Warning, probe lengths do not match number of keys in dictionary')
         print('Probe length: %s' % len(probe_list))
@@ -231,7 +229,7 @@ def GetDataFromProbeList(probe_list):
     return {'data_dictionary': dataDict, 'sample_list': sample_list}
 
 def EstimateBloodContamination(data_dict, sample_list, control_samples,
-                               diseased_samples, probe_list_fname, top_hit):
+                               diseased_samples, pr_list_fname, top_hit):
     '''
     Finds average of control and then takes each diseased sample and 
     calculates difference between diseased sample and avg controls.
@@ -247,41 +245,41 @@ def EstimateBloodContamination(data_dict, sample_list, control_samples,
     for s in diseased_samples:
         diseased_avgdiff[s] = []    # No values just yet
 
-    probe_list = []
+    pr_list = []
 
     beta_control = []
     beta_diseased = []
     print data_dict[top_hit]
-    count = 0
+    c = 0
     print sample_list
     for b in data_dict[top_hit]:
-        if sample_list[count] in control_samples:
+        if sample_list[c] in control_samples:
             beta_control.append(b)
-        elif sample_list[count] in diseased_samples:
+        elif sample_list[c] in diseased_samples:
             beta_diseased.append(b)
         else:
             print('Sample in neither control or diseased')
-        count += 1
+        c += 1
     control_avg = float(sum(beta_control)) / len(beta_control)
     # diseased_avg = float(sum(beta_diseased)) / len(beta_diseased)
     for j in xrange(0, len(beta_diseased)):
         avgdiff = beta_diseased[j] - control_avg
         diseased_avgdiff[diseased_samples[j]] = avgdiff
-    probe_list.append(top_hit)
+    pr_list.append(top_hit)
     print diseased_avgdiff
 
     buccal_avg = []
     blood_avg = []
     probe_count = 0
-    with open(probe_list_fname, 'rb') as hit_file:
+    with open(pr_list_fname, 'rb') as hit_file:
         probe_reader = csv.reader(hit_file, delimiter = '\t')
         for row in probe_reader:
-            if row[23] in probe_list:    # row[23] is cg probename
+            if row[23] in pr_list:    # row[23] is cg probename
                 buccal_avg.append(float(row[3]))
                 blood_avg.append(float(row[4]))
                 probe_count += 1
-            if probe_count >= len(probe_list):
-                print('All %s probes found' % len(probe_list))
+            if probe_count >= len(pr_list):
+                print('All %s probes found' % len(pr_list))
                 break
     hit_file.close()
 
@@ -289,8 +287,8 @@ def EstimateBloodContamination(data_dict, sample_list, control_samples,
     exper_list_samps = []
     for samp, experimental_diff in diseased_avgdiff.iteritems():
         init = 0.5    # Guess the blood contamination fraction
-        mix_frac = init
-        count = 0
+        mix_frc = init
+        c = 0
         rel_error = 1
         errorthreshold = 1e-2
         countthreshold = 1000
@@ -298,41 +296,41 @@ def EstimateBloodContamination(data_dict, sample_list, control_samples,
         mix_frac_list = []
         theor_list = []
         exper_list = []
-        while (abs(rel_error) > errorthreshold) and (count < countthreshold) and (mix_frac < 1) and (mix_frac > 0):
+        while (abs(rel_error) > errorthreshold) and (c < countthreshold) and (mix_frc < 1) and (mix_frc > 0):
 
             if experimental_diff > 0:
                 exper_list.append(experimental_diff)
-                mix_frac = 0
+                mix_frc = 0
                 rel_error = 0    # Dangerous to say 0?
                 print('%s experimental diff greater than zero, ignoring' % samp)
                 break
 
             theor_avg_diff_list = []
-            blood_weight = [j * mix_frac for j in blood_avg]
-            buccal_weight = [j * (1 - mix_frac) for j in buccal_avg]
+            blood_weight = [j * mix_frc for j in blood_avg]
+            buccal_weight = [j * (1 - mix_frc) for j in buccal_avg]
             avg_weight = [k + j for k, j in zip(blood_weight, buccal_weight)]
             for j in xrange(0, len(buccal_avg)):
                 theor_avg_diff_list.append(avg_weight[j] - buccal_avg[j])
             theoretical_diff = float(sum(theor_avg_diff_list)) / len(theor_avg_diff_list)
             rel_error = float(abs(experimental_diff) - abs(theoretical_diff)) / float(experimental_diff)
             error_list.append(abs(rel_error))
-            mix_frac_list.append(mix_frac)
+            mix_frac_list.append(mix_frc)
             theor_list.append(theoretical_diff)
             exper_list.append(experimental_diff)
             if rel_error < 0 and abs(rel_error) > errorthreshold:
-                # mix_frac -= 0.025
-                mix_frac *= 1.05
+                # mix_frc -= 0.025
+                mix_frc *= 1.05
             elif rel_error > 0 and abs(rel_error) > errorthreshold:
-                # mix_frac -= 0.025
-                mix_frac *= 0.95
-            elif count == countthreshold - 1:
+                # mix_frc -= 0.025
+                mix_frc *= 0.95
+            elif c == countthreshold - 1:
                 print('Count limit reached, no solution found')
             else:
                 print('%s: rel_error within threshold, error is %s.' % (samp, abs(rel_error)))
-            count += 1
-            # print samp, theoretical_diff, experimental_diff, rel_error, mix_frac
+            c += 1
+            # print samp, theoretical_diff, experimental_diff, rel_error, mix_frc
 
-        sample_mix_tup.append((samp, mix_frac, rel_error))
+        sample_mix_tup.append((samp, mix_frc, rel_error))
         exper_list_samps.append(exper_list[0])
 
     return sample_mix_tup
@@ -350,11 +348,12 @@ def PlotSuspectedContamination(sample_mix_tup, probe):
     plt.axis([-0.5, xmax, 0, 1])
     return sam, fra
 
-def CalculateAvgContamination(samps_list, fracs_list):
-    samps = samps_list[0]    # List in each index should contain same list.
-    fracs_by_samps = []    # Rearrange fracs_list so each index is its own list
-    for i in xrange(0, len(samps)):
-        fracs_by_samps.append([j[i] for j in fracs_list])
+def CalculateAvgContamination(samp_list, fr_list):
+    '''Calculate the average contamination'''
+    sample = samp_list[0]    # List in each index should contain same list.
+    fracs_by_samps = []    # Rearrange fr_list so each index is its own list
+    for k in xrange(0, len(sample)):
+        fracs_by_samps.append([j[k] for j in fr_list])
 
     # Calculate mean and variance.
     mean_list = []
@@ -371,51 +370,51 @@ def CalculateAvgContamination(samps_list, fracs_list):
         stderr_list.append(((Sum_sqr - ((Sum * Sum) / n)) / (n - 1)) ** 0.5)
         mean_list.append(Sum / n)
 
-    x = range(0, len(samps))
+    x = range(0, len(sample))
     plt.bar(x, mean_list, align = 'center', yerr = stderr_list)
     plt.ylabel('Average predicted fraction of blood in buccal sample', fontsize = 15)
     plt.title('Predicted blood fraction: Averaged over 4 probes', fontsize = 15)
-    plt.xticks(x, samps, fontsize = 10, rotation = 45)
+    plt.xticks(x, sample, fontsize = 10, rotation = 45)
     _, xmax, _, _ = plt.axis()
     plt.axis([-0.5, xmax, 0, 1])
 
-    return samps, fracs
+    return sample, fracs
 
 
 
 
-def PlotBetasInProbes(data_dict, sample_list, suspected_samples, probe_list, title):
+def PlotBetasInProbes(d_dict, samp_list, suspect_samples, pr_list, plot_title):
     '''
     From data_dictionary of probe:datalist pairs, plot the datalist against probe.
     Inputs:
-        data_dict: probe:datalist pair. Unordered, so probe_list is used to make sure 
+        d_dict: probe:datalist pair. Unordered, so probe_list is used to make sure 
             it plots with the same order as probe_list. 
-        sample_list: list of samples, tells the datalist which data corresponds
+        samp_list: list of samples, tells the datalist which data corresponds
             to which sample. 
-        suspected_samples: samples that are 'suspected' and will be colored red. 
+        suspect_samples: samples that are 'suspected' and will be colored red. 
             Suspected could be: if you think some samples are contaminated, you would 
             color those samples red, and everything else a different color for
             cmoparison purposes.
-        probe_list: list of probes to make sure data_dict plots in same order as 
+        pr_list: list of probes to make sure data_dict plots in same order as 
             probe_list. 
-        title: title of plot. 
+        plot_title: title of plot. 
     '''
 
     # Set plotcolors. Color suspected samples 'red'
     plotcolors = []
-    for s in sample_list:
-        if s in suspected_samples:
+    for s in samp_list:
+        if s in suspect_samples:
             plotcolors.append('red')
         else:
             plotcolors.append('blue')
 
     x_list = []    # For plotting
-    for i in xrange(len(sample_list)):
+    for j in xrange(len(samp_list)):
         y_list = []    # Reset for every i
-        for p in probe_list:
-            if i == 0:
-                x_list.append(p)
-            y_list.append(data_dict[p][i])
+        for pr in pr_list:
+            if j == 0:
+                x_list.append(pr)
+            y_list.append(d_dict[pr][j])
 
 #         for probe, val_list in data_dict.iteritems():
 #             if i == 0:
@@ -423,11 +422,11 @@ def PlotBetasInProbes(data_dict, sample_list, suspected_samples, probe_list, tit
 #                 x_list.append(probe.replace(prefix, ""))
 #             y_list.append(val_list[i])
 
-        plots.makeXYPlot(range(len(x_list)), y_list, 'probe ID', 'Beta-value', title,
-                         sample_list[i], plotcolors[i])
+        plots.makeXYPlot(range(len(x_list)), y_list, 'probe ID', 'Beta-value', plot_title,
+                         samp_list[j], plotcolors[j])
 
     plt.xticks(range(len(x_list)), x_list, size = 'small', rotation = 45)
-    plt.title(title, y = 0.92, fontsize = 20)
+    plt.title(plot_title, y = 0.92, fontsize = 20)
 
     # Adjust x-axis, concatonate an expected delta beta value to x-axis to
     # see expected difference between blood and buccal
@@ -439,16 +438,16 @@ def PlotBetasInProbes(data_dict, sample_list, suspected_samples, probe_list, tit
 
     return x_list
 
-def PlotBuccalVsBlood(probe_list_fname, probes_to_plot, mix_frac):
+def PlotBuccalVsBlood(pr_list_fname, probes_to_plot, mix_frc):
     '''TODO: Missing docstring'''
-    subtitle = 'Avg Beta Values of Buccal and Contaminated Buccal (%s fraction blood)' % mix_frac
+    subtitle = 'Avg Beta Values of Buccal and Contaminated Buccal (%s fraction blood)' % mix_frc
     beta_buccal = []
     beta_blood = []
     cg_no = []
     number_of_probes = len(probes_to_plot)
     probe_count = 0
     # Grab information regarding buccal vs. blood.
-    with open(probe_list_fname, 'rb') as hit_file:
+    with open(pr_list_fname, 'rb') as hit_file:
         probe_reader = csv.reader(hit_file, delimiter = '\t')
         for row in probe_reader:
             if row[23] in probes_to_plot:
@@ -456,7 +455,7 @@ def PlotBuccalVsBlood(probe_list_fname, probes_to_plot, mix_frac):
                 blood_avg = float(row[4])
                 beta_buccal.append(buccal_avg)    # Average buccal beta val
                 # Imagine it is a blood/buccal mixture...
-                beta_blood.append((1 - mix_frac) * buccal_avg + mix_frac * blood_avg)
+                beta_blood.append((1 - mix_frc) * buccal_avg + mix_frc * blood_avg)
                 cg_no.append(row[23])    # cg_no (probeID)
                 probe_count += 1
             if probe_count >= number_of_probes:
@@ -466,7 +465,7 @@ def PlotBuccalVsBlood(probe_list_fname, probes_to_plot, mix_frac):
     plots.makeXYPlot(range(len(cg_no)), beta_buccal, '', 'Beta-value', None,
                      'buccal', 'blue')
     plots.makeXYPlot(range(len(cg_no)), beta_blood, '', 'Beta-value', None,
-                     '%s blood, %s buccal' % (mix_frac, 1 - mix_frac), 'red')
+                     '%s blood, %s buccal' % (mix_frc, 1 - mix_frc), 'red')
     plt.title(subtitle, fontsize = 20)
     plt.xticks(range(len(cg_no)), cg_no, size = 'small', rotation = 45)
 
