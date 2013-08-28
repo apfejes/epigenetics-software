@@ -7,8 +7,6 @@ Tools used by views.py
 '''
 from .Annotations import showmethylation, showchipseq, showchipandmeth
 
-MARGIN = 30.0
-
 # Dictionary of zoom values
 zoom_factors = {'ZoomIn': 1.0 / 1.5, 'ZoomInMore': 1.0 / 3.0,
                 'ZoomOut': 1.5, 'ZoomOutMore': 3.0}
@@ -55,7 +53,6 @@ def query(p):
                                    end = p['end'],
                                    height = p['height'],
                                    width = p['width'],
-                                   margin = MARGIN,
                                    tss = p['tss'],
                                    cpg = p['cpg'])
     elif p['collection'] == 'methylation':
@@ -65,7 +62,6 @@ def query(p):
                                    end = p['end'],
                                    height = p['height'],
                                    width = p['width'],
-                                   margin = MARGIN,
                                    tss = p['tss'],
                                    cpg = p['cpg'],
                                    datapoints = p['datapoints'],
@@ -77,7 +73,6 @@ def query(p):
                                    end = p['end'],
                                    height = p['height'],
                                    width = p['width'],
-                                   margin = MARGIN,
                                    tss = p['tss'],
                                    cpg = p['cpg'],
                                    datapoints = p['datapoints'],

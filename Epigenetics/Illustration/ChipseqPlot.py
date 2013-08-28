@@ -16,15 +16,15 @@ class ChipseqPlot(object):
     '''
     Called by a MongoCurious object to plot ChIP-Seq data.
     '''
-    
+
     DISTR_STROKE = 0.5
     BOTTOM_MARGIN = 100    # 100 pixels
     RIGHT_MARGIN = 70
-    
-    
-    def __init__(self, filename, title, message, waves, start, end,
+    MARGIN = 30
 
-                 annotations, width, margin, height):
+
+    def __init__(self, filename, title, message, waves, start, end,
+                 annotations, width, height):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -36,9 +36,6 @@ class ChipseqPlot(object):
         self.start = start
         self.end = end
         self.width = width    # default = 200.0
-        self.margin = margin    # default = 20.0
-        if self.margin < 30:    # pixels
-            self.margin = 30
         self.annotations = annotations
         self.message = message
 
@@ -46,8 +43,8 @@ class ChipseqPlot(object):
         self.colors = [('indigo', 'slateblue'), ('red', 'orange'),
                   ('green', 'limegreen'), ('orange', 'yellow')]
 
-        self.dimension_y = self.height - self.margin - self.BOTTOM_MARGIN    # this is the size of the y field
-        self.dimension_x = self.width - self.margin - self.RIGHT_MARGIN
+        self.dimension_y = self.height - self.MARGIN - self.BOTTOM_MARGIN    # this is the size of the y field
+        self.dimension_x = self.width - self.MARGIN - self.RIGHT_MARGIN
         self.scale_x = float(self.dimension_x) / (self.end - self.start)    # this is a scaling variable
 
 
@@ -62,7 +59,7 @@ class ChipseqPlot(object):
 
         if message:
             Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
-                    fill = "black", font_size = bigfont*2)
+                    fill = "black", font_size = bigfont * 2)
             self.elements.append(Message)
         else:
             self.build()
@@ -76,17 +73,17 @@ class ChipseqPlot(object):
         for (pos, height, stddev, sample_id) in self.waves:
             heights.append(height)
         self.maxh = max(heights)
-        self.scale_y = self.dimension_y  / self.maxh
+        self.scale_y = self.dimension_y / self.maxh
 
         sample_count = 0
         samples_color = {}
         for (pos, height, stddev, sample_id) in self.waves:
-            #print "    Peak", pos, height, stddev
+            # print "    Peak", pos, height, stddev
             X, Y = self.makegaussian(self.start, self.end, pos, tail, self.start, float(height), stddev)
-            X = [round((x - self.start + pos) * self.scale_x, 2) + self.margin for x in X]
-            for x in X: #Adjust peaks on the edge of the plotting area so they don't look skewed.
-                if x < (self.margin + 1):
-                    X.insert(0, self.margin)
+            X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
+            for x in X:    # Adjust peaks on the edge of the plotting area so they don't look skewed.
+                if x < (self.MARGIN + 1):
+                    X.insert(0, self.MARGIN)
                     Y.insert(0, tail)
                     break
                 if x > (self.width - 1):
@@ -95,7 +92,7 @@ class ChipseqPlot(object):
                     break
             # Scale Y and inverse the coordinates
             Y = [round(y * self.scale_y, 2) for y in Y]
-            Y = [(self.height-self.BOTTOM_MARGIN - y) for y in Y]
+            Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
             # d is the list of coordinates with commands such as
             # M for "move to' to initiate curve and S for smooth curve
             d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
@@ -130,7 +127,7 @@ class ChipseqPlot(object):
 
     def get_elements(self):
         '''TODO: add docstring'''
-        self.add_sample_labels(self.margin * 3.2 + self.length)
+        self.add_sample_labels(self.MARGIN * 3.2 + self.width)
         return self.elements
 
     def add_data(self, foreign_elements):
@@ -145,12 +142,12 @@ class ChipseqPlot(object):
         ''' Add annotations, title, axis, tic marks and labels '''
         if self.title is None:
             self.title = "ChIP-Seq PLot"
-        Title = Text(self.title, insert = (bigfont + ((float(self.margin) - bigfont) / 3),
-                                           bigfont + ((float(self.margin) - bigfont) / 3)),
+        Title = Text(self.title, insert = (bigfont + ((float(self.MARGIN) - bigfont) / 3),
+                                           bigfont + ((float(self.MARGIN) - bigfont) / 3)),
                                            fill = "midnightblue", font_size = bigfont)
         self.elements.append(Title)
 
-        for axis in get_axis(self.start, self.end, self.width, self.margin, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
+        for axis in get_axis(self.start, self.end, self.width, self.MARGIN, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
             self.elements.append(axis)
 
         if self.message is '':
@@ -158,10 +155,10 @@ class ChipseqPlot(object):
             self.add_ytics()
             self.add_sample_labels(self.width - self.RIGHT_MARGIN + 10)
             if get_tss:
-                for tss in add_tss(self.annotations, self.margin, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
+                for tss in add_tss(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
                     self.elements.append(tss)
             if get_cpg:
-                for cpg in add_cpg(self.annotations, self.margin, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
+                for cpg in add_cpg(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
                     self.elements.append(cpg)
 
 
@@ -174,7 +171,7 @@ class ChipseqPlot(object):
         else: fontsize = medfont
 
         spacing = 0.1
-        y_position = self.margin
+        y_position = self.MARGIN
 
         for sample, color in self.samples_color.iteritems():
             label = Text(sample, insert = (x_position, y_position),
@@ -196,14 +193,14 @@ class ChipseqPlot(object):
             # TODO: fix the line below.
             xtics += [i for i in range(self.start, self.end + 1) if i % (scale_tics) == 0 and i not in xtics]
         xtics.sort()
-        spacing = fabs((self.margin + (xtics[1] - self.start) * self.scale_x) - (self.margin + (xtics[0] - self.start) * self.scale_x)) / 4
+        spacing = fabs((self.MARGIN + (xtics[1] - self.start) * self.scale_x) - (self.MARGIN + (xtics[0] - self.start) * self.scale_x)) / 4
         for tic in xtics:
-            tic_x = (self.margin + (tic - self.start) * self.scale_x)
-            tic_y = self.height - self.BOTTOM_MARGIN + smallfont *1.5
+            tic_x = (self.MARGIN + (tic - self.start) * self.scale_x)
+            tic_y = self.height - self.BOTTOM_MARGIN + smallfont * 1.5
             ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
             ticline = Rect(insert = (tic_x, self.height - self.BOTTOM_MARGIN - 2), size = (1, 5), fill = "midnightblue")
             for i in range (1, 4):
-                if tic_x - spacing * i > self.margin - 5:
+                if tic_x - spacing * i > self.MARGIN - 5:
                     ticline2 = Rect(insert = (tic_x - spacing * i, self.height - self.BOTTOM_MARGIN - 2), size = (1, 2), fill = "midnightblue")
                     self.elements.append(ticline2)
             self.elements.append(ticline)
@@ -216,16 +213,16 @@ class ChipseqPlot(object):
         while len(labels) < 4:
             scale_tics /= 2
             labels += [i for i in range(0, int(self.maxh) + 1, scale_tics) if i not in labels]
-        ytics = [round(self.height-self.BOTTOM_MARGIN - y * self.scale_y, 3) for y in labels]
+        ytics = [round(self.height - self.BOTTOM_MARGIN - y * self.scale_y, 3) for y in labels]
         spacing = (ytics[0] - ytics[1]) / 2
-        
-        
-        for tic,label in zip(ytics,labels):
-            ticline = Rect(insert = (self.margin - 2, tic), size = (5, 1), fill = "midnightblue")
-            if tic-spacing > self.margin: 
-                ticline2 = Rect(insert = (self.margin - 2, tic - spacing), size = (2, 1), fill = "midnightblue")
+
+
+        for tic, label in zip(ytics, labels):
+            ticline = Rect(insert = (self.MARGIN - 2, tic), size = (5, 1), fill = "midnightblue")
+            if tic - spacing > self.MARGIN:
+                ticline2 = Rect(insert = (self.MARGIN - 2, tic - spacing), size = (2, 1), fill = "midnightblue")
                 self.elements.append(ticline2)
-            tic_x = self.margin - smallfont * 2
+            tic_x = self.MARGIN - smallfont * 2
             tic_y = tic + 1
             if len(str(label)) == 1:
                 tic_x = tic_x + 3

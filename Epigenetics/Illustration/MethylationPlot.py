@@ -24,11 +24,12 @@ class MethylationPlot(object):
     DISTR_STROKE = 0.5
     BOTTOM_MARGIN = 120    # 120 pixels
     RIGHT_MARGIN = 70
+    MARGIN = 30
 
 
     def __init__(self, filename, title, message, sample_peaks,
                  pos_betas_dict, annotations, color, start, end,
-                 width, margin, height, show_points, show_peaks):
+                 width, height, show_points, show_peaks):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
         operate on.
@@ -39,16 +40,13 @@ class MethylationPlot(object):
         self.start = start
         self.end = end
         self.width = width    # default = 200.0
-        self.margin = margin    # default = 20.0
-        if self.margin < 30:    # pixels
-            self.margin = 30
 
         self.height = height    # default = 60.0
         self.annotations = annotations
         self.message = message
 
-        self.dimension_y = self.height - self.margin - self.BOTTOM_MARGIN    # this is the size of the y field
-        self.dimension_x = self.width - self.margin - self.RIGHT_MARGIN
+        self.dimension_y = self.height - self.MARGIN - self.BOTTOM_MARGIN    # this is the size of the y field
+        self.dimension_x = self.width - self.MARGIN - self.RIGHT_MARGIN
         self.scale_x = float(self.dimension_x) / (self.end - self.start)    # this is a scaling variable
 
         size = (str(self.width) + "px" , str(self.height) + "px")
@@ -79,11 +77,11 @@ class MethylationPlot(object):
         palette.Colors()    # blue, red, green, purple palettes
 
         for position in pos_betas_dict.keys():
-            x = round(float(position - self.start) * self.scale_x, 2) + self.margin
+            x = round(float(position - self.start) * self.scale_x, 2) + self.MARGIN
 
             if show_points:
                 for beta, sample_id, sample_type in pos_betas_dict[position]:
-                    y = round((1 - beta) * self.dimension_y, 2) + self.margin
+                    y = round((1 - beta) * self.dimension_y, 2) + self.MARGIN
                     type_color, sample_color = palette.sorter(sample_type, sample_id)
                     point = Circle(center = (x, y), r = self.DOT_RADIUS, fill = sample_color)
                     self.elements.append(point)
@@ -92,7 +90,7 @@ class MethylationPlot(object):
                 for sample_type in sample_peaks[position]:
                     type_color, sample_color = palette.sorter(sample_type, None)
                     (m, s) = sample_peaks[position][sample_type]
-                    m = round((1 - m) * self.dimension_y, 2) + self.margin
+                    m = round((1 - m) * self.dimension_y, 2) + self.MARGIN
                     s = round(s * self.dimension_y, 3)
 
 
@@ -138,7 +136,7 @@ class MethylationPlot(object):
 
     def get_elements(self):
         ''' TODO: fill in docstring '''
-        self.add_sample_labels(self.margin * 3.2 + self.width)
+        self.add_sample_labels(self.MARGIN * 3.2 + self.width)
         z = self.elements
         self.elements = None
         return z
@@ -154,12 +152,12 @@ class MethylationPlot(object):
         ''' Add annotations, title, axis, tic marks and labels '''
         if self.title is None:
             self.title = "Methylation PLot"
-        Title = Text(self.title, insert = (bigfont + ((float(self.margin) - bigfont) / 3),
-                                           bigfont + ((float(self.margin) - bigfont) / 3)),
+        Title = Text(self.title, insert = (bigfont + ((float(self.MARGIN) - bigfont) / 3),
+                                           bigfont + ((float(self.MARGIN) - bigfont) / 3)),
                                            fill = "midnightblue", font_size = bigfont)
         self.elements.append(Title)
 
-        for axis in get_axis(self.start, self.end, self.width, self.margin, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
+        for axis in get_axis(self.start, self.end, self.width, self.MARGIN, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
             self.elements.append(axis)
 
         if self.message is '':
@@ -167,10 +165,10 @@ class MethylationPlot(object):
             self.add_ytics()
             self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
             if get_tss:
-                for tss in add_tss(self.annotations, self.margin, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
+                for tss in add_tss(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
                     self.elements.append(tss)
             if get_cpg:
-                for cpg in add_cpg(self.annotations, self.margin, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
+                for cpg in add_cpg(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
                     self.elements.append(cpg)
 
     def add_sample_labels(self, x_position):
@@ -183,7 +181,7 @@ class MethylationPlot(object):
         else: fontsize = medfont
 
         spacing = 1
-        y_position = self.margin
+        y_position = self.MARGIN
 
         for sample, color in samples_color.iteritems():
             label = Text(sample, insert = (x_position, y_position),
@@ -205,14 +203,14 @@ class MethylationPlot(object):
             # TODO: fix the line below.
             xtics += [i for i in range(self.start, self.end + 1) if i % (scale_tics) == 0 and i not in xtics]
         xtics.sort()
-        spacing = fabs((self.margin + (xtics[1] - self.start) * self.scale_x) - (self.margin + (xtics[0] - self.start) * self.scale_x)) / 4
+        spacing = fabs((self.MARGIN + (xtics[1] - self.start) * self.scale_x) - (self.MARGIN + (xtics[0] - self.start) * self.scale_x)) / 4
         for tic in xtics:
-            tic_x = (self.margin + (tic - self.start) * self.scale_x)
+            tic_x = (self.MARGIN + (tic - self.start) * self.scale_x)
             tic_y = self.height - self.BOTTOM_MARGIN + smallfont * 1.5
             ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
             ticline = Rect(insert = (tic_x, self.height - self.BOTTOM_MARGIN - 2), size = (1, 5), fill = "midnightblue")
             for i in range (1, 4):
-                if tic_x - spacing * i > self.margin - 5:
+                if tic_x - spacing * i > self.MARGIN - 5:
                     ticline2 = Rect(insert = (tic_x - spacing * i, self.height - self.BOTTOM_MARGIN - 2), size = (1, 2), fill = "midnightblue")
                     self.elements.append(ticline2)
             self.elements.append(ticline)
@@ -221,14 +219,14 @@ class MethylationPlot(object):
     def add_ytics(self):
         ''' TODO: fill in docstring '''
         labels = [0, 0.2, 0.4, 0.6, 0.8, 1]
-        ytics = [round((self.margin + self.dimension_y) - (y * self.dimension_y), 3) for y in labels]
+        ytics = [round((self.MARGIN + self.dimension_y) - (y * self.dimension_y), 3) for y in labels]
         spacing = (ytics[0] - ytics[1]) / 2
         for tic, label in zip(ytics, labels):
-            ticline = Rect(insert = (self.margin - 2, tic), size = (5, 1), fill = "midnightblue")
-            if tic - spacing > self.margin:
-                ticline2 = Rect(insert = (self.margin - 2, tic - spacing), size = (2, 1), fill = "midnightblue")
+            ticline = Rect(insert = (self.MARGIN - 2, tic), size = (5, 1), fill = "midnightblue")
+            if tic - spacing > self.MARGIN:
+                ticline2 = Rect(insert = (self.MARGIN - 2, tic - spacing), size = (2, 1), fill = "midnightblue")
                 self.elements.append(ticline2)
-            tic_x = self.margin - smallfont * 2
+            tic_x = self.MARGIN - smallfont * 2
             tic_y = tic + 1
             if len(str(label)) == 1:
                 tic_x = tic_x + 3

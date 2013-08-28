@@ -7,8 +7,8 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 from MongoDB.mongoUtilities import MongoCurious
 
-def svgcode(db = None, chromosome = None, start = None, 
-            end = None, height = None, width = None, 
+def svgcode(db = None, chromosome = None, start = None,
+            end = None, height = None, width = None,
             margin = None, tss = False, cpg = False):
     print("Connecting to database:")
     organism = str.capitalize(db)
@@ -19,12 +19,11 @@ def svgcode(db = None, chromosome = None, start = None,
     if tss or cpg:
         m.getannotations(docs)
     if chromosome[0:3] != 'chr':
-        chromosome = 'chr'+str(chromosome)
-    return m.svg(to_string = True, 
-                 title = organism + " ChIP-Seq peaks on " + chromosome + " ("+str(start)+"-"+str(end) +")", 
-                 color = 'indigo', 
+        chromosome = 'chr' + str(chromosome)
+    return m.svg(to_string = True,
+                 title = organism + " ChIP-Seq peaks on " + chromosome + " (" + str(start) + "-" + str(end) + ")",
+                 color = 'indigo',
                  height = height,
                  width = width,
-                 margin = margin,
                  get_tss = tss,
                  get_cpg = cpg)
