@@ -142,8 +142,8 @@ class ChipseqPlot(object):
         ''' Add annotations, title, axis, tic marks and labels '''
         if self.title is None:
             self.title = "ChIP-Seq PLot"
-        Title = Text(self.title, insert = (bigfont + ((float(self.margin) - bigfont) / 3),
-                                           bigfont + ((float(self.margin) - bigfont) / 3)),
+        Title = Text(self.title, insert = (bigfont + ((float(self.MARGIN) - bigfont) / 3),
+                                           bigfont + ((float(self.MARGIN) - bigfont) / 3)),
                                            fill = legend_color, font_size = bigfont)
         self.elements.append(Title)
 
