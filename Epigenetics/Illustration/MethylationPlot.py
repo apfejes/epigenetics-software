@@ -22,7 +22,7 @@ class MethylationPlot(object):
     DOT_RADIUS = 2
     DISTR_HT = 12.0
     DISTR_STROKE = 0.5
-    BOTTOM_MARGIN = 100    # 100 pixels
+    BOTTOM_MARGIN = 120    # 120 pixels
     RIGHT_MARGIN = 70
 
 
@@ -62,14 +62,14 @@ class MethylationPlot(object):
 
         if message:
             Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
-                    fill = "black", font_size = bigfont*2)
+                    fill = "black", font_size = bigfont * 2)
             self.elements.append(Message)
         else:
             self.build(pos_betas_dict, sample_peaks, show_points, show_peaks)
 
 
     def build(self, pos_betas_dict, sample_peaks, show_points, show_peaks):
-
+        '''TODO: missing docstring'''
         all_y = []
         for position in pos_betas_dict.keys():
             for y, _sample, _sample_type in pos_betas_dict[position]:
@@ -165,7 +165,7 @@ class MethylationPlot(object):
         if self.message is '':
             self.add_xtics()
             self.add_ytics()
-            self.add_sample_labels(self.width - self.RIGHT_MARGIN + 10)
+            self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
             if get_tss:
                 for tss in add_tss(self.annotations, self.margin, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
                     self.elements.append(tss)
@@ -208,7 +208,7 @@ class MethylationPlot(object):
         spacing = fabs((self.margin + (xtics[1] - self.start) * self.scale_x) - (self.margin + (xtics[0] - self.start) * self.scale_x)) / 4
         for tic in xtics:
             tic_x = (self.margin + (tic - self.start) * self.scale_x)
-            tic_y = self.height - self.BOTTOM_MARGIN + smallfont*1.5
+            tic_y = self.height - self.BOTTOM_MARGIN + smallfont * 1.5
             ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
             ticline = Rect(insert = (tic_x, self.height - self.BOTTOM_MARGIN - 2), size = (1, 5), fill = legend_color)
             for i in range (1, 4):
@@ -225,7 +225,7 @@ class MethylationPlot(object):
         spacing = (ytics[0] - ytics[1]) / 2
         for tic, label in zip(ytics, labels):
             ticline = Rect(insert = (self.margin - 2, tic), size = (5, 1), fill = legend_color)
-            if tic-spacing > self.margin: 
+            if tic - spacing > self.margin: 
                 ticline2 = Rect(insert = (self.margin - 2, tic - spacing), size = (2, 1), fill = legend_color)
                 self.elements.append(ticline2)
             tic_x = self.margin - smallfont * 2

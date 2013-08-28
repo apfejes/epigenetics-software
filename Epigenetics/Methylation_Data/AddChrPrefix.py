@@ -23,6 +23,7 @@ arrayQuery = {'array_type': 'humanmethylation450_beadchip'}
 
 
 def AddChrPrefix(collection_name, chr_list):
+    '''append chr prefix.'''
     starttime = time.time()
     for c in chr_list:
         chrQuery = {'chr': c}

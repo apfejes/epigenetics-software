@@ -11,16 +11,20 @@ import ReadAheadIteratorPET
 
 
 class FakeAlignedRead():
+    '''A simple class that can be used as a stand-in for an aligned read.'''
 
     def __init__(self, aend, alen, rev):
+        '''init function - holds end, length, strand.'''
         self.aend = aend
         self.alen = alen
         self.is_reverse = rev
 
 
 class Test(unittest.TestCase):
+    '''Test class for testing readahead iterator'''
 
     def testReadAhead_onlyPet(self):
+        '''testing with PET reads only'''
         path = os.path.dirname(os.path.abspath(__file__))
         path = path.rsplit("/", 2)
         readahead = ReadAheadIteratorPET.ReadAheadIteratorPET(path[0] + "/testdata/ex1.sam", 200, "r", False)
@@ -51,11 +55,8 @@ class Test(unittest.TestCase):
         print "gets", readahead.gets
         self.assertEqual(count, 1699)
 
-
-
-
-
     def testReadAhead_allReads(self):
+        '''Test with PET and SET'''
         path = os.path.dirname(os.path.abspath(__file__))
         path = path.rsplit("/", 2)
         readahead = ReadAheadIteratorPET.ReadAheadIteratorPET(path[0] + "/testdata/ex1.sam", 200, "r", False)
@@ -70,6 +71,7 @@ class Test(unittest.TestCase):
 
 
     def testPushBack(self):
+        '''Test the pushback function of the iterator'''
         path = os.path.dirname(os.path.abspath(__file__))
         path = path.rsplit("/", 2)
         readahead = ReadAheadIteratorPET.ReadAheadIteratorPET(path[0] + "/testdata/ex1.sam", 200, "r", True)

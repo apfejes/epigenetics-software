@@ -63,14 +63,24 @@ def view_query_form(request):
     else:
         print 'No action specified', action_factor
 
-    if tss == 'on':
+    print ("tss = ", tss)
+
+    if tss == 'on' or tss == 'true':
         tss = True
-    if cpg == 'on':
+    else:
+        tss = False
+    if cpg == 'on' or cpg == 'true':
         cpg = True
-    if datapoints or datapoints == 'on':
+    else:
+        cpg = False
+    if datapoints == 'on' or datapoints == 'true':
         datapoints = True
-    if peaks == 'on':
+    else:
+        datapoints = False
+    if peaks == 'on' or peaks == 'true':
         peaks = True
+    else:
+        peaks = False
 
     if start is None:
         pass
@@ -86,13 +96,15 @@ def view_query_form(request):
     else:
         end = start + 1
 
-    width = int(width)
+
+    width = int(width) - 100
     if width < 600:
         width = 600
 
-    height = int(height) - 250
+    height = int(height) - 300
     if height < 400:
         height = 400
+
     parameters = {'organism':str(o), 'collection': str(col),
                   'chromosome': str(chrom), 'start': start, 'end':end,
                   'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks,
