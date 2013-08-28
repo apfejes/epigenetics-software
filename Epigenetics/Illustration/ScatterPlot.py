@@ -1,3 +1,4 @@
+'''TODO:missing doc string'''
 # from svgwrite.shapes import Rect
 from svgwrite.shapes import Line
 from svgwrite.shapes import Circle
@@ -11,9 +12,7 @@ from svgwrite.drawing import Drawing
 # from query_ensembl import name, location
 
 class ScatterPlot(object):
-    '''
-    classdocs
-    '''
+    '''TODO:missing doc string'''
     def __init__(self, filename, x_max, y_max, **kwargs):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
@@ -71,13 +70,15 @@ class ScatterPlot(object):
         self.plot.add(Line(start = (self.margin_left, self.margin_top + self.height + 4), end = (self.margin_left + self.height, self.margin_top + self.height + 4), stroke_width = 0.5, stroke = "black"))
 
     def add_and_zip_data(self, x, y):
+        '''TODO:missing doc string'''
         self.data = zip(x, y)
 
     def add_data(self, x):
+        '''TODO:missing doc string'''
         self.data = x
 
     def add_regression(self, slope):
-
+        '''TODO:missing doc string'''
         self.max_min()
         x = self.max_x
         y = slope * x
@@ -94,13 +95,16 @@ class ScatterPlot(object):
                                   stroke_width = 1, stroke = "black"))
 
     def x_to_printx(self, x):
+        '''TODO:missing doc string'''
         return self.margin_left + ((float(x) / self.max_x) * self.height)
 
     def y_to_printy(self, y):
+        '''TODO:missing doc string'''
         return (self.margin_top + self.height) - ((float(y) / self.max_y_value) * self.height)
 
 
     def max_min(self):
+        '''TODO:missing doc string'''
         self.max_x = self.data[0][0]
         self.max_y_value = self.data[0][1]
         for x, y in self.data:
@@ -112,6 +116,7 @@ class ScatterPlot(object):
 
 
     def build(self):
+        '''TODO:missing doc string'''
         self.max_min()
         for x, y in self.data:
             self.plot.add(Circle(center = (self.margin_left + ((x / self.max_x) * self.height),
@@ -125,10 +130,12 @@ class ScatterPlot(object):
 
 
     def save(self):
+        '''TODO:missing doc string'''
         self.plot.save()
         self.plot = None
 
     def to_string(self):
+        '''TODO:missing doc string'''
         z = self.plot.tostring()
         self.plot = None
         return z

@@ -105,6 +105,7 @@ def FindDiffProbes(project_name, group_control, group_diseased):
     return sorted(probe_pval, key = lambda tup: tup[1]), probe_beta_control, probe_beta_diseased
 
 def FindPValThreshold(pvalues, Fdr):
+    '''TODO:missing doc string'''
     count = 0
     m = len(pvalues)
     for p in pvalues:
@@ -117,6 +118,7 @@ def FindPValThreshold(pvalues, Fdr):
     return t
 
 def AdjustPValsBH(pvalues):
+    '''TODO:missing doc string'''
     qvalues = []
     count = 0
     m = len(pvalues)
@@ -148,6 +150,7 @@ def AdjustPValsBH(pvalues):
     return qvalues
 
 def PlotHits(control_betas_dic, diseased_betas_dic, hit_tuples):
+    '''TODO:missing doc string'''
     xlabs = ['control', 'diseased']
     yLabel = 'Beta value'
     count = 1

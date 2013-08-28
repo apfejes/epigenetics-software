@@ -23,7 +23,7 @@ class MethylationPlot(object):
     DISTR_HT = 12.0
     DISTR_STROKE = 0.5
     BOTTOM_MARGIN = 120    # 120 pixels
-    RIGHT_MARGIN = 70
+    RIGHT_MARGIN = 100
     MARGIN = 30
 
 
@@ -157,7 +157,7 @@ class MethylationPlot(object):
                                            fill = legend_color, font_size = bigfont)
         self.elements.append(Title)
 
-        for axis in get_axis(self.start, self.end, self.width, self.MARGIN, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
+        for axis in get_axis(self.width, self.MARGIN, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
             self.elements.append(axis)
 
         if self.message is '':
@@ -165,7 +165,7 @@ class MethylationPlot(object):
             self.add_ytics()
             self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
             if get_tss:
-                for tss in add_tss(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
+                for tss in add_tss(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
                     self.elements.append(tss)
             if get_cpg:
                 for cpg in add_cpg(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):

@@ -13,17 +13,6 @@ class AlignedReadObj():
         self.right_end = re
         self.read = read
 
-    def get_left_end(self):
-        '''simple getter function for the left_end coordinate'''
-        return self.left_end
-
-    def get_right_end(self):
-        '''simple getter function for the right_end coordinate'''
-        return self.right_end
-
-    def get_read(self):
-        '''simple getter function for the read object itself.'''
-        return self.read
 
     @staticmethod
     def type():

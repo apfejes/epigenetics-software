@@ -33,6 +33,7 @@ import MappingItem
 
 
 def random_index(num_queues):
+    '''TODO:missing doc string'''
     return randint(0, num_queues - 1)
 
 
@@ -62,6 +63,7 @@ def put_assigned(map_queues, item, max_threads):
     # print ''.join([(str(queue.qsize()) + " ") for queue in map_queues])
 
 def create_param_obj(param_file):
+    '''TODO:missing doc string'''
     p = None
     if os.path.exists(param_file):
         p = Parameters.parameter(param_file)
@@ -71,6 +73,7 @@ def create_param_obj(param_file):
     return p
 
 def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_processes):
+    '''TODO:missing doc string'''
     current_chromosome = None
     count = 0
     new_block = True
@@ -92,8 +95,8 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
         if current_chromosome != chromosome:
             # push currently buffered reads to map maker, so mapping can begin
             # again from the start of the next chromosome.
-            read_left = alignedreadobjpet.get_left_end()
-            read_right = alignedreadobjpet.get_right_end()
+            read_left = alignedreadobjpet.left_end()
+            read_right = alignedreadobjpet.right_end()
             if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get_parameter("max_pet_length"):
                 continue    # simply move to the
             if not new_block:    # flush current reads to map
@@ -117,8 +120,8 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
             # end new chromosome
         count += 1
 
-        read_left = alignedreadobjpet.get_left_end()
-        read_right = alignedreadobjpet.get_right_end()
+        read_left = alignedreadobjpet.left_end
+        read_right = alignedreadobjpet.right_end
         if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get_parameter("max_pet_length"):
             continue
         if new_block:
@@ -150,6 +153,7 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
     readahead.close()
 
 def process_WIG_reads(PARAM, map_queues, print_queue, worker_processes):
+    '''TODO:missing doc string'''
     current_chromosome = None
     count = 0
     position = 0
