@@ -6,7 +6,6 @@ Created on 2013-08-23
 Tools used by views.py
 '''
 from .Annotations import showmethylation, showchipseq, showchipandmeth
-from django.http import HttpResponse
 
 MARGIN = 60.0
 
@@ -15,6 +14,8 @@ zoom_factors = {'ZoomIn': 1.0 / 1.5, 'ZoomInMore': 1.0 / 3.0,
                 'ZoomOut': 1.5, 'ZoomOutMore': 3.0}
 
 def zoom(zoom_symbol, start, end):
+    '''TODO: docstring missing'''
+
     # Adjusts start and end value for new query
     # ex: zoomfactor = 0.1, start = 200, end = 300
     span = (end - start)    # span of 100bp
@@ -29,6 +30,7 @@ panning_percents = {'LessRight':0.6, 'MoreRight':0.9,
                'LessLeft':-0.6, 'MoreLeft':-0.9}
 
 def panning(pan_factor, start, end):
+    '''TODO: docstring missing'''
     # Adjusts start and end value for new query
     # ex: pan_factor = '>>', start = 200, end = 300
     start, end = int(start), int(end)
@@ -38,12 +40,14 @@ def panning(pan_factor, start, end):
 
 
 def check(p):
+    '''TODO: docstring missing'''
     if p['chromosome'] != 'None' and p['organism'] != 'None' and p['collection'] != 'None':
         return True
     else:
         return False
 
 def query(p):
+    '''TODO: docstring missing'''
     if p['collection'] == 'chipseq':
         return showchipseq.svgcode(db = p['organism'],
                                    chromosome = p['chromosome'],
