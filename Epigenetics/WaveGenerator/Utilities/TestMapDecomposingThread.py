@@ -7,8 +7,10 @@ import unittest
 import MapDecomposingThread
 
 class Test(unittest.TestCase):
+    '''Unit tests for decomposing maps for the wave generator'''
 
     def testBuild_and_destroy(self):
+        '''Build and destroy a map'''
         mapdecomp = MapDecomposingThread.MapDecomposer(None, None, None, None, None)
         length = 90
         height = 15
@@ -28,6 +30,7 @@ class Test(unittest.TestCase):
             self.assert_(coverage_map[x] == 0.0, "Subtraction failed: " + str(coverage_map[x]))
 
     def testFind_best_sigma(self):
+        '''test functions that identify the best sigma'''
         mapdecomp = MapDecomposingThread.MapDecomposer(None, None, None, None, None)
         height = 15
         sigma = 15
