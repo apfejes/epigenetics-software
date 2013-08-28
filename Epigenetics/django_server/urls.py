@@ -1,3 +1,5 @@
+'''Root url file for the django web server'''
+
 from django.conf.urls import patterns, include, url
 
 # Uncomment the next two lines to enable the admin:

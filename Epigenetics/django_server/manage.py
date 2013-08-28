@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+'''function that starts the web server'''
+
 import os
 import sys
 
