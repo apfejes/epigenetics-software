@@ -4,15 +4,21 @@ html
   a(href='/')
 
 body
-    #header
-        h1 Human Epigenetics Database Access
-    #wrapper
-        #navigation
-           ul
-             li: a(href!='{% url 'base' %}') Home
-             li: a(href!='{% url 'collections' %}') Collections
-             li: a(href!='{% url 'query_form' %}') Query the database
-        #content
-                image
-                    embed(src!='{% url 'svgcode' %}', scrolling = 'no', width='750', height = '180')
-        p.footersmall Running from the Kobor Lab @ the CMMT
+  #header
+     h1 Human Epigenetics Database Access
+  #wrapper
+    #navigation
+      #padding-div
+        h2 Available pages:
+        ul
+          li: a(href!='{% url 'base' %}') Home
+          //li: a(href!='{% url 'collections' %}') Collections
+          li: a(href!='{% url 'query_form' %}') Query the database
+    #content
+      #padding-div 
+        p.content Welcome to the Kobor lab's human epigenetics database.
+        image
+          embed(src!='{% url 'svgcode' %}', width = '100%')
+  #footersmall
+    #padding-div
+      p Running from the Kobor Lab @ the CMMT
