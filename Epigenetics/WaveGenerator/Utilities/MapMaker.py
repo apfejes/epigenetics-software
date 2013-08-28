@@ -39,12 +39,12 @@ class MapMaker():
         p = list_reads.head
 
         while p != None:
-            # print p.holding.get_left_end(), "-", p.holding.get_right_end()
+            # print p.holding.left_end, "-", p.holding.right_end
             if p.holding.read2 is None:    # set tag
                 read = p.holding.read1
                 if read.is_reverse:
 
-                    read_end = p.holding.get_right_end()
+                    read_end = p.holding.right_end
                     read_start = read_end - self.template_length
                     # print "st to end: ", read_start, "-", read_end, " t:", self.template_length
 
@@ -57,7 +57,7 @@ class MapMaker():
                         # print i, "   (", template_length, "-1) - (", i, "-", read_st, ") + 1)"
                         coverage_map[i] += self.coverage_template[(self.template_length - 1) - (i - read_st)]
                 else:    # forward
-                    read_start = p.holding.get_left_end()
+                    read_start = p.holding.left_end
                     read_end = read_start + self.template_length
                     read_st = read_start - start
 
@@ -72,10 +72,10 @@ class MapMaker():
                 read1 = p.holding.read1
                 read2 = p.holding.read2
 
-                ends = [read1.get_left_end(),
-                        read1.get_right_end(),
-                        read2.get_left_end(),
-                        read2.get_right_end()]
+                ends = [read1.left_end,
+                        read1.right_end,
+                        read2.left_end,
+                        read2.right_end]
                 le = min(ends) - start
                 re = max(ends) - start
                 for i in range(le, re):    # No rounding done.
