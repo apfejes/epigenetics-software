@@ -63,14 +63,24 @@ def view_query_form(request):
     else:
         print 'No action specified', action_factor
 
-    if tss == 'on':
+    print ("tss = ", tss)
+
+    if tss == 'on' or tss == 'true':
         tss = True
-    if cpg == 'on':
+    else:
+        tss = False
+    if cpg == 'on' or cpg == 'true':
         cpg = True
-    if datapoints or datapoints == 'on':
+    else:
+        cpg = False
+    if datapoints == 'on' or datapoints == 'true':
         datapoints = True
-    if peaks == 'on':
+    else:
+        datapoints = False
+    if peaks == 'on' or peaks == 'true':
         peaks = True
+    else:
+        peaks = False
 
     if start is None:
         pass
