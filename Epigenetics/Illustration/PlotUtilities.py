@@ -26,7 +26,7 @@ def get_axis(width, margin, height, bottom_margin, right_margin):
     return (x_axis, y_axis)
 
 
-def add_tss(annotations, margin, height, scale_x, offset_x, end, bottom_margin):
+def add_tss(annotations, margin, height, scale_x, offset_x, bottom_margin):
     if annotations is None:
         return []
     annotations = annotations

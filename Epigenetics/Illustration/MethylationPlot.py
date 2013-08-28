@@ -165,7 +165,7 @@ class MethylationPlot(object):
             self.add_ytics()
             self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
             if get_tss:
-                for tss in add_tss(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
+                for tss in add_tss(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
                     self.elements.append(tss)
             if get_cpg:
                 for cpg in add_cpg(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
