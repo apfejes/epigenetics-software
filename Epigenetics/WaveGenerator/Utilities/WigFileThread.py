@@ -14,8 +14,10 @@ queue = Queue.Queue()
 
 
 class WigFileWriter(threading.Thread):
+    '''Filewriter that outputs in the form of a wig file'''
 
     def __init__(self, filewriter):
+        '''initialize the filewriter'''
         threading.Thread.__init__(self)
         self.queue = queue
         self.t = None    # thread
@@ -23,6 +25,7 @@ class WigFileWriter(threading.Thread):
             self.f = filewriter
 
     def process_map(self, item):
+        '''convert a single map (array/list of integers) to a single "fixedstep" region'''
         if item.start >= 0:    # drop entire maps that start before the 0th position.
             # TODO: a more elegant solution would be to trim the positions until they start at zero.
             self.f.write("\nfixedStep chrom=%s start=%i step=1\n" % (item.chr, item.start))
@@ -31,6 +34,8 @@ class WigFileWriter(threading.Thread):
 
 
     def run(self):
+        ''' start the file writer - accept objects from the queue and processes 
+        them, writing out when done.'''
         while True:
             # grabs host from queue
             map_item = self.queue.get()
@@ -40,6 +45,7 @@ class WigFileWriter(threading.Thread):
 
 
     def start_wig_writer(self, output_path, file_name, trackname = 'WaveGenerator', ucsc = False):
+        '''generate the required header for the output wig file.'''
         path = os.path.dirname(os.path.abspath(__file__))
         path = path.rsplit("/", 1)
         self.f = open(output_path + '/' + file_name + '.wig', 'w')
@@ -62,12 +68,15 @@ class WigFileWriter(threading.Thread):
 
 
     def close_wig_writer(self):
+        '''close the filewriter'''
         queue.join()
 
         if (self.f != None):
             self.f.close()
 
-    def add_map(self, map_region, chromosome, start):
+    @staticmethod
+    def add_map(map_region, chromosome, start):
+        '''add a map to the queue for processing'''
         # populate queue with data
         queue.put(MappingItem.Item(map_region, chromosome, start))
         # wait on the queue until everything has been processed
