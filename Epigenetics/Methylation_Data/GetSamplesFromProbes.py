@@ -68,7 +68,7 @@ def AskTopBtmRdn():
 
     return tb, skip
 
-def GetProbesFromHits(pr_list_fname, skip_rows):
+def GetProbesFromHits(pr_list_fname, sk_rows):
     '''
     Get list of probes from probe_list_fname, also get other values such as 
     expected difference in beta values. 
@@ -84,7 +84,7 @@ def GetProbesFromHits(pr_list_fname, skip_rows):
     # Grab information regarding buccal vs. blood.
     with open(pr_list_fname, 'rb') as hit_file:
         probe_reader = csv.reader(hit_file, delimiter = '\t')
-        for _ in xrange(skip_rows):
+        for _ in xrange(sk_rows):
             probe_reader.next()
         for row in probe_reader:
             pr_list.append(row[23])    # Probe_iD
@@ -123,19 +123,19 @@ def GetRandomProbesFromHits(pr_list_fname, random_probes):
 
     return probe_list_subset
 
-def GetDataFromProbeList(probe_list):
+def GetDataFromProbeList(pr_list):
     '''
     From a list of goldengateIDs, get data from samples. 
     '''
 
     # Attach prefix to probename for searching in methylation collection
     probe_list_prefixed = []
-    for pr in probe_list:
+    for pr in pr_list:
         probe_list_prefixed.append(''.join((prefix, pr)))
-        # probe_list.append(''. join((prefix, probe_dic['cg_no'])))
+        # pr_list.append(''. join((prefix, probe_dic['cg_no'])))
     print probe_list_prefixed
 
-    # From probe_list, get sample data. Then find number of samples.
+    # From pr_list, get sample data. Then find number of samples.
 
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
     mongo.ensure_index(methylation_collection, 'annotation_id')    # For speed
@@ -146,7 +146,7 @@ def GetDataFromProbeList(probe_list):
     data_cursor = mongo.find(methylation_collection, findQuery = fQuery,
                              returnQuery = rQuery).sort([('annotation_id', pymongo.ASCENDING),
                                                         ('sample_label', pymongo.ASCENDING)])
-    print'%s data docs match probe_list' % data_cursor.count()
+    print'%s data docs match pr_list' % data_cursor.count()
 
     fSampQuery = {'project': 'down'}    # 17 samples in down (unittest?)
     rSampQuery = {'patient.Total_BriefPraxis': True, 'Sample Group': True,
@@ -211,9 +211,9 @@ def GetDataFromProbeList(probe_list):
 
 #     Three if conditions for sanity check. Maybe make this into unit test?
 
-    if len(dataDict.keys()) != len(probe_list):
+    if len(dataDict.keys()) != len(pr_list):
         print('Warning, probe lengths do not match number of keys in dictionary')
-        print('Probe length: %s' % len(probe_list))
+        print('Probe length: %s' % len(pr_list))
         print('Number of keys in dict: %s' % len(dataDict.keys()))
 
     vals_per_key = [len(vals) for vals in dataDict.values()]
@@ -228,8 +228,8 @@ def GetDataFromProbeList(probe_list):
 
     return {'data_dictionary': dataDict, 'sample_list': sample_list}
 
-def EstimateBloodContamination(data_dict, sample_list, control_samples,
-                               diseased_samples, pr_list_fname, top_hit):
+def EstimateBloodContamination(d_dict, samp_list, ctrl_samples,
+                               disease_samples, pr_list_fname, best_hit):
     '''
     Finds average of control and then takes each diseased sample and 
     calculates difference between diseased sample and avg controls.
@@ -242,20 +242,20 @@ def EstimateBloodContamination(data_dict, sample_list, control_samples,
 
     # Create dictionary with diseasedsamples as keys, avgdiff as values.
     diseased_avgdiff = {}
-    for s in diseased_samples:
+    for s in disease_samples:
         diseased_avgdiff[s] = []    # No values just yet
 
     pr_list = []
 
     beta_control = []
     beta_diseased = []
-    print data_dict[top_hit]
+    print d_dict[best_hit]
     c = 0
-    print sample_list
-    for b in data_dict[top_hit]:
-        if sample_list[c] in control_samples:
+    print samp_list
+    for b in d_dict[best_hit]:
+        if samp_list[c] in ctrl_samples:
             beta_control.append(b)
-        elif sample_list[c] in diseased_samples:
+        elif samp_list[c] in disease_samples:
             beta_diseased.append(b)
         else:
             print('Sample in neither control or diseased')
@@ -264,8 +264,8 @@ def EstimateBloodContamination(data_dict, sample_list, control_samples,
     # diseased_avg = float(sum(beta_diseased)) / len(beta_diseased)
     for j in xrange(0, len(beta_diseased)):
         avgdiff = beta_diseased[j] - control_avg
-        diseased_avgdiff[diseased_samples[j]] = avgdiff
-    pr_list.append(top_hit)
+        diseased_avgdiff[disease_samples[j]] = avgdiff
+    pr_list.append(best_hit)
     print diseased_avgdiff
 
     buccal_avg = []

@@ -22,6 +22,8 @@ collection_name = 'methylation'
 # directory = '/home/jyeung/Documents/Outputs/Down'
 
 def InsertDataToDB(collection, data):
+    '''TODO:missing docstring'''
+
     # fdata is a dictionary which is organized as:
     # data{probe_id:(sample_id, beta, mvalue)}
     # data = {'c001':(sampA, 0,0), 'c002':(sampB,1,2), 'c003':(sampC,4,5)}
@@ -49,6 +51,7 @@ def InsertDataToDB(collection, data):
     return number_of_inserts
 
 def InsertMethylData(db_name, coll_name, data):
+    '''TODO:missing docstring'''
     starttime = time.time()
 
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
