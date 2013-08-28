@@ -10,6 +10,7 @@ from svgwrite.text import Text
 bigfont = 20
 medfont = 14
 smallfont = 10
+legend_color = 'black'
 
 def get_axis(start, end, width, margin, height, bottom_margin, right_margin):
     '''leave "margin" on either side of the image, draw the axes along the 
@@ -18,10 +19,10 @@ def get_axis(start, end, width, margin, height, bottom_margin, right_margin):
     height = height
     x_axis = Rect(insert = (margin, height - bottom_margin),
             size = (width - (margin + right_margin), 1),
-            fill = "midnightblue")
+            fill = legend_color)
     y_axis = Rect(insert = (margin, margin),
         size = (1, height - (margin + bottom_margin)),    # viewing area is the height, minus the top margin and bottom margin.
-        fill = "midnightblue")
+        fill = legend_color)
     return (x_axis, y_axis)
 
 

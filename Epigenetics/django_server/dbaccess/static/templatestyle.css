@@ -95,3 +95,25 @@ b { color: #f38227 }
   height:100px;
   background-color:#333333;
 }
+
+paginate{font-family:Arial,Helvetica,sans-serif;padding:3px;margin:3px;}
+.bigbutton{cursor: pointer; 
+       background-color: transparent;border:2px solid #999;
+       text-decoration:none;
+       color:#999;
+       font-weight:bold;
+}
+.medbutton{cursor: pointer; 
+       background-color: transparent;border:2px solid #999;
+       text-decoration:none;
+       color:#660099;
+       font-weight:bold;
+}
+
+input[type="submit"]:hover{
+    border:1px solid #999;color:#660099;
+}
+
+
+
+

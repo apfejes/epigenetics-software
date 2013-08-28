@@ -12,7 +12,7 @@ from math import fabs, exp, sqrt, log
 import Color_Palette
 palette = Color_Palette.ColorPalette()
 
-from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, medfont, smallfont
+from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, medfont, smallfont, legend_color
 
 class MethylationPlot(object):
     '''
@@ -156,7 +156,7 @@ class MethylationPlot(object):
             self.title = "Methylation PLot"
         Title = Text(self.title, insert = (bigfont + ((float(self.margin) - bigfont) / 3),
                                            bigfont + ((float(self.margin) - bigfont) / 3)),
-                                           fill = "midnightblue", font_size = bigfont)
+                                           fill = legend_color, font_size = bigfont)
         self.elements.append(Title)
 
         for axis in get_axis(self.start, self.end, self.width, self.margin, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
@@ -209,11 +209,11 @@ class MethylationPlot(object):
         for tic in xtics:
             tic_x = (self.margin + (tic - self.start) * self.scale_x)
             tic_y = self.height - self.BOTTOM_MARGIN + smallfont*1.5
-            ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
-            ticline = Rect(insert = (tic_x, self.height - self.BOTTOM_MARGIN - 2), size = (1, 5), fill = "midnightblue")
+            ticmarker = (Text(str(tic), insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
+            ticline = Rect(insert = (tic_x, self.height - self.BOTTOM_MARGIN - 2), size = (1, 5), fill = legend_color)
             for i in range (1, 4):
                 if tic_x - spacing * i > self.margin - 5:
-                    ticline2 = Rect(insert = (tic_x - spacing * i, self.height - self.BOTTOM_MARGIN - 2), size = (1, 2), fill = "midnightblue")
+                    ticline2 = Rect(insert = (tic_x - spacing * i, self.height - self.BOTTOM_MARGIN - 2), size = (1, 2), fill = legend_color)
                     self.elements.append(ticline2)
             self.elements.append(ticline)
             self.elements.append(ticmarker)
@@ -224,9 +224,9 @@ class MethylationPlot(object):
         ytics = [round((self.margin + self.dimension_y) - (y * self.dimension_y), 3) for y in labels]
         spacing = (ytics[0] - ytics[1]) / 2
         for tic, label in zip(ytics, labels):
-            ticline = Rect(insert = (self.margin - 2, tic), size = (5, 1), fill = "midnightblue")
+            ticline = Rect(insert = (self.margin - 2, tic), size = (5, 1), fill = legend_color)
             if tic-spacing > self.margin: 
-                ticline2 = Rect(insert = (self.margin - 2, tic - spacing), size = (2, 1), fill = "midnightblue")
+                ticline2 = Rect(insert = (self.margin - 2, tic - spacing), size = (2, 1), fill = legend_color)
                 self.elements.append(ticline2)
             tic_x = self.margin - smallfont * 2
             tic_y = tic + 1
@@ -234,7 +234,7 @@ class MethylationPlot(object):
                 tic_x = tic_x + 3
             if len(str(label)) == 2:
                 tic_x = tic_x + 2
-            ticmarker = (Text(label, insert = (tic_x, tic_y), fill = "midnightblue", font_size = smallfont))
+            ticmarker = (Text(label, insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
             self.elements.append(ticline)
             self.elements.append(ticline2)
             self.elements.append(ticmarker)
