@@ -23,7 +23,7 @@ class MethylationPlot(object):
     DISTR_HT = 12.0
     DISTR_STROKE = 0.5
     BOTTOM_MARGIN = 120    # 120 pixels
-    RIGHT_MARGIN = 100
+    RIGHT_MARGIN = 200
     MARGIN = 30
 
 
@@ -168,7 +168,7 @@ class MethylationPlot(object):
                 for tss in add_tss(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
                     self.elements.append(tss)
             if get_cpg:
-                for cpg in add_cpg(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
+                for cpg in add_cpg(self.annotations, self.MARGIN, self.height, self.width, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
                     self.elements.append(cpg)
 
     def add_sample_labels(self, x_position):

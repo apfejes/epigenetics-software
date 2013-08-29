@@ -19,7 +19,7 @@ class ChipseqPlot(object):
 
     DISTR_STROKE = 0.5
     BOTTOM_MARGIN = 100    # 100 pixels
-    RIGHT_MARGIN = 70
+    RIGHT_MARGIN = 200
     MARGIN = 30
 
 
@@ -158,7 +158,7 @@ class ChipseqPlot(object):
                 for tss in add_tss(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
                     self.elements.append(tss)
             if get_cpg:
-                for cpg in add_cpg(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
+                for cpg in add_cpg(self.annotations, self.MARGIN, self.height, self.width, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
                     self.elements.append(cpg)
 
 

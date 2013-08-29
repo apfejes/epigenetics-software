@@ -72,12 +72,14 @@ def add_tss(annotations, margin, height, scale_x, offset_x, bottom_margin):
 
 
 
-def add_cpg(annotations, margin, height, scale_x, start, end, bottom_margin):
+def add_cpg(annotations, margin, height, width, scale_x, start, end, bottom_margin, right_margin):
     '''draw the cpg islands on the svg graph.'''
     if annotations is None:
         return []
     elements = []
 
+    color_high = 'darkseagreen'
+    color_low = 'deepskyblue'
     for ((a, b), c) in annotations['Islands']:
         if a < start:
             a = start
@@ -87,15 +89,27 @@ def add_cpg(annotations, margin, height, scale_x, start, end, bottom_margin):
         thickness = (b - a) * scale_x
 
         if 'IC' in c:
-            color = 'deepskyblue'
+            color = color_low
             opacity = 0.2
         if 'HC' in c:
-            color = 'darkseagreen'
+            color = color_high
             opacity = 0.4
         island = Rect(insert = (x1, margin),
                        size = (thickness, height - margin - bottom_margin),
                        fill = color,
                        fill_opacity = opacity)
         elements.append(island)
+        
+    elements.append(Text("High Density CpG Island", insert = (width - right_margin +medfont, height), fill = legend_color, font_size = medfont, fill_opacity = 0.8))
+    elements.append(Text("Intermediate Density CpG Island", insert = (width - right_margin +medfont, height - medfont), fill = legend_color, font_size = medfont, fill_opacity = 0.8))
+    elements.append(Rect(insert = (width - right_margin,height - medfont),
+                       size = (medfont,medfont),
+                       fill = color_high,
+                       fill_opacity = 0.3))
 
+    elements.append(Rect(insert = (width - right_margin,height - medfont*2),
+                       size = (medfont,medfont),
+                       fill = color_low,
+                       fill_opacity = 0.3))
+    
     return elements
