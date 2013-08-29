@@ -171,8 +171,10 @@ class MethylationPlot(object):
                 for cpg in add_cpg(self.annotations, self.MARGIN, self.height, self.width, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
                     self.elements.append(cpg)
 
-    def add_sample_labels(self, x_position):
+    def add_sample_labels(self, x_position = None):
         ''' TODO: fill in docstring '''
+        if x_position == None:
+            x_position = self.width - self.RIGHT_MARGIN + self.RIGHT_MARGIN/2
         samples_color = palette.colors_dict()
         if len(samples_color) > 20:
             fontsize = str(float(medfont) - 0.5)
@@ -180,12 +182,13 @@ class MethylationPlot(object):
             fontsize = str(float(medfont) + 0.5)
         else: fontsize = medfont
 
+        print "SAMPLES", samples_color
         spacing = 1
         y_position = self.MARGIN
 
         for sample, color in samples_color.iteritems():
             label = Text(sample, insert = (x_position, y_position),
-                                            fill = color, font_size = fontsize)
+                        fill = color, font_size = fontsize)
             y_position += float(fontsize) + spacing
             self.elements.append(label)
         return None

@@ -162,8 +162,10 @@ class ChipseqPlot(object):
                     self.elements.append(cpg)
 
 
-    def add_sample_labels(self, x_position):
-        '''TODO: add docstring'''
+    def add_sample_labels(self, x_position = None):
+        ''' TODO: fill in docstring '''
+        if x_position == None:
+            x_position = self.width - self.RIGHT_MARGIN + self.RIGHT_MARGIN/2
         if len(self.samples_color) > 20:
             fontsize = str(float(medfont) - 0.5)
         elif len(self.samples_color) < 5:

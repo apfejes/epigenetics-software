@@ -452,6 +452,7 @@ class MongoCurious():
             z = drawing.to_string()
             drawing = None
         elif get_elements:
+            drawing.add_sample_labels()
             z = drawing.get_elements()
             print " Returning %i svg elements" % len(z)
             drawing = None
