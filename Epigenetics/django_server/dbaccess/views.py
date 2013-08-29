@@ -38,6 +38,8 @@ def view_query_form(request):
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
 
+    print "Q=", q
+
     o = q.get("organism", None)
     col = q.get("collection", None)
     start = q.get("start", None)
@@ -64,20 +66,21 @@ def view_query_form(request):
         print 'No action specified', action_factor
 
     print ("tss = ", tss)
+    print ("peaks = ", peaks)
 
-    if tss == 'on' or tss == 'true':
+    if tss == 'on' or tss == 'true' or tss  :
         tss = True
     else:
         tss = False
-    if cpg == 'on' or cpg == 'true':
+    if cpg == 'on' or cpg == 'true' or cpg :
         cpg = True
     else:
         cpg = False
-    if datapoints == 'on' or datapoints == 'true':
+    if datapoints == 'on' or datapoints == 'true' or datapoints:
         datapoints = True
     else:
         datapoints = False
-    if peaks == 'on' or peaks == 'true':
+    if peaks == 'on' or peaks == 'true' or peaks:
         peaks = True
     else:
         peaks = False

@@ -76,9 +76,10 @@ b { color: #f38227 }
 }
 
 #padding-div {
-  width:95%;
+  margin: 10px 10px 10px 10px;
+  /*width:95%;
   margin-left: auto;
-  margin-right: auto;
+  margin-right: auto;*/
   font-family: Verdana;
 }
 
@@ -107,22 +108,31 @@ b { color: #f38227 }
   background-color:#333333;
 }
 
-paginate{font-family:Arial,Helvetica,sans-serif;padding:3px;margin:3px;}
+paginate{
+  font-family:Arial,Helvetica,sans-serif;
+  padding:3px;
+  margin:3px;
+}
+
 .bigbutton{cursor: pointer; 
-       background-color: transparent;border:2px solid #999;
+       background-color: transparent;
+       border:1px outset #999;
        text-decoration:none;
-       color:#660099;
-       font-weight:bold;
+       /*color:#660099;*/
+       
 }
 .medbutton{cursor: pointer; 
-       background-color: transparent;border:2px solid #999;
+       background-color: transparent;
+       border:1px outset #999;
        text-decoration:none;
-       color:#660099;
+       /*color:#660099;*/
        font-weight:bold;
 }
 
 input[type="submit"]:hover{
-    border:1px solid #999;color:#000000;
+    border:1px inset #999;
+    color:#000000;
+    /*font-weight:bold;*/
 }
 
 

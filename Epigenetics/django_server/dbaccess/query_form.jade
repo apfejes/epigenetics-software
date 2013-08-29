@@ -67,34 +67,6 @@ body
                         else
                             input(id='end', size = '8', type='text', value='', name='end')
                     input(type='submit',value='Query!', class ="bigbutton")
-            #option_elements
-                if organism = 'human'
-                  #selection_element
-                    label(for='tss') Tss:
-                        if tss
-                            input(id='tss', size = '8', type='checkbox', name="tss", checked)
-                        else
-                            input(id='tss', size = '8', type='checkbox', name="tss")
-                  #selection_element
-                    label(for='cpg') CpG Islands:
-                        if cpg
-                            input(id='cpg', size = '8', type='checkbox', name="cpg", checked)
-                        else
-                            input(id='cpg', size = '8', type='checkbox', name="cpg")
-                if collection = 'methylation' or collection = "methchip"
-                  #selection_element
-                    label(for='datapoints') Show data points:
-                        if datapoints
-                            input(id='datapoints', size = '8', type='checkbox', name="datapoints", checked)
-                        else
-                            input(id='datapoints', size = '8', type='checkbox', name="datapoints")
-                  #selection_element
-                    label(for='peaks') Show sample type distribution:
-                        if peaks
-                            input(id='peaks', size = '8', type='checkbox', name="peaks", checked)
-                        else
-                            input(id='peaks', size = '8', type='checkbox', name="peaks")
-                    
             #zoompan
               #selection_element
                 input(type='button',value = '<<<', title="Pan left 90%", name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self');", class = "medbutton")
@@ -112,7 +84,35 @@ body
                 input(type='button',value = '>>', title="Pan right 60%", name='LessRight', onClick="window.open(newURL('LessRight'),'_self');", class = "medbutton")
               #selection_element
                 input(type='button',value = '>>>', title="Pan right 90%", name='MoreRight', onClick="window.open(newURL('MoreRight'),'_self');", class = "medbutton")
-        |!{plot}
+            #option_elements
+              if organism = 'human'
+                #selection_element
+                  label(for='tss') Tss:
+                     if tss
+                          input(id='tss', size = '8', type='checkbox', name="tss", checked)
+                      else
+                          input(id='tss', size = '8', type='checkbox', name="tss")
+                #selection_element
+                  label(for='cpg') CpG Islands:
+                      if cpg
+                          input(id='cpg', size = '8', type='checkbox', name="cpg", checked)
+                      else
+                          input(id='cpg', size = '8', type='checkbox', name="cpg")
+              if collection = 'methylation' or collection = "methchip"
+                #selection_element
+                  label(for='datapoints') Show data points:
+                      if datapoints
+                          input(id='datapoints', size = '8', type='checkbox', name="datapoints", checked)
+                      else
+                          input(id='datapoints', size = '8', type='checkbox', name="datapoints")
+                #selection_element
+                  label(for='peaks') Show sample type distribution:
+                      if peaks
+                          input(id='peaks', size = '8', type='checkbox', name="peaks", checked)
+                      else
+                          input(id='peaks', size = '8', type='checkbox', name="peaks")
+                  
+         |!{plot}
              
 
 script(type='text/javascript')
