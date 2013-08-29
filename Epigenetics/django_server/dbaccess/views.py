@@ -51,20 +51,6 @@ def view_query_form(request):
     height = q.get("height", 600)
     datapoints = q.get("datapoints", True)
 
-    if action_factor and start and end:
-        if 'Right' in action_factor or 'Left' in action_factor:
-            print 'Action: panning!', action_factor
-            start, end = panning(action_factor, int(start), int(end))
-        elif 'In' in action_factor or 'Out' in action_factor:
-            print 'Action: zooming!', action_factor
-            start, end = zoom(action_factor, int(start), int(end))
-        else:
-            print 'Action not available:', action_factor
-    else:
-        print 'No action specified', action_factor
-
-    print ("tss = ", tss)
-
     if tss == 'on' or tss == 'true':
         tss = True
     else:
@@ -82,15 +68,15 @@ def view_query_form(request):
     else:
         peaks = False
 
-    if start is None:
-        pass
+    if start is None or start == '':
+        start = 0
     elif start >= 0:
         start = int(start)
     else:
         start = 0
 
-    if end is None:
-        pass
+    if end is None or end == '':
+        end = start + 1
     elif end > start:
         end = int(end)
     else:
@@ -105,6 +91,18 @@ def view_query_form(request):
     if height < 400:
         height = 400
 
+    if action_factor and (start>=0) and (end>=0):
+        if 'Right' in action_factor or 'Left' in action_factor:
+            print 'Action: panning!', action_factor
+            start, end = panning(action_factor, int(start), int(end))
+        elif 'In' in action_factor or 'Out' in action_factor:
+            print 'Action: zooming!', action_factor
+            start, end = zoom(action_factor, int(start), int(end))
+        else:
+            print 'Action not available:', action_factor
+    else:
+        print 'No action specified', action_factor
+        
     parameters = {'organism':str(o), 'collection': str(col),
                   'chromosome': str(chrom), 'start': start, 'end':end,
                   'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks,
