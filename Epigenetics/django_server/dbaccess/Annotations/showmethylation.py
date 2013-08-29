@@ -8,7 +8,7 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 from MongoDB.mongoUtilities import MongoCurious
 
-def svgcode(db = None, chromosome = None, start = None,
+def svgcode(db = None, project = None, chromosome = None, start = None,
             end = None, height = None, width = None,
             tss = False, cpg = False, datapoints = False, peaks = False):
     '''TODO:missing docstring'''
@@ -17,7 +17,7 @@ def svgcode(db = None, chromosome = None, start = None,
     database = db + "_epigenetics"
     m = MongoCurious.MongoCurious(database = database)
     print("Querying...")
-    docs = m.query(collection = "methylation", project = 'down syndrome', chromosome = chromosome, start = start, end = end)
+    docs = m.query(collection = "methylation", project = project, chromosome = chromosome, start = start, end = end)
     if tss or cpg:
         m.getannotations(docs)
     if chromosome[0:3] != 'chr':

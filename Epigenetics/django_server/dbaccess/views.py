@@ -42,6 +42,7 @@ def view_query_form(request):
 
     o = q.get("organism", None)
     col = q.get("collection", None)
+    project = q.get('project',None)
     start = q.get("start", None)
     end = q.get("end", None)
     chrom = q.get("chromosome", None)
@@ -105,7 +106,7 @@ def view_query_form(request):
     else:
         print 'No action specified', action_factor
         
-    parameters = {'organism':str(o), 'collection': str(col),
+    parameters = {'organism':str(o), 'collection': str(col), 'project':project,
                   'chromosome': str(chrom), 'start': start, 'end':end,
                   'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks,
                   'width':width, 'height':height }
@@ -113,7 +114,9 @@ def view_query_form(request):
 
     if check(parameters):
         svg = query(parameters)
-    return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o,
+    return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o, 'project':project,
                                                'collection':col, 'chromosome':chrom, 'start':start,
                                                'end':end, 'tss':tss, 'cpg':cpg, 'datapoints': datapoints,
                                                 'peaks':peaks, 'width':width, 'height':height})
+    
+    

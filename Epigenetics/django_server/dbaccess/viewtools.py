@@ -65,25 +65,27 @@ def query(p):
                                    cpg = p['cpg'])
     elif p['collection'] == 'methylation':
         return showmethylation.svgcode(db = p['organism'],
-                                   chromosome = p['chromosome'],
-                                   start = p['start'],
-                                   end = p['end'],
-                                   height = p['height'],
-                                   width = p['width'],
-                                   tss = p['tss'],
-                                   cpg = p['cpg'],
-                                   datapoints = p['datapoints'],
-                                   peaks = p['peaks'])
+                                       project = p['project'],
+                                       chromosome = p['chromosome'],
+                                       start = p['start'],
+                                       end = p['end'],
+                                       height = p['height'],
+                                       width = p['width'],
+                                       tss = p['tss'],
+                                       cpg = p['cpg'],
+                                       datapoints = p['datapoints'],
+                                       peaks = p['peaks'])
     elif p['collection'] == 'methchip':
         return showchipandmeth.svgcode(db = p['organism'],
-                                   chromosome = p['chromosome'],
-                                   start = p['start'],
-                                   end = p['end'],
-                                   height = p['height'],
-                                   width = p['width'],
-                                   tss = p['tss'],
-                                   cpg = p['cpg'],
-                                   datapoints = p['datapoints'],
-                                   peaks = p['peaks'])
+                                       project = p['project'],
+                                       chromosome = p['chromosome'],
+                                       start = p['start'],
+                                       end = p['end'],
+                                       height = p['height'],
+                                       width = p['width'],
+                                       tss = p['tss'],
+                                       cpg = p['cpg'],
+                                       datapoints = p['datapoints'],
+                                       peaks = p['peaks'])
     else:
         return p['collection'] + ' is an invalid collection! Please try again...'

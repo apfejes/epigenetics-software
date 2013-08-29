@@ -50,6 +50,25 @@ body
                                 option(value="methchip")="Both"
                                 option(value="methylation")="Methylation"
                                 option(value="chipseq")="ChIP-Seq"
+                    if organism = 'human'
+                        if collection = 'methylation' or collection = "methchip"
+                            label(for='project') Project:
+                                if project = 'down syndrome'
+                                    select(name='project', id='project') 
+                                        option(value="down syndrome")="Down Syndrome"
+                                        option(value="Anne Ellis")="Anne Ellis"
+                                        option(value="FASD")="FASD"
+                                if project = 'Anne Ellis'
+                                    select(name='project', id='project') 
+                                        option(value="Anne Ellis")="Anne Ellis"
+                                        option(value="down syndrome")="Down Syndrome"
+                                        option(value="FASD")="FASD"
+                                if project = 'FASD'
+                                    select(name='project', id='project') 
+                                        option(value="FASD")="FASD"
+                                        option(value="down syndrome")="Down Syndrome"
+                                        option(value="Anne Ellis")="Anne Ellis"
+                                        option(value="FASD")="FASD"
                     label(for='chromosome') Chromosome:
                         if chromosome
                             input(id='chromosome',size = '6', type='text', name='chromosome', value = chromosome)
@@ -122,6 +141,8 @@ script(type='text/javascript')
       var organism = e.options[e.selectedIndex].value;
       var e = document.getElementById("collection");
       var collection = e.options[e.selectedIndex].value;
+      var e = document.getElementById("project");
+      var project = e.options[e.selectedIndex].value;
       var e = document.getElementById("tss");
       var tss = e.checked;
       var e = document.getElementById("cpg");
@@ -136,6 +157,7 @@ script(type='text/javascript')
       base += "&end=" + end.value
       base += "&organism=" + organism
       base += "&collection=" + collection
+      base += "&project=" + project
       base += "&action=" + action
       base += "&tss=" + tss
       base += "&cpg=" + cpg
