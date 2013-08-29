@@ -74,7 +74,7 @@ class MongoCurious():
             chromosome = 'chr' + str(chromosome)
         self.chromosome = chromosome
 
-        print 'project', project
+
         # First we collect the list of samples the user is interested in:
         sample_ids = self.organize_samples(project, sample_label, sample_group, chip)
         # print '\n    Sample_ids list:', sample_ids
@@ -149,7 +149,14 @@ class MongoCurious():
                     if doc_sample_group == sample_group or sample_group is None:
                         if doc_sample_label == sample_label or sample_label is None:
                             sample_ids[sample_id] = (doc_sample_label, doc_sample_group)
-
+                elif project == 'FASD':
+                    doc_sample_group = doc['sample_group']
+                    if doc_sample_group == sample_group or sample_group is None:
+                        sample_ids[sample_id] = ('', doc_sample_group)
+                elif project == 'Anne Ellis':
+                    doc_sample_group = doc['atopic']
+                    if doc_sample_group == sample_group or sample_group is None:
+                        sample_ids[sample_id] = ('', doc_sample_group)
         return sample_ids
 
 
@@ -216,7 +223,7 @@ class MongoCurious():
                 if sample_group:
                     query_parameters["sample_group"] = sample_group
             return_chr = {'_id': True, 'samplelabel': True, 'type (ip, mock, input)':True,
-                              'project': True, 'sample_group': True, 'chip':True}
+                              'project': True, 'sample_group': True, 'chip':True, 'atopic':True}
             sortby, sortorder = 'sample_group', 1
 
         elif collection == "methylation":

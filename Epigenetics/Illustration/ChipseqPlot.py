@@ -19,7 +19,7 @@ class ChipseqPlot(object):
 
     DISTR_STROKE = 0.5
     BOTTOM_MARGIN = 100    # 100 pixels
-    RIGHT_MARGIN = 200
+    RIGHT_MARGIN = 240
     MARGIN = 30
 
 
@@ -173,7 +173,7 @@ class ChipseqPlot(object):
         else: fontsize = medfont
 
         spacing = 0.1
-        y_position = self.MARGIN
+        y_position = self.MARGIN + bigfont
 
         for sample, color in self.samples_color.iteritems():
             label = Text(sample, insert = (x_position, y_position),

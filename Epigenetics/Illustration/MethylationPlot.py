@@ -23,7 +23,7 @@ class MethylationPlot(object):
     DISTR_HT = 12.0
     DISTR_STROKE = 0.5
     BOTTOM_MARGIN = 120    # 120 pixels
-    RIGHT_MARGIN = 200
+    RIGHT_MARGIN = 240
     MARGIN = 30
 
 
@@ -182,9 +182,8 @@ class MethylationPlot(object):
             fontsize = str(float(medfont) + 0.5)
         else: fontsize = medfont
 
-        print "SAMPLES", samples_color
         spacing = 1
-        y_position = self.MARGIN
+        y_position = self.MARGIN + bigfont
 
         for sample, color in samples_color.iteritems():
             label = Text(sample, insert = (x_position, y_position),

@@ -36,7 +36,7 @@ def add_tss(annotations, margin, height, scale_x, offset_x, bottom_margin):
     offset_y = 0
     elements = []
     x1 = 0
-    font_size = smallfont
+    font_size = medfont
     between_tss = font_size * 7
 
     # Add TSS line if there is in fact a TSS in this region
@@ -100,14 +100,14 @@ def add_cpg(annotations, margin, height, width, scale_x, start, end, bottom_marg
                        fill_opacity = opacity)
         elements.append(island)
         
-    elements.append(Text("High Density CpG Island", insert = (width - right_margin + medfont*2, height - bottom_margin + medfont*2), fill = legend_color, font_size = medfont, fill_opacity = 0.8))
-    elements.append(Text("Intermediate Density CpG Island", insert = (width - right_margin + medfont*2, height - bottom_margin + medfont*4), fill = legend_color, font_size = medfont, fill_opacity = 0.8))
-    elements.append(Rect(insert = (width - right_margin, height -bottom_margin + medfont),
+    elements.append(Text("High Density CpG Island", insert = (width - right_margin + medfont*3, height - bottom_margin + medfont*2), fill = legend_color, font_size = medfont, fill_opacity = 0.8))
+    elements.append(Text("Intermediate Density CpG Island", insert = (width - right_margin + medfont*3, height - bottom_margin + medfont*4), fill = legend_color, font_size = medfont, fill_opacity = 0.8))
+    elements.append(Rect(insert = (width - right_margin + medfont, height -bottom_margin + medfont),
                        size = (medfont,medfont),
                        fill = color_high,
                        fill_opacity = 0.3))
 
-    elements.append(Rect(insert = (width - right_margin, height - bottom_margin + medfont*3),
+    elements.append(Rect(insert = (width - right_margin + medfont, height - bottom_margin + medfont*3),
                        size = (medfont,medfont), 
                        fill = color_low,
                        fill_opacity = 0.3))

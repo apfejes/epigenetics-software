@@ -38,8 +38,6 @@ def view_query_form(request):
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
 
-    print "Q=", q
-
     o = q.get("organism", None)
     col = q.get("collection", None)
     project = q.get('project',None)
@@ -50,9 +48,9 @@ def view_query_form(request):
     tss = q.get("tss", False)
     cpg = q.get("cpg", False)
     peaks = q.get("peaks", False)
+    datapoints = q.get("datapoints", False)
     width = q.get("width", 1000)
     height = q.get("height", 600)
-    datapoints = q.get("datapoints", True)
 
     if tss == 'on' or tss == 'true' or tss  :
         tss = True
