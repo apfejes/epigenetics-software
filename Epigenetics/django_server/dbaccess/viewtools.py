@@ -21,6 +21,8 @@ def zoom(zoom_symbol, start, end):
     new_span = span * zoom_factor    # span is now 10bp
     new_start = start + span / 2 - new_span / 2    # start is now 245
     new_end = end - span / 2 + new_span / 2    # end is now 255bp
+    if new_start < 0: 
+        new_start = 0
     return int(new_start), int(new_end)
 
 # Dictionary of panning percentages from window that is shifted aside
@@ -34,7 +36,13 @@ def panning(pan_factor, start, end):
     start, end = int(start), int(end)
     percent = panning_percents[pan_factor]    # look up percent shift in dictionary
     shiftby = int((end - start) * percent)    # will be positive to go the right, negative to the left
-    return start + shiftby, end + shiftby
+    new_start = int(start + shiftby)
+    new_end = int(end + shiftby)
+    if new_start < 0: 
+        new_start = 0
+    if new_end <= new_start:
+        new_end = new_start+1
+    return new_start, new_end
 
 
 def check(p):

@@ -59,6 +59,7 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
 
     # probes = robjects.r('rownames(exprs(methylObj))')
     col_names = robjects.r('colnames(pData(methylObj))')
+    sample_row_names = robjects.r('rownames(pData(methylObj))')
     columns = []
     for i, j in enumerate(col_names):
         if (j.find(".")):
@@ -76,14 +77,17 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
         for i, j in enumerate(columns):
             print "%i, %s" % (i, j)
         sid_field = -1
-        while (sid_field < 0 or sid_field >= len(columns)):
-            sid_field = raw_input('Enter the number of the field to use:')
+        while ((sid_field < 0 or sid_field >= len(columns)) and sid_field != "R"):
+            sid_field = raw_input('Enter the number of the field to use, or "R" to use the rownames (eg %s, %s):'
+                                  % (sample_row_names[0], sample_row_names[1]))
             if ty.is_int(sid_field):
                 sid_field = int(sid_field)
                 if sid_field >= 0 and sid_field < len(columns):
                     sample_field = columns[sid_field]
                 else:
                     sid_field = -1
+            elif sid_field == "R":
+                sample_field = "R"
             else:
                 sid_field = -1
 
@@ -97,7 +101,11 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
             samples[f - 1][columns[count - 1]] = field.rx(f, 1)[0]
             samples[f - 1]["project"] = proj_name
 
-    if sid_field != "":
+
+    if sid_field == "R":
+        for f in range(0, num_samples):
+            samples[f]["sampleid"] = sample_row_names[f]
+    elif sid_field != "":
         for f in range(0, num_samples):
             samples[f]["sampleid"] = samples[f][sample_field]
 
