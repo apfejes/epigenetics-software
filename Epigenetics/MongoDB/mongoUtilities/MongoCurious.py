@@ -126,9 +126,24 @@ class MongoCurious():
                                     sample_group = sample_group,
                                     chip = chip)
 
+
         if samplesdocs is None:
             self.message = 'No samples found'
             return {}
+
+        if self.collection == 'methylation':
+            if project == 'down syndrome':
+                name_sampgroup = 'sample_group'
+                name_samplabel = 'sampleid'
+            elif project == 'FASD':
+                name_sampgroup = 'samplegroup'
+                name_samplabel = 'sampleid'
+            elif project == 'Anne Ellis':
+                name_sampgroup = 'treatment'
+                name_samplabel = 'sampleid'
+            else:
+                return {}
+
 
         sample_ids = {}
         for doc in samplesdocs:
@@ -143,20 +158,11 @@ class MongoCurious():
                     sample_ids[sample_id] = doc_chip
 
             if self.collection == 'methylation':
-                if project == 'down syndrome':
-                    doc_sample_group = doc['sample_group']
-                    doc_sample_label = doc['samplelabel']
-                    if doc_sample_group == sample_group or sample_group is None:
-                        if doc_sample_label == sample_label or sample_label is None:
-                            sample_ids[sample_id] = (doc_sample_label, doc_sample_group)
-                elif project == 'FASD':
-                    doc_sample_group = doc['sample_group']
-                    if doc_sample_group == sample_group or sample_group is None:
-                        sample_ids[sample_id] = ('', doc_sample_group)
-                elif project == 'Anne Ellis':
-                    doc_sample_group = doc['atopic']
-                    if doc_sample_group == sample_group or sample_group is None:
-                        sample_ids[sample_id] = ('', doc_sample_group)
+                doc_sample_group = doc[name_sampgroup]
+                doc_sample_label = doc[name_samplabel]
+                if doc_sample_group == sample_group or sample_group is None:
+                    if doc_sample_label == sample_label or sample_label is None:
+                        sample_ids[sample_id] = (doc_sample_label, doc_sample_group)
         return sample_ids
 
 
@@ -222,8 +228,9 @@ class MongoCurious():
                     query_parameters["sample_label"] = sample_label
                 if sample_group:
                     query_parameters["sample_group"] = sample_group
-            return_chr = {'_id': True, 'samplelabel': True, 'type (ip, mock, input)':True,
-                              'project': True, 'sample_group': True, 'chip':True, 'atopic':True}
+            return_chr = {'_id': True, 'type (ip, mock, input)':True,
+                          'samplegroup':True, 'sampleid':True, 'project': True, 
+                          'sample_group': True, 'chip':True, 'treatment':True}
             sortby, sortorder = 'sample_group', 1
 
         elif collection == "methylation":
