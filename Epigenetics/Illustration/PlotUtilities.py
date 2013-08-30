@@ -90,10 +90,10 @@ def add_cpg(annotations, margin, height, width, scale_x, start, end, bottom_marg
 
         if 'IC' in c:
             color = color_low
-            opacity = 0.2
+            opacity = 0.2   
         if 'HC' in c:
             color = color_high
-            opacity = 0.3
+            opacity = 0.2
         island = Rect(insert = (x1, margin),
                        size = (thickness, height - margin - bottom_margin),
                        fill = color,

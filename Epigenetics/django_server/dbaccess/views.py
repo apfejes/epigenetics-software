@@ -48,35 +48,35 @@ def view_query_form(request):
     tss = q.get("tss", False)
     cpg = q.get("cpg", False)
     peaks = q.get("peaks", False)
-    datapoints = q.get("datapoints", False)
+    datapoints = q.get("datapoints", True)
     width = q.get("width", 1000)
     height = q.get("height", 600)
 
-    if tss == 'on' or tss == 'true' or tss  :
+    if tss == 'on' or tss == 'true' or tss == True :
         tss = True
     else:
         tss = False
-    if cpg == 'on' or cpg == 'true' or cpg :
+    if cpg == 'on' or cpg == 'true' or cpg == True:
         cpg = True
     else:
         cpg = False
-    if datapoints == 'on' or datapoints == 'true' or datapoints:
+    if datapoints == 'on' or datapoints == 'true' or datapoints == True:
         datapoints = True
     else:
         datapoints = False
-    if peaks == 'on' or peaks == 'true' or peaks:
+    if peaks == 'on' or peaks == 'true' or peaks == True:
         peaks = True
     else:
         peaks = False
 
-    if start is None or start == '':
+    if start is None or start == '' or start == True:
         start = 0
     elif start >= 0:
         start = int(start)
     else:
         start = 0
 
-    if end is None or end == '':
+    if end is None or end == '' or end == True:
         end = start + 1
     elif end > start:
         end = int(end)

@@ -39,12 +39,16 @@ class ColorPalette(object):
         #print '\n', self.counter, sample_type, sample_id
         if sample_type not in self.types_color:
             self.type_count += 1
+            if self.type_count >= len(self.color_wheel.keys()):
+                self.type_count = 1
             self.types_color[sample_type] = self.color_wheel[self.type_count] #Assign a hue to sample_type
             self.counter[sample_type] = 0
             #print 'types:', self.type_count, sample_type, self.color_wheel[self.type_count]
         if sample_id not in self.samples_color:
             self.samples_color[sample_id] = self.colors[self.types_color[sample_type]][self.counter[sample_type]]
             self.counter[sample_type]+=1
+            if self.counter[sample_type] >= len(self.colors[self.types_color[sample_type]]):
+                self.counter[sample_type]=0
         #print len(self.colors[self.types_color[sample_type]]), self.colors[self.types_color[sample_type]]
         if self.counter[sample_type] > len(self.colors[self.types_color[sample_type]]):
             print self.counter
