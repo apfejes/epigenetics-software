@@ -28,7 +28,7 @@ class ColorPalette(object):
                                'yellowgreen', 'darkolivegreen','darkgreen', 'darkseagreen', 'lime']
         self.colors['red']=['orangered', 'tomato','orange', 'gold', 'firebrick', 'sandybrown', 
                              'lightcoral', 'crimson', 'coral', 'darkred', 'indianred', 'maroon']
-        self.colors['purple']=['darkslategrey','orchid', 'purple', 'blueviolet','darkviolet', 
+        self.colors['purple']=['darkslategrey','orchid', 'magenta', 'purple', 'blueviolet','darkviolet', 
                            'pink', 'mediumslateblue', 'lightpink', 'deeppink', 'indigo', 'lavenderblush',
                            'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
         self.color_wheel = {1:'blue', 2:'red', 4:'purple', 3:'green'} 
