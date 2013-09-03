@@ -40,7 +40,7 @@ def view_query_form(request):
 
     o = q.get("organism", None)
     col = q.get("collection", None)
-    project = q.get('project',None)
+    project = q.get('project', None)
     start = q.get("start", None)
     end = q.get("end", None)
     chrom = q.get("chromosome", None)
@@ -92,7 +92,7 @@ def view_query_form(request):
     if height < 400:
         height = 400
 
-    if action_factor and (start>=0) and (end>=0):
+    if action_factor and (start >= 0) and (end >= 0):
         if 'Right' in action_factor or 'Left' in action_factor:
             print 'Action: panning!', action_factor
             start, end = panning(action_factor, int(start), int(end))
@@ -103,7 +103,7 @@ def view_query_form(request):
             print 'Action not available:', action_factor
     else:
         print 'No action specified', action_factor
-        
+
     parameters = {'organism':str(o), 'collection': str(col), 'project':project,
                   'chromosome': str(chrom), 'start': start, 'end':end,
                   'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks,
@@ -116,5 +116,5 @@ def view_query_form(request):
                                                'collection':col, 'chromosome':chrom, 'start':start,
                                                'end':end, 'tss':tss, 'cpg':cpg, 'datapoints': datapoints,
                                                 'peaks':peaks, 'width':width, 'height':height})
-    
-    
+
+
