@@ -68,15 +68,16 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
         columns.append(j)
 
 
+    sid_field = -1
     sample_field = ""
     try:
-        if columns.index("sampleid"):
-            pass
+        if columns.index("sampleid") :
+            pass    # as long as an error isn't thrown, set the sample_field equal to "sampleid"
+        sample_field = "sampleid"
     except ValueError:
         print "the following columns are available.  Please pick which one you'd like to use as the sample id"
         for i, j in enumerate(columns):
             print "%i, %s" % (i, j)
-        sid_field = -1
         while ((sid_field < 0 or sid_field >= len(columns)) and sid_field != "R"):
             sid_field = raw_input('Enter the number of the field to use, or "R" to use the rownames (eg %s, %s):'
                                   % (sample_row_names[0], sample_row_names[1]))
@@ -105,7 +106,7 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
     if sid_field == "R":
         for f in range(0, num_samples):
             samples[f]["sampleid"] = sample_row_names[f]
-    elif sid_field != "":
+    elif sid_field != -1:
         for f in range(0, num_samples):
             samples[f]["sampleid"] = samples[f][sample_field]
 
