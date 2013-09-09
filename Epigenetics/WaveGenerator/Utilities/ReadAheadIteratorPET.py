@@ -3,10 +3,10 @@ Created on 2013-01-28
 
 @author: fejes
 '''
-import pysam
+
 import AlignedReadObjPET
 import DoublyLinkedList
-
+import pysam
 
 class ReadAheadIteratorPET():
 
@@ -24,9 +24,11 @@ class ReadAheadIteratorPET():
         '''print ReadAheadIteratorPET, identify the class'''
         print ("ReadAheadIteratorPET")
 
+    # pylint: disable=E1101
+
     def __init__(self, filename, fragment_length, flags, only_PET):
         '''initialize the readahead iterator with the parameters it requires'''
-        self.samfile = pysam.Samfile(filename, flags)    # @UndefinedVariable
+        self.samfile = pysam.Samfile(filename, flags)
         self.iterator = self.samfile.__iter__()
         self.isReadValid = True
         self.fragmentLength = fragment_length
