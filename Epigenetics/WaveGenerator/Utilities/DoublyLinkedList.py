@@ -64,11 +64,12 @@ class DLL(object):
             DLL.head = newnode
         self.__len += 1
 
+
+
     def insert_before(self, node, thing):
         '''method for inserting an object (thing) before a specific node'''
-        # test if first node, then use convenience method:#
-        if node == DLL.head:
-            DLL.insert_at_head(thing)
+        if node == DLL.head:    # test if first node, then use convenience method:#
+            DLL.insert_at_head(thing)    # pylint: disable=E1120
             return None
         else:
             newnode = Node(thing)
