@@ -11,14 +11,38 @@ body
       #padding-div
         h2 Available pages:
         ul
-          li: a(href!='{% url 'base' %}') Home
+          li: a(href='http://kruncher.cmmt.ubc.ca:3000/login') Kobor Lab Lims
+          //li: a(href!='{% url 'base' %}') Home
           //li: a(href!='{% url 'collections' %}') Collections
           li: a(href!='{% url 'query_form' %}') Query the database
+        h2 Kobor R servers:
+        ul 
+          li: a(href='http://kore.cmmt.ubc.ca:8787/') Kore
+          li: a(href='http://kandy.cmmt.ubc.ca:8787/') Kandy
+          li: a(href='http://echelon.cmmt.ubc.ca:8787/') Echelon
+        h2 Want something new?
+        p If you want to know something about the data stored in the database, or have ideas about things we could learn about the data, please don't hesitate to say something! It's not hard to add new functions here. 
     #content
       #padding-div 
-        p.content Welcome to the Kobor lab's human epigenetics database.
-        //image
-          embed(src!='{% url 'svgcode' %}', width = '100%')
+        h2 Welcome to the Kobor lab's human epigenetics database.
+        p.content This database is currently being developed and is undergoing rapid change.   
+          | Please feel free to use the web site, but be prepared for momentary glitches.  If
+          | a bug seems to persist more than a few minutes, please send an email to Anthony 
+          | (afejes@cmmt.ubc.ca)
+        H3 Outstanding Work:
+        ul
+          li Move legend out of figure
+          li select data sets independently
+          li More data!
+          li better ability to select chip-seq and methylation together from different datasets
+        p.content if you have a suggestion, or would like one of the above to be moved up in priority, please say so!  The deveopment plan is flexible.
+
+       
+        h3 Past Contributors to the project
+        ul 
+          li Jake Yeung
+          li Sarah Perez
+        
   #footersmall
     #padding-div
       p Running from the Kobor Lab @ the CMMT
