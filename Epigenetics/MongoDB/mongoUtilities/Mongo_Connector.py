@@ -65,6 +65,11 @@ class MongoConnector():
         collection = self.db[collection_name]
         return collection.update(queryDict, updateDict, multi = multiOpt)
 
+    def remove(self, collection_name, queryDict, multiOpt = True):
+        '''USE THIS FUNCTION WITH CAUTION!'''
+        collection = self.db[collection_name]
+        return collection.remove(queryDict, multi = multiOpt)
+
     def close(self):
         self.db.connection.disconnect()
 
