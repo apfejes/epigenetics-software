@@ -147,7 +147,6 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
         batch += 1
         time2 = time.time()
         print "Batch %i completed at %f seconds" % (batch, time2 - time1)
-        sys.exit()
 
     return records_added_to_db
 
