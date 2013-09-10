@@ -252,6 +252,8 @@ class ParametersEditor (tk.Toplevel):
                         else:    # handle strings
                             self.parameters.parameters[key] = value
                 f.close()
+            except IOError as e:
+                print "I/O error({0}): {1}".format(e.errno, e.strerror)
             except:
                 print "Unexpected error in parameter reading:", sys.exc_info()[0]
                 print "Reading parameters failed."
