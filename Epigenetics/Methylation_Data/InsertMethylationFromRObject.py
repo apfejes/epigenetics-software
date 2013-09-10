@@ -95,13 +95,11 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
 
     samples = [{} for _k in range(1, num_samples + 1)]
     for count in range(1, num_sample_fields + 1):
-        field = robjects.r('pData(methylObj)[,' + str(count) + ',drop=FALSE]')
-        if hasattr(field.rx(1, 1), "levels"):
-            field = robjects.r('as.character(pData(methylObj)[,' + str(count) + ',drop=FALSE])')
+        field = robjects.r('pData(methylObj)[,%i,drop=FALSE]' % (count))
+        ar = field.rx2(1)
         for f in range(1, num_samples + 1):
-            samples[f - 1][columns[count - 1]] = field.rx(f, 1)[0]
+            samples[f - 1][columns[count - 1]] = ar[f - 1]
             samples[f - 1]["project"] = proj_name
-
 
     if sid_field == "R":
         for f in range(0, num_samples):
@@ -121,41 +119,35 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
     SampleIDs = []
     for record in cursor:
         SampleIDs.append(str(record["_id"]))
-    # process betas and exprs
 
     batch_size = 5000
     batch = 0
     end = -1
     records_added_to_db = 0
 
-#     sys.exit()
-
-    while (batch) * batch_size < num_probes:
+    while (batch) * batch_size < num_probes:    # process betas and exprs
         time1 = time.time()
         start = end + 1
         end = (batch + 1) * batch_size
         print "start, end (%i, %i)" % (start, end)
         if end > num_probes:
             end = num_probes
-
+        b = robjects.r('betas(methylObj)[%i:%i,,drop=FALSE]' % (start, end))
+        r = robjects.r('rownames(betas(methylObj)[%i:%i,,drop=FALSE])' % (start, end))
+        m = robjects.r('exprs(methylObj)[%i:%i,,drop=FALSE]' % (start, end))    # don't worry about levels. Data will always be floats, for this table
         for x in range(1, num_samples + 1):    # one to number of samples  - the column number - iterate.
             items = [{} for _k in range(start, end + 1)]    # zero to batch_size-1
-            betas = robjects.r('betas(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + ',drop=FALSE]')    # don't worry about levels. Data will always be floats, for this table
-            rows = robjects.r('rownames(betas(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + ',drop=FALSE])')
-
             for y in range(1, (end - start + 1)):    # the data
                 items[y - 1]['sampleid'] = SampleIDs[x - 1]
                 items[y - 1]['array_type'] = "humanmethylation450_beadchip"
-                items[y - 1]["beta"] = betas.rx(y, 1)[0]
-                # print "row = ", rows.rx(y)[0]
-                items[y - 1]['probeid'] = rows.rx(y)[0]
-            mvals = robjects.r('exprs(methylObj)[' + str(start) + ':' + str(end) + ',' + str(x) + ',drop=FALSE]')    # don't worry about levels. Data will always be floats, for this table
-            for y in range(1, (end - start + 1)):    # the data
-                items[y - 1]["mval"] = mvals.rx(y, 1)[0]
+                items[y - 1]["beta"] = b.rx(y, x)[0]    # betas.rx(y, 1)[0]
+                items[y - 1]['probeid'] = r.rx(y)[0]    # rows.rx(y)[0]
+                items[y - 1]["mval"] = m.rx(y, x)[0]
             records_added_to_db += mongo.InsertBatchToDB(collection_name, items)
         batch += 1
         time2 = time.time()
         print "Batch %i completed at %f seconds" % (batch, time2 - time1)
+        sys.exit()
 
     return records_added_to_db
 
