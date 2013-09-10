@@ -4,8 +4,7 @@ Created on 2013-03-13
 @author: afejes
 '''
 import sys
-import traceback
-
+import CommonUtils.Types as cu
 
 
 class parameter(object):
@@ -28,11 +27,11 @@ class parameter(object):
                     key = a[0].strip()
                     value = a[1].strip()
                     # print "read:", key, "->", value
-                    if parameter.isint(value):    # handle ints
+                    if cu.is_int(value):    # handle ints
                         self.parameters[key] = int(value)
-                    elif parameter.isfloat(value):    # handle floats
+                    elif cu.is_float(value):    # handle floats
                         self.parameters[key] = float(value)
-                    elif parameter.isbool(value):    # handle booleans
+                    elif cu.is_bool(value):    # handle booleans
                         if (value.lower() == "true"):
                             self.parameters[key] = True
                         else:
@@ -44,10 +43,8 @@ class parameter(object):
         except:
             print "Unexpected error in parameter reading:", sys.exc_info()[0]
             print "Reading parameters failed."
-            print traceback.format_exc()
+            print
             sys.exit()
-
-
 
     def set_parameter(self, key, value):
         self.parameters[key] = value
@@ -60,28 +57,6 @@ class parameter(object):
             return None
 
     @staticmethod
-    def isfloat(element):
-        try:
-            float(element)
-        except ValueError:
-            return False
-        return True
-
-    @staticmethod
-    def isint(element):
-        try:
-            int(element)
-        except ValueError:
-            return False
-        return True
-
-    @staticmethod
-    def isbool(element):
-        if (element.lower() == "true" or element.lower() == "false"):
-            return True
-        else:
-            return False
-
-
-    def type(self):
+    def type():
+        '''Simply return "Parameter List" when asked'''
         return ("Parameter List")
