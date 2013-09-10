@@ -6,6 +6,7 @@ Created on 2013-04-15
 
 import gc
 
+
 def CreateListFromCursor(cursor):
     '''convert a cursor to a full list of items'''
     gc.disable()
@@ -16,6 +17,18 @@ def CreateListFromCursor(cursor):
         listitems.append(record)
     gc.enable()
     return listitems
+
+def CreateListFromOIDs(cursor):
+    '''convert a cursor of objectIDs to a full list of items'''
+    gc.disable()
+    listitems = []
+    if cursor is None:
+        return {}
+    for record in cursor:
+        listitems.append(str(record['_id']))
+    gc.enable()
+    return listitems
+
 
 
 class MongoUtilities(object):
