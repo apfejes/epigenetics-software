@@ -43,13 +43,15 @@ class parameter(object):
         except:
             print "Unexpected error in parameter reading:", sys.exc_info()[0]
             print "Reading parameters failed."
-            print
+            print ""
             sys.exit()
 
     def set_parameter(self, key, value):
+        '''set a parameter with a key value pair'''
         self.parameters[key] = value
 
     def get_parameter(self, key):
+        '''get a parameter with a key value'''
         if (self.parameters.has_key(key)):
             return self.parameters.get(key)
         else:
