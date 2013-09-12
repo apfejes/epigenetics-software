@@ -9,15 +9,15 @@ and then query the methylation data. Or we can do the opposite.
 import os, sys
 from time import time
 sys.path.insert(0, "/home/sperez/epigenetics-software/epigenetics-software/Epigenetics")
-from MongoDB.mongoUtilities import MongoCurious
+from MongoDB.mongoUtilities import MongoEpigeneticsWrapper
 
 
-m = MongoCurious.MongoCurious(database = "human_epigenetics")
+m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper("human_epigenetics")
 
 collection = 'methylation'
 chromosome = 'chr11'
 project = "down"
-gene='SLC22A18AS'
+gene = 'SLC22A18AS'
 start = 2909327
 end = 2925175
 

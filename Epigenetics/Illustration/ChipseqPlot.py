@@ -14,7 +14,7 @@ from PlotUtilities import get_axis, add_cpg, add_tss, bigfont, medfont, smallfon
 
 class ChipseqPlot(object):
     '''
-    Called by a MongoCurious object to plot ChIP-Seq data.
+    Called by a MongoEpigeneticsWrapper object to plot ChIP-Seq data.
     '''
 
     DISTR_STROKE = 0.5
@@ -165,7 +165,7 @@ class ChipseqPlot(object):
     def add_sample_labels(self, x_position = None):
         ''' TODO: fill in docstring '''
         if x_position == None:
-            x_position = self.width - self.RIGHT_MARGIN + self.RIGHT_MARGIN/2
+            x_position = self.width - self.RIGHT_MARGIN + self.RIGHT_MARGIN / 2
         if len(self.samples_color) > 20:
             fontsize = str(float(medfont) - 0.5)
         elif len(self.samples_color) < 5:

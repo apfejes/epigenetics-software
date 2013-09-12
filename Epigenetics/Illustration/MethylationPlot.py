@@ -16,7 +16,7 @@ from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, medfont, smallfon
 
 class MethylationPlot(object):
     '''
-    Called by a MongoCurious object to plot methylation data.
+    Called by a MongoEpigeneticsWrapper object to plot methylation data.
     '''
 
     DOT_RADIUS = 2
@@ -174,7 +174,7 @@ class MethylationPlot(object):
     def add_sample_labels(self, x_position = None):
         ''' TODO: fill in docstring '''
         if x_position == None:
-            x_position = self.width - self.RIGHT_MARGIN + self.RIGHT_MARGIN/2
+            x_position = self.width - self.RIGHT_MARGIN + self.RIGHT_MARGIN / 2
         samples_color = palette.colors_dict()
         if len(samples_color) > 20:
             fontsize = str(float(medfont) - 0.5)

@@ -1,8 +1,7 @@
-import MongoCurious
-MongoCurious = MongoCurious.MongoCurious
+import MongoEpigeneticsWrapper
 
 # Example of how to use the class
-m = MongoCurious(database = "human_epigenetics", collection = "methylation")
+m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper("human_epigenetics")
 
 chromosomes = [21]
 chromosomes = ["chr" + str(c) for c in chromosomes]

@@ -6,7 +6,7 @@ _root_dir = os.path.dirname(_root_dir)
 _root_dir = os.path.dirname(_root_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
-from MongoDB.mongoUtilities import MongoCurious
+from MongoDB.mongoUtilities import MongoEpigeneticsWrapper
 
 def svgcode(db = None, chromosome = None, start = None,
             end = None, height = None, width = None,
@@ -15,7 +15,7 @@ def svgcode(db = None, chromosome = None, start = None,
     print("Connecting to database:")
     organism = str.capitalize(db)
     database = db + "_epigenetics"
-    m = MongoCurious.MongoCurious(database = database)
+    m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database)
     print("Querying...")
     docs = m.query(collection = "waves", chromosome = chromosome, start = start, end = end)
     if tss or cpg:

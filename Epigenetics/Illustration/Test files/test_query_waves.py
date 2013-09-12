@@ -3,15 +3,15 @@ Created on 2013-05-30
 
 @author: sperez
 
-Example of how to use the class MongoCurious to plot ChipSeq peaks from db.waves collection
+Example of how to use the class MongoEpigeneticsWrapper to plot ChipSeq peaks from db.waves collection
 '''
 import os, sys
 from time import time
 sys.path.insert(0, "/home/sperez/epigenetics-software/epigenetics-software/Epigenetics")
-from MongoDB.mongoUtilities import MongoCurious
+from MongoDB.mongoUtilities import MongoEpigeneticsWrapper
 t0 = time()
 # Tell the database which collection you want to query from
-m = MongoCurious.MongoCurious(database = "human_epigenetics")
+m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper("human_epigenetics")
 # Query the database
 
 query1 = m.query(collection = "waves", chromosome = "chr4", chip = 'Mafkab50322', start = 3005000, end = 3211000)

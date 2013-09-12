@@ -26,7 +26,7 @@ directory_for_svgs = "/home/sperez/Documents/svg_temp/"
 
 
 
-class MongoCurious():
+class MongoEpigeneticsWrapper():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
     def __init__(self, database):
         '''Performs the connection to the Mongo database.'''
@@ -41,6 +41,7 @@ class MongoCurious():
         self.start = None
         self.waves = None
         self.annotations = None
+        self.error_message = None
 
     def query(self, collection, chromosome, start, end,
               # optional parameters
@@ -54,9 +55,9 @@ class MongoCurious():
         self.start = start
 
         if start == end or start > end or start < 0 or end < 0:
-            self.message = 'Invalid start and end points.'
+            self.error_message = 'Invalid start and end points.'
         else:
-            self.message = ""    # contains error messages to pass to the server
+            self.error_message = None    # contains error messages to pass to the server
 
         # Make sure chr variable is in the right format
         if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
@@ -115,7 +116,7 @@ class MongoCurious():
                                     chip = chip)
 
         if samplesdocs is None:
-            self.message = 'No samples found'
+            self.error_message = 'No samples found'
             return {}
 
         if self.collection == 'methylation':
@@ -156,7 +157,7 @@ class MongoCurious():
 
         '''Finds documents corresponding to collection and type of query'''
 
-        if self.message != '':    # If there are existing error messages, don't perform these operations.
+        if self.error_message:    # If there are existing error messages, don't perform these operations.
             return {}
         collection = 'annotations'
         query_parameters = {}    # This dictionary will store all the query parameters
@@ -181,7 +182,7 @@ class MongoCurious():
 
         '''Finds documents corresponding to collection and type of query'''
 
-        if self.message != '':    # If there are existing error messages, don't perform these operations.
+        if self.error_message:    # If there are existing error messages, don't perform these operations.
             return {}
         collection = 'waves'
         query_parameters = {}    # This dictionary will store all the query parameters
@@ -209,7 +210,7 @@ class MongoCurious():
 
         '''Finds documents corresponding to collection and type of query'''
 
-        if self.message != '':    # If there are existing error messages, don't perform these operations.
+        if self.error_message:    # If there are existing error messages, don't perform these operations.
             return {}
         collection = 'samples'
         query_parameters = {}    # This dictionary will store all the query parameters
@@ -241,7 +242,7 @@ class MongoCurious():
 
         '''Finds documents corresponding to collection and type of query'''
 
-        if self.message != '':    # If there are existing error messages, don't perform these operations.
+        if self.error_message:    # If there are existing error messages, don't perform these operations.
             return {}
         collection = 'methylation'
         query_parameters = {}    # This dictionary will store all the query parameters
@@ -270,9 +271,9 @@ class MongoCurious():
             warning = "    WARNING: The following query return zero probes or documents!"
             warning += "\n    ---> Find(%s)" % (str(query_parameters))
             warning += "\n     use the checkquery() method to validate the inputs of your query."
-            # self.errorlog(message)
+            # self.errorlog(error_message)
             print warning
-            self.message = 'No data here!'
+            self.error_message = 'No data here!'
             return {}
 
         print "    --> Found %i documents." % docs.count()
@@ -283,7 +284,7 @@ class MongoCurious():
         '''Organises the probe locations/ids into a dictionary'''
         probes = {}
         if docs is None:
-            self.message = 'No data here'
+            self.error_message = 'No data here'
             return {}
         for doc in docs:
             if self.collection == 'methylation':
@@ -388,7 +389,7 @@ class MongoCurious():
         if count == 0:
             message = "    WARNING: None of peaks found in the query lie in the region!"
             print message
-            # self.errorlog(message)
+            # self.errorlog(error_message)
         else:
             print "   Only %i peaks were found to occur in region." % count
             self.waves = waves
@@ -462,12 +463,12 @@ class MongoCurious():
             filename = directory_for_svgs + filename
 
         if self.collection == "methylation":
-            drawing = methylationplot.MethylationPlot(filename, title, self.message, self.sample_peaks,
+            drawing = methylationplot.MethylationPlot(filename, title, self.error_message, self.sample_peaks,
                                                       self.pos_betas_dict, self.annotations,
                                                       color, self.start, self.end, width,
                                                       height, show_points, show_peaks)
         if self.collection == "waves":
-            drawing = chipseqplot.ChipseqPlot(filename, title, self.message, self.waves, self.start,
+            drawing = chipseqplot.ChipseqPlot(filename, title, self.error_message, self.waves, self.start,
                                               self.end, self.annotations, width,
                                               height)
 
@@ -500,7 +501,7 @@ class MongoCurious():
 
     @staticmethod
     def errorlog(errormessage):
-        '''returns error message to server'''
+        '''returns error error_message to server'''
         # self.errorcount += 1
         print errormessage
         return errormessage

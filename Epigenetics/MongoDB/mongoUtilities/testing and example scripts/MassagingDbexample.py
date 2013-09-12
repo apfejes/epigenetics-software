@@ -12,11 +12,11 @@ import os, sys
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
-import Mongo_Connector, MongoCurious
+import Mongo_Connector, MongoEpigeneticsWrapper
 import MongoQuery
 
 
-m = MongoCurious.MongoCurious(database = "human_epigenetics")
+m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper("human_epigenetics")
 
 sample_query = m.query(collection = "samples", project = 'gecko')
 print sample_query
@@ -30,13 +30,13 @@ print sample_labels_list
 t0 = time()
 mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, 'human_epigenetics')
 
-#First we need to drop the index on 'project' 
-mongo.drop_index('methylation','project_1')
+# First we need to drop the index on 'project'
+mongo.drop_index('methylation', 'project_1')
 
 queryDict = {'sample_label':{'$in':sample_labels_list}}
 updateDict = {'$set':{'project':'gecko'}}
 mongo.update('methylation', queryDict, updateDict, True)
 
-print "Done updating in ", (time()-t0)
+print "Done updating in ", (time() - t0)
 
-mongo.ensure_index('methylation','project')
+mongo.ensure_index('methylation', 'project')

@@ -3,12 +3,12 @@ Created on 2013-05-30
 
 @author: sperez
 
-Example of how to use the class MongoCurious to plot methylation data from the methylation collection
+Example of how to use the class MongoEpigeneticsWrapper to plot methylation data from the methylation collection
 '''
 import os, sys
 from time import time
 sys.path.insert(0, "/home/sperez/epigenetics-software/epigenetics-software/Epigenetics")
-from MongoDB.mongoUtilities import MongoCurious
+from MongoDB.mongoUtilities import MongoEpigeneticsWrapper
 
 collection = 'methylation'
 chromosome = 'chr21'
@@ -18,7 +18,7 @@ project = "down"
 
 # Tell the database which collection you want to query from
 t0 = time()
-m = MongoCurious.MongoCurious(database = "human_epigenetics")
+m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper("human_epigenetics")
 print " Query %.3f" % (time() - t0)
 
 t0 = time()
