@@ -129,7 +129,7 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
         time1 = time.time()
         start = end + 1
         end = (batch + 1) * batch_size
-        print "start, end (%i, %i)" % (start, end)
+        print "Batch %i -> (start, end) (%i, %i)" % (batch + 1, start, end)
         if end > num_probes:
             end = num_probes
         b = robjects.r('betas(methylObj)[%i:%i,,drop=FALSE]' % (start, end))
