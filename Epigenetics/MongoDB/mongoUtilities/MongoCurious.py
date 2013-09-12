@@ -261,7 +261,10 @@ class MongoCurious():
         print "\n Conducting query: "
         print "   From the database %s and collection %s" % (self.database, collection)
         print "   Find(%s)" % (query_parameters)    # Get documents corresponding to query and sort by sorting parameter
-        docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
+        if sortby:
+            docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
+        else:
+            docs = self.mongo.find(collection, query_parameters, return_chr)
 
         if docs.count() == 0:
             warning = "    WARNING: The following query return zero probes or documents!"
@@ -275,113 +278,6 @@ class MongoCurious():
         print "    --> Found %i documents." % docs.count()
         # return documents found
         return docs
-
-
-    def finddocs_original(self, collection, sample_ids = None,
-                 probe_id = None, project = None, sample_label = None,
-                 sample_group = None, chip = None):
-
-        '''Finds documents corresponding to collection and type of query'''
-
-        if self.message != '':    # If there are existing error messages, don't perform these operations.
-            return {}
-
-        query_parameters = {}    # This dictionary will store all the query parameters
-
-        # Adding the different parameters of the query depending on the collection chosen
-        if collection == "annotations":
-            query_parameters["chr"] = self.chromosome
-            query_location = {}
-            if self.end >= 0:
-                query_location["$lte"] = self.end
-            if self.start >= 0:
-                query_location["$gte"] = self.start
-            query_parameters["mapinfo"] = dict(query_location.items())
-            # Decide which parameters to return
-            return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hil_cpg_island_name':True,
-                          'closest_tss_1': True, 'ucsc_refgene_name':True, 'closest_tss_gene_name':True,
-                          'regulatory_feature_group':True, 'regulatory_feature_name':True}
-            # Decide how to sort the returned entries (make sure there is an index on the chosen sorting parameter)
-            sortby, sortorder = 'mapinfo', 1
-
-        elif collection == 'waves':
-            query_parameters['chr'] = self.chromosome
-            if sample_ids:
-                ids = []
-                for item in sample_ids.keys():
-                    ids.append(ObjectId(item))
-                query_parameters["sample_id"] = {"$in":ids}
-            if project:
-                query_parameters['project'] = project
-            if self.start and self.end:
-                extension = 500    # extend the region of query to catch peaks with tails in the region
-                query_parameters["pos"] = {"$lte":self.end + extension, "$gte":self.start - extension}
-            return_chr = {'_id': False, 'pos': True,
-                          'height': True, 'stddev': True,
-                          'sample_id': True}
-            sortby, sortorder = 'height', (-1)
-
-        elif collection == "samples":
-            if self.collection == 'waves':
-                if chip:
-                    if self.database == 'yeast_epigenetics':
-                        query_parameters["type  (ip, mock, input)"] = chip
-                    else:
-                        query_parameters["chip"] = chip
-                else:
-                    query_parameters['haswaves'] = True
-            elif self.collection == 'methylation':
-                query_parameters['haswaves'] = {'$exists':False}
-                if project:
-                    query_parameters["project"] = project
-                if sample_label:
-                    query_parameters["sample_label"] = sample_label
-                if sample_group:
-                    query_parameters["sample_group"] = sample_group
-            return_chr = {'_id': True, 'type (ip, mock, input)':True,
-                          'samplegroup':True, 'sampleid':True, 'project': True,
-                          'sample_group': True, 'chip':True, 'treatment':True}
-            sortby, sortorder = 'sample_group', 1
-
-        elif collection == "methylation":
-            if sample_ids:
-                query_parameters["sampleid"] = sample_ids
-            if probe_id:
-                query_parameters["probeid"] = probe_id
-            return_chr = {'mval':True, 'sampleid': True, 'beta':True,
-                          'probeid':True}
-            sortby, sortorder = None, None
-
-        else:
-            print "Collection queried is either not supported or not in the database. Exiting..."
-            sys.exit()
-
-        print "\n Conducting query: "
-        print "   From the database %s and collection %s" % (self.database, collection)
-        print "   Find(%s)" % (query_parameters)
-                # Get documents corresponding to query and sort by sorting parameter
-        if sortby:
-            docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
-        else:
-            docs = self.mongo.find(collection, query_parameters, return_chr)
-
-        if docs.count() == 0:
-            warning = "    WARNING: The following query return zero probes or documents!"
-            warning += "\n    ---> Find(" + str(query_parameters) + ")"
-            warning += "\n     use the checkquery() method to validate the inputs of your query."
-            # self.errorlog(message)
-            print warning
-            self.message = 'No data here!'
-            return {}
-
-        print "    --> Found %i documents." % docs.count()
-        # return documents found
-        return docs
-
-
-
-
-
 
     def getprobes(self, docs):
         '''Organises the probe locations/ids into a dictionary'''
