@@ -7,8 +7,9 @@ from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
 
-from pymongo import Connection
-mongo = Connection('kruncher.cmmt.ubc.ca', 27017)
+
+from pymongo.mongo_client import MongoClient
+mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
 
 from viewtools import panning, zoom, check, query
 
@@ -38,7 +39,8 @@ def view_query_form(request):
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
 
-    o = q.get("organism", None)
+
+    o = q.get("organism", "human")
     col = q.get("collection", None)
     project = q.get('project', None)
     start = q.get("start", None)
@@ -104,6 +106,20 @@ def view_query_form(request):
     else:
         print 'No action specified', action_factor
 
+    db_list = [str(x) for x in mongo.database_names()]
+    organism_list = []
+    for f in db_list:
+        if f.endswith("_epigenetics"):
+            organism_list.append(f.replace("_epigenetics", ""))
+    print "default o: %s" % (o)
+
+
+
+    proj_list = mongo[o + "_epigenetics"]['samples'].distinct("project")
+    project_list = [str(x) for x in proj_list]
+    project_list.sort()
+    print "project_list ", project_list
+
     parameters = {'organism':str(o), 'collection': str(col), 'project':project,
                   'chromosome': str(chrom), 'start': start, 'end':end,
                   'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks,
@@ -112,7 +128,8 @@ def view_query_form(request):
 
     if check(parameters):
         svg = query(parameters)
-    return render(request, 'query_form.jade', {'plot':mark_safe(svg), 'organism':o, 'project':project,
+    return render(request, 'query_form.jade', {'organism_list':organism_list, 'project_list':project_list,
+                                               'plot':mark_safe(svg), 'organism':o, 'project':project,
                                                'collection':col, 'chromosome':chrom, 'start':start,
                                                'end':end, 'tss':tss, 'cpg':cpg, 'datapoints': datapoints,
                                                 'peaks':peaks, 'width':width, 'height':height})

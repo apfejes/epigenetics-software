@@ -110,26 +110,44 @@ class MongoEpigeneticsWrapper():
         saves a dictionary of the form {sample_id: (sample_label, sample_group)
         '''
 
+        sampleid_name = 'sampleid'    # previously name_samplabel
+        if self.collection == 'methylation':
+
+            if project == 'down syndrome':    # assign default groupby_name (previously name_sampgroup)
+                groupby_name = 'sample_group'
+            elif project == 'FASD':
+                groupby_name = 'samplegroup'
+            elif project == 'Kollman':
+                groupby_name = 'sample_group'
+            elif project == 'Anne Ellis':
+                groupby_name = 'treatment'
+            elif project == 'Wisconsin':
+                groupby_name = 'sampleid'
+            elif project == 'Valproate':
+                groupby_name = 'sample_group'
+            elif project == 'Roberts':
+                groupby_name = 'sample_group'
+            elif project == 'GTProject':
+                groupby_name = 'gender'
+            elif project == 'McMaster':
+                groupby_name = 'infected'
+            elif project == 'PAWS':
+                groupby_name = 'sample_group'
+            elif project == 'Pygmies_Bantu':
+                groupby_name = 'treatment'
+            else:
+                print "Project name not recognized (MEW - 132): %s" % (project)
+                return {}
+
         samplesdocs = self.finddocs_samples(project = project,
                                     sample_label = sample_label,
-                                    sample_group = sample_group,
+                                    sample_group = groupby_name,
                                     chip = chip)
 
         if samplesdocs is None:
             self.error_message = 'No samples found'
             return {}
 
-        if self.collection == 'methylation':
-            sampleid_name = 'sampleid'    # previously name_samplabel
-
-            if project == 'down syndrome':    # assign default groupby_name (previously name_sampgroup)
-                groupby_name = 'sample_group'
-            elif project == 'FASD':
-                groupby_name = 'samplegroup'
-            elif project == 'Anne Ellis':
-                groupby_name = 'treatment'
-            else:
-                return {}
 
 
         sample_ids = {}
@@ -229,11 +247,7 @@ class MongoEpigeneticsWrapper():
                 query_parameters["project"] = project
             if sample_label:
                 query_parameters["sample_label"] = sample_label
-            if sample_group:
-                query_parameters["sample_group"] = sample_group
-        return_chr = {'_id': True, 'type (ip, mock, input)':True,
-                      'samplegroup':True, 'sampleid':True, 'project': True,
-                      'sample_group': True, 'chip':True, 'treatment':True}
+        return_chr = {'_id': True, 'sampleid':True, sample_group:True, 'project':True}
         sortby, sortorder = 'sample_group', 1
         return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
 

@@ -19,21 +19,12 @@ body
             div(align='center')
                 fieldset
                     label(for='organism') Organism:
-                        if organism = 'arabidopsis'
-                            select(name='organism', id='organism')
-                                option(value="arabidopsis")="Arabidopsis"
-                                option(value="human")="Human"
-                                option(value="yeast")="Yeast"
-                        elif organism = 'yeast'
-                            select(name='organism', id='organism')
-                                option(value="yeast")="Yeast"
-                                option(value="human")="Human"
-                                option(value="arabidopsis")="Arabidopsis"
-                        else
-                            select(name='organism', id='organism')
-                                option(value="human")="Human"
-                                option(value="arabidopsis")="Arabidopsis"
-                                option(value="yeast")="Yeast"
+                        select(name='organism', id='organism')
+                            - each org in organism_list
+                                  - if org == organism
+                                       option(value=org, selected)=org
+                                  - else 
+                                       option(value=org)=org
                     label(for='collection') Collection:
                         if collection = 'chipseq'
                             select(name='collection', id='collection') 
@@ -50,24 +41,13 @@ body
                                 option(value="methchip")="Both"
                                 option(value="methylation")="Methylation"
                                 option(value="chipseq")="ChIP-Seq"
-                    if organism = 'human'
-                        if collection = 'methylation' or collection = "methchip"
-                            label(for='project') Project:
-                                if project = 'FASD'
-                                    select(name='project', id='project') 
-                                        option(value="FASD")="FASD"
-                                        option(value="Anne Ellis")="Anne Ellis"
-                                        option(value="down syndrome")="Down Syndrome"
-                                elif project = 'Anne Ellis'
-                                    select(name='project', id='project') 
-                                        option(value="Anne Ellis")="Anne Ellis"
-                                        option(value="down syndrome")="Down Syndrome"
-                                        option(value="FASD")="FASD"
-                                else
-                                    select(name='project', id='project') 
-                                        option(value="down syndrome")="Down Syndrome"
-                                        option(value="Anne Ellis")="Anne Ellis"
-                                        option(value="FASD")="FASD"
+                    label(for='project') Project:
+                        select(name='project', id='project')
+                            - each pt in project_list
+                                - if pt == project
+                                    option(value=pt, selected)=pt
+                                - else 
+                                    option(value=pt)=pt
                     label(for='chromosome') Chromosome:
                         if chromosome
                             input(id='chromosome',size = '6', type='text', name='chromosome', value = chromosome)
