@@ -41,7 +41,7 @@ class MongoEpigeneticsWrapper():
         self.start = None
         self.waves = None
         self.annotations = None
-        self.error_message = None
+        self.error_message = ''
 
     def query(self, collection, chromosome, start, end,
               # optional parameters
@@ -57,7 +57,7 @@ class MongoEpigeneticsWrapper():
         if start == end or start > end or start < 0 or end < 0:
             self.error_message = 'Invalid start and end points.'
         else:
-            self.error_message = None    # contains error messages to pass to the server
+            self.error_message = ''    # contains error messages to pass to the server
 
         # Make sure chr variable is in the right format
         if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
@@ -157,7 +157,7 @@ class MongoEpigeneticsWrapper():
 
         '''Finds documents corresponding to collection and type of query'''
 
-        if self.error_message:    # If there are existing error messages, don't perform these operations.
+        if self.error_message != '' :    # If there are existing error messages, don't perform these operations.
             return {}
         collection = 'annotations'
         query_parameters = {}    # This dictionary will store all the query parameters
@@ -182,7 +182,7 @@ class MongoEpigeneticsWrapper():
 
         '''Finds documents corresponding to collection and type of query'''
 
-        if self.error_message:    # If there are existing error messages, don't perform these operations.
+        if self.error_message != '' :    # If there are existing error messages, don't perform these operations.
             return {}
         collection = 'waves'
         query_parameters = {}    # This dictionary will store all the query parameters
@@ -210,7 +210,7 @@ class MongoEpigeneticsWrapper():
 
         '''Finds documents corresponding to collection and type of query'''
 
-        if self.error_message:    # If there are existing error messages, don't perform these operations.
+        if self.error_message != '' :    # If there are existing error messages, don't perform these operations.
             return {}
         collection = 'samples'
         query_parameters = {}    # This dictionary will store all the query parameters
@@ -242,7 +242,7 @@ class MongoEpigeneticsWrapper():
 
         '''Finds documents corresponding to collection and type of query'''
 
-        if self.error_message:    # If there are existing error messages, don't perform these operations.
+        if self.error_message != '' :    # If there are existing error messages, don't perform these operations.
             return {}
         collection = 'methylation'
         query_parameters = {}    # This dictionary will store all the query parameters
