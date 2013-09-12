@@ -17,13 +17,16 @@ import common_utilities as cu
 
 
 if __name__ == '__main__':
-
+    if len(sys.argv) < 2:
+        print('Project name to delete must be given.')
+        sys.exit()
+    proj_name = sys.argv[1]
 
     db_name = "human_epigenetics"
     mongodb = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
-    curs = mongodb.find("samples", {"project":"Pygmies_Bantu"}, {"_id": True})
+    curs = mongodb.find("samples", {"project":proj_name}, {"_id": True})
     samples = cu.CreateListFromOIDs(curs)
     removed = mongodb.remove("methylation", {"sampleid": {"$in": samples}}, True)
     print "data points removed = %s" % (removed['n'])
-    removed = mongodb.remove("samples", {"project":"Pygmies_Bantu"}, True)
+    removed = mongodb.remove("samples", {"project":proj_name}, True)
     print "samples removed = %s" % (removed['n'])
