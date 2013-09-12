@@ -137,9 +137,11 @@ def run():
 
     chromosomes = util.get_chromosome_names()
 
+    # id_s = map(util.get_sample_id_from_name, samples)
+    # id_r = map(util.get_sample_id_from_name, controls)
+    id_s = [util.get_sample_id_from_name(s) for s in samples]
+    id_r = [util.get_sample_id_from_name(c) for c in controls]
 
-    id_s = map(util.get_sample_id_from_name, samples)
-    id_r = map(util.get_sample_id_from_name, controls)
     # print "sample ids", id_s
     # print "control ids", id_r
     x = []

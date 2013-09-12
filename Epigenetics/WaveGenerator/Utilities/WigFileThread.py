@@ -29,8 +29,7 @@ class WigFileWriter(threading.Thread):
         if item.start >= 0:    # drop entire maps that start before the 0th position.
             # TODO: a more elegant solution would be to trim the positions until they start at zero.
             self.f.write("\nfixedStep chrom=%s start=%i step=1\n" % (item.chr, item.start))
-            self.f.write('\n'.join(map(str, item.coverage_map)))
-
+            self.f.write('\n'.join([str(s) for s in item.coverage_map]))
 
 
     def run(self):
