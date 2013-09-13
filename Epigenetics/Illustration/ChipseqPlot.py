@@ -18,7 +18,7 @@ class ChipseqPlot(object):
     '''
 
     DISTR_STROKE = 0.5
-    BOTTOM_MARGIN = 100    # 100 pixels
+    BOTTOM_MARGIN = 120    # 120 pixels
     RIGHT_MARGIN = 240
     MARGIN = 30
 
@@ -111,14 +111,14 @@ class ChipseqPlot(object):
 
 
     def save(self):
-        '''TODO: add docstring'''
+        ''' TODO: fill in docstring '''
         for element in self.elements:
             self.plot.add(element)
         self.elements = None    # may want to remove this, if we ever want to do fancy stuff with the elements.
         self.plot.save()
 
     def to_string(self):
-        '''TODO: add docstring'''
+        ''' TODO: fill in docstring '''
         for element in self.elements:
             self.plot.add(element)
         z = self.plot.tostring()
@@ -126,7 +126,7 @@ class ChipseqPlot(object):
         return z
 
     def get_elements(self):
-        '''TODO: add docstring'''
+        ''' TODO: fill in docstring '''
         self.add_sample_labels(self.MARGIN * 3.2 + self.width)
         return self.elements
 
@@ -153,14 +153,13 @@ class ChipseqPlot(object):
         if self.message is '':
             self.add_xtics()
             self.add_ytics()
-            self.add_sample_labels(self.width - self.RIGHT_MARGIN + 10)
+            self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
             if get_tss:
                 for tss in add_tss(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
                     self.elements.append(tss)
             if get_cpg:
                 for cpg in add_cpg(self.annotations, self.MARGIN, self.height, self.width, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
                     self.elements.append(cpg)
-
 
     def add_sample_labels(self, x_position = None):
         ''' TODO: fill in docstring '''
@@ -183,7 +182,7 @@ class ChipseqPlot(object):
         return None
 
     def add_xtics(self):
-        '''TODO: add docstring'''
+        ''' TODO: fill in docstring '''
         scale_tics = 1
 
         while((scale_tics * 10) < self.end - self.start):

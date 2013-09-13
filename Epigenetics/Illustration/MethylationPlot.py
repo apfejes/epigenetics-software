@@ -117,6 +117,7 @@ class MethylationPlot(object):
         ''' TODO: fill in docstring '''
         for element in self.elements:
             self.plot.add(element)
+        self.elements = None    # may want to remove this, if we ever want to do fancy stuff with the elements.
         self.plot.save()
 
     def to_string(self):
