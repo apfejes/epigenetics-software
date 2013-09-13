@@ -8,6 +8,7 @@ from time import time
 import os, sys
 from numpy import log, mean, std
 from math import sqrt
+import math
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
@@ -112,6 +113,7 @@ class MongoEpigeneticsWrapper():
         '''
 
         sampleid_name = 'sampleid'    # previously name_samplabel
+        groupby_name = 'samplegroup'
         if self.collection == 'methylation':
 
             if project == 'down syndrome':    # assign default groupby_name (previously name_sampgroup)
@@ -327,6 +329,8 @@ class MongoEpigeneticsWrapper():
             sample = sample_ids[sample_id][0]
             stype = sample_ids[sample_id][1]
             beta = methyldata['beta']
+            if math.isnan(beta):
+                continue
             # mval = methyldata['mval'] #unused currently
             pos = probes[methyldata['probeid']]
             if pos in pos_betas_dict:
