@@ -10,8 +10,6 @@ from svgwrite.drawing import Drawing
 from svgwrite.path import Path
 from math import fabs, exp, sqrt, log
 import Color_Palette
-palette = Color_Palette.ColorPalette()
-
 from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, medfont, smallfont, legend_color
 
 class MethylationPlot(object):
@@ -25,7 +23,7 @@ class MethylationPlot(object):
     BOTTOM_MARGIN = 120    # 120 pixels
     RIGHT_MARGIN = 240
     MARGIN = 30
-
+    palette = Color_Palette.ColorPalette()
 
     def __init__(self, filename, title, message, sample_peaks,
                  pos_betas_dict, annotations, color, start, end,
@@ -74,7 +72,7 @@ class MethylationPlot(object):
                 all_y.append(y)
         # self.max_y_value = max(all_y)    # (max y value - value /y height) + margin gives you position
             # / self.max_y_value
-        palette.Colors()    # blue, red, green, purple palettes
+#        palette.Colors()    # blue, red, green, purple palettes # APF - don't need to call this, now part of init.
 
         for position in pos_betas_dict.keys():
             x = round(float(position - self.start) * self.scale_x, 2) + self.MARGIN
@@ -82,23 +80,23 @@ class MethylationPlot(object):
             if show_points:
                 for beta, sample_id, sample_type in pos_betas_dict[position]:
                     y = round((1 - beta) * self.dimension_y, 2) + self.MARGIN
-                    type_color, sample_color = palette.sorter(sample_type, sample_id)
+                    type_color, sample_color = self.palette.sorter(sample_type, sample_id)
                     point = Circle(center = (x, y), r = self.DOT_RADIUS, fill = sample_color)
                     self.elements.append(point)
 
             if show_peaks:
                 for sample_type in sample_peaks[position]:
-                    type_color, sample_color = palette.sorter(sample_type, None)
+                    type_color, sample_color = self.palette.sorter(sample_type, None)
                     (m, s) = sample_peaks[position][sample_type]
                     m = round((1 - m) * self.dimension_y, 2) + self.MARGIN
                     s = round(s * self.dimension_y, 3)
-
 
                     if s != 0.0:
                         gaussian_y, gaussian_x = self.makegaussian(s, self.DISTR_HT)    # reverse output arguments for sideways gaussians
                         gaussian_x = [coord + x - 1 for coord in gaussian_x]
                         gaussian_y = [item + m for item in gaussian_y]
                         d = "M"
+
                         for i in range(0, len(gaussian_x)):
                             d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
 
@@ -176,7 +174,7 @@ class MethylationPlot(object):
         ''' Add the sample labels to the image. '''
         if x_position == None:
             x_position = self.width - self.RIGHT_MARGIN + self.RIGHT_MARGIN / 2
-        samples_color = palette.colors_dict()
+        samples_color = self.palette.colors_dict()
         if len(samples_color) > 20:
             fontsize = str(float(medfont) - 0.5)
         elif len(samples_color) < 5:

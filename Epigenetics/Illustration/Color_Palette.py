@@ -4,22 +4,18 @@ Created on 2013-07-11
 @author: sperez
 '''
 
-class ColorPalette(object):
+class ColorPalette():
     '''
     Stores organization of color scheme for each part of plot.
     '''
     def __init__(self):
-
         self.type_count = 0
-
         self.counter = {}    # keeps track of
-
         self.types_color = {}
         self.samples_color = {}
-
         self.colors = {}
 
-    def Colors(self):
+        # Hold dictionaries of colours for use in generating svgs
         self.colors['blue'] = ['blue', 'cornflowerblue', 'darkblue', 'deepskyblue', 'darkturquoise',
                        'midnightblue', 'navy', 'dodgerblue', 'lightblue', 'lightskyblue', 'cadetblue', 'teal',
                        'paleturquoise', 'aquamarine', 'azure', 'aqua', 'lightsteelblue', 'powderblue']
@@ -33,9 +29,11 @@ class ColorPalette(object):
                            'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
         self.color_wheel = {1:'blue', 2:'red', 4:'purple', 3:'green'}
 
-        return self.colors, self.color_wheel
+        # return self.colors, self.color_wheel
 
     def sorter(self, sample_type, sample_id):
+        '''This function appears to assign colours to each sample id, based up on sample type.'''
+
         # print '\n', self.counter, sample_type, sample_id
         if sample_type not in self.types_color:
             self.type_count += 1
@@ -63,4 +61,5 @@ class ColorPalette(object):
         return type_color, sample_color
 
     def colors_dict(self):
+        '''return the list of colour/sample mappings'''
         return self.samples_color
