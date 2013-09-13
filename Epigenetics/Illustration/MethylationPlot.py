@@ -67,7 +67,7 @@ class MethylationPlot(object):
 
 
     def build(self, pos_betas_dict, sample_peaks, show_points, show_peaks):
-        '''TODO: missing docstring'''
+        '''convert loaded data into svg imagees'''
         all_y = []
         for position in pos_betas_dict.keys():
             for y, _sample, _sample_type in pos_betas_dict[position]:
@@ -114,14 +114,14 @@ class MethylationPlot(object):
 
 
     def save(self):
-        ''' TODO: fill in docstring '''
+        ''' push loaded elements to the the plot, clear out the elements. '''
         for element in self.elements:
             self.plot.add(element)
         self.elements = None    # may want to remove this, if we ever want to do fancy stuff with the elements.
         self.plot.save()
 
     def to_string(self):
-        ''' TODO: fill in docstring '''
+        ''' convert the loaded elements to strings and return the list of elements'''
         for element in self.elements:
             self.plot.add(element)
         z = self.plot.tostring()
@@ -129,21 +129,21 @@ class MethylationPlot(object):
         return z
 
     def get_xml(self):
-        ''' TODO: fill in docstring '''
+        ''' Convert the loaded elements into XML strings and then return them.'''
         strings = ""
         for element in self.elements:
             strings += (element.get_xml().decode('utf-8'))
         return strings
 
     def get_elements(self):
-        ''' TODO: fill in docstring '''
+        ''' call sample labels and delete loaded elements. '''
         self.add_sample_labels(self.MARGIN * 3.2 + self.width)
         z = self.elements
         self.elements = None
         return z
 
     def add_data(self, elements = None):
-        ''' TODO: fill in docstring '''
+        ''' add new elements to the elements queue '''
         elements_to_add = elements
         for element in elements_to_add:
             self.plot.add(element)
@@ -164,7 +164,7 @@ class MethylationPlot(object):
         if self.message is '':
             self.add_xtics()
             self.add_ytics()
-            self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
+            # self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
             if get_tss:
                 for tss in add_tss(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
                     self.elements.append(tss)
@@ -173,7 +173,7 @@ class MethylationPlot(object):
                     self.elements.append(cpg)
 
     def add_sample_labels(self, x_position = None):
-        ''' TODO: fill in docstring '''
+        ''' Add the sample labels to the image. '''
         if x_position == None:
             x_position = self.width - self.RIGHT_MARGIN + self.RIGHT_MARGIN / 2
         samples_color = palette.colors_dict()
@@ -194,7 +194,7 @@ class MethylationPlot(object):
         return None
 
     def add_xtics(self):
-        ''' TODO: fill in docstring '''
+        ''' Create X tics on the plot'''
         scale_tics = 1
 
         while((scale_tics * 10) < self.end - self.start):
@@ -220,7 +220,7 @@ class MethylationPlot(object):
             self.elements.append(ticmarker)
 
     def add_ytics(self):
-        ''' TODO: fill in docstring '''
+        ''' Add Y ticks to the svg plot '''
         labels = [0, 0.2, 0.4, 0.6, 0.8, 1]
         ytics = [round((self.MARGIN + self.dimension_y) - (y * self.dimension_y), 3) for y in labels]
         spacing = (ytics[0] - ytics[1]) / 2
@@ -243,7 +243,7 @@ class MethylationPlot(object):
 
     @staticmethod
     def makegaussian(stddev, innerheight):
-        ''' TODO: fill in docstring '''
+        ''' create gausian distributions on the plot '''
         endpts = (sqrt((-2) * stddev * stddev * log(1.0 / innerheight)))
         X = [0]
         X.extend([round(stddev * 2.0 * (i / 9.0) - stddev, 3) for i in range(0, 10)])    # add 10 points  near mean

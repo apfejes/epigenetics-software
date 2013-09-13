@@ -66,6 +66,7 @@ class ChipseqPlot(object):
 
 
     def build(self):
+        '''convert loaded data into svg images'''
         tail = 1
 
         # create path objects for each peak
@@ -111,14 +112,14 @@ class ChipseqPlot(object):
 
 
     def save(self):
-        ''' TODO: fill in docstring '''
+        ''' push loaded elements to the the plot, clear out the elements. '''
         for element in self.elements:
             self.plot.add(element)
         self.elements = None    # may want to remove this, if we ever want to do fancy stuff with the elements.
         self.plot.save()
 
     def to_string(self):
-        ''' TODO: fill in docstring '''
+        ''' convert the loaded elements to strings and return the list of elements'''
         for element in self.elements:
             self.plot.add(element)
         z = self.plot.tostring()
@@ -126,12 +127,12 @@ class ChipseqPlot(object):
         return z
 
     def get_elements(self):
-        ''' TODO: fill in docstring '''
+        ''' call sample labels and delete loaded elements. '''
         self.add_sample_labels(self.MARGIN * 3.2 + self.width)
         return self.elements
 
     def add_data(self, foreign_elements):
-        '''TODO: add docstring'''
+        ''' add new elements to the elements queue '''
         if not isinstance(foreign_elements, list):
             raise ValueError("Data to add to plot should be stored in a list, not a {}".format(type(foreign_elements)))
         for element in foreign_elements:
@@ -162,7 +163,7 @@ class ChipseqPlot(object):
                     self.elements.append(cpg)
 
     def add_sample_labels(self, x_position = None):
-        ''' TODO: fill in docstring '''
+        ''' Add the sample labels to the image. '''
         if x_position == None:
             x_position = self.width - self.RIGHT_MARGIN + self.RIGHT_MARGIN / 2
         if len(self.samples_color) > 20:
@@ -182,7 +183,7 @@ class ChipseqPlot(object):
         return None
 
     def add_xtics(self):
-        ''' TODO: fill in docstring '''
+        ''' Create X tics on the plot'''
         scale_tics = 1
 
         while((scale_tics * 10) < self.end - self.start):
@@ -208,7 +209,7 @@ class ChipseqPlot(object):
             self.elements.append(ticmarker)
 
     def add_ytics(self):
-        '''TODO: add docstring'''
+        ''' Add Y ticks to the svg plot '''
         scale_tics = 64
         labels = [i for i in range(0, int(self.maxh) + 1, scale_tics)]
         while len(labels) < 4:
@@ -233,7 +234,7 @@ class ChipseqPlot(object):
 
     @staticmethod
     def makegaussian(start, end, pos, tail, offset, innerheight, stddev):
-        '''TODO: Add docstring'''
+        ''' create gausian distributions on the plot '''
         endpts = int((sqrt((-2) * stddev * stddev * log(float(tail) / innerheight))))
         spacing = 64
         n_points = 0
