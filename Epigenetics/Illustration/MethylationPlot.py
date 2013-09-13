@@ -24,6 +24,7 @@ class MethylationPlot(object):
     RIGHT_MARGIN = 240
     MARGIN = 30
     palette = Color_Palette.ColorPalette()
+       # APF - reset on each iteration through the sorter.
 
     def __init__(self, filename, title, message, sample_peaks,
                  pos_betas_dict, annotations, color, start, end,
@@ -43,6 +44,8 @@ class MethylationPlot(object):
         self.annotations = annotations
         self.message = message
 
+        self.palette.samples_color = {}    # reset the methylation plot colour assignment on initialization.
+
         self.dimension_y = self.height - self.MARGIN - self.BOTTOM_MARGIN    # this is the size of the y field
         self.dimension_x = self.width - self.MARGIN - self.RIGHT_MARGIN
         self.scale_x = float(self.dimension_x) / (self.end - self.start)    # this is a scaling variable
@@ -55,6 +58,7 @@ class MethylationPlot(object):
                             )
         background = Rect(insert = (0, 0), size = size, fill = "white")
         self.plot.add(background)
+
 
         if message:
             Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
@@ -72,7 +76,8 @@ class MethylationPlot(object):
                 all_y.append(y)
         # self.max_y_value = max(all_y)    # (max y value - value /y height) + margin gives you position
             # / self.max_y_value
-#        palette.Colors()    # blue, red, green, purple palettes # APF - don't need to call this, now part of init.
+
+
 
         for position in pos_betas_dict.keys():
             x = round(float(position - self.start) * self.scale_x, 2) + self.MARGIN
@@ -110,6 +115,9 @@ class MethylationPlot(object):
 
                         self.elements.append(gaussian)
 
+    def get_sample_index(self):
+        ''' Return the sample index so that it can be used in HTML'''
+        return self.palette.colors_dict()
 
     def save(self):
         ''' push loaded elements to the the plot, clear out the elements. '''
@@ -170,8 +178,10 @@ class MethylationPlot(object):
                 for cpg in add_cpg(self.annotations, self.MARGIN, self.height, self.width, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
                     self.elements.append(cpg)
 
+
+
     def add_sample_labels(self, x_position = None):
-        ''' Add the sample labels to the image. '''
+        ''' DEPRECATED - Add the sample labels to the image. '''
         if x_position == None:
             x_position = self.width - self.RIGHT_MARGIN + self.RIGHT_MARGIN / 2
         samples_color = self.palette.colors_dict()

@@ -143,7 +143,21 @@ input[type="submit"]:hover{
     /*font-weight:bold;*/
 }
 
+#right {
+	font-size: 0.7em;
+	float: right;
+	display: inline; /* for IE */
+	width: 100px;
+	margin: 0 10px;
+}
 
+#left {
+	float: left;
+	display: inline; /* for IE */
+	width: 80%;
+	padding: 0 25px;
+	margin: 0;
+}
 
 
 

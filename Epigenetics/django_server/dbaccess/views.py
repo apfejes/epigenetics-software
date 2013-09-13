@@ -130,14 +130,14 @@ def view_query_form(request):
     svg = 'Please query the database to generate an image!'
     if check(parameters):
         if col == 'methylation':
-            svg = query_methylation(parameters)
+            svg, sample_index = query_methylation(parameters)
         elif col == 'chipseq':
             svg = query_chipseq(parameters)
         elif col == 'methchip':
             svg = query_all(parameters)
 
     return render(request, 'query_form.jade', {'organism_list':organism_list, 'project_list':project_list,
-                                               'collection_list':collection_list,
+                                               'collection_list':collection_list, 'sample_index':sample_index,
                                                'plot':mark_safe(svg), 'organism':o, 'project':project,
                                                'collection':col, 'chromosome':chrom, 'start':start,
                                                'end':end, 'tss':tss, 'cpg':cpg, 'datapoints': datapoints,

@@ -25,8 +25,6 @@ from bson.objectid import ObjectId
 
 directory_for_svgs = "/home/sperez/Documents/svg_temp/"
 
-
-
 class MongoEpigeneticsWrapper():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
 
@@ -150,8 +148,6 @@ class MongoEpigeneticsWrapper():
         if samplesdocs is None:
             self.error_message = 'No samples found'
             return {}
-
-
 
         sample_ids = {}
         for doc in samplesdocs:
@@ -482,15 +478,17 @@ class MongoEpigeneticsWrapper():
             filename = directory_for_svgs + filename
 
         if self.collection == "methylation":
+
             drawing = methylationplot.MethylationPlot(filename, title, self.error_message, self.sample_peaks,
                                                       self.pos_betas_dict, self.annotations,
                                                       color, self.start, self.end, width,
                                                       height, show_points, show_peaks)
+            sampleindex = drawing.get_sample_index()
         if self.collection == "waves":
             drawing = chipseqplot.ChipseqPlot(filename, title, self.error_message, self.waves, self.start,
                                               self.end, self.annotations, width,
                                               height)
-
+            # TODO: SAMPLE NAMES MUST BE RETRIEVED HERE.
         if to_string:
             print " Returning svg as a unicode string"
             drawing.add_legends(get_tss, get_cpg)
@@ -512,7 +510,7 @@ class MongoEpigeneticsWrapper():
             drawing.add_legends(get_tss, get_cpg)
             z = drawing
             drawing = None
-        return z
+        return z, sampleindex
 
 # Error function below needs testing
 
