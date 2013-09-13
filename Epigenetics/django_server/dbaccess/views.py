@@ -33,7 +33,7 @@ def send_svg(request):
 def view_query_form(request):
     ''' Instructions for parsing the query_form, and getting the names of the 
         information required to re-populate the drop down boxes and menus '''
-    svg = 'Try querying the database!'
+
     q = None
     if request.method == 'GET':
         q = request.GET
@@ -42,7 +42,7 @@ def view_query_form(request):
 
 
     o = q.get("organism", "human")
-    col = q.get("collection", None)
+    col = q.get("collection", "methylation")
     project = q.get('project', None)
     start = q.get("start", None)
     end = q.get("end", None)
@@ -127,7 +127,7 @@ def view_query_form(request):
                   'width':width, 'height':height }
     print 'parameters = ', parameters
 
-    svg = ""
+    svg = 'Please query the database to generate an image!'
     if check(parameters):
         if col == 'methylation':
             svg = query_methylation(parameters)
