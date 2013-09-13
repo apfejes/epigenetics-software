@@ -6,7 +6,7 @@ Created on 2013-05-07
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
-
+import json
 
 from pymongo.mongo_client import MongoClient
 mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
@@ -31,7 +31,8 @@ def send_svg(request):
     return HttpResponse(showgene.svgcode())
 
 def view_query_form(request):
-    ''' TODO: fill in docstring '''
+    ''' Instructions for parsing the query_form, and getting the names of the 
+        information required to re-populate the drop down boxes and menus '''
     svg = 'Try querying the database!'
     q = None
     if request.method == 'GET':
@@ -113,12 +114,12 @@ def view_query_form(request):
             organism_list.append(f.replace("_epigenetics", ""))
     print "default o: %s" % (o)
 
-
-
     proj_list = mongo[o + "_epigenetics"]['samples'].distinct("project")
     project_list = [str(x) for x in proj_list]
     project_list.sort()
     print "project_list ", project_list
+
+    collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip':'Both'}
 
     parameters = {'organism':str(o), 'collection': str(col), 'project':project,
                   'chromosome': str(chrom), 'start': start, 'end':end,
@@ -129,6 +130,7 @@ def view_query_form(request):
     if check(parameters):
         svg = query(parameters)
     return render(request, 'query_form.jade', {'organism_list':organism_list, 'project_list':project_list,
+                                               'collection_list':collection_list,
                                                'plot':mark_safe(svg), 'organism':o, 'project':project,
                                                'collection':col, 'chromosome':chrom, 'start':start,
                                                'end':end, 'tss':tss, 'cpg':cpg, 'datapoints': datapoints,
