@@ -21,7 +21,7 @@ def zoom(zoom_symbol, start, end):
     new_span = span * zoom_factor    # span is now 10bp
     new_start = start + span / 2 - new_span / 2    # start is now 245
     new_end = end - span / 2 + new_span / 2    # end is now 255bp
-    if new_start < 0: 
+    if new_start < 0:
         new_start = 0
     return int(new_start), int(new_end)
 
@@ -38,10 +38,10 @@ def panning(pan_factor, start, end):
     shiftby = int((end - start) * percent)    # will be positive to go the right, negative to the left
     new_start = int(start + shiftby)
     new_end = int(end + shiftby)
-    if new_start < 0: 
+    if new_start < 0:
         new_start = 0
     if new_end <= new_start:
-        new_end = new_start+1
+        new_end = new_start + 1
     return new_start, new_end
 
 
@@ -52,40 +52,41 @@ def check(p):
     else:
         return False
 
-def query(p):
+def query_chipseq(p):
+    '''run the query for chipseq'''
+    return showchipseq.svgcode(db = p['organism'],
+                               chromosome = p['chromosome'],
+                               start = p['start'],
+                               end = p['end'],
+                               height = p['height'],
+                               width = p['width'],
+                               tss = p['tss'],
+                               cpg = p['cpg'])
+
+def query_methylation(p):
     '''TODO: docstring missing'''
-    if p['collection'] == 'chipseq':
-        return showchipseq.svgcode(db = p['organism'],
+    return showmethylation.svgcode(db = p['organism'],
+                                   project = p['project'],
                                    chromosome = p['chromosome'],
                                    start = p['start'],
                                    end = p['end'],
                                    height = p['height'],
                                    width = p['width'],
                                    tss = p['tss'],
-                                   cpg = p['cpg'])
-    elif p['collection'] == 'methylation':
-        return showmethylation.svgcode(db = p['organism'],
-                                       project = p['project'],
-                                       chromosome = p['chromosome'],
-                                       start = p['start'],
-                                       end = p['end'],
-                                       height = p['height'],
-                                       width = p['width'],
-                                       tss = p['tss'],
-                                       cpg = p['cpg'],
-                                       datapoints = p['datapoints'],
-                                       peaks = p['peaks'])
-    elif p['collection'] == 'methchip':
-        return showchipandmeth.svgcode(db = p['organism'],
-                                       project = p['project'],
-                                       chromosome = p['chromosome'],
-                                       start = p['start'],
-                                       end = p['end'],
-                                       height = p['height'],
-                                       width = p['width'],
-                                       tss = p['tss'],
-                                       cpg = p['cpg'],
-                                       datapoints = p['datapoints'],
-                                       peaks = p['peaks'])
-    else:
-        return p['collection'] + ' is an invalid collection! Please try again...'
+                                   cpg = p['cpg'],
+                                   datapoints = p['datapoints'],
+                                   peaks = p['peaks'])
+
+def query_all(p):
+    '''TODO: docstring missing'''
+    return showchipandmeth.svgcode(db = p['organism'],
+                                   project = p['project'],
+                                   chromosome = p['chromosome'],
+                                   start = p['start'],
+                                   end = p['end'],
+                                   height = p['height'],
+                                   width = p['width'],
+                                   tss = p['tss'],
+                                   cpg = p['cpg'],
+                                   datapoints = p['datapoints'],
+                                   peaks = p['peaks'])

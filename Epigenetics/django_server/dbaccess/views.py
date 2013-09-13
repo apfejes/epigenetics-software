@@ -6,12 +6,12 @@ Created on 2013-05-07
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
-import json
+
 
 from pymongo.mongo_client import MongoClient
 mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
 
-from viewtools import panning, zoom, check, query
+from viewtools import panning, zoom, check, query_all, query_chipseq, query_methylation
 
 def home_view(request):
     ''' TODO: fill in docstring '''
@@ -127,8 +127,15 @@ def view_query_form(request):
                   'width':width, 'height':height }
     print 'parameters = ', parameters
 
+    svg = ""
     if check(parameters):
-        svg = query(parameters)
+        if col == 'methylation':
+            svg = query_methylation(parameters)
+        elif col == 'chipseq':
+            svg = query_chipseq(parameters)
+        elif col == 'methchip':
+            svg = query_all(parameters)
+
     return render(request, 'query_form.jade', {'organism_list':organism_list, 'project_list':project_list,
                                                'collection_list':collection_list,
                                                'plot':mark_safe(svg), 'organism':o, 'project':project,

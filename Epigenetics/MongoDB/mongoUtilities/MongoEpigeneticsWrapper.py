@@ -28,6 +28,7 @@ directory_for_svgs = "/home/sperez/Documents/svg_temp/"
 
 class MongoEpigeneticsWrapper():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
+
     def __init__(self, database):
         '''Performs the connection to the Mongo database.'''
         self.database = database
