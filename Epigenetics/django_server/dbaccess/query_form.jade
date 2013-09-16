@@ -27,7 +27,7 @@ body
                                        option(value=org)=org
                     label(for='collection') Collection:
                        - var col = collection_list.items()
-                       select(name='collection',id='collection)
+                       select(name='collection',id='collection')
                          - for x,y in col
                            - if x == collection
                                option(value=x, selected)=y
