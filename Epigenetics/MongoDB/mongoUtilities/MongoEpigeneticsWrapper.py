@@ -112,6 +112,7 @@ class MongoEpigeneticsWrapper():
 
         sampleid_name = 'sampleid'    # previously name_samplabel
         groupby_name = 'samplegroup'
+        print "project name = %s" % project
         if self.collection == 'methylation':
 
             if project == 'down syndrome':    # assign default groupby_name (previously name_sampgroup)
@@ -136,11 +137,19 @@ class MongoEpigeneticsWrapper():
                 groupby_name = 'sample_group'
             elif project == 'Pygmies_Bantu':
                 groupby_name = 'treatment'
+            elif project == None:    # All Projects
+                groupby_name = 'project'
             else:
                 print "Project name not recognized (MEW - 132): %s" % (project)
                 return {}
 
-        samplesdocs = self.finddocs_samples(project = project,
+
+        if project == None:
+            samplesdocs = self.finddocs_samples(sample_group = groupby_name,
+                                    chip = chip)
+            print "sampledocs %s" % (samplesdocs)
+        else:
+            samplesdocs = self.finddocs_samples(project = project,
                                     sample_label = sample_label,
                                     sample_group = groupby_name,
                                     chip = chip)

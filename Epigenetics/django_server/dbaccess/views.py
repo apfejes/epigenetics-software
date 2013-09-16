@@ -30,6 +30,13 @@ def send_svg(request):
     from .Annotations import showgene
     return HttpResponse(showgene.svgcode())
 
+def to_boolean(value):
+    '''test is value is true or false'''
+    if value == 'on' or value == 'true' or value == True :
+        return True
+    else:
+        return False
+
 def view_query_form(request):
     ''' Instructions for parsing the query_form, and getting the names of the 
         information required to re-populate the drop down boxes and menus '''
@@ -55,22 +62,10 @@ def view_query_form(request):
     width = q.get("width", 1000)
     height = q.get("height", 600)
 
-    if tss == 'on' or tss == 'true' or tss == True :
-        tss = True
-    else:
-        tss = False
-    if cpg == 'on' or cpg == 'true' or cpg == True:
-        cpg = True
-    else:
-        cpg = False
-    if datapoints == 'on' or datapoints == 'true' or datapoints == True:
-        datapoints = True
-    else:
-        datapoints = False
-    if peaks == 'on' or peaks == 'true' or peaks == True:
-        peaks = True
-    else:
-        peaks = False
+    tss = to_boolean(tss)
+    cpg = to_boolean(cpg)
+    datapoints = to_boolean(datapoints)
+    peaks = to_boolean(peaks)
 
     if start is None or start == '' or start == True:
         start = 0
@@ -116,15 +111,21 @@ def view_query_form(request):
 
     proj_list = mongo[o + "_epigenetics"]['samples'].distinct("project")
     project_list = [str(x) for x in proj_list]
+    project_list.append("All")
     project_list.sort()
     print "project_list ", project_list
 
     collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip':'Both'}
 
-    parameters = {'organism':str(o), 'collection': str(col), 'project':project,
+
+    parameters = {'organism':str(o), 'collection': str(col),
                   'chromosome': str(chrom), 'start': start, 'end':end,
                   'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks,
                   'width':width, 'height':height }
+    if project != "All":
+        parameters['project'] = str(project)
+    else:
+        parameters['project'] = None
     print 'parameters = ', parameters
 
     sample_index = {}
