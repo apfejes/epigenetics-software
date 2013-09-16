@@ -127,7 +127,9 @@ def view_query_form(request):
                   'width':width, 'height':height }
     print 'parameters = ', parameters
 
+    sample_index = {}
     svg = 'Please query the database to generate an image!'
+
     if check(parameters):
         if col == 'methylation':
             svg, sample_index = query_methylation(parameters)
