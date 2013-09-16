@@ -55,10 +55,10 @@ class MethylationPlot(object):
 
         size = (str(self.width) + "px" , str(self.height) + "px")
         # create drawing
-        self.plot = Drawing(filename, size = size
+        self.plot = Drawing(filename, size = size)
                             # , viewBox = ("0 0 " + str(self.height) + " " + str(self.width + (self.margin * 2)))
-                            # , preserveAspectRatio = "xMinYMin meet"
-                            )
+                            # , preserveAspectRatio = "xMinYMin meet")
+
         background = Rect(insert = (0, 0), size = size, fill = "white")
         self.plot.add(background)
 
@@ -89,7 +89,7 @@ class MethylationPlot(object):
                 for beta, sample_id, sample_type in pos_betas_dict[position]:
                     sample_id = str(sample_id)
                     y = round((1 - beta) * self.dimension_y, 2) + self.MARGIN
-                    print "sample Grouping = %s" % (self.sample_grouping)
+                    # print "sample Grouping = %s" % (self.sample_grouping)
                     if self.sample_grouping.has_key(sample_id):
                         type_color, sample_color = self.palette.get_colours(sample_type, sample_id)
                     else:
