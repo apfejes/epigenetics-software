@@ -33,8 +33,7 @@ class ColorPalette():
 
     def sorter(self, sample_type, sample_id):
         '''This function appears to assign colours to each sample id, based up on sample type.'''
-
-        # print '\n', self.counter, sample_type, sample_id
+        # print "counter=%s sample_type=%s sample_id=%s" % (self.counter, sample_type, sample_id)
         if sample_type not in self.types_color:
             self.type_count += 1
             if self.type_count >= len(self.color_wheel.keys()):
@@ -54,11 +53,42 @@ class ColorPalette():
             print self.types_color[sample_type]
             print self.counter[sample_type]
             print len(self.colors[self.types_color[sample_type]])
-            raise ValueError("Ran out of colours!")
+            raise ValueError("Ran out of colours! - sorter")
         sample_color = self.samples_color[sample_id]
         type_color = self.types_color[sample_type]
         # print type_color, sample_color
         return type_color, sample_color
+
+    def assign_group_colour(self, sample_type):
+        '''This function appears to assign colours to each sample id, based up on sample type.'''
+        print "counter=%s sample_type=%s" % (self.counter, sample_type)
+        if sample_type not in self.types_color:
+            self.type_count += 1
+            if self.type_count >= len(self.color_wheel.keys()):
+                self.type_count = 1
+            self.types_color[sample_type] = self.color_wheel[self.type_count]    # Assign a hue to sample_type
+            self.counter[sample_type] = 0
+            # print 'types:', self.type_count, sample_type, self.color_wheel[self.type_count]
+        # print len(self.colors[self.types_color[sample_type]]), self.colors[self.types_color[sample_type]]
+        if self.counter[sample_type] > len(self.colors[self.types_color[sample_type]]):
+            print self.counter
+            print sample_type
+            print self.types_color[sample_type]
+            print self.counter[sample_type]
+            print len(self.colors[self.types_color[sample_type]])
+            raise ValueError("Ran out of colours! - assign_group_colour")
+        type_color = self.types_color[sample_type]
+        # print type_color, sample_color
+        return type_color
+
+
+    def get_colours(self, sample_type, sample_id):
+        '''Simple method for retrieving colours we should already have in the palette.'''
+        return self.types_color[sample_type], self.samples_color[sample_id]
+
+    def get_group_colours(self, sample_type):
+        '''Simple method for retrieving colours we should already have in the palette.'''
+        return self.types_color[sample_type]
 
     def colors_dict(self):
         '''return the list of colour/sample mappings'''

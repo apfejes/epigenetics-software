@@ -23,8 +23,9 @@ class MethylationPlot(object):
     BOTTOM_MARGIN = 120    # 120 pixels
     RIGHT_MARGIN = 240
     MARGIN = 30
-    palette = Color_Palette.ColorPalette()
-       # APF - reset on each iteration through the sorter.
+    palette = Color_Palette.ColorPalette()    # APF - reset on each iteration through the sorter.
+
+
 
     def __init__(self, filename, title, message, sample_peaks,
                  pos_betas_dict, annotations, color, start, end,
@@ -45,6 +46,8 @@ class MethylationPlot(object):
         self.message = message
 
         self.palette.samples_color = {}    # reset the methylation plot colour assignment on initialization.
+        self.sample_grouping = {}    # store sample id/sample group.
+        self.gausian_colour = {}
 
         self.dimension_y = self.height - self.MARGIN - self.BOTTOM_MARGIN    # this is the size of the y field
         self.dimension_x = self.width - self.MARGIN - self.RIGHT_MARGIN
@@ -84,14 +87,24 @@ class MethylationPlot(object):
 
             if show_points:
                 for beta, sample_id, sample_type in pos_betas_dict[position]:
+                    sample_id = str(sample_id)
                     y = round((1 - beta) * self.dimension_y, 2) + self.MARGIN
-                    type_color, sample_color = self.palette.sorter(sample_type, sample_id)
+                    print "sample Grouping = %s" % (self.sample_grouping)
+                    if self.sample_grouping.has_key(sample_id):
+                        type_color, sample_color = self.palette.get_colours(sample_type, sample_id)
+                    else:
+                        self.sample_grouping[sample_id] = sample_type
+                        type_color, sample_color = self.palette.sorter(sample_type, sample_id)
                     point = Circle(center = (x, y), r = self.DOT_RADIUS, fill = sample_color)
                     self.elements.append(point)
 
             if show_peaks:
                 for sample_type in sample_peaks[position]:
-                    type_color, sample_color = self.palette.sorter(sample_type, None)
+                    if self.gausian_colour.has_key(sample_type):
+                        type_color = self.gausian_colour[sample_type]
+                    else:
+                        type_color = self.palette.assign_group_colour(sample_type)
+                        self.gausian_colour[sample_type] = type_color
                     (m, s) = sample_peaks[position][sample_type]
                     m = round((1 - m) * self.dimension_y, 2) + self.MARGIN
                     s = round(s * self.dimension_y, 3)
