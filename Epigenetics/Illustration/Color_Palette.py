@@ -10,7 +10,7 @@ class ColorPalette():
     '''
     def __init__(self):
         self.type_count = 0
-        self.counter = {}    # keeps track of
+        self.counter = {}    # keeps track of maps
         self.types_color = {}
         self.samples_color = {}
         self.colors = {}
@@ -31,9 +31,11 @@ class ColorPalette():
 
         # return self.colors, self.color_wheel
 
+
+
     def sorter(self, sample_type, sample_id):
         '''This function appears to assign colours to each sample id, based up on sample type.'''
-        # print "counter=%s sample_type=%s sample_id=%s" % (self.counter, sample_type, sample_id)
+        print "counter=%s sample_type=%s sample_id=%s" % (self.counter, sample_type, sample_id)
         if sample_type not in self.types_color:
             self.type_count += 1
             if self.type_count >= len(self.color_wheel.keys()):
@@ -61,7 +63,7 @@ class ColorPalette():
 
     def assign_group_colour(self, sample_type):
         '''This function appears to assign colours to each sample id, based up on sample type.'''
-        print "counter=%s sample_type=%s" % (self.counter, sample_type)
+        # print "counter=%s sample_type=%s" % (self.counter, sample_type)
         if sample_type not in self.types_color:
             self.type_count += 1
             if self.type_count >= len(self.color_wheel.keys()):
@@ -86,10 +88,20 @@ class ColorPalette():
         '''Simple method for retrieving colours we should already have in the palette.'''
         return self.types_color[sample_type], self.samples_color[sample_id]
 
-    def get_group_colours(self, sample_type):
+    def get_group_colour(self, sample_type):
         '''Simple method for retrieving colours we should already have in the palette.'''
         return self.types_color[sample_type]
 
-    def colors_dict(self):
+    def get_type_colors(self):
+        '''get colours for all types'''
+        return self.types_color
+
+    def get_colors_dict(self):
         '''return the list of colour/sample mappings'''
         return self.samples_color
+
+    def set_colors_dict(self, types, samples):
+        '''return the list of colour/sample mappings'''
+        self.samples_color = samples
+        self.types_color = types
+

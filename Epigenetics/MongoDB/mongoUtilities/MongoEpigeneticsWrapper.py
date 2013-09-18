@@ -18,6 +18,7 @@ import Mongo_Connector
 from common_utilities import CreateListFromCursor
 
 sys.path.insert(0, _root_dir + os.sep + "Illustration")
+# from .Annotations import showchipseq, showchipandmeth
 import ChipseqPlot as chipseqplot
 import MethylationPlot as methylationplot
 
@@ -42,6 +43,7 @@ class MongoEpigeneticsWrapper():
         self.waves = None
         self.annotations = None
         self.error_message = ''
+        self.drawing = None
 
     def query(self, collection, chromosome, start, end,
               # optional parameters
@@ -315,7 +317,6 @@ class MongoEpigeneticsWrapper():
 
     def collectbetas(self, sample_ids, probes):
         '''Collects and bins methylation data'''
-
         # Bin the beta values and collect their position
         pos_betas_dict = {}    # contains CpGs
         sample_peaks = {}    # contains average CpG value and std for samples from same Sample Group
@@ -473,7 +474,7 @@ class MongoEpigeneticsWrapper():
 
 
 
-    def svg(self, filename = None, title = None,
+    def svg(self, types_index = None, sample_index = None, filename = None, title = None,
             color = None, to_string = False,
             get_elements = False, height = 200.0, width = 60.0,
             get_tss = False, get_cpg = False,
@@ -486,40 +487,55 @@ class MongoEpigeneticsWrapper():
                 filename += '.svg'
             filename = directory_for_svgs + filename
 
+
+
         if self.collection == "methylation":
 
-            drawing = methylationplot.MethylationPlot(filename, title, self.error_message, self.sample_peaks,
-                                                      self.pos_betas_dict, self.annotations,
-                                                      color, self.start, self.end, width,
-                                                      height, show_points, show_peaks)
-            sampleindex = drawing.get_sample_index()
+            if self.drawing == None:
+                self.drawing = methylationplot.MethylationPlot()
+            if sample_index:
+                print "Setting sample index to %s" % (sample_index)
+                print "Setting types index to %s" % (types_index)
+                self.drawing.set_sample_index(types_index, sample_index)
+            else:
+                print "Not setting sample or types index."
+            self.drawing.set_properties(filename, title, color, self.start, self.end, width, height)
+            self.drawing.build(self.error_message, self.pos_betas_dict, self.sample_peaks, show_points, show_peaks)
+            sampleindex = self.drawing.get_sample_index()
+            typesindex = self.drawing.get_types_index()
+
+                # self.drawing = methylationplot.MethylationPlot(filename, title, self.error_message, self.sample_peaks,
+                #                                      self.pos_betas_dict, self.annotations,
+                #                                      color, self.start, self.end, width,
+                #                                      height, show_points, show_peaks)
+
         if self.collection == "waves":
-            drawing = chipseqplot.ChipseqPlot(filename, title, self.error_message, self.waves, self.start,
+            self.drawing = chipseqplot.ChipseqPlot(filename, title, self.error_message, self.waves, self.start,
                                               self.end, self.annotations, width,
                                               height)
-            # TODO: SAMPLE NAMES MUST BE RETRIEVED HERE.
+            # TODO: SAMPLE NAMES/type names MUST BE RETRIEVED HERE. - mirror code above
+
+        if get_elements:
+            self.drawing.add_sample_labels()
+            z = self.drawing.get_elements()
+            print " Returning %i svg elements" % len(z)
+            return z, sampleindex, typesindex
+
+
+        if (self.error_message == ''):
+            self.drawing.add_legends(get_tss, get_cpg, self.annotations)
         if to_string:
             print " Returning svg as a unicode string"
-            drawing.add_legends(get_tss, get_cpg)
-            z = drawing.to_string()
-            drawing = None
-        elif get_elements:
-            drawing.add_sample_labels()
-            z = drawing.get_elements()
-            print " Returning %i svg elements" % len(z)
-            drawing = None
+            z = self.drawing.to_string()
         elif filename and not to_string and not get_elements:
             print " Making svg file \"%s\"\n" % filename
-            drawing.add_legends(get_tss, get_cpg)
-            z = drawing
+            z = self.drawing
             z.save()
-            drawing = None
         else:
             print "No filename specified. Returning the SVG object without legends"
-            drawing.add_legends(get_tss, get_cpg)
-            z = drawing
-            drawing = None
-        return z, sampleindex
+            z = self.drawing
+            self.drawing = None
+        return z, sampleindex, typesindex
 
 # Error function below needs testing
 

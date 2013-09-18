@@ -5,11 +5,14 @@ Created on 2013-08-23
 
 Tools used by views.py
 '''
-from .Annotations import showmethylation, showchipseq, showchipandmeth
 
 # Dictionary of zoom values
-zoom_factors = {'ZoomIn': 1.0 / 1.5, 'ZoomInMore': 1.0 / 3.0,
+ZOOM_FACTORS = {'ZoomIn': 1.0 / 1.5, 'ZoomInMore': 1.0 / 3.0,
                 'ZoomOut': 1.5, 'ZoomOutMore': 3.0}
+# Dictionary of panning percentages from window that is shifted aside
+PANNING_PERCENTS = {'LessRight':0.3, 'MoreRight':0.6,
+               'LessLeft':-0.3, 'MoreLeft':-0.6}
+
 
 def zoom(zoom_symbol, start, end):
     '''TODO: docstring missing'''
@@ -17,7 +20,7 @@ def zoom(zoom_symbol, start, end):
     # Adjusts start and end value for new query
     # ex: zoomfactor = 0.1, start = 200, end = 300
     span = (end - start)    # span of 100bp
-    zoom_factor = zoom_factors[zoom_symbol]
+    zoom_factor = ZOOM_FACTORS[zoom_symbol]
     new_span = span * zoom_factor    # span is now 10bp
     new_start = start + span / 2 - new_span / 2    # start is now 245
     new_end = end - span / 2 + new_span / 2    # end is now 255bp
@@ -25,16 +28,14 @@ def zoom(zoom_symbol, start, end):
         new_start = 0
     return int(new_start), int(new_end)
 
-# Dictionary of panning percentages from window that is shifted aside
-panning_percents = {'LessRight':0.6, 'MoreRight':0.9,
-               'LessLeft':-0.6, 'MoreLeft':-0.9}
+
 
 def panning(pan_factor, start, end):
-    '''TODO: docstring missing'''
+    '''This code shifts the viewing window by the pan_factor.  Currently set above.'''
     # Adjusts start and end value for new query
     # ex: pan_factor = '>>', start = 200, end = 300
     start, end = int(start), int(end)
-    percent = panning_percents[pan_factor]    # look up percent shift in dictionary
+    percent = PANNING_PERCENTS[pan_factor]    # look up percent shift in dictionary
     shiftby = int((end - start) * percent)    # will be positive to go the right, negative to the left
     new_start = int(start + shiftby)
     new_end = int(end + shiftby)
@@ -52,41 +53,3 @@ def check(p):
     else:
         return False
 
-def query_chipseq(p):
-    '''run the query for chipseq'''
-    return showchipseq.svgcode(db = p['organism'],
-                               chromosome = p['chromosome'],
-                               start = p['start'],
-                               end = p['end'],
-                               height = p['height'],
-                               width = p['width'],
-                               tss = p['tss'],
-                               cpg = p['cpg'])
-
-def query_methylation(p):
-    '''TODO: docstring missing'''
-    return showmethylation.svgcode(db = p['organism'],
-                                   project = p['project'],
-                                   chromosome = p['chromosome'],
-                                   start = p['start'],
-                                   end = p['end'],
-                                   height = p['height'],
-                                   width = p['width'],
-                                   tss = p['tss'],
-                                   cpg = p['cpg'],
-                                   datapoints = p['datapoints'],
-                                   peaks = p['peaks'])
-
-def query_all(p):
-    '''TODO: docstring missing'''
-    return showchipandmeth.svgcode(db = p['organism'],
-                                   project = p['project'],
-                                   chromosome = p['chromosome'],
-                                   start = p['start'],
-                                   end = p['end'],
-                                   height = p['height'],
-                                   width = p['width'],
-                                   tss = p['tss'],
-                                   cpg = p['cpg'],
-                                   datapoints = p['datapoints'],
-                                   peaks = p['peaks'])

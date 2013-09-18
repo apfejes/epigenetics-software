@@ -9,9 +9,23 @@ from django.shortcuts import render
 
 
 from pymongo.mongo_client import MongoClient
+import os, sys
+import json
+_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
+_root_dir = os.path.dirname(os.path.dirname(_cur_dir))
+sys.path.insert(0, _root_dir)
+sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
+from MongoDB.mongoUtilities import MongoEpigeneticsWrapper
+import Annotations.showmethylation as showmethylation
+import Annotations.showchipseq as showchipseq
+import Annotations.showchipandmeth as showchipandmeth
 mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
 
-from viewtools import panning, zoom, check, query_all, query_chipseq, query_methylation
+
+from viewtools import panning, zoom, check
+collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip':'Both'}
+
+
 
 def home_view(request):
     ''' TODO: fill in docstring '''
@@ -59,6 +73,8 @@ def view_query_form(request):
     cpg = q.get("cpg", False)
     peaks = q.get("peaks", False)
     datapoints = q.get("datapoints", True)
+    sample_index = q.get("samples", None)
+    types_index = q.get("types", None)
     width = q.get("width", 1000)
     height = q.get("height", 600)
 
@@ -80,7 +96,6 @@ def view_query_form(request):
         end = int(end)
     else:
         end = start + 1
-
 
     width = int(width) - 100
     if width < 600:
@@ -112,38 +127,85 @@ def view_query_form(request):
     proj_list = mongo[o + "_epigenetics"]['samples'].distinct("project")
     project_list = [str(x) for x in proj_list]
     project_list.append("All")
+    project_list.append("Tissue")
     project_list.sort()
     print "project_list ", project_list
 
-    collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip':'Both'}
+
+
+    database = o + "_epigenetics"
+    print("creating Mongo Wrapper on Database")
+    m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database)
 
 
     parameters = {'organism':str(o), 'collection': str(col),
                   'chromosome': str(chrom), 'start': start, 'end':end,
                   'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks,
                   'width':width, 'height':height }
-    if project != "All":
+    if project != "All" and project != "Tissue":
         parameters['project'] = str(project)
     else:
         parameters['project'] = None
     print 'parameters = ', parameters
 
-    sample_index = {}
+
     svg = 'Please query the database to generate an image!'
+    print "sample_index = %s" % (sample_index)
+#     if sample_index:
+#         sample_index = json.loads(sample_index)
+#     if types_index:
+#         types_index = json.loads(types_index)
+
+
 
     if check(parameters):
         if col == 'methylation':
-            svg, sample_index = query_methylation(parameters)
+            svg, sample_index, types_index = showmethylation.svgcode(m,
+                                   json.dumps(sample_index),
+                                   json.dumps(types_index),
+                                   organism = str.capitalize(parameters['organism']),
+                                   project = parameters['project'],
+                                   chromosome = parameters['chromosome'],
+                                   start = parameters['start'],
+                                   end = parameters['end'],
+                                   height = parameters['height'],
+                                   width = parameters['width'],
+                                   tss = parameters['tss'],
+                                   cpg = parameters['cpg'],
+                                   datapoints = parameters['datapoints'],
+                                   peaks = parameters['peaks'])
         elif col == 'chipseq':
-            svg = query_chipseq(parameters)
+            svg, sample_index = showchipseq.svgcode(m, sample_index,
+                               organism = str.capitalize(parameters['organism']),
+                               chromosome = parameters['chromosome'],
+                               start = parameters['start'],
+                               end = parameters['end'],
+                               height = parameters['height'],
+                               width = parameters['width'],
+                               tss = parameters['tss'],
+                               cpg = parameters['cpg'])
+
+
         elif col == 'methchip':
-            svg = query_all(parameters)
+            svg = showchipandmeth.svgcode(m, sample_index,
+                                organism = str.capitalize(parameters['organism']),
+                                project = parameters['project'],
+                                chromosome = parameters['chromosome'],
+                                start = parameters['start'],
+                                end = parameters['end'],
+                                height = parameters['height'],
+                                width = parameters['width'],
+                                tss = parameters['tss'],
+                                cpg = parameters['cpg'],
+                                datapoints = parameters['datapoints'],
+                                peaks = parameters['peaks'])
 
     return render(request, 'query_form.jade', {'organism_list':organism_list, 'project_list':project_list,
                                                'collection_list':collection_list, 'sample_index':sample_index,
+                                               'types_index':types_index,
                                                'plot':mark_safe(svg), 'organism':o, 'project':project,
                                                'collection':col, 'chromosome':chrom, 'start':start,
                                                'end':end, 'tss':tss, 'cpg':cpg, 'datapoints': datapoints,
-                                                'peaks':peaks, 'width':width, 'height':height})
+                                               'peaks':peaks, 'width':width, 'height':height})
 
 

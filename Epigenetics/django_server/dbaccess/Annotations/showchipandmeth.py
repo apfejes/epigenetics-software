@@ -1,43 +1,33 @@
 '''TODO:missing doc string'''
-import os, sys
-_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
-_root_dir = os.path.dirname(_cur_dir)
-_root_dir = os.path.dirname(_root_dir)
-_root_dir = os.path.dirname(_root_dir)
-sys.path.insert(0, _root_dir)
-sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
-from MongoDB.mongoUtilities import MongoEpigeneticsWrapper
 
-def svgcode(db = None, chromosome = None, project = None, start = None,
+def svgcode(mongowrapper, sample_index = None, organism = None, chromosome = None, project = None, start = None,
             end = None, height = None, width = None, tss = False, cpg = False,
             datapoints = False, peaks = False):
     '''TODO:missing doc string'''
-    print("Connecting to database:")
-    organism = str.capitalize(db)
-    database = db + "_epigenetics"
-    m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database)
     print("Querying...")
-    docs = m.query(collection = "methylation", project = project, chromosome = chromosome, start = start, end = end)
+    docs = mongowrapper.query(collection = "methylation", project = project, chromosome = chromosome, start = start, end = end)
     if chromosome[0:3] != 'chr':
         chromosome = 'chr' + str(chromosome)
-    methylation = m.svg(get_elements = True,
+    methylation = mongowrapper.svg(get_elements = True,
                         color = 'indigo',
                         height = height,
                         width = width,
                         get_tss = tss,
                         get_cpg = cpg,
                         show_points = datapoints,
-                        show_peaks = peaks)
+                        show_peaks = peaks,
+                        sample_index = sample_index)
 
-    m.query(collection = "waves", chromosome = chromosome, start = start, end = end)
+    mongowrapper.query(collection = "waves", chromosome = chromosome, start = start, end = end)
     if tss or cpg:
-        m.getannotations(docs)
-    drawing = m.svg(title = organism + " DNA methylation and ChIP-Seq peaks on " + chromosome + " (" + str(start) + "-" + str(end) + ")",
+        mongowrapper.getannotations(docs)
+    drawing = mongowrapper.svg(title = organism + " DNA methylation and ChIP-Seq peaks on " + chromosome + " (" + str(start) + "-" + str(end) + ")",
                     color = 'indigo',
                     height = height,
                     width = width,
                     get_tss = tss,
-                    get_cpg = cpg)
+                    get_cpg = cpg,
+                    sample_index = sample_index)
 
     drawing.add_data(methylation)
 

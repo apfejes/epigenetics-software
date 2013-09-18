@@ -10,7 +10,8 @@ from svgwrite.drawing import Drawing
 from svgwrite.path import Path
 from math import fabs, exp, sqrt, log
 import Color_Palette
-from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, medfont, smallfont, legend_color
+from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, smallfont, legend_color
+# from PlotUtilities import medfont
 
 class MethylationPlot(object):
     '''
@@ -26,14 +27,27 @@ class MethylationPlot(object):
     palette = Color_Palette.ColorPalette()    # APF - reset on each iteration through the sorter.
 
 
+    def __init__(self):
+        '''Simple initiation of all of the self parameters... Does not do anything unexpected.'''
+        self.elements = []
+        self.palette.samples_color = {}    # reset the methylation plot colour assignment on initialization.
+        self.sample_grouping = {}    # store sample id/sample group.
+        self.gausian_colour = {}
+        self.last_hash = 0
+        self.color = 0
+        self.start = 0
+        self.end = 0
+        self.width = 200    # default = 200.0
 
-    def __init__(self, filename, title, message, sample_peaks,
-                 pos_betas_dict, annotations, color, start, end,
-                 width, height, show_points, show_peaks):
-        '''
-        Initialize this object - you need to pass it a mongo object for it to 
-        operate on.
-        '''
+        self.height = 60    # default = 60.0
+        self.message = None
+
+        self.dimension_y = 0    # this is the size of the y field
+        self.dimension_x = 0
+        self.scale_x = 0
+
+    def set_properties(self, filename, title, color, start, end, width, height):
+        '''Set the properties of the canvas on which you'll want to generate your image '''
         self.elements = []
         self.title = title
         self.color = color
@@ -42,46 +56,47 @@ class MethylationPlot(object):
         self.width = width    # default = 200.0
 
         self.height = height    # default = 60.0
-        self.annotations = annotations
-        self.message = message
-
-        self.palette.samples_color = {}    # reset the methylation plot colour assignment on initialization.
-        self.sample_grouping = {}    # store sample id/sample group.
-        self.gausian_colour = {}
 
         self.dimension_y = self.height - self.MARGIN - self.BOTTOM_MARGIN    # this is the size of the y field
         self.dimension_x = self.width - self.MARGIN - self.RIGHT_MARGIN
         self.scale_x = float(self.dimension_x) / (self.end - self.start)    # this is a scaling variable
 
-        size = (str(self.width) + "px" , str(self.height) + "px")
         # create drawing
-        self.plot = Drawing(filename, size = size)
-                            # , viewBox = ("0 0 " + str(self.height) + " " + str(self.width + (self.margin * 2)))
-                            # , preserveAspectRatio = "xMinYMin meet")
-
-        background = Rect(insert = (0, 0), size = size, fill = "white")
+        canvas_size = (str(self.width) + "px" , str(self.height) + "px")
+        self.plot = Drawing(filename, size = canvas_size)
+        background = Rect(insert = (0, 0), size = canvas_size, fill = "white")
         self.plot.add(background)
 
+    def set_sample_index(self, index, types):
+        '''overwrite the sample_index to preserve colours from previous set.'''
+        self.palette.set_colors_dict(types, index)
+
+    def get_sample_index(self):
+        ''' Return the sample index so that it can be used in HTML'''
+        return self.palette.get_colors_dict()
+
+    def get_types_index(self):
+        ''' Return the sample index so that it can be used in HTML'''
+        return self.palette.get_type_colors()
+
+
+    def build(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
+        '''convert this information into elements of the svg image'''
+        all_y = []
 
         if message:
             Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
                     fill = "black", font_size = bigfont * 2)
             self.elements.append(Message)
-        else:
-            self.build(pos_betas_dict, sample_peaks, show_points, show_peaks)
 
 
-    def build(self, pos_betas_dict, sample_peaks, show_points, show_peaks):
-        '''convert loaded data into svg imagees'''
-        all_y = []
         for position in pos_betas_dict.keys():
             for y, _sample, _sample_type in pos_betas_dict[position]:
                 all_y.append(y)
         # self.max_y_value = max(all_y)    # (max y value - value /y height) + margin gives you position
             # / self.max_y_value
 
-
-
+        first = True
         for position in pos_betas_dict.keys():
             x = round(float(position - self.start) * self.scale_x, 2) + self.MARGIN
 
@@ -91,8 +106,13 @@ class MethylationPlot(object):
                     y = round((1 - beta) * self.dimension_y, 2) + self.MARGIN
                     # print "sample Grouping = %s" % (self.sample_grouping)
                     if self.sample_grouping.has_key(sample_id):
+                        # print "sample grouping has key (%s)" % (sample_id)
                         type_color, sample_color = self.palette.get_colours(sample_type, sample_id)
                     else:
+                        if first:
+                            self.palette.set_colors_dict({}, {})    # reset if first key does not exist.
+                            first = False
+                        # print "sample grouping does not have key (%s)" % (sample_id)
                         self.sample_grouping[sample_id] = sample_type
                         type_color, sample_color = self.palette.sorter(sample_type, sample_id)
                     point = Circle(center = (x, y), r = self.DOT_RADIUS, fill = sample_color)
@@ -128,9 +148,6 @@ class MethylationPlot(object):
 
                         self.elements.append(gaussian)
 
-    def get_sample_index(self):
-        ''' Return the sample index so that it can be used in HTML'''
-        return self.palette.colors_dict()
 
     def save(self):
         ''' push loaded elements to the the plot, clear out the elements. '''
@@ -145,6 +162,7 @@ class MethylationPlot(object):
             self.plot.add(element)
         z = self.plot.tostring()
         self.plot = None
+
         return z
 
     def get_xml(self):
@@ -154,13 +172,6 @@ class MethylationPlot(object):
             strings += (element.get_xml().decode('utf-8'))
         return strings
 
-    def get_elements(self):
-        ''' call sample labels and delete loaded elements. '''
-        self.add_sample_labels(self.MARGIN * 3.2 + self.width)
-        z = self.elements
-        self.elements = None
-        return z
-
     def add_data(self, elements = None):
         ''' add new elements to the elements queue '''
         elements_to_add = elements
@@ -168,7 +179,7 @@ class MethylationPlot(object):
             self.plot.add(element)
         print "% i svg elements have been added to the current svg object." % len(elements)
 
-    def add_legends(self, get_tss, get_cpg):
+    def add_legends(self, get_tss, get_cpg, annotations):
         ''' Add annotations, title, axis, tic marks and labels '''
         if self.title is None:
             self.title = "Methylation PLot"
@@ -180,39 +191,15 @@ class MethylationPlot(object):
         for axis in get_axis(self.width, self.MARGIN, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
             self.elements.append(axis)
 
-        if self.message is '':
-            self.add_xtics()
-            self.add_ytics()
-            # self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
-            if get_tss:
-                for tss in add_tss(self.annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
-                    self.elements.append(tss)
-            if get_cpg:
-                for cpg in add_cpg(self.annotations, self.MARGIN, self.height, self.width, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
-                    self.elements.append(cpg)
-
-
-
-    def add_sample_labels(self, x_position = None):
-        ''' DEPRECATED - Add the sample labels to the image. '''
-        if x_position == None:
-            x_position = self.width - self.RIGHT_MARGIN + self.RIGHT_MARGIN / 2
-        samples_color = self.palette.colors_dict()
-        if len(samples_color) > 20:
-            fontsize = str(float(medfont) - 0.5)
-        elif len(samples_color) < 5:
-            fontsize = str(float(medfont) + 0.5)
-        else: fontsize = medfont
-
-        spacing = 1
-        y_position = self.MARGIN + bigfont
-
-        for sample, color in samples_color.iteritems():
-            label = Text(sample, insert = (x_position, y_position),
-                        fill = color, font_size = fontsize)
-            y_position += float(fontsize) + spacing
-            self.elements.append(label)
-        return None
+        self.add_xtics()
+        self.add_ytics()
+        # self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
+        if get_tss:
+            for tss in add_tss(annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
+                self.elements.append(tss)
+        if get_cpg:
+            for cpg in add_cpg(annotations, self.MARGIN, self.height, self.width, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
+                self.elements.append(cpg)
 
     def add_xtics(self):
         ''' Create X tics on the plot'''
