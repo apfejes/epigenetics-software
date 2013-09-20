@@ -4,54 +4,35 @@ a(href='/')
 h1= title
 form( method="post")
   #newinformation
-    H3 Enter your chip-chip sample Information:
-    table
-      tr 
-        td.label: b Researcher :
-        td: input(type="text", name="researcher", id="researcher", value=chipchip.researcher)
-      tr
-        td: b CrossLinkingTime : 
-        td: input(type="text", name="crosslinkingtime", id="crosslinkingtime", value=chipchip.crosslinkingtime, required)
-      tr
-        td: b Protocol :
-        td: input(type="text", name="protocol", id="protocol", value=chipchip.protocol, required)
-      tr
-        td: b ArrayLotNumber :
-        td: input(type="text", name="arraylotnumber", id="arraylotnumber", value=chipchip.arraylotnumber, required)
-      tr
-        td: b Antibody :
-        td: input(type="text", name="antibody", id="antibody", value=chipchip.antibody, required)
-      tr
-        td: b ArrayType :
-        td: input(type="text", name="arraytype", id="arraytype", value=chipchip.arraytype, required)
-      tr
-        td: b Type :
-        td: input(type="text", name="type", id="type", value=chipchip.type, required)
-      tr
-        td: b AntibodyVolume :
-        td: input(type="text", name="antibodyvolume", id="antibodyvolume", value=chipchip.antibodyvolume)
-      tr
-        td: b PubmedID :
-        td: input(type="text", name="pubmedid", id="pubmedid", value=chipchip.pubmedid)
-      tr
-        td: b CatalogNumber :
-        td: input(type="text", name="catalognumber", id="catalognumber", value=chipchip.catalognumber)
-      tr
-        td: b CEL file :
-        td: input(type="text", name="cel_file", id="cel_file", value=chipchip.cel_file, readOnly="True")
-      tr
-        td: b StrainNumber :
-        td: input(type="text", name="strainnumber", id="strainnumber", value=chipchip.strainnumber, required)
-      tr
-        td: b StrainBackground :
-        td: input(type="text", name="strainbackground", id="strainbackground", value=chipchip.strainbackground, required)
-      tr
-        td: b Comments :
-        td: input(type="text", name="comments", id="comments", value=chipchip.comments)
-      tr
-        td: b Date:
-        td: input(type="date", name="date", id="date", value=chipchip.date)
-        
+    H3 Enter your project Information:
+    div
+      span Project Name : 
+      input(type="text", name="proj_name", id="editProjectName", value=project.proj_name, required)
+    div
+      span Kobor lab Contact :
+      input(type="text", name="lab_contact", id="editlabContact", value=project.lab_contact)
+    div
+      div
+        span Colaborator Name :
+        input(type="text", name="col_name", id="editColName", value=project.col_name)
+      div 
+        span Colaborator or Contact Email :
+        input(type="email", name="col_email", id="editColEmail", value=project.col_email)
+    div
+      span Number of Samples :
+      input(type="number", name="sample_count", id="editSampleCount", value=project.sample_count)
+    div
+      span Date Samples Arrived :
+      input(type="date", name="arrival_date", id="editArrivalDate", value=project.arrival_date)
+    div
+      //Sample type (drop down list?)
+      span Project Type :
+      select(name='role', value=project.role)
+        - each st in status 
+          option(value=st.desc)=st.desc 
+    div
+      span Date of Chip Run :
+      input(type="date", name="chip_run_date", id="editChipRunDate", value=project.chip_run_date)
     div#editArticleSubmit
       input(type="submit", value="Save")
       input(type="button", value="Cancel", onClick="window.history.back(-1)")
