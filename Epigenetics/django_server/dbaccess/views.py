@@ -162,7 +162,7 @@ def view_query_form(request):
 
     print("creating Mongo Wrapper on Database")
 
-    m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks)
+    m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks, start, end)
 
 
     parameters = {'organism':str(o), 'collection': str(col),

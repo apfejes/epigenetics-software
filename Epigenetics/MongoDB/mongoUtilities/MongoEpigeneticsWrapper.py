@@ -28,14 +28,16 @@ from MongoDB.mongoUtilities import Svg_Builder
 class MongoEpigeneticsWrapper():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
 
-    def __init__(self, database, methylation, peaks):
+    def __init__(self, database, methylation, peaks, start, end):
         '''Performs the connection to the Mongo database.'''
         self.database = database
         self.mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database)
         self.methylation = methylation
         self.peaks = peaks
+        self.start = start
+        self.end = end
 
-        self.svg_builder = Svg_Builder.Svg_Builder(self.methylation, self.peaks)
+        self.svg_builder = Svg_Builder.Svg_Builder(self.methylation, self.peaks, self.start, self.end)
         self.chromosome = None
 
 
@@ -50,13 +52,15 @@ class MongoEpigeneticsWrapper():
         '''Function performs the query on the database to retrieve information.'''
         # self.svg_builder.collection = collection
 
-        self.svg_builder.end = end
-        self.svg_builder.start = start
+
 
         if start == end or start > end or start < 0 or end < 0:
             self.error_message = 'Invalid start and end points.'
         else:
             self.error_message = ''    # contains error messages to pass to the server
+
+        self.end = end
+        self.start = start
 
         # Make sure chr variable is in the right format
         if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
@@ -198,10 +202,10 @@ class MongoEpigeneticsWrapper():
         query_parameters = {}    # This dictionary will store all the query parameters
         query_parameters["chr"] = self.chromosome
         query_location = {}
-        if self.svg_builder.end >= 0:
-            query_location["$lte"] = self.svg_builder.end
-        if self.svg_builder.start >= 0:
-            query_location["$gte"] = self.svg_builder.start
+        if self.end >= 0:
+            query_location["$lte"] = self.end
+        if self.start >= 0:
+            query_location["$gte"] = self.start
         query_parameters["mapinfo"] = dict(query_location.items())
         # Decide which parameters to return
         return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hil_cpg_island_name':True,
@@ -230,9 +234,9 @@ class MongoEpigeneticsWrapper():
             query_parameters["sample_id"] = {"$in":ids}
         if project:
             query_parameters['project'] = project
-        if self.svg_builder.start and self.svg_builder.end:
+        if self.start and self.end:
             extension = 500    # extend the region of query to catch peaks with tails in the region
-            query_parameters["pos"] = {"$lte":self.svg_builder.end + extension, "$gte":self.svg_builder.start - extension}
+            query_parameters["pos"] = {"$lte":self.end + extension, "$gte":self.start - extension}
         return_chr = {'_id': False, 'pos': True,
                       'height': True, 'stddev': True,
                       'sample_id': True}
@@ -374,11 +378,11 @@ class MongoEpigeneticsWrapper():
 
         self.svg_builder.sample_peaks = sample_peaks
 
-        if self.svg_builder.end is None:
-            self.svg_builder.end = maxpos
-            print "    New end position:", self.svg_builder.end
 
-
+        # TODO: APF, must figure out why this is here.  Why not in the init?
+        if self.end is None:
+            self.end = maxpos
+            print "    New end position:", self.end
         return None
 
 
@@ -400,13 +404,13 @@ class MongoEpigeneticsWrapper():
             pos, height, stddev, sample_id = doc['pos'], doc['height'], int(doc['stddev']), str(doc['sample_id'])
             # search for sample label name:
             doc_sample_group = sample_ids[sample_id]
-            if self.svg_builder.start <= pos <= self.svg_builder.end:
+            if self.start <= pos <= self.end:
                 waves.append((pos, height, stddev, doc_sample_group))
                 count += 1
             else:
-                if not self.svg_builder.end:
+                if not self.end:
                     dist_to_region = 0
-                else: dist_to_region = min(abs(pos - self.svg_builder.end), abs(self.svg_builder.start - pos))
+                else: dist_to_region = min(abs(pos - self.end), abs(self.start - pos))
                 dist_from_peak_to_tail = sqrt((-2) * stddev * stddev * log(tail / height))
                 if dist_from_peak_to_tail - dist_to_region >= 0:
                     waves.append((pos, height, stddev, doc_sample_group))
@@ -414,9 +418,11 @@ class MongoEpigeneticsWrapper():
             if pos > maxpos:
                 maxpos = pos
 
-        if self.svg_builder.end is None:
-            self.svg_builder.end = maxpos
-            print "    New end position:", self.svg_builder.end
+
+        # TODO: APF, must check why this is here - seems a bad place for it to be.  Why not init?
+        if self.end is None:
+            self.end = maxpos
+            print "    New end position:", self.end
 
         if count == 0:
             message = "    WARNING: None of peaks found in the query lie in the region!"
@@ -447,8 +453,8 @@ class MongoEpigeneticsWrapper():
 
             for tss, gene in genes:
                 tss = int(tss)
-                if tss >= self.svg_builder.start:
-                    if tss <= self.svg_builder.end:
+                if tss >= self.start:
+                    if tss <= self.end:
                         annotations['TSS'][tss] = gene
                 else:
                     annotations['genes'].add((gene, tss))
