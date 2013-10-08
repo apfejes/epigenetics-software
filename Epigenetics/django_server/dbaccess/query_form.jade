@@ -98,20 +98,15 @@ body
                       else
                           input(id='datapoints', size = '8', type='checkbox', name="datapoints")
                 #selection_element
-                  label(for='peaks') Show sample type distribution:
-                      if peaks
-                          input(id='peaks', size = '8', type='checkbox', name="peaks", checked)
+                  label(for='show_dist') Show sample type distribution:
+                      if show_dist
+                          input(id='show_dist', size = '8', type='checkbox', name="show_dist", checked)
                       else
-                          input(id='peaks', size = '8', type='checkbox', name="peaks")
+                          input(id='show_dist', size = '8', type='checkbox', name="show_dist")
          #left
            |!{plot}
          #right
-           - if sample_index
-             - var samples = sample_index.items()
-             - for k, v in samples
-                 font(color=v)
-                   !{k}
-                 br
+
 
 script(type='text/javascript')
     function newURL(action){  
@@ -128,8 +123,8 @@ script(type='text/javascript')
       var cpg = e.checked;
       var e = document.getElementById("datapoints");
       var datapoints = e.checked;
-      var e = document.getElementById("peaks");
-      var peaks = e.checked;
+      var e = document.getElementById("show_dist");
+      var show_dist = e.checked;
       
       base += "?chromosome=" + chromosome.value
       base += "&start=" + start.value
@@ -141,7 +136,7 @@ script(type='text/javascript')
       base += "&tss=" + tss
       base += "&cpg=" + cpg
       base += "&datapoints=" + datapoints
-      base += "&peaks=" + peaks
+      base += "&show_dist=" + show_dist
       base += "&width=" + window.innerWidth
       base += "&height=" + window.innerHeight
       base += "&types=" + types_index

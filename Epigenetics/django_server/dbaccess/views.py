@@ -11,12 +11,12 @@ from django.shortcuts import render
 from pymongo.mongo_client import MongoClient
 import os, sys
 import json
+
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(os.path.dirname(_cur_dir))
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 from MongoDB.mongoUtilities import MongoEpigeneticsWrapper
-import Annotations.showmethylation as showmethylation
 import Annotations.showchipseq as showchipseq
 import Annotations.showchipandmeth as showchipandmeth
 mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
@@ -51,6 +51,28 @@ def to_boolean(value):
     else:
         return False
 
+
+def process_collection(col):
+    '''handle collection variable'''
+    # shortcut for "both", but could be replaced later with this infrastructure
+    if col == 'methchip':
+        methylation = True
+        peaks = True
+        return methylation, peaks
+
+    if col == 'methylation':
+        methylation = True
+    else:
+        methylation = False
+
+    if col == 'chipseq':
+        peaks = True
+    else:
+        peaks = False
+    return methylation, peaks
+
+
+
 def view_query_form(request):
     ''' Instructions for parsing the query_form, and getting the names of the 
         information required to re-populate the drop down boxes and menus '''
@@ -71,7 +93,7 @@ def view_query_form(request):
     action_factor = q.get("action", None)
     tss = q.get("tss", False)
     cpg = q.get("cpg", False)
-    peaks = q.get("peaks", False)
+    show_dist = q.get("show_dist", False)
     datapoints = q.get("datapoints", True)
     sample_index = q.get("samples", None)
     types_index = q.get("types", None)
@@ -81,7 +103,7 @@ def view_query_form(request):
     tss = to_boolean(tss)
     cpg = to_boolean(cpg)
     datapoints = to_boolean(datapoints)
-    peaks = to_boolean(peaks)
+    show_dist = to_boolean(show_dist)
 
     if start is None or start == '' or start == True:
         start = 0
@@ -134,13 +156,18 @@ def view_query_form(request):
 
 
     database = o + "_epigenetics"
+
+    # variables:
+    methylation, peaks = process_collection(col)
+
     print("creating Mongo Wrapper on Database")
-    m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database)
+
+    m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks)
 
 
     parameters = {'organism':str(o), 'collection': str(col),
                   'chromosome': str(chrom), 'start': start, 'end':end,
-                  'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'peaks':peaks,
+                  'cpg':cpg, 'tss':tss, 'datapoints': datapoints, 'show_dist':show_dist,
                   'width':width, 'height':height }
     if project != "All" and project != "Tissue":
         parameters['project'] = str(project)
@@ -159,8 +186,10 @@ def view_query_form(request):
 
 
     if check(parameters):
-        if col == 'methylation':
-            svg, sample_index, types_index = showmethylation.svgcode(m,
+        if methylation and not peaks:
+            svg, sample_index, types_index = svg_methylation_code(m,
+                                   methylation,
+                                   peaks,
                                    json.dumps(sample_index),
                                    json.dumps(types_index),
                                    organism = str.capitalize(parameters['organism']),
@@ -173,8 +202,8 @@ def view_query_form(request):
                                    tss = parameters['tss'],
                                    cpg = parameters['cpg'],
                                    datapoints = parameters['datapoints'],
-                                   peaks = parameters['peaks'])
-        elif col == 'chipseq':
+                                   show_dist = parameters['show_dist'])
+        elif peaks and not methylation:
             svg, sample_index = showchipseq.svgcode(m, sample_index,
                                organism = str.capitalize(parameters['organism']),
                                chromosome = parameters['chromosome'],
@@ -186,7 +215,7 @@ def view_query_form(request):
                                cpg = parameters['cpg'])
 
 
-        elif col == 'methchip':
+        elif methylation and peaks:
             svg = showchipandmeth.svgcode(m, sample_index,
                                 organism = str.capitalize(parameters['organism']),
                                 project = parameters['project'],
@@ -198,7 +227,7 @@ def view_query_form(request):
                                 tss = parameters['tss'],
                                 cpg = parameters['cpg'],
                                 datapoints = parameters['datapoints'],
-                                peaks = parameters['peaks'])
+                                show_dist = parameters['show_dist'])
 
     return render(request, 'query_form.jade', {'organism_list':organism_list, 'project_list':project_list,
                                                'collection_list':collection_list, 'sample_index':sample_index,
@@ -206,6 +235,48 @@ def view_query_form(request):
                                                'plot':mark_safe(svg), 'organism':o, 'project':project,
                                                'collection':col, 'chromosome':chrom, 'start':start,
                                                'end':end, 'tss':tss, 'cpg':cpg, 'datapoints': datapoints,
-                                               'peaks':peaks, 'width':width, 'height':height})
+                                               'show_dist':show_dist, 'width':width, 'height':height})
 
+
+
+def svg_methylation_code(mongowrapper,
+                         methylation,
+                         peaks,
+                         sample_index,
+                         types_index,
+                         organism = None,
+                         project = None,
+                         chromosome = None,
+                         start = None,
+                         end = None,
+                         height = None,
+                         width = None,
+                         tss = False,
+                         cpg = False,
+                         datapoints = False,
+                         show_dist = False):
+    '''TODO:missing docstring'''
+
+    print("Querying...")
+    docs = mongowrapper.query(methylation = methylation,
+                              peaks = peaks,
+                              project = project,
+                              chromosome = chromosome,
+                              start = start,
+                              end = end)
+    if tss or cpg:
+        mongowrapper.getannotations(docs)
+    if chromosome[0:3] != 'chr':
+        chromosome = 'chr' + str(chromosome)
+    return mongowrapper.svg_builder.svg(to_string = True,
+                           title = organism + " DNA methylation on " + chromosome + " (" + str(start) + "-" + str(end) + ")",
+                           color = 'indigo',
+                           height = height,
+                           width = width,
+                           get_tss = tss,
+                           get_cpg = cpg,
+                           show_points = datapoints,
+                           show_dist = show_dist,
+                           types_index = types_index,
+                           sample_index = sample_index)
 

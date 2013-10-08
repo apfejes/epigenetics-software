@@ -48,7 +48,12 @@ a(href='/')
   input#rollButton(type="button", value="Edit", onclick="viewItem()")
   ul
     li 
-      a(href="/input/sample_new/"+project._id)='Add samples to this project (Must be done before any other steps.)'
+      a(href="/input/sample_new/"+project._id)='Add samples to this project'
+      | &nbsp;
+      u or
+      | &nbsp;
+      a(href="/input/sample_import"+project._id)='Import a project from an external source' 
+      |  (Must be done before any other steps.)
     li
       a(href="/input/nanodrop_new/"+project._id)='Add a nanodrop report to this project'
     li
