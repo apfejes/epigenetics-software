@@ -118,6 +118,8 @@ class MongoEpigeneticsWrapper():
         '''
         Finds the sample_ids of the project and sample group user is interested in
         saves a dictionary of the form {sample_id: (sample_label, sample_group)
+        
+        Sets the default group_by property of each dataset. 
         '''
 
         sampleid_name = 'sampleid'    # previously name_samplabel
@@ -147,17 +149,18 @@ class MongoEpigeneticsWrapper():
                 groupby_name = 'sample_group'
             elif project == 'Pygmies_Bantu':
                 groupby_name = 'treatment'
-            elif project == None:    # All Projects
+            elif project == "All":
+                groupby_name = 'project'
+            elif project == "Tissue":
                 groupby_name = 'project'
             else:
                 print "Project name not recognized (MEW - 132): %s" % (project)
                 return {}
 
-
-        if project == None:
+        if project == 'All' or project == 'Tissue':    # special case, don't use project in the query!
             samplesdocs = self.finddocs_samples(sample_group = groupby_name,
                                     chip = chip)
-            print "sampledocs %s" % (samplesdocs)
+            # print "sampledocs %s" % (samplesdocs)
         else:
             samplesdocs = self.finddocs_samples(project = project,
                                     sample_label = sample_label,
