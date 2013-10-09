@@ -65,13 +65,14 @@ class MongoEpigeneticsWrapper():
             chromosome = 'chr' + str(chromosome)
         self.chromosome = chromosome
 
+
         # First we collect the list of samples the user is interested in:
-        sample_ids = self.organize_samples(parameters['project'], sample_label, sample_group,
-                                           parameters['chip'] if 'chip' in parameters else None)
+
         # print '\n    Sample_ids list:', sample_ids
 
         # Conduct query and collect the data depending on which collection was chosen.
         if self.methylation:
+            sample_ids = self.organize_samples_methylation(parameters['project'], sample_label, sample_group)
             cursor = self.finddocs_annotations()    # get probe and annotation info for region queried
             docs = CreateListFromCursor(cursor)
             probes = self.getprobes(docs)    # get list of probe ids
@@ -79,6 +80,8 @@ class MongoEpigeneticsWrapper():
             annotation_docs = docs
 
         if self.peaks:
+            sample_ids = self.organize_samples_chipseq(parameters['project'], sample_label, sample_group,
+                                           parameters['chip'])
             docs = self.finddocs_waves(sample_ids = sample_ids, project = parameters['project'])    # get peak info for region queried
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
             if self.database == 'human_epigenetics':
@@ -109,7 +112,7 @@ class MongoEpigeneticsWrapper():
         return None
 
 
-    def organize_samples(self, project, sample_label, sample_group, chip = None):
+    def organize_samples_methylation(self, project, sample_label, sample_group):
         '''
         Finds the sample_ids of the project and sample group user is interested in
         saves a dictionary of the form {sample_id: (sample_label, sample_group)
@@ -120,47 +123,43 @@ class MongoEpigeneticsWrapper():
         sampleid_name = 'sampleid'    # previously name_samplabel
         groupby_name = 'samplegroup'
         print "project name = %s" % project
-        if self.methylation:
-
-            if project == 'down syndrome':    # assign default groupby_name (previously name_sampgroup)
-                groupby_name = 'sample_group'
-            elif project == 'FASD':
-                groupby_name = 'samplegroup'
-            elif project == 'Kollman':
-                groupby_name = 'sample_group'
-            elif project == 'Anne Ellis':
-                groupby_name = 'treatment'
-            elif project == 'Wisconsin':
-                groupby_name = 'sampleid'
-            elif project == 'Valproate':
-                groupby_name = 'sample_group'
-            elif project == 'Roberts':
-                groupby_name = 'sample_group'
-            elif project == 'GTProject':
-                groupby_name = 'gender'
-            elif project == 'McMaster':
-                groupby_name = 'infected'
-            elif project == 'PAWS':
-                groupby_name = 'sample_group'
-            elif project == 'Pygmies_Bantu':
-                groupby_name = 'treatment'
-            elif project == "All":
-                groupby_name = 'project'
-            elif project == "Tissue":
-                groupby_name = 'project'
-            else:
-                print "Project name not recognized (MEW - 132): %s" % (project)
-                return {}
+        if project == 'down syndrome':    # assign default groupby_name (previously name_sampgroup)
+            groupby_name = 'sample_group'
+        elif project == 'FASD':
+            groupby_name = 'samplegroup'
+        elif project == 'Kollman':
+            groupby_name = 'sample_group'
+        elif project == 'Anne Ellis':
+            groupby_name = 'treatment'
+        elif project == 'Wisconsin':
+            groupby_name = 'sampleid'
+        elif project == 'Valproate':
+            groupby_name = 'sample_group'
+        elif project == 'Roberts':
+            groupby_name = 'sample_group'
+        elif project == 'GTProject':
+            groupby_name = 'gender'
+        elif project == 'McMaster':
+            groupby_name = 'infected'
+        elif project == 'PAWS':
+            groupby_name = 'sample_group'
+        elif project == 'Pygmies_Bantu':
+            groupby_name = 'treatment'
+        elif project == "All":
+            groupby_name = 'project'
+        elif project == "Tissue":
+            groupby_name = 'project'
+        else:
+            print "Project name not recognized (MEW - 132): %s" % (project)
+            return {}
 
         if project == 'All' or project == 'Tissue':    # special case, don't use project in the query!
-            samplesdocs = self.finddocs_samples(sample_group = groupby_name,
-                                    chip = chip)
-            # print "sampledocs %s" % (samplesdocs)
+            samplesdocs = self.finddocs_samples(sample_group = groupby_name)
+        # print "sampledocs %s" % (samplesdocs)
         else:
             samplesdocs = self.finddocs_samples(project = project,
-                                    sample_label = sample_label,
-                                    sample_group = groupby_name,
-                                    chip = chip)
+                                sample_label = sample_label,
+                                sample_group = groupby_name)
 
         if samplesdocs is None:
             self.error_message = 'No samples found'
@@ -170,24 +169,54 @@ class MongoEpigeneticsWrapper():
 
         for doc in samplesdocs:
             sample_id = str(doc['_id'])
-            print "document: %s" % doc
-
-
-            if self.peaks:
-                if self.database == 'yeast_epigenetics':
-                    doc_chip = str(doc['type (ip, mock, input)'])
-                else:
-                    doc_chip = str(doc['chip'])
-                if doc_chip == chip or chip is None:
-                    sample_ids[sample_id] = doc_chip
-
-            if self.methylation:
-                doc_sample_group = doc[groupby_name]
-                doc_sample_label = doc[sampleid_name]
-                if doc_sample_group == sample_group or sample_group is None:
-                    if doc_sample_label == sample_label or sample_label is None:
-                        sample_ids[sample_id] = (doc_sample_label, doc_sample_group)
+            # print "document: %s" % doc
+            doc_sample_group = doc[groupby_name]
+            doc_sample_label = doc[sampleid_name]
+            if doc_sample_group == sample_group or sample_group is None:
+                if doc_sample_label == sample_label or sample_label is None:
+                    sample_ids[sample_id] = (doc_sample_label, doc_sample_group)
         return sample_ids
+
+
+    def organize_samples_chipseq(self, project, sample_label, sample_group, chip):
+        '''
+        Finds the sample_ids of the project and sample group user is interested in
+        saves a dictionary of the form {sample_id: (sample_label, sample_group)
+        
+        Sets the default group_by property of each dataset. 
+        '''
+
+        groupby_name = 'samplegroup'
+        print "project name = %s" % project
+
+        samplesdocs = None
+        if project == 'All' or project == 'Tissue':    # special case, don't use project in the query!
+            samplesdocs = self.finddocs_samples(sample_group = groupby_name,
+                                    chip = chip)
+        else:
+            samplesdocs = self.finddocs_samples(project = project,
+                                sample_label = sample_label,
+                                sample_group = groupby_name,
+                                chip = chip)
+        if samplesdocs is None:
+            self.error_message = 'No samples found'
+            return {}
+
+        sample_ids = {}
+
+        for doc in samplesdocs:
+            sample_id = str(doc['_id'])
+            # print "document: %s" % doc
+            if self.database == 'yeast_epigenetics':
+                doc_chip = str(doc['type (ip, mock, input)'])
+            else:
+                doc_chip = str(doc['chip'])
+            if doc_chip == chip or chip is None:
+                sample_ids[sample_id] = doc_chip
+
+        return sample_ids
+
+
 
 
     def finddocs_annotations (self):
@@ -292,9 +321,9 @@ class MongoEpigeneticsWrapper():
 
     def runquery(self, collection, query_parameters, return_chr, sortby = None, sortorder = None):
         '''run a query to return records.'''
-        print "\n Conducting query: "
-        print "   From the database %s and collection %s" % (self.database, collection)
-        print "   Find(%s)" % (query_parameters)    # Get documents corresponding to query and sort by sorting parameter
+        print "\n Conducting query. "
+        # print "   From the database %s and collection %s" % (self.database, collection)
+        # print "   Find(%s)" % (query_parameters)    # Get documents corresponding to query and sort by sorting parameter
         if sortby:
             docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
         else:

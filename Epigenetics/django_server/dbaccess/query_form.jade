@@ -36,12 +36,16 @@ body
                            - else
                                option(value=x)=y
                     label(for='project') Project:
-                        select(name='project', id='project')
+                        select(name='project', id='project',multiple)
                           - each pt in project_list
                             - if pt == project
                                 option(value=pt, selected)=pt
                             - else 
                                 option(value=pt)=pt
+                    label(for='chipseq') Chip-Seq:
+                        select(name='chipseq', id='chipseq',multiple)
+                          - each cs in chip_list
+                            option(value=cs)=cs
                     label(for='chromosome') Chromosome:
                         if chromosome
                             input(id='chromosome',size = '6', type='text', name='chromosome', value = chromosome)

@@ -17,7 +17,6 @@ _root_dir = os.path.dirname(os.path.dirname(_cur_dir))
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 from MongoDB.mongoUtilities import MongoEpigeneticsWrapper
-import Annotations.showchipseq as showchipseq
 import Annotations.showchipandmeth as showchipandmeth
 mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
 
@@ -154,6 +153,13 @@ def view_query_form(request):
     project_list.sort()
     print "project_list ", project_list
 
+    chip_list = mongo[parameters['organism'] + "_epigenetics"]['samples'].find({'haswaves': True}).distinct('chip')
+    chipseq_list = [str(x) for x in chip_list]
+    project_list.append("All")
+    chipseq_list.sort()
+    print "chipseq_list ", chipseq_list
+
+
     database = parameters['organism'] + "_epigenetics"
 
     # variables:
@@ -178,8 +184,8 @@ def view_query_form(request):
             svg, sample_index, types_index = m.svg_builder.svg(to_string = True,
                            title = "%s DNA methylation on %s (%i - %i)" %
                            (str.capitalize(parameters['organism']),
-                           parameters['chromosome'],
-                           parameters['start'], parameters['end']),
+                               parameters['chromosome'],
+                               parameters['start'], parameters['end']),
                            color = 'indigo',
                            height = parameters['height'],
                            width = parameters['width'],
@@ -192,16 +198,21 @@ def view_query_form(request):
 
 
         elif peaks and not methylation:
-            svg, sample_index = showchipseq.svgcode(m,
-                               json.dumps(parameters['sample_index']),
-                               organism = str.capitalize(parameters['organism']),
-                               chromosome = parameters['chromosome'],
-                               start = parameters['start'],
-                               end = parameters['end'],
-                               height = parameters['height'],
-                               width = parameters['width'],
-                               tss = parameters['tss'],
-                               cpg = parameters['cpg'])
+            docs = m.query(parameters)
+            if parameters['tss'] or parameters['cpg']:
+                m.getannotations(docs)
+            svg, sample_index, types_index = m.svg_builder.svg(to_string = True,
+                            title = "%s Chip-Seq on %s (%i - %i)" %
+                            (str.capitalize(parameters['organism']),
+                               parameters['chromosome'],
+                               parameters['start'], parameters['end']),
+                            color = 'indigo',
+                            height = parameters['height'],
+                            width = parameters['width'],
+                            get_tss = parameters['tss'],
+                            get_cpg = parameters['cpg'],
+                            sample_index = json.dumps(parameters['sample_index']))
+
 
 
         elif methylation and peaks:
@@ -223,6 +234,7 @@ def view_query_form(request):
                                                'collection_list':collection_list,
                                                'sample_index':sample_index,
                                                'types_index':types_index,
+                                               'chip_list':chip_list,
                                                'plot':mark_safe(svg),
                                                'organism':parameters['organism'],
                                                'project':parameters['project'],
@@ -236,9 +248,5 @@ def view_query_form(request):
                                                'show_dist':parameters['show_dist'],
                                                'width':parameters['width'],
                                                'height':parameters['height']})
-
-
-
-
 
 
