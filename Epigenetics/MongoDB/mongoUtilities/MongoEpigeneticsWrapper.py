@@ -43,17 +43,14 @@ class MongoEpigeneticsWrapper():
 
 
 
-    def query(self, methylation, peaks, chromosome, start, end,
-              # optional parameters
-                chip = None,
-                project = None,
+    def query(self, parameters,
                 sample_group = None,
                 sample_label = None):
         '''Function performs the query on the database to retrieve information.'''
         # self.svg_builder.collection = collection
 
-
-
+        start = parameters['start']
+        end = parameters['end']
         if start == end or start > end or start < 0 or end < 0:
             self.error_message = 'Invalid start and end points.'
         else:
@@ -63,12 +60,13 @@ class MongoEpigeneticsWrapper():
         self.start = start
 
         # Make sure chr variable is in the right format
-        if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
-            chromosome = 'chr' + str(chromosome)
+        if isinstance(parameters['chromosome'], int) or parameters['chromosome'][0:3] != 'chr':
+            chromosome = 'chr' + str(parameters['chromosome'])
         self.chromosome = chromosome
 
         # First we collect the list of samples the user is interested in:
-        sample_ids = self.organize_samples(project, sample_label, sample_group, chip)
+        sample_ids = self.organize_samples(parameters['project'], sample_label, sample_group,
+                                           parameters['chip'] if 'chip' in parameters else None)
         # print '\n    Sample_ids list:', sample_ids
 
         # Conduct query and collect the data depending on which collection was chosen.
@@ -80,7 +78,7 @@ class MongoEpigeneticsWrapper():
             annotation_docs = docs
 
         if self.peaks:
-            docs = self.finddocs_waves(sample_ids = sample_ids, project = project)    # get peak info for region queried
+            docs = self.finddocs_waves(sample_ids = sample_ids, project = parameters['project'])    # get peak info for region queried
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
             if self.database == 'human_epigenetics':
                 annotation_docs = self.finddocs_annotations()    # get the gene annotations info
@@ -114,7 +112,7 @@ class MongoEpigeneticsWrapper():
         return None
 
 
-    def organize_samples(self, project, sample_label, sample_group, chip):
+    def organize_samples(self, project, sample_label, sample_group, chip = None):
         '''
         Finds the sample_ids of the project and sample group user is interested in
         saves a dictionary of the form {sample_id: (sample_label, sample_group)

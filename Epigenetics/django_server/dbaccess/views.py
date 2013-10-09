@@ -133,7 +133,7 @@ def view_query_form(request):
     parameters = process_request(request)
 
     # adjust screen size if necessary.
-    if parameters['width'] < 600:
+    if parameters['width'] < 600:    # note proces_request already modifies these values from the window size passed in.
         parameters['width'] = 600
 
     if parameters['height'] < 400:
@@ -146,7 +146,6 @@ def view_query_form(request):
     for f in db_list:
         if f.endswith("_epigenetics"):
             organism_list.append(f.replace("_epigenetics", ""))
-    # print "default o: %s" % (o)
 
     proj_list = mongo[parameters['organism'] + "_epigenetics"]['samples'].distinct("project")
     project_list = [str(x) for x in proj_list]
@@ -154,8 +153,6 @@ def view_query_form(request):
     project_list.append("Tissue")
     project_list.sort()
     print "project_list ", project_list
-
-
 
     database = parameters['organism'] + "_epigenetics"
 
@@ -170,6 +167,8 @@ def view_query_form(request):
 
     svg = 'Please query the database to generate an image!'    # default string..  Should remove this.
     print "sample_index = %s" % (parameters['sample_index'])
+    sample_index = None
+    types_index = None
 
     if check(parameters):
         if methylation and not peaks:
@@ -178,19 +177,10 @@ def view_query_form(request):
                                    peaks,
                                    json.dumps(parameters['sample_index']),
                                    json.dumps(parameters['types_index']),
-                                   organism = str.capitalize(parameters['organism']),
-                                   project = parameters['project'],
-                                   chromosome = parameters['chromosome'],
-                                   start = parameters['start'],
-                                   end = parameters['end'],
-                                   height = parameters['height'],
-                                   width = parameters['width'],
-                                   tss = parameters['tss'],
-                                   cpg = parameters['cpg'],
-                                   datapoints = parameters['datapoints'],
-                                   show_dist = parameters['show_dist'])
+                                   parameters)
         elif peaks and not methylation:
-            svg, sample_index = showchipseq.svgcode(m, sample_index,
+            svg, sample_index = showchipseq.svgcode(m,
+                               json.dumps(parameters['sample_index']),
                                organism = str.capitalize(parameters['organism']),
                                chromosome = parameters['chromosome'],
                                start = parameters['start'],
@@ -203,7 +193,7 @@ def view_query_form(request):
 
         elif methylation and peaks:
             svg = showchipandmeth.svgcode(m,
-                                sample_index,
+                                json.dumps(parameters['sample_index']),
                                 organism = str.capitalize(parameters['organism']),
                                 project = parameters['project'],
                                 chromosome = parameters['chromosome'],
@@ -217,7 +207,8 @@ def view_query_form(request):
                                 show_dist = parameters['show_dist'])
 
     return render(request, 'query_form.jade', {'organism_list':organism_list, 'project_list':project_list,
-                                               'collection_list':collection_list, 'sample_index':sample_index,
+                                               'collection_list':collection_list,
+                                               'sample_index':sample_index,
                                                'types_index':types_index,
                                                'plot':mark_safe(svg),
                                                'organism':parameters['organism'],
@@ -240,39 +231,24 @@ def svg_methylation_code(mongowrapper,
                          peaks,
                          sample_index,
                          types_index,
-                         organism = None,
-                         project = None,
-                         chromosome = None,
-                         start = None,
-                         end = None,
-                         height = None,
-                         width = None,
-                         tss = False,
-                         cpg = False,
-                         datapoints = False,
-                         show_dist = False):
+                         parameters):
     '''TODO:missing docstring'''
 
     print("Querying...")
-    docs = mongowrapper.query(methylation = methylation,
-                              peaks = peaks,
-                              project = project,
-                              chromosome = chromosome,
-                              start = start,
-                              end = end)
-    if tss or cpg:
+    docs = mongowrapper.query(parameters)
+    if parameters['tss'] or parameters['cpg']:
         mongowrapper.getannotations(docs)
-    if chromosome[0:3] != 'chr':
-        chromosome = 'chr' + str(chromosome)
     return mongowrapper.svg_builder.svg(to_string = True,
-                           title = organism + " DNA methylation on " + chromosome + " (" + str(start) + "-" + str(end) + ")",
+                           title = "%s DNA methylation on %s (%i - %i)" %
+                           (str.capitalize(parameters['organism']), parameters['chromosome'],
+                            parameters['start'], parameters['end']),
                            color = 'indigo',
-                           height = height,
-                           width = width,
-                           get_tss = tss,
-                           get_cpg = cpg,
-                           show_points = datapoints,
-                           show_dist = show_dist,
+                           height = parameters['height'],
+                           width = parameters['width'],
+                           get_tss = parameters['tss'],
+                           get_cpg = parameters['cpg'],
+                           show_points = parameters['datapoints'],
+                           show_dist = parameters['show_dist'],
                            types_index = types_index,
                            sample_index = sample_index)
 

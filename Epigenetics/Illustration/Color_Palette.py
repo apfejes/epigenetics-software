@@ -35,7 +35,7 @@ class ColorPalette():
 
     def sorter(self, sample_type, sample_id):
         '''This function appears to assign colours to each sample id, based up on sample type.'''
-        print "counter=%s sample_type=%s sample_id=%s" % (self.counter, sample_type, sample_id)
+        # print "counter=%s sample_type=%s sample_id=%s" % (self.counter, sample_type, sample_id)
         if sample_type not in self.types_color:
             self.type_count += 1
             if self.type_count >= len(self.color_wheel.keys()):

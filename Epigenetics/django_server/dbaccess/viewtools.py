@@ -47,8 +47,8 @@ def panning(pan_factor, start, end):
 
 
 def check(p):
-    '''TODO: docstring missing'''
-    if p['chromosome'] != 'None' and p['organism'] != 'None' and p['collection'] != 'None':
+    '''Verify that information is complete before processing, otherwise, don't try to generate an SVG'''
+    if p['chromosome'] != None and p['organism'] != None and p['collection'] != None:
         return True
     else:
         return False
