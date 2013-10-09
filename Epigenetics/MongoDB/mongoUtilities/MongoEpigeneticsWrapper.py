@@ -60,8 +60,9 @@ class MongoEpigeneticsWrapper():
         self.start = start
 
         # Make sure chr variable is in the right format
-        if isinstance(parameters['chromosome'], int) or parameters['chromosome'][0:3] != 'chr':
-            chromosome = 'chr' + str(parameters['chromosome'])
+        chromosome = parameters['chromosome']
+        if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
+            chromosome = 'chr' + str(chromosome)
         self.chromosome = chromosome
 
         # First we collect the list of samples the user is interested in:
@@ -101,14 +102,10 @@ class MongoEpigeneticsWrapper():
 
     def checkquery(self, project, chromosome):
         '''Checks that query inputs are valid'''
-        # t0 = time()
-
         if self.methylation:
             self.checkquery_tests('methylation', project, chromosome)
         if self.peaks:
             self.checkquery_tests('waves', project, chromosome)
-
-        # print "Input check done in %i seconds." % round(time() - t0, 1)
         return None
 
 

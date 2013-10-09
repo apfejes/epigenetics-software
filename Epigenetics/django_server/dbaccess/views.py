@@ -163,21 +163,34 @@ def view_query_form(request):
 
     m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks, parameters['start'], parameters['end'])
 
-
-
     svg = 'Please query the database to generate an image!'    # default string..  Should remove this.
     print "sample_index = %s" % (parameters['sample_index'])
     sample_index = None
     types_index = None
 
+    print("Querying...")
+
     if check(parameters):
         if methylation and not peaks:
-            svg, sample_index, types_index = svg_methylation_code(m,
-                                   methylation,
-                                   peaks,
-                                   json.dumps(parameters['sample_index']),
-                                   json.dumps(parameters['types_index']),
-                                   parameters)
+            docs = m.query(parameters)
+            if parameters['tss'] or parameters['cpg']:
+                m.getannotations(docs)
+            svg, sample_index, types_index = m.svg_builder.svg(to_string = True,
+                           title = "%s DNA methylation on %s (%i - %i)" %
+                           (str.capitalize(parameters['organism']),
+                           parameters['chromosome'],
+                           parameters['start'], parameters['end']),
+                           color = 'indigo',
+                           height = parameters['height'],
+                           width = parameters['width'],
+                           get_tss = parameters['tss'],
+                           get_cpg = parameters['cpg'],
+                           show_points = parameters['datapoints'],
+                           show_dist = parameters['show_dist'],
+                           types_index = json.dumps(parameters['types_index']),
+                           sample_index = json.dumps(parameters['sample_index']))
+
+
         elif peaks and not methylation:
             svg, sample_index = showchipseq.svgcode(m,
                                json.dumps(parameters['sample_index']),
@@ -226,29 +239,6 @@ def view_query_form(request):
 
 
 
-def svg_methylation_code(mongowrapper,
-                         methylation,
-                         peaks,
-                         sample_index,
-                         types_index,
-                         parameters):
-    '''TODO:missing docstring'''
 
-    print("Querying...")
-    docs = mongowrapper.query(parameters)
-    if parameters['tss'] or parameters['cpg']:
-        mongowrapper.getannotations(docs)
-    return mongowrapper.svg_builder.svg(to_string = True,
-                           title = "%s DNA methylation on %s (%i - %i)" %
-                           (str.capitalize(parameters['organism']), parameters['chromosome'],
-                            parameters['start'], parameters['end']),
-                           color = 'indigo',
-                           height = parameters['height'],
-                           width = parameters['width'],
-                           get_tss = parameters['tss'],
-                           get_cpg = parameters['cpg'],
-                           show_points = parameters['datapoints'],
-                           show_dist = parameters['show_dist'],
-                           types_index = types_index,
-                           sample_index = sample_index)
+
 
