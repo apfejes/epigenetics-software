@@ -18,23 +18,26 @@ class MethylationPlot(object):
     Called by a MongoEpigeneticsWrapper object to plot methylation data.
     '''
 
-    DOT_RADIUS = 2
-    DISTR_HT = 12.0
+    METHYLATION_DOT_RADIUS = 2
+    METHYLATION_DISTR_HT = 12.0
     DISTR_STROKE = 0.5
     BOTTOM_MARGIN = 120    # 120 pixels
     RIGHT_MARGIN = 240
     MARGIN = 30
     palette = Color_Palette.ColorPalette()    # APF - reset on each iteration through the sorter.
+    colors = [('indigo', 'slateblue'), ('red', 'orange'),
+                  ('green', 'limegreen'), ('orange', 'yellow')]
+
 
 
     def __init__(self):
         '''Simple initiation of all of the self parameters... Does not do anything unexpected.'''
         self.elements = []
+        self.title = None
         self.palette.samples_color = {}    # reset the methylation plot colour assignment on initialization.
         self.sample_grouping = {}    # store sample id/sample group.
         self.gausian_colour = {}
         self.last_hash = 0
-        self.color = 0
         self.start = 0
         self.end = 0
         self.width = 200    # default = 200.0
@@ -46,11 +49,10 @@ class MethylationPlot(object):
         self.dimension_x = 0
         self.scale_x = 0
 
-    def set_properties(self, filename, title, color, start, end, width, height):
+    def set_properties(self, filename, title, start, end, width, height):
         '''Set the properties of the canvas on which you'll want to generate your image '''
         self.elements = []
         self.title = title
-        self.color = color
         self.start = start
         self.end = end
         self.width = width    # default = 200.0
@@ -80,7 +82,57 @@ class MethylationPlot(object):
         return self.palette.get_type_colors()
 
 
-    def build(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
+    def build_chipseq(self, message, waves):
+        '''convert loaded data into svg images'''
+        if message:
+            Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
+                    fill = "black", font_size = bigfont * 2)
+            self.elements.append(Message)
+
+        tail = 1
+
+        # create path objects for each peak
+        heights = []
+        for (pos, height, stddev, sample_id) in waves:
+            heights.append(height)
+        self.maxh = max(heights)
+        self.scale_y = self.dimension_y / self.maxh
+
+        sample_count = 0
+        samples_color = {}
+        for (pos, height, stddev, sample_id) in waves:
+            # print "    Peak", pos, height, stddev
+            X, Y = self.makegaussian_horizontal(self.start, self.end, pos, tail, self.start, float(height), stddev)
+            X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
+            for x in X:    # Adjust peaks on the edge of the plotting area so they don't look skewed.
+                if x < (self.MARGIN + 1):
+                    X.insert(0, self.MARGIN)
+                    Y.insert(0, tail)
+                    break
+                if x > (self.width - 1):
+                    X.append(self.width)
+                    Y.append(tail)
+                    break
+            # Scale Y and inverse the coordinates
+            Y = [round(y * self.scale_y, 2) for y in Y]
+            Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
+            # d is the list of coordinates with commands such as
+            # M for "move to' to initiate curve and S for smooth curve
+            d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
+            for i in range(2, len(X)):
+                d += (" " + str(X[i]) + "," + str(Y[i]))
+
+            if sample_id not in samples_color :
+                sample_count += 1
+                samples_color[sample_id] = self.colors[sample_count - 1]
+
+
+            self.elements.append(Path(stroke = samples_color[sample_id][0], stroke_width = 0.1,
+                           stroke_linecap = 'round', stroke_opacity = 0.8,
+                           fill = samples_color[sample_id][1], fill_opacity = 0.5, d = d))
+        self.samples_color = samples_color
+
+    def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
         '''convert this information into elements of the svg image'''
         all_y = []
 
@@ -115,7 +167,7 @@ class MethylationPlot(object):
                         # print "sample grouping does not have key (%s)" % (sample_id)
                         self.sample_grouping[sample_id] = sample_type
                         type_color, sample_color = self.palette.sorter(sample_type, sample_id)
-                    point = Circle(center = (x, y), r = self.DOT_RADIUS, fill = sample_color)
+                    point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color)
                     self.elements.append(point)
 
             if show_peaks:
@@ -130,7 +182,7 @@ class MethylationPlot(object):
                     s = round(s * self.dimension_y, 3)
 
                     if s != 0.0:
-                        gaussian_y, gaussian_x = self.makegaussian(s, self.DISTR_HT)    # reverse output arguments for sideways gaussians
+                        gaussian_y, gaussian_x = self.makegaussian_vertical(s, self.METHYLATION_DISTR_HT)    # reverse output arguments for sideways gaussians
                         gaussian_x = [coord + x - 1 for coord in gaussian_x]
                         gaussian_y = [item + m for item in gaussian_y]
                         d = "M"
@@ -148,7 +200,6 @@ class MethylationPlot(object):
 
                         self.elements.append(gaussian)
 
-
     def save(self):
         ''' push loaded elements to the the plot, clear out the elements. '''
         for element in self.elements:
@@ -162,8 +213,12 @@ class MethylationPlot(object):
             self.plot.add(element)
         z = self.plot.tostring()
         self.plot = None
-
         return z
+
+    def get_elements(self):
+        ''' call sample labels and delete loaded elements. '''
+        self.add_sample_labels(self.MARGIN * 3.2 + self.width)
+        return self.elements
 
     def get_xml(self):
         ''' Convert the loaded elements into XML strings and then return them.'''
@@ -172,17 +227,9 @@ class MethylationPlot(object):
             strings += (element.get_xml().decode('utf-8'))
         return strings
 
-    def add_data(self, elements = None):
-        ''' add new elements to the elements queue '''
-        elements_to_add = elements
-        for element in elements_to_add:
-            self.plot.add(element)
-        print "% i svg elements have been added to the current svg object." % len(elements)
-
     def add_legends(self, get_tss, get_cpg, annotations):
         ''' Add annotations, title, axis, tic marks and labels '''
-        if self.title is None:
-            self.title = "Methylation Plot"
+
         Title = Text(self.title, insert = (bigfont + ((float(self.MARGIN) - bigfont) / 3),
                                            bigfont + ((float(self.MARGIN) - bigfont) / 3)),
                                            fill = legend_color, font_size = bigfont)
@@ -191,15 +238,22 @@ class MethylationPlot(object):
         for axis in get_axis(self.width, self.MARGIN, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
             self.elements.append(axis)
 
-        self.add_xtics()
-        self.add_ytics()
-        # self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
-        if get_tss:
-            for tss in add_tss(annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
-                self.elements.append(tss)
-        if get_cpg:
-            for cpg in add_cpg(annotations, self.MARGIN, self.height, self.width, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
-                self.elements.append(cpg)
+        print "add_legends, messages are: %s" % self.message
+
+        if self.message is None:
+            self.add_xtics()
+
+            # TODO: Have both of these run, depending on which data is present
+            # self.add_ytics_chipseq()
+            self.add_ytics_methylation()
+
+            # self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
+            if get_tss:
+                for tss in add_tss(annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
+                    self.elements.append(tss)
+            if get_cpg:
+                for cpg in add_cpg(annotations, self.MARGIN, self.height, self.width, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
+                    self.elements.append(cpg)
 
     def add_xtics(self):
         ''' Create X tics on the plot'''
@@ -227,7 +281,31 @@ class MethylationPlot(object):
             self.elements.append(ticline)
             self.elements.append(ticmarker)
 
-    def add_ytics(self):
+    def add_ytics_chipseq(self):
+        ''' Add Y ticks to the svg plot '''
+        scale_tics = 64
+        labels = [i for i in range(0, int(self.maxh) + 1, scale_tics)]
+        while len(labels) < 4:
+            scale_tics /= 2
+            labels += [i for i in range(0, int(self.maxh) + 1, scale_tics) if i not in labels]
+        ytics = [round(self.height - self.BOTTOM_MARGIN - y * self.scale_y, 3) for y in labels]
+        spacing = (ytics[0] - ytics[1]) / 2
+        for tic, label in zip(ytics, labels):
+            ticline = Rect(insert = (self.MARGIN - 2, tic), size = (5, 1), fill = legend_color)
+            if tic - spacing > self.MARGIN:
+                ticline2 = Rect(insert = (self.MARGIN - 2, tic - spacing), size = (2, 1), fill = legend_color)
+                self.elements.append(ticline2)
+            tic_x = self.MARGIN - smallfont * 2
+            tic_y = tic + 1
+            if len(str(label)) == 1:
+                tic_x = tic_x + 3
+            if len(str(label)) == 2:
+                tic_x = tic_x + 2
+            ticmarker = (Text(label, insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
+            self.elements.append(ticline)
+            self.elements.append(ticmarker)
+
+    def add_ytics_methylation(self):
         ''' Add Y ticks to the svg plot '''
         labels = [0, 0.2, 0.4, 0.6, 0.8, 1]
         ytics = [round((self.MARGIN + self.dimension_y) - (y * self.dimension_y), 3) for y in labels]
@@ -250,7 +328,31 @@ class MethylationPlot(object):
             self.elements.append(ticmarker)
 
     @staticmethod
-    def makegaussian(stddev, innerheight):
+    def makegaussian_horizontal(start, end, pos, tail, offset, innerheight, stddev):
+        ''' create gausian distributions on the plot '''
+        endpts = int((sqrt((-2) * stddev * stddev * log(float(tail) / innerheight))))
+        spacing = 64
+        n_points = 0
+        while n_points < 25 and spacing >= 2:
+            X = []
+            for i in range (-stddev, stddev, spacing):
+                X.append(float(i))
+            for i in range (-endpts, -stddev, spacing):
+                X.append(float(i))
+            for i in range (stddev, endpts, spacing):
+                X.append(float(i))
+            n_points = len(X)
+            spacing /= 2
+        if (endpts) not in X:
+            X.append(endpts)
+        X.sort()
+        X = [float(x) for x in X if 0 <= (x + pos - offset) < (end - start)]
+        stddev = float(stddev)
+        Y = [round(innerheight * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
+        return X, Y
+
+    @staticmethod
+    def makegaussian_vertical(stddev, innerheight):
         ''' create gausian distributions on the plot '''
         endpts = (sqrt((-2) * stddev * stddev * log(1.0 / innerheight)))
         X = [0]

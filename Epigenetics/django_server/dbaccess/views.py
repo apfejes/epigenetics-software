@@ -83,6 +83,7 @@ def process_request(request):
 
     p['organism'] = str(q.get("organism", "human"))
     p['collection'] = q.get("collection", "methylation")
+    p['chipseq'] = q.get("chipseq", None)    # list of chip seq samples available
     p['project'] = q.get('project', None)
     p['chromosome'] = q.get("chromosome", None)
     p['tss'] = to_boolean(q.get("tss", False))
@@ -215,7 +216,7 @@ def view_query_form(request):
 
 
         elif methylation and peaks:
-            svg = svg_mixed_code(m,
+            svg = svg_mixed_code(m, parameters,
                                 json.dumps(parameters['sample_index']),
                                 organism = str.capitalize(parameters['organism']),
                                 project = parameters['project'],
@@ -250,15 +251,22 @@ def view_query_form(request):
 
 
 
-def svg_mixed_code(mongowrapper, sample_index = None, organism = None, chromosome = None, project = None, start = None,
-            end = None, height = None, width = None, tss = False, cpg = False,
-            datapoints = False, peaks = False):
+def svg_mixed_code(m, parameters,
+                   sample_index = None,
+                   organism = None,
+                   chromosome = None,
+                   project = None,
+                   start = None,
+                   end = None,
+                   height = None,
+                   width = None,
+                   tss = False,
+                   cpg = False,
+                   datapoints = False,
+                   peaks = False):
     '''TODO:missing doc string'''
-    print("Querying...")
-    docs = mongowrapper.query(collection = "methylation", project = project, chromosome = chromosome, start = start, end = end)
-    if chromosome[0:3] != 'chr':
-        chromosome = 'chr' + str(chromosome)
-    methylation = mongowrapper.svg(get_elements = True,
+    docs = m.query(parameters)
+    methylation = m.svg_builder.svg(get_elements = True,
                         color = 'indigo',
                         height = height,
                         width = width,
@@ -268,10 +276,14 @@ def svg_mixed_code(mongowrapper, sample_index = None, organism = None, chromosom
                         show_peaks = peaks,
                         sample_index = sample_index)
 
-    mongowrapper.query(collection = "waves", chromosome = chromosome, start = start, end = end)
+    m.query(collection = "waves", chromosome = chromosome, start = start, end = end)
     if tss or cpg:
-        mongowrapper.getannotations(docs)
-    drawing = mongowrapper.svg(title = organism + " DNA methylation and ChIP-Seq peaks on " + chromosome + " (" + str(start) + "-" + str(end) + ")",
+        m.getannotations(docs)
+    drawing = m.svg_builder.svg(
+                            title = "%s DNA methylation and ChIP-Seq peaks on %s (%i - %i)" %
+                            (str.capitalize(parameters['organism']),
+                               parameters['chromosome'],
+                               parameters['start'], parameters['end']),
                     color = 'indigo',
                     height = height,
                     width = width,

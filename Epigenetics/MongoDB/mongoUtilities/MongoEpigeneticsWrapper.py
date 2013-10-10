@@ -71,6 +71,8 @@ class MongoEpigeneticsWrapper():
         # print '\n    Sample_ids list:', sample_ids
 
         # Conduct query and collect the data depending on which collection was chosen.
+
+        # TODO: Make sure that if "both" is picked, that the two pieces of code work together, and don't overwrite each other.
         if self.methylation:
             sample_ids = self.organize_samples_methylation(parameters['project'], sample_label, sample_group)
             cursor = self.finddocs_annotations()    # get probe and annotation info for region queried
@@ -81,12 +83,15 @@ class MongoEpigeneticsWrapper():
 
         if self.peaks:
             sample_ids = self.organize_samples_chipseq(parameters['project'], sample_label, sample_group,
-                                           parameters['chip'])
+                                           parameters['chipseq'])
             docs = self.finddocs_waves(sample_ids = sample_ids, project = parameters['project'])    # get peak info for region queried
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
             if self.database == 'human_epigenetics':
                 annotation_docs = self.finddocs_annotations()    # get the gene annotations info
-            else: annotation_docs = {}
+            else:
+                annotation_docs = {}
+
+
 
         return annotation_docs
 
@@ -189,12 +194,7 @@ class MongoEpigeneticsWrapper():
         groupby_name = 'samplegroup'
         print "project name = %s" % project
 
-        samplesdocs = None
-        if project == 'All' or project == 'Tissue':    # special case, don't use project in the query!
-            samplesdocs = self.finddocs_samples(sample_group = groupby_name,
-                                    chip = chip)
-        else:
-            samplesdocs = self.finddocs_samples(project = project,
+        samplesdocs = self.finddocs_samples(project = project,
                                 sample_label = sample_label,
                                 sample_group = groupby_name,
                                 chip = chip)
@@ -206,7 +206,7 @@ class MongoEpigeneticsWrapper():
 
         for doc in samplesdocs:
             sample_id = str(doc['_id'])
-            # print "document: %s" % doc
+            print "document: %s" % doc
             if self.database == 'yeast_epigenetics':
                 doc_chip = str(doc['type (ip, mock, input)'])
             else:
@@ -259,8 +259,6 @@ class MongoEpigeneticsWrapper():
             for item in sample_ids.keys():
                 ids.append(ObjectId(item))
             query_parameters["sample_id"] = {"$in":ids}
-        if project:
-            query_parameters['project'] = project
         if self.start and self.end:
             extension = 500    # extend the region of query to catch peaks with tails in the region
             query_parameters["pos"] = {"$lte":self.end + extension, "$gte":self.start - extension}
@@ -268,6 +266,9 @@ class MongoEpigeneticsWrapper():
                       'height': True, 'stddev': True,
                       'sample_id': True}
         sortby, sortorder = 'height', (-1)
+
+        print "finddocs_waves query_parameters = %s" % query_parameters
+        print "finddocs_waves return_parameters = %s" % return_chr
 
         return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
 
@@ -280,13 +281,17 @@ class MongoEpigeneticsWrapper():
             return {}
         collection = 'samples'
         query_parameters = {}    # This dictionary will store all the query parameters
+        return_chr = {'_id': True, 'sampleid':True, sample_group:True, 'project':True}
+
 
         if self.peaks:
             if chip:
                 if self.database == 'yeast_epigenetics':
                     query_parameters["type  (ip, mock, input)"] = chip
+                    return_chr["type  (ip, mock, input)"] = True
                 else:
                     query_parameters["chip"] = chip
+                    return_chr["chip"] = True
             else:
                 query_parameters['haswaves'] = True
         elif self.methylation:
@@ -295,8 +300,12 @@ class MongoEpigeneticsWrapper():
                 query_parameters["project"] = project
             if sample_label:
                 query_parameters["sample_label"] = sample_label
-        return_chr = {'_id': True, 'sampleid':True, sample_group:True, 'project':True}
+
         sortby, sortorder = 'sample_group', 1
+        print "finding samples based on query :"
+        print "---> Query Parameters: %s" % query_parameters
+        print "---> return conditions: %s" % return_chr
+
         return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
 
 
@@ -330,7 +339,7 @@ class MongoEpigeneticsWrapper():
             docs = self.mongo.find(collection, query_parameters, return_chr)
 
         if docs.count() == 0:
-            warning = "    WARNING: The following query return zero probes or documents!"
+            warning = "    WARNING: The following query returned zero probes or documents!"
             warning += "\n    ---> Find(%s)" % (str(query_parameters))
             warning += "\n     use the checkquery() method to validate the inputs of your query."
             # self.errorlog(error_message)

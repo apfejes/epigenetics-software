@@ -119,6 +119,8 @@ script(type='text/javascript')
       var organism = e.options[e.selectedIndex].value;
       var e = document.getElementById("collection");
       var collection = e.options[e.selectedIndex].value;
+      var e = document.getElementById("chipseq");
+      var chipseq = e.options[e.selectedIndex].value;
       var e = document.getElementById("project");
       var project = e.options[e.selectedIndex].value;
       var e = document.getElementById("tss");
@@ -135,6 +137,7 @@ script(type='text/javascript')
       base += "&end=" + end.value
       base += "&organism=" + organism
       base += "&collection=" + collection
+      base += "&chipseq=" + chipseq
       base += "&project=" + project
       base += "&action=" + action
       base += "&tss=" + tss

@@ -4,8 +4,6 @@ Created on 2013-05-23
 @author: sperez, apfejes
 
 '''
-
-import ChipseqPlot as chipseqplot
 import MethylationPlot as methylationplot
 
 
@@ -33,7 +31,6 @@ class Svg_Builder():
 
 
     def svg(self,
-
             types_index = None,
             sample_index = None,
             filename = None,
@@ -55,32 +52,24 @@ class Svg_Builder():
                 filename += '.svg'
             filename = directory_for_svgs + filename
 
-
+        self.drawing = methylationplot.MethylationPlot()
+        self.drawing.set_properties(filename, title, self.start, self.end, width, height)
+        if sample_index:
+            print "Setting sample index to %s" % (sample_index)
+            print "Setting types index to %s" % (types_index)
+            self.drawing.set_sample_index(types_index, sample_index)
+        else:
+            print "Not setting sample or types index."
 
         if self.methylation:
-            if self.drawing == None:
-                self.drawing = methylationplot.MethylationPlot()
-            if sample_index:
-                print "Setting sample index to %s" % (sample_index)
-                print "Setting types index to %s" % (types_index)
-                self.drawing.set_sample_index(types_index, sample_index)
-            else:
-                print "Not setting sample or types index."
-            self.drawing.set_properties(filename, title, color, self.start, self.end, width, height)
-            self.drawing.build(self.error_message, self.pos_betas_dict, self.sample_peaks, show_points, show_dist)
-            sampleindex = self.drawing.get_sample_index()
-            typesindex = self.drawing.get_types_index()
-
-                # self.drawing = methylationplot.MethylationPlot(filename, title, self.error_message, self.sample_peaks,
-                #                                      self.pos_betas_dict, self.annotations,
-                #                                      color, self.start, self.end, width,
-                #                                      height, show_points, show_peaks)
+            self.drawing.build_methylation(self.error_message, self.pos_betas_dict, self.sample_peaks, show_points, show_dist)
 
         if self.peaks:
-            self.drawing = chipseqplot.ChipseqPlot(filename, title, self.error_message, self.waves, self.start,
-                                              self.end, self.annotations, width,
-                                              height)
-            # TODO: SAMPLE NAMES/type names MUST BE RETRIEVED HERE. - mirror code above
+            print "waves = %s" % self.waves
+            # self.annotations,
+            self.drawing.build_chipseq(self.error_message, self.waves)
+        sampleindex = self.drawing.get_sample_index()
+        typesindex = self.drawing.get_types_index()
 
         if get_elements:
             self.drawing.add_sample_labels()
