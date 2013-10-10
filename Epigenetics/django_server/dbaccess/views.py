@@ -77,9 +77,7 @@ def process_request(request):
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
 
-
     p = {}    # parameters obtained
-
 
     p['organism'] = str(q.get("organism", "human"))
     p['collection'] = q.get("collection", "methylation")
@@ -288,7 +286,7 @@ def view_query_form(request):
                                                'collection_list':collection_list,
                                                'sample_index':sample_index,
                                                'types_index':types_index,
-                                               'chip_list':chip_list,
+                                               'chip_list':chipseq_list,
                                                'chipseq':parameters['chipseq'],
                                                'plot':mark_safe(svg),
                                                'organism':parameters['organism'],
