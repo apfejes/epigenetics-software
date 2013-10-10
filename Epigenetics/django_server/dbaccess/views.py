@@ -257,24 +257,27 @@ def view_query_form(request):
                             width = parameters['width'],
                             get_tss = parameters['tss'],
                             get_cpg = parameters['cpg'],
-                            sample_index = json.dumps(parameters['sample_index']))
+                            sample_index = json.dumps(parameters['sample_index']),
+                            show_points = parameters['datapoints'],
+                            show_dist = parameters['show_dist'],
+                            types_index = json.dumps(parameters['types_index']),)
 
 
 
 
 
 
-            drawing = m.svg_builder.svg(
-                            title = "%s DNA methylation and ChIP-Seq peaks on %s (%i - %i)" %
-                            (str.capitalize(parameters['organism']),
-                               parameters['chromosome'],
-                               parameters['start'], parameters['end']),
-                            color = 'indigo',
-                            height = parameters['height'],
-                            width = parameters['width'],
-                            get_tss = parameters['tss'],
-                            get_cpg = parameters['cpg'],
-                    sample_index = sample_index)
+#             drawing = m.svg_builder.svg(
+#                             title = "%s DNA methylation and ChIP-Seq peaks on %s (%i - %i)" %
+#                             (str.capitalize(parameters['organism']),
+#                                parameters['chromosome'],
+#                                parameters['start'], parameters['end']),
+#                             color = 'indigo',
+#                             height = parameters['height'],
+#                             width = parameters['width'],
+#                             get_tss = parameters['tss'],
+#                             get_cpg = parameters['cpg'],
+#                     sample_index = sample_index)
 
             # drawing.add_data(methylation)
 
