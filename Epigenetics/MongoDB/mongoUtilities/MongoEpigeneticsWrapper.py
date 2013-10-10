@@ -65,13 +65,6 @@ class MongoEpigeneticsWrapper():
             chromosome = 'chr' + str(chromosome)
         self.chromosome = chromosome
 
-
-        # First we collect the list of samples the user is interested in:
-
-        # print '\n    Sample_ids list:', sample_ids
-
-        # Conduct query and collect the data depending on which collection was chosen.
-
         # TODO: Make sure that if "both" is picked, that the two pieces of code work together, and don't overwrite each other.
         if self.methylation:
             sample_ids = self.organize_samples_methylation(parameters['project'], sample_label, sample_group)
@@ -82,17 +75,13 @@ class MongoEpigeneticsWrapper():
             annotation_docs = docs
 
         if self.peaks:
-            sample_ids = self.organize_samples_chipseq(parameters['project'], sample_label, sample_group,
-                                           parameters['chipseq'])
-            docs = self.finddocs_waves(sample_ids = sample_ids, project = parameters['project'])    # get peak info for region queried
+            sample_ids = self.organize_samples_chipseq(parameters['chipseq'])
+            docs = self.finddocs_waves(sample_ids)    # get peak info for region queried
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
             if self.database == 'human_epigenetics':
                 annotation_docs = self.finddocs_annotations()    # get the gene annotations info
             else:
                 annotation_docs = {}
-
-
-
         return annotation_docs
 
     def checkquery_tests(self, collection, project, chromosome):
@@ -159,10 +148,10 @@ class MongoEpigeneticsWrapper():
             return {}
 
         if project == 'All' or project == 'Tissue':    # special case, don't use project in the query!
-            samplesdocs = self.finddocs_samples(sample_group = groupby_name)
+            samplesdocs = self.finddocs_samples_methylation(sample_group = groupby_name)
         # print "sampledocs %s" % (samplesdocs)
         else:
-            samplesdocs = self.finddocs_samples(project = project,
+            samplesdocs = self.finddocs_samples_methylation(project = project,
                                 sample_label = sample_label,
                                 sample_group = groupby_name)
 
@@ -183,7 +172,7 @@ class MongoEpigeneticsWrapper():
         return sample_ids
 
 
-    def organize_samples_chipseq(self, project, sample_label, sample_group, chip):
+    def organize_samples_chipseq(self, chip):
         '''
         Finds the sample_ids of the project and sample group user is interested in
         saves a dictionary of the form {sample_id: (sample_label, sample_group)
@@ -191,13 +180,7 @@ class MongoEpigeneticsWrapper():
         Sets the default group_by property of each dataset. 
         '''
 
-        groupby_name = 'samplegroup'
-        print "project name = %s" % project
-
-        samplesdocs = self.finddocs_samples(project = project,
-                                sample_label = sample_label,
-                                sample_group = groupby_name,
-                                chip = chip)
+        samplesdocs = self.finddocs_samples_chipseq(chip)
         if samplesdocs is None:
             self.error_message = 'No samples found'
             return {}
@@ -244,7 +227,7 @@ class MongoEpigeneticsWrapper():
         return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
 
 
-    def finddocs_waves(self, sample_ids = None, project = None):
+    def finddocs_waves(self, sample_ids = None):
 
         '''Finds documents corresponding to collection and type of query'''
 
@@ -272,7 +255,36 @@ class MongoEpigeneticsWrapper():
 
         return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
 
-    def finddocs_samples(self, project = None, sample_label = None,
+    def finddocs_samples_chipseq(self, chip):
+
+        '''Finds documents corresponding to collection and type of query'''
+
+        if self.error_message != '' :    # If there are existing error messages, don't perform these operations.
+            return {}
+        collection = 'samples'
+        query_parameters = {}    # This dictionary will store all the query parameters
+        return_chr = {'_id': True, 'sampleid':True}
+
+        print "finddocs_samples_chipseq, chip =  %s" % chip
+
+        if chip:
+            if self.database == 'yeast_epigenetics':
+                query_parameters["type  (ip, mock, input)"] = chip
+                return_chr["type  (ip, mock, input)"] = True
+            else:
+                query_parameters["chip"] = chip
+                return_chr["chip"] = True
+        else:
+            query_parameters['haswaves'] = True
+
+        sortby, sortorder = 'sample_group', 1
+        print "finding samples based on query :"
+        print "---> Query Parameters: %s" % query_parameters
+        print "---> return conditions: %s" % return_chr
+
+        return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
+
+    def finddocs_samples_methylation(self, project = None, sample_label = None,
                  sample_group = None, chip = None):
 
         '''Finds documents corresponding to collection and type of query'''
@@ -283,23 +295,11 @@ class MongoEpigeneticsWrapper():
         query_parameters = {}    # This dictionary will store all the query parameters
         return_chr = {'_id': True, 'sampleid':True, sample_group:True, 'project':True}
 
-
-        if self.peaks:
-            if chip:
-                if self.database == 'yeast_epigenetics':
-                    query_parameters["type  (ip, mock, input)"] = chip
-                    return_chr["type  (ip, mock, input)"] = True
-                else:
-                    query_parameters["chip"] = chip
-                    return_chr["chip"] = True
-            else:
-                query_parameters['haswaves'] = True
-        elif self.methylation:
-            query_parameters['haswaves'] = {'$exists':False}
-            if project:
-                query_parameters["project"] = project
-            if sample_label:
-                query_parameters["sample_label"] = sample_label
+        query_parameters['haswaves'] = {'$exists':False}
+        if project:
+            query_parameters["project"] = project
+        if sample_label:
+            query_parameters["sample_label"] = sample_label
 
         sortby, sortorder = 'sample_group', 1
         print "finding samples based on query :"

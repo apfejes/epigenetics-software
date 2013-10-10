@@ -152,13 +152,14 @@ def view_query_form(request):
     project_list.append("Tissue")
     project_list.sort()
     print "project_list ", project_list
+    print "project:", parameters['project']
 
     chip_list = mongo[parameters['organism'] + "_epigenetics"]['samples'].find({'haswaves': True}).distinct('chip')
     chipseq_list = [str(x) for x in chip_list]
-    project_list.append("All")
+    chipseq_list.append("All")
     chipseq_list.sort()
     print "chipseq_list ", chipseq_list
-
+    print "chipseq:", parameters['chipseq']
 
     database = parameters['organism'] + "_epigenetics"
 
@@ -216,25 +217,76 @@ def view_query_form(request):
 
 
         elif methylation and peaks:
-            svg = svg_mixed_code(m, parameters,
-                                json.dumps(parameters['sample_index']),
-                                organism = str.capitalize(parameters['organism']),
-                                project = parameters['project'],
-                                chromosome = parameters['chromosome'],
-                                start = parameters['start'],
-                                end = parameters['end'],
-                                height = parameters['height'],
-                                width = parameters['width'],
-                                tss = parameters['tss'],
-                                cpg = parameters['cpg'],
-                                datapoints = parameters['datapoints'],
-                                show_dist = parameters['show_dist'])
+#             svg = svg_mixed_code(m, parameters,
+#                                 json.dumps(parameters['sample_index']),
+#                                 organism = str.capitalize(parameters['organism']),
+#                                 project = parameters['project'],
+#                                 chromosome = parameters['chromosome'],
+#                                 start = parameters['start'],
+#                                 end = parameters['end'],
+#                                 height = parameters['height'],
+#                                 width = parameters['width'],
+#                                 tss = parameters['tss'],
+#                                 cpg = parameters['cpg'],
+#                                 datapoints = parameters['datapoints'],
+#                                 show_dist = parameters['show_dist'])
+
+
+
+            docs = m.query(parameters)
+            if parameters['tss'] or parameters['cpg']:
+                m.getannotations(docs)
+#             methylation = m.svg_builder.svg(# get_elements = True,
+#                         color = 'indigo',
+#                         height = parameters['height'],
+#                         width = parameters['width'],
+#                         get_tss = parameters['tss'],
+#                         get_cpg = parameters['cpg'],
+#                         show_points = parameters['datapoints'],
+#                         show_dist = parameters['show_dist'],
+#                         datapoints = parameters['datapoints'],
+#                         sample_index = sample_index)
+
+            svg, sample_index, types_index = m.svg_builder.svg(to_string = True,
+                            title = "%s DNA methylation and ChIP-Seq peaks on %s (%i - %i)" %
+                            (str.capitalize(parameters['organism']),
+                               parameters['chromosome'],
+                               parameters['start'], parameters['end']),
+                            color = 'indigo',
+                            height = parameters['height'],
+                            width = parameters['width'],
+                            get_tss = parameters['tss'],
+                            get_cpg = parameters['cpg'],
+                            sample_index = json.dumps(parameters['sample_index']))
+
+
+
+
+
+
+            drawing = m.svg_builder.svg(
+                            title = "%s DNA methylation and ChIP-Seq peaks on %s (%i - %i)" %
+                            (str.capitalize(parameters['organism']),
+                               parameters['chromosome'],
+                               parameters['start'], parameters['end']),
+                            color = 'indigo',
+                            height = parameters['height'],
+                            width = parameters['width'],
+                            get_tss = parameters['tss'],
+                            get_cpg = parameters['cpg'],
+                    sample_index = sample_index)
+
+            # drawing.add_data(methylation)
+
+
+
 
     return render(request, 'query_form.jade', {'organism_list':organism_list, 'project_list':project_list,
                                                'collection_list':collection_list,
                                                'sample_index':sample_index,
                                                'types_index':types_index,
                                                'chip_list':chip_list,
+                                               'chipseq':parameters['chipseq'],
                                                'plot':mark_safe(svg),
                                                'organism':parameters['organism'],
                                                'project':parameters['project'],
@@ -250,48 +302,4 @@ def view_query_form(request):
                                                'height':parameters['height']})
 
 
-
-def svg_mixed_code(m, parameters,
-                   sample_index = None,
-                   organism = None,
-                   chromosome = None,
-                   project = None,
-                   start = None,
-                   end = None,
-                   height = None,
-                   width = None,
-                   tss = False,
-                   cpg = False,
-                   datapoints = False,
-                   peaks = False):
-    '''TODO:missing doc string'''
-    docs = m.query(parameters)
-    methylation = m.svg_builder.svg(get_elements = True,
-                        color = 'indigo',
-                        height = height,
-                        width = width,
-                        get_tss = tss,
-                        get_cpg = cpg,
-                        show_points = datapoints,
-                        show_peaks = peaks,
-                        sample_index = sample_index)
-
-    m.query(collection = "waves", chromosome = chromosome, start = start, end = end)
-    if tss or cpg:
-        m.getannotations(docs)
-    drawing = m.svg_builder.svg(
-                            title = "%s DNA methylation and ChIP-Seq peaks on %s (%i - %i)" %
-                            (str.capitalize(parameters['organism']),
-                               parameters['chromosome'],
-                               parameters['start'], parameters['end']),
-                    color = 'indigo',
-                    height = height,
-                    width = width,
-                    get_tss = tss,
-                    get_cpg = cpg,
-                    sample_index = sample_index)
-
-    drawing.add_data(methylation)
-
-    return drawing.to_string()
 
