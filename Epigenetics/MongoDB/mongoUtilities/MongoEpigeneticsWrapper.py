@@ -163,7 +163,6 @@ class MongoEpigeneticsWrapper():
 
         for doc in samplesdocs:
             sample_id = str(doc['_id'])
-            # print "document: %s" % doc
             doc_sample_group = doc[groupby_name]
             doc_sample_label = doc[sampleid_name]
             if doc_sample_group == sample_group or sample_group is None:
@@ -188,7 +187,6 @@ class MongoEpigeneticsWrapper():
 
         for doc in samplesdocs:
             sample_id = str(doc['_id'])
-            print "document: %s" % doc
             if self.database == 'yeast_epigenetics':
                 doc_chip = str(doc['type (ip, mock, input)'])
             else:
@@ -246,10 +244,6 @@ class MongoEpigeneticsWrapper():
                       'height': True, 'stddev': True,
                       'sample_id': True}
         sortby, sortorder = 'height', (-1)
-
-        print "finddocs_waves query_parameters = %s" % query_parameters
-        print "finddocs_waves return_parameters = %s" % return_chr
-
         return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
 
     def finddocs_samples_chipseq(self, chip):
@@ -345,11 +339,11 @@ class MongoEpigeneticsWrapper():
 
         if docs.count() == 0:
             warning = "    WARNING: The following query returned zero probes or documents!"
-            warning += "\n    ---> Find(%s)" % (str(query_parameters))
+            warning += "\n    ---> Find in collection [%s] (%s)" % (collection, (str(query_parameters)))
             warning += "\n     use the checkquery() method to validate the inputs of your query."
-            # self.errorlog(error_message)
             print warning
-            self.svg_builder.error_message = 'No data here!'
+
+            # todo: warn if no data found
             return {}
 
         print "    --> Found %i documents." % docs.count()
@@ -381,6 +375,8 @@ class MongoEpigeneticsWrapper():
             return None
 
         probedata = self.finddocs_methylation(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()})
+
+        # handle if probedata == {}
 
         for methyldata in probedata:
             sample_id = str(methyldata['sampleid'])
@@ -461,6 +457,7 @@ class MongoEpigeneticsWrapper():
 
 
         # TODO: APF, must check why this is here - seems a bad place for it to be.  Why not init?
+        # potentially handling an empty case (whole chromosome?)
         if self.end is None:
             self.end = maxpos
             print "    New end position:", self.end
