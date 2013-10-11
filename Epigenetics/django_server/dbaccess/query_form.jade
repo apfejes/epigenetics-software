@@ -110,6 +110,12 @@ body
          #left
            |!{plot}
          #right
+           - if sample_index
+             - var samples = sample_index.items()
+             - for k, v in samples
+                 font(color=v)
+                   !{k}
+                 br
 
 
 script(type='text/javascript')

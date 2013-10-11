@@ -13,7 +13,7 @@ import Color_Palette
 from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, smallfont, legend_color
 # from PlotUtilities import medfont
 
-class MethylationPlot(object):
+class Plot(object):
     '''
     Called by a MongoEpigeneticsWrapper object to plot methylation data.
     '''

@@ -4,10 +4,7 @@ Created on 2013-05-23
 @author: sperez, apfejes
 
 '''
-import MethylationPlot as methylationplot
-
-
-directory_for_svgs = "/home/sperez/Documents/svg_temp/"
+from Illustration import SVGPlot
 
 class Svg_Builder():
     '''A class plot SVGs'''
@@ -47,12 +44,14 @@ class Svg_Builder():
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an .svg file or a svg string for webserver rendering
         '''
-        if filename:
-            if filename[-4:len(filename)] != '.svg':
-                filename += '.svg'
-            filename = directory_for_svgs + filename
 
-        self.drawing = methylationplot.MethylationPlot()
+        # TODO: Set up mechanism for writing out to file
+#         if filename:
+#             if filename[-4:len(filename)] != '.svg':
+#                 filename += '.svg'
+#             filename = directory_for_svgs + filename
+
+        self.drawing = SVGPlot.Plot()
         self.drawing.set_properties(filename, title, self.start, self.end, width, height)
         if sample_index:
             print "Setting sample index to %s" % (sample_index)
@@ -66,6 +65,13 @@ class Svg_Builder():
 
         if self.peaks:    # information about waves is already pushed by MEW.
             self.drawing.build_chipseq(self.error_message, self.waves)
+
+
+        # TODO: Insert error handling here, if methylation and no methylation data, drop out
+        # TODO: Insert error handling here, if chipseq and no chipseq data, drop out
+        # TODO: Insert error handling here, if both and no data, drop out
+
+
         sampleindex = self.drawing.get_sample_index()
         typesindex = self.drawing.get_types_index()
 
