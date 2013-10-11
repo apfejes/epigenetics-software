@@ -184,7 +184,6 @@ class MongoEpigeneticsWrapper():
         if samplesdocs is None:
             self.error_message = 'No samples found'
             return {}
-
         sample_ids = {}
 
         for doc in samplesdocs:
@@ -194,12 +193,10 @@ class MongoEpigeneticsWrapper():
                 doc_chip = str(doc['type (ip, mock, input)'])
             else:
                 doc_chip = str(doc['chip'])
-            if doc_chip == chip or chip is None:
+            if doc_chip == chip or chip is None or chip == "All":
                 sample_ids[sample_id] = doc_chip
 
         return sample_ids
-
-
 
 
     def finddocs_annotations (self):
@@ -267,13 +264,21 @@ class MongoEpigeneticsWrapper():
 
         print "finddocs_samples_chipseq, chip =  %s" % chip
 
+
         if chip:
-            if self.database == 'yeast_epigenetics':
-                query_parameters["type  (ip, mock, input)"] = chip
-                return_chr["type  (ip, mock, input)"] = True
+            if chip == "All":
+                query_parameters['haswaves'] = True
+                if self.database == 'yeast_epigenetics':
+                    return_chr["type  (ip, mock, input)"] = True
+                else:
+                    return_chr["chip"] = True
             else:
-                query_parameters["chip"] = chip
-                return_chr["chip"] = True
+                if self.database == 'yeast_epigenetics':
+                    query_parameters["type  (ip, mock, input)"] = chip
+                    return_chr["type  (ip, mock, input)"] = True
+                else:
+                    query_parameters["chip"] = chip
+                    return_chr["chip"] = True
         else:
             query_parameters['haswaves'] = True
 
@@ -363,7 +368,7 @@ class MongoEpigeneticsWrapper():
         return probes
 
     def collectbetas(self, sample_ids, probes):
-        '''Collects and bins methylation data'''
+        '''Collects and bins methylation data, and pushes it into the svg_generating object.'''
         # Bin the beta values and collect their position
         pos_betas_dict = {}    # contains CpGs
         sample_peaks = {}    # contains average CpG value and std for samples from same Sample Group
@@ -423,7 +428,7 @@ class MongoEpigeneticsWrapper():
 
 
     def getwaves(self, docs, sample_ids):
-        ''' TODO: fill in docstring '''
+        '''Collects and bins chipseq data, and pushes it into the svg_generating object.'''
         count = 0
         tail = 1
         maxpos = 0

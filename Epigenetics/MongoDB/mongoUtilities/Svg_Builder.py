@@ -64,9 +64,7 @@ class Svg_Builder():
         if self.methylation:
             self.drawing.build_methylation(self.error_message, self.pos_betas_dict, self.sample_peaks, show_points, show_dist)
 
-        if self.peaks:
-            print "waves = %s" % self.waves
-            # self.annotations,
+        if self.peaks:    # information about waves is already pushed by MEW.
             self.drawing.build_chipseq(self.error_message, self.waves)
         sampleindex = self.drawing.get_sample_index()
         typesindex = self.drawing.get_types_index()
