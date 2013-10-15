@@ -2,7 +2,7 @@
 Converts CEL files to Bed file.
     Uses rpy2 library.
     robjects.r(' ') is used to talk to R. 
-@author: apfejes
+@author: apfejes, sbrown
 '''
 import sys
 import time
