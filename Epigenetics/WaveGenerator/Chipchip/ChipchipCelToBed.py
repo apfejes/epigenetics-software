@@ -6,8 +6,14 @@ Converts CEL files to Bed file.
 '''
 import sys
 import time
+import os
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
+_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
+_root_dir = _cur_dir
+while ("WaveGenerator" in _root_dir):
+    _root_dir = os.path.dirname(_root_dir)
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
 import StringUtils
 
 def ConvertToBedViaR(cel_file):
