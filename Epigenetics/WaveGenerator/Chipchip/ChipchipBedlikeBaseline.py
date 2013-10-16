@@ -150,7 +150,7 @@ if __name__ == "__main__":
         '11-03-14_Rpb3_WT_IP.BEDlike',
         'untagged_control_others.BEDlike',
         '12-08-02inputH3K79me3.BEDlike',
-        '2012-2-7_Flag_Bymock.BEDlike',
+        #'2012-2-7_Flag_Bymock.BEDlike',
         '12-01-07_Cdk8flag_flag_input.BEDlike',
         'BY-input.BEDlike',
         '09-06-03_pRS315_bre1deletion_IP.BEDlike',
