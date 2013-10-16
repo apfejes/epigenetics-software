@@ -170,8 +170,8 @@ def view_query_form(request):
 
     svg = 'Please query the database to generate an image!'    # default string..  Should remove this.
     print "sample_index = %s" % (parameters['sample_index'])
-    sample_index = None
-    types_index = None
+    sample_index = {}
+    types_index = {}
 
     print("Querying...")
 
