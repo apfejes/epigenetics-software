@@ -32,7 +32,7 @@ def ConvertToBedViaR(cel_file):
     # write.table(data, file = paste(expName,"_exp1_AllData.txt",sep=''), append = FALSE, row.names = FALSE, sep = "\t");
 
 
-    bpmapfile = "/home/afejes/Chip-chip/Sc03b_MR_v04.bpmap"
+    bpmapfile = "/home/sbrown/datafiles/Sc03b_MR_v04.bpmap"
     bedfile = StringUtils.rreplace(cel_file, 'CEL', 'BED', 2)
     bedfile = bedfile + "like"
 
