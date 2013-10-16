@@ -27,7 +27,7 @@ class ColorPalette():
         self.colors['purple'] = ['darkslategrey', 'orchid', 'magenta', 'purple', 'blueviolet', 'darkviolet',
                            'pink', 'mediumslateblue', 'lightpink', 'deeppink', 'indigo', 'lavenderblush',
                            'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
-        self.color_wheel = {1:'blue', 2:'red', 4:'purple', 3:'green'}
+        self.color_wheel = {1:'blue', 2:'red', 3:'green', 4:'purple'}
 
         # return self.colors, self.color_wheel
 
@@ -38,8 +38,10 @@ class ColorPalette():
         # print "counter=%s sample_type=%s sample_id=%s" % (self.counter, sample_type, sample_id)
         if sample_type not in self.types_color:
             self.type_count += 1
-            if self.type_count >= len(self.color_wheel.keys()):
+            print "self.type_count = %s " % self.type_count
+            if self.type_count > len(self.color_wheel.keys()):    # this array has no zero, 1 to len(), therefore not >= len()
                 self.type_count = 1
+                print "resetting self.type_count = %s " % self.type_count
             self.types_color[sample_type] = self.color_wheel[self.type_count]    # Assign a hue to sample_type
             self.counter[sample_type] = 0
             # print 'types:', self.type_count, sample_type, self.color_wheel[self.type_count]

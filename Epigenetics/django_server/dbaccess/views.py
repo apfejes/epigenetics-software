@@ -212,38 +212,10 @@ def view_query_form(request):
                             get_cpg = parameters['cpg'],
                             sample_index = json.dumps(parameters['sample_index']))
 
-
-
         elif methylation and peaks:
-#             svg = svg_mixed_code(m, parameters,
-#                                 json.dumps(parameters['sample_index']),
-#                                 organism = str.capitalize(parameters['organism']),
-#                                 project = parameters['project'],
-#                                 chromosome = parameters['chromosome'],
-#                                 start = parameters['start'],
-#                                 end = parameters['end'],
-#                                 height = parameters['height'],
-#                                 width = parameters['width'],
-#                                 tss = parameters['tss'],
-#                                 cpg = parameters['cpg'],
-#                                 datapoints = parameters['datapoints'],
-#                                 show_dist = parameters['show_dist'])
-
-
-
             docs = m.query(parameters)
             if parameters['tss'] or parameters['cpg']:
                 m.getannotations(docs)
-#             methylation = m.svg_builder.svg(# get_elements = True,
-#                         color = 'indigo',
-#                         height = parameters['height'],
-#                         width = parameters['width'],
-#                         get_tss = parameters['tss'],
-#                         get_cpg = parameters['cpg'],
-#                         show_points = parameters['datapoints'],
-#                         show_dist = parameters['show_dist'],
-#                         datapoints = parameters['datapoints'],
-#                         sample_index = sample_index)
 
             svg, sample_index, types_index = m.svg_builder.svg(to_string = True,
                             title = "%s DNA methylation and ChIP-Seq peaks on %s (%i - %i)" %
@@ -259,28 +231,6 @@ def view_query_form(request):
                             show_points = parameters['datapoints'],
                             show_dist = parameters['show_dist'],
                             types_index = json.dumps(parameters['types_index']),)
-
-
-
-
-
-
-#             drawing = m.svg_builder.svg(
-#                             title = "%s DNA methylation and ChIP-Seq peaks on %s (%i - %i)" %
-#                             (str.capitalize(parameters['organism']),
-#                                parameters['chromosome'],
-#                                parameters['start'], parameters['end']),
-#                             color = 'indigo',
-#                             height = parameters['height'],
-#                             width = parameters['width'],
-#                             get_tss = parameters['tss'],
-#                             get_cpg = parameters['cpg'],
-#                     sample_index = sample_index)
-
-            # drawing.add_data(methylation)
-
-
-
 
     return render(request, 'query_form.jade', {'organism_list':organism_list, 'project_list':project_list,
                                                'collection_list':collection_list,
@@ -301,6 +251,4 @@ def view_query_form(request):
                                                'show_dist':parameters['show_dist'],
                                                'width':parameters['width'],
                                                'height':parameters['height']})
-
-
 

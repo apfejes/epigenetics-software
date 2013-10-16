@@ -155,17 +155,18 @@ class Plot(object):
             if show_points:
                 for beta, sample_id, sample_type in pos_betas_dict[position]:
                     sample_id = str(sample_id)
+                    sample_type = str(sample_type)
                     y = round((1 - beta) * self.dimension_y, 2) + self.MARGIN
                     # print "sample Grouping = %s" % (self.sample_grouping)
-                    if self.sample_grouping.has_key(sample_id):
+                    if self.sample_grouping.has_key("%s-%s" % (sample_type, sample_id)):
                         # print "sample grouping has key (%s)" % (sample_id)
                         type_color, sample_color = self.palette.get_colours(sample_type, sample_id)
                     else:
                         if first:
                             self.palette.set_colors_dict({}, {})    # reset if first key does not exist.
                             first = False
-                        # print "sample grouping does not have key (%s)" % (sample_id)
-                        self.sample_grouping[sample_id] = sample_type
+                        # print "sample grouping does not have key (%s)" % ("%s-%s" % (sample_type, sample_id))
+                        self.sample_grouping["%s-%s" % (sample_type, sample_id)] = sample_type
                         type_color, sample_color = self.palette.sorter(sample_type, sample_id)
                     point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color)
                     self.elements.append(point)
