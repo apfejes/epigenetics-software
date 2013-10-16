@@ -2,7 +2,7 @@
 Converts CEL files to Bed file.
     Uses rpy2 library.
     robjects.r(' ') is used to talk to R. 
-@author: apfejes
+@author: apfejes, sbrown
 '''
 import sys
 import time
@@ -45,6 +45,8 @@ class row():
 
 def ReadBaseline(file_name, ps):
     bed = open(file_name, 'r')    # open file
+    #file like: chr1    0    7.497689
+    #           chr1    4    7.500031
     linecount = 0
     for line in bed:
         a = line.split("\t")
@@ -82,6 +84,7 @@ def ApplyBaseline(index, file_in, file_out, ps):
 
     bed.close()
 
+'''
 def ProduceStats(records, ps):
     output = open("/home/afejes/baseline.bedlike", 'w')
     for r in range(1, len(ps[0])):
@@ -92,6 +95,7 @@ def ProduceStats(records, ps):
         avg = avg / records
         output.write("%s\t%f\n" % (ps[0][r], avg))
     output.close()
+'''
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -107,11 +111,11 @@ if __name__ == "__main__":
     ReadBaseline(sys.argv[2], probeset)
 
     print "done."
-    op = StringUtils.rreplace(sys.argv[1], 'BED', 'NORMAL', 1)
+    #op = StringUtils.rreplace(sys.argv[1], 'BED', 'NORMAL', 1)
     for i, f in enumerate(files):
         filetime = time.time()
-        of = StringUtils.rreplace(f, 'BEDlike', '.normalized.BEDlike', 1)
+        of = StringUtils.rreplace(f, '.BEDlike', '.normalized.BEDlike', 1)
         ApplyBaseline(i + 1, "%s%s" % (sys.argv[1], f), "%s%s" % (sys.argv[1], of), probeset)    # first file is first file, use zero for chr/pos
         print "File %i - %s processed in %f seconds" % (i + 1, f, time.time() - filetime)
-    ProduceStats(len(files) + 1, probeset)
+    #ProduceStats(len(files) + 1, probeset)
     print 'Completed in %s seconds' % int((time.time() - starttime))
