@@ -119,7 +119,7 @@ def FindBaseline(file_name, normalize = False):
             data[g].setv(v)
     # create wig file
     f_w_name = StringUtils.rreplace(file_name, '.BEDlike', '', 1)
-    f_w_name = StringUtils.rreplace(f_w_name, 'BED', 'WIG', 1)
+    f_w_name = StringUtils.rreplace(f_w_name, 'BED', 'WIG', 1)      ##should these two lines just replace .BEDlike with .WIG?
     trackname = os.path.basename(f_w_name)
 
     # print "Writing to %s" % (f_w_name)
@@ -149,8 +149,8 @@ def FindBaseline(file_name, normalize = False):
         # print "x of len: %i/%i" % (x, l)
         if data[x].chromosome != current_chr:
             if len(coverage_map) > 0:
-                # wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)
-                wigfile.add_map(coverage_map, current_chr, block_left)
+                wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)    #for yeast chromosome nomenclature (roman numeral)
+                #wigfile.add_map(coverage_map, current_chr, block_left)
                 coverage_map = []
             # TODO: taper off chromosome
             # TODO: taper "on" new chromosome
@@ -185,8 +185,8 @@ def FindBaseline(file_name, normalize = False):
             x += 1
             last_ht = 0
         if len(coverage_map) > 0:
-            # wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)
-            wigfile.add_map(coverage_map, current_chr, block_left)
+            wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left) #for yeast chromosome nomenclature (roman numeral)
+            #wigfile.add_map(coverage_map, current_chr, block_left)
             coverage_map = []
     # gc.enable()
 
