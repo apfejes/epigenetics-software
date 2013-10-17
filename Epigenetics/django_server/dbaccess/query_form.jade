@@ -28,13 +28,14 @@ body
                                   - else 
                                        option(value=org)=org
                     label(for='collection') Collection:
-                       - var col = collection_list.items()
-                       select(name='collection',id='collection')
-                         - for x,y in col
-                           - if x == collection
-                               option(value=x, selected)=y
-                           - else
-                               option(value=x)=y
+                       - if collection_list
+                           - var col = collection_list.items()
+                           select(name='collection',id='collection')
+                             - for x,y in col
+                               - if x == collection
+                                   option(value=x, selected)=y
+                               - else
+                                   option(value=x)=y
                     label(for='project') Project:
                         select(name='project', id='project',multiple)
                           - each pt in project_list
@@ -110,19 +111,28 @@ body
          #left
            |!{plot}
          #right
-           - if types_index
-             - var samples = types_index.items()
-             - for k, v in samples
-                 font(color=v)
-                   !{k}
-                 br
+           h3 Group Index
+           - if types_index == "null"
+              | No Data found 
+           - elif types_index == "{}"
+               | No Data found
+           - else
+               - var samples = types_index.items()
+               - for k, v in samples
+                   font(color=v)
+                     !{k}
+                   br  
            h3 Sample Index
-           - if sample_index
+           - if sample_index == "null"
+             | No Data found 
+           - elif sample_index == "{}"
+             | No Data found 
+           - else 
              - var samples = sample_index.items()
              - for k, v in samples
                  font(color=v)
                    !{k}
-                 br
+                 br 
 
 
 script(type='text/javascript')

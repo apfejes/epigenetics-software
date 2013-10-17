@@ -16,20 +16,28 @@ class ColorPalette():
         self.colors = {}
 
         # Hold dictionaries of colours for use in generating svgs
-        self.colors['blue'] = ['blue', 'cornflowerblue', 'darkblue', 'deepskyblue', 'darkturquoise',
-                       'midnightblue', 'navy', 'dodgerblue', 'lightblue', 'lightskyblue', 'cadetblue', 'teal',
-                       'paleturquoise', 'aquamarine', 'azure', 'aqua', 'lightsteelblue', 'powderblue']
-        self.colors['green'] = ['lightseagreen', 'limegreen', 'lawngreen', 'olivedrab', 'chartreuse', 'mediumturquoise',
-                               'mediumspringgreen', 'forestgreen', 'seagreen', 'palegreen', 'olive', 'darkcyan',
-                               'yellowgreen', 'darkolivegreen', 'darkgreen', 'darkseagreen', 'lime']
-        self.colors['red'] = ['orangered', 'tomato', 'orange', 'gold', 'firebrick', 'sandybrown',
-                             'lightcoral', 'crimson', 'coral', 'darkred', 'indianred', 'maroon']
-        self.colors['purple'] = ['darkslategrey', 'orchid', 'magenta', 'purple', 'blueviolet', 'darkviolet',
-                           'pink', 'mediumslateblue', 'lightpink', 'deeppink', 'indigo', 'lavenderblush',
-                           'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
-        self.color_wheel = {1:'blue', 2:'red', 3:'green', 4:'purple'}
+#         self.colors['blue'] = ['blue', 'cornflowerblue', 'darkblue', 'deepskyblue', 'darkturquoise',
+#                        'midnightblue', 'navy', 'dodgerblue', 'lightblue', 'lightskyblue', 'cadetblue', 'teal',
+#                        'paleturquoise', 'aquamarine', 'azure', 'aqua', 'lightsteelblue', 'powderblue']
+#         self.colors['green'] = ['lightseagreen', 'limegreen', 'lawngreen', 'olivedrab', 'chartreuse', 'mediumturquoise',
+#                                'mediumspringgreen', 'forestgreen', 'seagreen', 'palegreen', 'olive', 'darkcyan',
+#                                'yellowgreen', 'darkolivegreen', 'darkgreen', 'darkseagreen', 'lime']
+#         self.colors['red'] = ['orangered', 'tomato', 'orange', 'gold', 'firebrick', 'sandybrown',
+#                              'lightcoral', 'crimson', 'coral', 'darkred', 'indianred', 'maroon']
+#         self.colors['purple'] = ['darkslategrey', 'orchid', 'magenta', 'purple', 'blueviolet', 'darkviolet',
+#                            'pink', 'mediumslateblue', 'lightpink', 'deeppink', 'indigo', 'lavenderblush',
+#                            'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
+        self.colors['#FF00FF'] = ['#ffccff', '#ffb9ff', '#ffa7ff', '#ff94ff', '#ff82ff', '#ff6fff', '#ff5dff', '#ff4aff', '#ff38ff', '#ff25ff', '#ff13ff', '#ff00ff']    # magenta
+        self.colors['#FF0000'] = ['#ffcccc', '#ffb9b9', '#ffa7a7', '#ff9494', '#ff8282', '#ff6f6f', '#ff5d5d', '#ff4a4a', '#ff3838', '#ff2525', '#ff1313', '#ff0000']    # red
+        self.colors['#00FF00'] = ['#00cc00', '#0FCF0F', '#1DD21D', '#2CD52C', '#3BD83B', '#4ADB4A', '#58DD58', '#67E067', '#76E376', '#85E685', '#93E993', '#A2ECA2']    # green
+        self.colors['#0000ff'] = ['#ccccff', '#b9b9ff', '#a7a7ff', '#9494ff', '#8282ff', '#6f6fff', '#5d5dff', '#4a4aff', '#3838ff', '#2525ff', '#1313ff', '#0000ff']    # blue
+        self.colors['#00ffff'] = ['#ccffff', '#b9ffff', '#a7ffff', '#94ffff', '#82ffff', '#6fffff', '#5dffff', '#4affff', '#38ffff', '#25ffff', '#13ffff', '#00ffff']    # light blue
+        self.colors['#CCCC00'] = ['#cccc00', '#BFC000', '#B1B400', '#A4A700', '#969B00', '#898F00', '#7B8300', '#6E7700', '#606B00', '#535E00', '#455200', '#384600']    # yellows
+        self.color_wheel = {}
 
-        # return self.colors, self.color_wheel
+        for i, j in enumerate(self.colors):
+            self.color_wheel[1 + i] = j
+            print "colour_wheel %i - %s" % (1 + i, j)
 
 
 
