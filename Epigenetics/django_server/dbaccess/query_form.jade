@@ -113,9 +113,9 @@ body
          #right
            h3 Group Index
            - if types_index == "null"
-              | 
+              | No Data found 
            - elif types_index == "{}"
-               .
+               | No Data found
            - else
                - var samples = types_index.items()
                - for k, v in samples
@@ -124,9 +124,9 @@ body
                    br  
            h3 Sample Index
            - if sample_index == "null"
-             |
+             | No Data found 
            - elif sample_index == "{}"
-             | 
+             | No Data found 
            - else 
              - var samples = sample_index.items()
              - for k, v in samples

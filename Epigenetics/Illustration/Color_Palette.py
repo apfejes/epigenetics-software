@@ -27,9 +27,16 @@ class ColorPalette():
         self.colors['purple'] = ['darkslategrey', 'orchid', 'magenta', 'purple', 'blueviolet', 'darkviolet',
                            'pink', 'mediumslateblue', 'lightpink', 'deeppink', 'indigo', 'lavenderblush',
                            'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
-        self.color_wheel = {1:'blue', 2:'red', 3:'green', 4:'purple'}
+        self.colors['teal'] = ['#00AF63', '#57AF89', '#83AF9C', '#277553', '#133A29', '#418367', '#729988']
+        self.colors['orange'] = ['#FFB200', '#FFD87F', '#FFEBBF', '#A98738', '#54431C', '#BFA25F', '#DDCDA6']
+        self.colors['magenta'] = ['#CE008D', '#CE67AD', '#CE9ABE', '#892D6C', '#441636', '#9A4D82', '#B386A5']
+        self.colors['#8E8E2F'] = ['#D6D600', '#D6D66B', '#D6D6A0', '#8E8E2F', '#474717', '#A0A050', '#BABA8B']    # greeny yellows\
+        self.colors['#2E4736'] = ['#326B44', '#4E6B57', '#5C6B61', '#2E4736', '#17231B', '#3B5041', '#505D54']    # deep greens
+        self.color_wheel = {}
 
-        # return self.colors, self.color_wheel
+        for i, j in enumerate(self.colors):
+            self.color_wheel[1 + i] = j
+            print "colour_wheel %i - %s" % (1 + i, j)
 
 
 
