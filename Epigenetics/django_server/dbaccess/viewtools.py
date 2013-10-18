@@ -15,7 +15,7 @@ PANNING_PERCENTS = {'LessRight':0.3, 'MoreRight':0.6,
 
 
 def zoom(zoom_symbol, start, end):
-    '''TODO: docstring missing'''
+    '''This code widens or narrows the window on each side by a zoom factor'''
 
     # Adjusts start and end value for new query
     # ex: zoomfactor = 0.1, start = 200, end = 300

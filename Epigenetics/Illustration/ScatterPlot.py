@@ -1,4 +1,8 @@
-'''TODO:missing doc string'''
+'''
+A simple plot for scattered x,y data.
+
+@author: apfejes
+'''
 # from svgwrite.shapes import Rect
 from svgwrite.shapes import Line
 from svgwrite.shapes import Circle
@@ -12,7 +16,9 @@ from svgwrite.drawing import Drawing
 # from query_ensembl import name, location
 
 class ScatterPlot(object):
-    '''TODO:missing doc string'''
+    '''A simple scatter diagram plot.'''
+
+
     def __init__(self, filename, x_max, y_max, **kwargs):
         '''
         Initialize this object - you need to pass it a mongo object for it to 
