@@ -69,9 +69,9 @@ class Plot(object):
         background = Rect(insert = (0, 0), size = canvas_size, fill = "white")
         self.plot.add(background)
 
-    def set_sample_index(self, index, types):
+    def set_sample_index(self, types, samples):
         '''overwrite the sample_index to preserve colours from previous set.'''
-        self.palette.set_colors_dict(types, index)
+        self.palette.set_colors_dict(types, samples)
 
     def get_sample_index(self):
         ''' Return the sample index so that it can be used in HTML'''
@@ -158,16 +158,14 @@ class Plot(object):
                     sample_type = str(sample_type)
                     y = round((1 - beta) * self.dimension_y, 2) + self.MARGIN
                     # print "sample Grouping = %s" % (self.sample_grouping)
-                    if self.sample_grouping.has_key("%s-%s" % (sample_type, sample_id)):
-                        # print "sample grouping has key (%s)" % (sample_id)
-                        type_color, sample_color = self.palette.get_colours(sample_type, sample_id)
-                    else:
-                        if first:
-                            self.palette.set_colors_dict({}, {})    # reset if first key does not exist.
-                            first = False
-                        # print "sample grouping does not have key (%s)" % ("%s-%s" % (sample_type, sample_id))
-                        self.sample_grouping["%s-%s" % (sample_type, sample_id)] = sample_type
-                        type_color, sample_color = self.palette.sorter(sample_type, sample_id)
+                    key = "%s-%s" % (sample_type, sample_id)
+                    if first:
+                        print "palette.sample_color: ", self.palette.samples_color
+                        first = False
+                        if key not in self.palette.samples_color:
+                            print "resetting sample colours - %s not found in palette.sample_color" % (key)
+                            self.palette.set_colors_dict({}, {})
+                    type_color, sample_color = self.palette.colour_assignment(sample_type, sample_id)
                     point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color)
                     self.elements.append(point)
 
@@ -176,7 +174,7 @@ class Plot(object):
                     if self.gausian_colour.has_key(sample_type):
                         type_color = self.gausian_colour[sample_type]
                     else:
-                        type_color = self.palette.assign_group_colour(sample_type)
+                        type_color = self.palette.colour_assignment_group(sample_type)
                         self.gausian_colour[sample_type] = type_color
                     (m, s) = sample_peaks[position][sample_type]
                     m = round((1 - m) * self.dimension_y, 2) + self.MARGIN
