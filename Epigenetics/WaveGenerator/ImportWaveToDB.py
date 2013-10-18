@@ -1,7 +1,7 @@
 '''
 Created on 2013-03-27
 
-@author: afejes
+@author: afejes, sbrown
 '''
 
 import sys
@@ -25,7 +25,7 @@ def create_param_obj(param_file):
         sys.exit()
 
 
-def run():
+def run(PARAM):
     '''simple script for reading in a wave file and inserting it into a table in a mongodb database.'''
 
     wave_data_file = raw_input('wave file to load: ')
@@ -57,7 +57,8 @@ def run():
 
     db_names = {0:"arabidopsis_epigenetics",
                 1:"human_epigenetics",
-                2:"yeast_epigenetics"}
+                2:"yeast_epigenetics",
+                3:"test"}
     db_choice = -1
     while not (db_choice >= 0 and db_choice < len(db_names)):
         for y in db_names:
@@ -67,7 +68,7 @@ def run():
 
     print "Thanks - Data has been collected."
     print "opening connection(s) to MongoDB..."
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
+    mongo = Mongo_Connector.MongoConnector(PARAM.get_parameter("server"), PARAM.get_parameter("port"), db_name)
 
     print "processing %s..." % wave_input_file
     sample = create_param_obj(wave_input_file)
@@ -121,6 +122,6 @@ if __name__ == '__main__':
         sys.exit()
     conf_file = sys.argv[1]
     p = Parameters.parameter(conf_file)
-    run()
+    run(p)
     print "Completed."
 
