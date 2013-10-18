@@ -112,27 +112,23 @@ body
            |!{plot}
          #right
            h3 Group Index
-           - if types_index == "null"
-              | No Data found 
-           - elif types_index == "{}"
-               | No Data found
-           - else
+           - if types_index.items
                - var samples = types_index.items()
                - for k, v in samples
                    font(color=v)
                      !{k}
                    br  
-           h3 Sample Index
-           - if sample_index == "null"
-             | No Data found 
-           - elif sample_index == "{}"
-             | No Data found 
            - else 
+             | No Data Found                   
+           h3 Sample Index
+           - if sample_index.items
              - var samples = sample_index.items()
              - for k, v in samples
                  font(color=v)
                    !{k}
                  br 
+           - else 
+             | No Data Found
 
 
 script(type='text/javascript')
