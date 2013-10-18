@@ -167,7 +167,6 @@ def view_query_form(request):
     m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks, parameters['start'], parameters['end'])
 
     svg = 'Please query the database to generate an image!'    # default string..  Should remove this.
-    print "sample_index = %s" % (parameters['sample_index'])
 
     sample_index = {}
     types_index = {}
