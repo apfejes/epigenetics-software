@@ -1,11 +1,15 @@
 Mongo:
  
-replicating tables between database instances:
+**replicating tables between database instances:**
 
 db.xlat.find().forEach(function(d){ db.getSiblingDB('test')['xlat'].insert(d); });
 
-Update string value to int value:
+**Update string value to int value:**
 
 db.waves.find().forEach(function(data) {
     db.waves.update({_id:data._id},{$set:{stddev:parseInt(data.stddev)}});
 })
+
+
+**Upgrade Pyjade.**
+	sudo pip install pyjade --upgrade
