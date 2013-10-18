@@ -88,8 +88,8 @@ def process_request(request):
     p['cpg'] = to_boolean(q.get("cpg", False))
     p['show_dist'] = to_boolean(q.get("show_dist", False))
     p['datapoints'] = to_boolean(q.get("datapoints", True))
-    p['sample_index'] = q.get("samples", None)
-    p['types_index'] = q.get("types", None)
+    p['sample_index'] = q.get("sample_index", None)
+    p['types_index'] = q.get("types_index", None)
     p['width'] = int(q.get("width", 1000)) - 100    # width of screen minus 100
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
 
@@ -136,8 +136,6 @@ def view_query_form(request):
     if parameters['height'] < 400:
         parameters['height'] = 400
 
-
-
     db_list = [str(x) for x in mongo.database_names()]
     organism_list = []
     for f in db_list:
@@ -169,7 +167,7 @@ def view_query_form(request):
     m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks, parameters['start'], parameters['end'])
 
     svg = 'Please query the database to generate an image!'    # default string..  Should remove this.
-    print "sample_index = %s" % (parameters['sample_index'])
+
     sample_index = {}
     types_index = {}
 

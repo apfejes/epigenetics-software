@@ -3,6 +3,9 @@ Created on 2013-07-11
 
 @author: sperez
 '''
+import types
+import ast
+import json
 
 class ColorPalette():
     '''
@@ -10,7 +13,7 @@ class ColorPalette():
     '''
     def __init__(self):
         self.type_count = 0
-        self.counter = {}    # keeps track of maps
+        self.counter = {}    # keeps track of last assigned colour for each colour (self.colors) map.
         self.types_color = {}
         self.samples_color = {}
         self.colors = {}
@@ -39,60 +42,43 @@ class ColorPalette():
             self.color_wheel[1 + i] = j
             print "colour_wheel %i - %s" % (1 + i, j)
 
+    def _increment_type_counter(self):
+        '''self.counter keeps track of the next group colour to assign to new groups.'''
+        self.type_count += 1
+        if self.type_count > len(self.color_wheel.keys()):    # this array has no zero, 1 to len(), therefore not >= len()
+            self.type_count = 1
+        return None
 
-
-    def sorter(self, sample_type, sample_id):
-        '''This function appears to assign colours to each sample id, based up on sample type.'''
-        # print "counter=%s sample_type=%s sample_id=%s" % (self.counter, sample_type, sample_id)
-        if sample_type not in self.types_color:
-            self.type_count += 1
-            print "self.type_count = %s " % self.type_count
-            if self.type_count > len(self.color_wheel.keys()):    # this array has no zero, 1 to len(), therefore not >= len()
-                self.type_count = 1
-                print "resetting self.type_count = %s " % self.type_count
-            self.types_color[sample_type] = self.color_wheel[self.type_count]    # Assign a hue to sample_type
+    def _increment_sample_counter(self, sample_type):
+        '''self.counter keeps track of the next sample colour to assign for each sample type.'''
+        self.counter[sample_type] += 1
+        if self.counter[sample_type] >= len(self.colors[self.types_color[sample_type]]):
             self.counter[sample_type] = 0
-            # print 'types:', self.type_count, sample_type, self.color_wheel[self.type_count]
-        if sample_id not in self.samples_color:
-            self.samples_color[sample_id] = self.colors[self.types_color[sample_type]][self.counter[sample_type]]
-            self.counter[sample_type] += 1
-            if self.counter[sample_type] >= len(self.colors[self.types_color[sample_type]]):
-                self.counter[sample_type] = 0
-        # print len(self.colors[self.types_color[sample_type]]), self.colors[self.types_color[sample_type]]
-        if self.counter[sample_type] > len(self.colors[self.types_color[sample_type]]):
-            print self.counter
-            print sample_type, sample_id
-            print self.types_color[sample_type]
-            print self.counter[sample_type]
-            print len(self.colors[self.types_color[sample_type]])
-            raise ValueError("Ran out of colours! - sorter")
-        sample_color = self.samples_color[sample_id]
-        type_color = self.types_color[sample_type]
-        # print type_color, sample_color
-        return type_color, sample_color
+        return None
 
-    def assign_group_colour(self, sample_type):
-        '''This function appears to assign colours to each sample id, based up on sample type.'''
-        # print "counter=%s sample_type=%s" % (self.counter, sample_type)
+    def colour_assignment(self, sample_type, sample_name):
+        '''assign colours for individual samples.  If the group doesn't already have a colour, assign that too.'''
+
+        key = "%s-%s" % (sample_type, sample_name)
+        # work out if the type has a color palette
+        type_colour = self.colour_assignment_group(sample_type)
+
+        if key not in self.samples_color:
+            self.samples_color[key] = self.colors[self.types_color[sample_type]][self.counter[sample_type]]
+            self._increment_sample_counter(sample_type)
+        sample_colour = self.samples_color[key]
+
+        return type_colour, sample_colour
+
+    def colour_assignment_group(self, sample_type):
+        '''assign a colour to a group - used by groups in methylation, and used for Waves, which are all the same colour'''
+
         if sample_type not in self.types_color:
-            self.type_count += 1
-            if self.type_count >= len(self.color_wheel.keys()):
-                self.type_count = 1
-            self.types_color[sample_type] = self.color_wheel[self.type_count]    # Assign a hue to sample_type
+            self._increment_type_counter()
+            self.types_color[sample_type] = self.color_wheel[self.type_count]
             self.counter[sample_type] = 0
-            # print 'types:', self.type_count, sample_type, self.color_wheel[self.type_count]
-        # print len(self.colors[self.types_color[sample_type]]), self.colors[self.types_color[sample_type]]
-        if self.counter[sample_type] > len(self.colors[self.types_color[sample_type]]):
-            print self.counter
-            print sample_type
-            print self.types_color[sample_type]
-            print self.counter[sample_type]
-            print len(self.colors[self.types_color[sample_type]])
-            raise ValueError("Ran out of colours! - assign_group_colour")
-        type_color = self.types_color[sample_type]
-        # print type_color, sample_color
-        return type_color
-
+        type_colour = self.types_color.get(sample_type)
+        return type_colour
 
     def get_colours(self, sample_type, sample_id):
         '''Simple method for retrieving colours we should already have in the palette.'''
@@ -110,8 +96,17 @@ class ColorPalette():
         '''return the list of colour/sample mappings'''
         return self.samples_color
 
-    def set_colors_dict(self, types, samples):
+    def set_colors_dict(self, types_index, samples):
         '''return the list of colour/sample mappings'''
-        self.samples_color = samples
-        self.types_color = types
+        if type(samples) is types.DictionaryType:
+            self.samples_color = samples
+        else:
+            self.samples_color = ast.literal_eval(json.loads('%s' % samples))
+
+        if type(types_index) is types.DictionaryType:
+            self.types_color = types_index
+        else:
+            self.types_color = ast.literal_eval(json.loads('%s' % types_index))
+
+
 

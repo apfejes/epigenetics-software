@@ -53,12 +53,9 @@ class Svg_Builder():
 
         self.drawing = SVGPlot.Plot()
         self.drawing.set_properties(filename, title, self.start, self.end, width, height)
-        if sample_index:
-            print "Setting sample index to %s" % (sample_index)
-            print "Setting types index to %s" % (types_index)
+
+        if sample_index:    # if sample index, assume types and sample index both need to be restored to preserve colours.
             self.drawing.set_sample_index(types_index, sample_index)
-        else:
-            print "Not setting sample or types index."
 
         if self.methylation:
             self.drawing.build_methylation(self.error_message, self.pos_betas_dict, self.sample_peaks, show_points, show_dist)

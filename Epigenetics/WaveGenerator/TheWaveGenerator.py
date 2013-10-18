@@ -45,7 +45,7 @@ import StringUtils
 
 
 def random_index(num_queues):
-    '''TODO:missing doc string'''
+    '''return a random number between 0 and the number of queues available.'''
     return randint(0, num_queues - 1)
 
 
@@ -75,7 +75,7 @@ def put_assigned(map_queues, item, max_threads):
     # print ''.join([(str(queue.qsize()) + " ") for queue in map_queues])
 
 def create_param_obj(param_file):
-    '''TODO:missing doc string'''
+    '''check if file exists, and then create a parameter object for the file.'''
     p = None
     if os.path.exists(param_file):
         p = Parameters.parameter(param_file)
@@ -85,7 +85,7 @@ def create_param_obj(param_file):
     return p
 
 def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_processes):
-    '''TODO:missing doc string'''
+    '''Process reads from BAM or SAM sources.  Apply extensions and calculate maps.'''
     current_chromosome = None
     count = 0
     new_block = True
@@ -165,7 +165,7 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
     readahead.close()
 
 def process_WIG_reads(PARAM, map_queues, print_queue, worker_processes):
-    '''TODO:missing doc string'''
+    '''Process wig data - create maps from wigs and pass to the working queues'''
     current_chromosome = None
     count = 0
     position = 0

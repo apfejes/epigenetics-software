@@ -126,7 +126,7 @@ class MongoEpigeneticsWrapper():
         elif project == 'Anne Ellis':
             groupby_name = 'treatment'
         elif project == 'Wisconsin':
-            groupby_name = 'sampleid'
+            groupby_name = 'tissuetype'
         elif project == 'Valproate':
             groupby_name = 'sample_group'
         elif project == 'Roberts':
