@@ -99,13 +99,13 @@ def run(PARAM, wave_data_file, wave_input_file, db_name):
     '''
     print "processing %s..." % wave_input_file
     sample = create_param_obj(wave_input_file)
-    sample['cell_line'] = ""
-    sample['chip'] = ""
+    #sample['cell_line'] = "" ##stored as strain_background in metadata update file
+    #sample['chip'] = "" ##stored as antibody in metadata update file
     sample['haswaves'] = True    # used to indicate a sample has wave data
     #overwrite param file input and output names
-    sample['input_file'] = StringUtils.rreplace(os.path.basename(wave_data_file), '.waves', '.wig', 1)
-    sample['output_path'] = '/home/sbrown/Phoebe_CEL/WAVES/'
-    sample['file_name'] = wave_data_file
+    sample['input_file'] = StringUtils.rreplace(wave_data_file, '.waves', '.wig', 1)
+    sample['output_path'] = os.path.dirname(wave_data_file) + "/"
+    sample['file_name'] = os.path.basename(wave_data_file)
     collection_name = "samples"
     sample_id = mongo.insert(collection_name, sample)
 
