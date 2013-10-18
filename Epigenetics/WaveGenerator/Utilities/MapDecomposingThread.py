@@ -254,7 +254,7 @@ class MapDecomposer(multiprocessing.Process):
         cProfile.runctx("self.run(args)", globals(), locals())
         self.print_queue.put("finished profiling")
 
-    def run(self):    # , *args):
+    def run(self, *args):
         '''process the maps, while the thread is running.'''
         while True:
             try:
