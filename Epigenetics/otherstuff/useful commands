@@ -13,3 +13,43 @@ db.waves.find().forEach(function(data) {
 
 **Upgrade Pyjade.**
 	sudo pip install pyjade --upgrade
+
+*** getting a list of genes or exons ***
+
+ensembl.org/biomart:  
+* Parameters:
+Homo sapiens genes (GRCh37.p12)
+* Filters
+[None selected]
+* Attributes
+Ensembl Gene ID
+Ensembl Transcript ID
+Exon Chr Start (bp)
+Exon Chr End (bp)
+Constitutive Exon
+Exon Rank in Transcript
+cDNA coding start
+cDNA coding end
+Genomic coding start
+Genomic coding end
+Ensembl Exon ID
+Ensembl Protein ID
+Chromosome Name
+Gene Start (bp)
+Gene End (bp)
+Transcript Start (bp)
+Transcript End (bp)
+Strand
+Associated Gene Name
+5‘ UTR Start
+5‘ UTR End
+3‘ UTR End
+3‘ UTR Start
+Description
+Transcript count
+CDS Length
+Gene Biotype
+CDS Start
+CDS End
+
+
