@@ -1,7 +1,7 @@
 '''
 Main module for Chip-seq WaveGenerator software.  Generates the waves, which 
 can be analyzed with other modules, or imported into a database for further use.
-@author: afejes
+@author: afejes, sbrown
 
 '''
 
@@ -30,6 +30,18 @@ import LinkedList
 import MapMaker
 import WigFileThread
 import MappingItem
+
+_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
+_root_dir = os.path.dirname(_cur_dir)
+while ("WaveGenerator" in _root_dir):
+    _root_dir = os.path.dirname(_root_dir)
+sys.path.insert(0, _root_dir)
+sys.path.insert(0, _cur_dir)
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+sys.path.insert(0, _root_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
+
+import StringUtils
+
 
 
 def random_index(num_queues):
@@ -165,31 +177,38 @@ def process_WIG_reads(PARAM, map_queues, print_queue, worker_processes):
         if line.startswith('track'):
             continue
         if line.startswith('fixedStep'):
+            count += 1
             if not firstpass:
-                count += 1
+                ##this dumps the previous region into queue
                 put_assigned(map_queues,
                              MappingItem.Item(thismap, current_chromosome,
                                               position),
-                             worker_processes)
-                a = line.split()
-                t = a[1].split("=")
-                chromosome = t[1]
-                t = a[2].split("=")
-                position = int(t[1])
-                # print "chromosome and position (%s, %i)" % (chromosome, position)
-                # process array that you've built - send it to the map processor
-                thismap = []
-            # break string into components
-            # get chromosome name and position of map
+                             worker_processes)  
             else:
                 firstpass = False
+            #now look at current region
+            a = line.split()
+            t = a[1].split("=")
+            chromosome = t[1]
+            t = a[2].split("=")
+            position = int(t[1])
+            # print "chromosome and position (%s, %i)" % (chromosome, position)
+            # process array that you've built - send it to the map processor
+            thismap = []
+            # break string into components
+            # get chromosome name and position of map
+            
 
             if chromosome != current_chromosome:
-                print_queue.put("chromosome %s had %i regions of enrichment" % (current_chromosome, count))
+                if current_chromosome != None:
+                    print_queue.put("chromosome %s had %i regions of enrichment" % (current_chromosome, count-1))
+                    #count-1 since remove first 'fixedStep' of new chrom.
+                    count = 1 #to take into account the first 'fixedStep' line of new chrom.
                 current_chromosome = chromosome
-                count = 0
+                #count = 0
         else:
             thismap.append(float(line))
+    #endfor
     if len(thismap) > 0:
         put_assigned(map_queues, MappingItem.Item(thismap, current_chromosome, position), worker_processes)
     print_queue.put("chromosome %s had %i regions of enrichment" % (current_chromosome, count))
@@ -213,7 +232,8 @@ def main(PARAM):
 
         # launch thread to read and process the print queue'''
         # print_thread = PrintThread.StringWriter(print_queue)
-        print_thread = PrintThread.StringWriter(print_queue, "/home/afejes/temp/", "wavegenerator.txt", False, True)
+        #print_thread = PrintThread.StringWriter(print_queue, "/home/afejes/temp/", "wavegenerator.txt", False, True)
+        print_thread = PrintThread.StringWriter(print_queue, PARAM.get_parameter("output_path"), PARAM.get_parameter("file_name")+"_wavegenerator.txt", False, True)
         print_queue.put("Print queue and thread have started")
 
 
@@ -337,11 +357,34 @@ def main(PARAM):
         print "Shutdown complete"
 
 if __name__ == "__main__":
+    '''
     if len(sys.argv) > 0 :
         for arg in sys.argv:
             print arg
     # sys.argv[1] must provide the file name of the input file.
+    '''
+       
+    if len(sys.argv) <= 1 :
+        print "USAGE: python TheWaveGenerator.py param.file [input_file [output_path]]"
+        
+        sys.exit()
 
     param = create_param_obj(sys.argv[1])
+    
+    #override parameter file with cmdline args
+    if len(sys.argv) >= 3 :
+        param.set_parameter("input_file", sys.argv[2]) #override input_file
+        #set file_name in param to be based on input file.
+        ofile = StringUtils.rreplace(os.path.basename(sys.argv[2]), '.wig', '', 1)
+        param.set_parameter("file_name", ofile) #override output file_name (.waves gets added later)
+    if len(sys.argv) == 4 :
+        param.set_parameter("output_path", sys.argv[3]) #override output_path
+        
+    print "param file: ",sys.argv[1]
+    print "input_file: ",param.get_parameter("input_file")
+    print "output_path: ",param.get_parameter("output_path")
+    print "output_file_name: ",param.get_parameter("file_name")
+    
+        
     main(param)
 
