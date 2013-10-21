@@ -90,6 +90,7 @@ class Plot(object):
             self.elements.append(Message)
 
         tail = 1
+        first = True
 
         # create path objects for each peak
         heights = []
@@ -122,15 +123,20 @@ class Plot(object):
             for i in range(2, len(X)):
                 d += (" " + str(X[i]) + "," + str(Y[i]))
 
-            if sample_id not in samples_color :
-                sample_count += 1
-                samples_color[sample_id] = self.colors[sample_count - 1]
 
-
-            self.elements.append(Path(stroke = samples_color[sample_id][0], stroke_width = 0.1,
+            if first:
+                print "palette.sample_color: ", self.palette.samples_color
+                first = False
+                if sample_id not in self.palette.samples_color:
+                    print "resetting sample colours - %s not found in palette.sample_color" % (sample_id)
+                    self.palette.set_colors_dict({}, {})
+            sample_color = self.palette.colour_assignment_group(sample_id)
+            point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color)
+            self.elements.append(point)
+            self.elements.append(Path(stroke = sample_color, stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
-                           fill = samples_color[sample_id][1], fill_opacity = 0.5, d = d))
-        self.samples_color = samples_color
+                           fill = sample_color, fill_opacity = 0.5, d = d))
+        self.samples_color = sample_color
 
     def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
         '''convert this information into elements of the svg image'''
