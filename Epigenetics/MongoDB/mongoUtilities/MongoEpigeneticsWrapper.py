@@ -190,7 +190,7 @@ class MongoEpigeneticsWrapper():
         for doc in samplesdocs:
             sample_id = str(doc['_id'])
             if self.database == 'yeast_epigenetics':
-                doc_chip = str(doc['type (ip, mock, input)'])
+                doc_chip = str(doc['type'])
             else:
                 doc_chip = str(doc['chip'])
             if doc_chip == chip or chip is None or chip == "All":
