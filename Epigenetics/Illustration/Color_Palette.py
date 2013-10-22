@@ -3,9 +3,6 @@ Created on 2013-07-11
 
 @author: sperez
 '''
-import types
-import ast
-import json
 
 class ColorPalette():
     '''
@@ -98,15 +95,9 @@ class ColorPalette():
 
     def set_colors_dict(self, types_index, samples):
         '''return the list of colour/sample mappings'''
-        if type(samples) is types.DictionaryType:
-            self.samples_color = samples
-        else:
-            self.samples_color = samples
+        self.samples_color = samples
+        self.types_color = types_index
 
-        if type(types_index) is types.DictionaryType:
-            self.types_color = types_index
-        else:
-            self.types_color = types_index
 
 
 

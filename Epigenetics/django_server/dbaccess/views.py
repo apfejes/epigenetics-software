@@ -10,10 +10,7 @@ from django.shortcuts import render
 
 from pymongo.mongo_client import MongoClient
 import os, sys
-import json
 import ast
-import types
-from django.utils import simplejson
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(os.path.dirname(_cur_dir))
@@ -82,6 +79,8 @@ def process_request(request):
 
     p = {}    # parameters obtained
 
+    print "q =", q
+
     p['organism'] = str(q.get("organism", "human"))
     p['collection'] = q.get("collection", "methylation")
     p['chipseq'] = q.get("chipseq", None)    # list of chip seq samples available
@@ -91,18 +90,13 @@ def process_request(request):
     p['cpg'] = to_boolean(q.get("cpg", False))
     p['show_dist'] = to_boolean(q.get("show_dist", False))
     p['datapoints'] = to_boolean(q.get("datapoints", True))
-    
-    si = q.get("sample_index", '{}')
-    print "sample index 1:", si
-    #p['sample_index'] = ast.literal_eval(si)
-    if si is not types.DictionaryType:
-        print "Not dictionary - sample_index"
-        p['sample_index'] = ast.literal_eval('%s' % si.strip())
-    t = q.get("types_index", '{}')
-    print "types_index: ", t
-    p['types_index'] = ast.literal_eval('%s' % t.strip())
+    p['sample_index'] = ast.literal_eval(str(q.get("sample_index", '{}')))
+    p['types_index'] = ast.literal_eval(str(q.get("types_index", '{}')))
     p['width'] = int(q.get("width", 1000)) - 100    # width of screen minus 100
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
+
+    print "sample_index from GET/POST:", p['sample_index']
+
 
     start = q.get("start", None)
     if start is None or start == '' or start == True:
@@ -201,8 +195,8 @@ def view_query_form(request):
                            get_cpg = parameters['cpg'],
                            show_points = parameters['datapoints'],
                            show_dist = parameters['show_dist'],
-                           types_index = json.dumps(parameters['types_index']),
-                           sample_index = json.dumps(parameters['sample_index']))
+                           types_index = parameters['types_index'],
+                           sample_index = parameters['sample_index'])
 
 
         elif peaks and not methylation:
@@ -220,7 +214,8 @@ def view_query_form(request):
                             width = parameters['width'],
                             get_tss = parameters['tss'],
                             get_cpg = parameters['cpg'],
-                            sample_index = json.dumps(parameters['sample_index']))
+                            types_index = parameters['types_index'],
+                            sample_index = parameters['sample_index'])
 
         elif methylation and peaks:
             docs = m.query(parameters)
@@ -237,10 +232,10 @@ def view_query_form(request):
                             width = parameters['width'],
                             get_tss = parameters['tss'],
                             get_cpg = parameters['cpg'],
-                            sample_index = json.dumps(parameters['sample_index']),
+                            sample_index = parameters['sample_index'],
                             show_points = parameters['datapoints'],
                             show_dist = parameters['show_dist'],
-                            types_index = json.dumps(parameters['types_index']),)
+                            types_index = parameters['types_index'])
 
     return render(request, 'query_form.jade', {'organism_list':organism_list, 'project_list':project_list,
                                                'collection_list':collection_list,
