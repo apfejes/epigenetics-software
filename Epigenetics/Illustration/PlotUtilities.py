@@ -105,14 +105,14 @@ def add_cpg(annotations, margin, height, width, scale_x, start, end, bottom_marg
 
     # elements.append(Text("High Density CpG Island", insert = (width - right_margin + medfont*3, height - bottom_margin + medfont*2), fill = legend_color, font_size = medfont, fill_opacity = 0.8))
     # elements.append(Text("Intermediate Density CpG Island", insert = (width - right_margin + medfont*3, height - bottom_margin + medfont*4), fill = legend_color, font_size = medfont, fill_opacity = 0.8))
-    elements.append(Rect(insert = (width - right_margin + medfont, height - bottom_margin + medfont),
-                       size = (medfont, medfont),
-                       fill = color_high,
-                       fill_opacity = 0.3))
-
-    elements.append(Rect(insert = (width - right_margin + medfont, height - bottom_margin + medfont * 3),
-                       size = (medfont, medfont),
-                       fill = color_low,
-                       fill_opacity = 0.3))
+#     elements.append(Rect(insert = (width - right_margin + medfont, height - bottom_margin + medfont),
+#                        size = (medfont, medfont),
+#                        fill = color_high,
+#                        fill_opacity = 0.3))
+#
+#     elements.append(Rect(insert = (width - right_margin + medfont, height - bottom_margin + medfont * 3),
+#                        size = (medfont, medfont),
+#                        fill = color_low,
+#                        fill_opacity = 0.3))
 
     return elements
