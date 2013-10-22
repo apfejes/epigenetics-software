@@ -11,6 +11,9 @@ from django.shortcuts import render
 from pymongo.mongo_client import MongoClient
 import os, sys
 import json
+import ast
+import types
+from django.utils import simplejson
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(os.path.dirname(_cur_dir))
@@ -88,8 +91,16 @@ def process_request(request):
     p['cpg'] = to_boolean(q.get("cpg", False))
     p['show_dist'] = to_boolean(q.get("show_dist", False))
     p['datapoints'] = to_boolean(q.get("datapoints", True))
-    p['sample_index'] = q.get("sample_index", None)
-    p['types_index'] = q.get("types_index", None)
+    
+    si = q.get("sample_index", '{}')
+    print "sample index 1:", si
+    #p['sample_index'] = ast.literal_eval(si)
+    if si is not types.DictionaryType:
+        print "Not dictionary - sample_index"
+        p['sample_index'] = ast.literal_eval('%s' % si.strip())
+    t = q.get("types_index", '{}')
+    print "types_index: ", t
+    p['types_index'] = ast.literal_eval('%s' % t.strip())
     p['width'] = int(q.get("width", 1000)) - 100    # width of screen minus 100
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
 
@@ -198,6 +209,7 @@ def view_query_form(request):
             docs = m.query(parameters)
             if parameters['tss'] or parameters['cpg']:
                 m.getannotations(docs)
+            #print "DEBUG: parameters: ", parameters
             svg, sample_index, types_index = m.svg_builder.svg(to_string = True,
                             title = "%s Chip-Seq on %s (%i - %i)" %
                             (str.capitalize(parameters['organism']),

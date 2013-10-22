@@ -101,12 +101,12 @@ class ColorPalette():
         if type(samples) is types.DictionaryType:
             self.samples_color = samples
         else:
-            self.samples_color = ast.literal_eval(json.loads('%s' % samples))
+            self.samples_color = samples
 
         if type(types_index) is types.DictionaryType:
             self.types_color = types_index
         else:
-            self.types_color = ast.literal_eval(json.loads('%s' % types_index))
+            self.types_color = types_index
 
 
 

@@ -13,25 +13,25 @@ input_file = /home/afejes/git/Epigenetics/Epigenetics/testdata/011912_MKY6_FLAG.
 #-------------------------------------------------------------------------------
 # Single End Reads must be treated with an extension.  Use this to set the 
 # parameters for guiding the extension properties.
-map_type = Triangle
+#map_type = Triangle
 #
 # For weighted reads, in the Triangle distribution, start weighting at this 
 # position
-triangle_min = 200
+#triangle_min = 200
 #
 # For weighted reads, in the Triangle distribution, median weighting at this 
 # position
-triangle_median = 250
+#triangle_median = 250
 #
 # the maximum extension length of a single read for all extension types.
-fragment_length = 300
+#fragment_length = 300
 #
 # Smooth out the leading edge of a read, to prevent very bumpy maps.
-round_leading_edge = True
+#round_leading_edge = True
 #
 # maximum allowable length of a PET read.  Reads with ends longer than this 
 # distance will be discarded.
-max_pet_length = 2000
+#max_pet_length = 2000
 ################################################################################
 #
 # Wave calling options

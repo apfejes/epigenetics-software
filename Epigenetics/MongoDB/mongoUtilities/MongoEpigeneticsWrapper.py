@@ -189,8 +189,17 @@ class MongoEpigeneticsWrapper():
 
         for doc in samplesdocs:
             sample_id = str(doc['_id'])
+            #print "DEBUG: Looking at %s" % doc["_id"]
+            #print "DEBUG: doc[] is ", doc
+            #print "DEBUG: chip is: ", chip
             if self.database == 'yeast_epigenetics':
-                doc_chip = str(doc['type'])
+                doc_chip = str(doc['_id'])
+                '''
+                if "type" in doc: #if sample has a type:
+                    doc_chip = str(doc['type'])
+                else:
+                    doc_chip = None
+                '''
             else:
                 doc_chip = str(doc['chip'])
             if doc_chip == chip or chip is None or chip == "All":
@@ -256,7 +265,7 @@ class MongoEpigeneticsWrapper():
             return {}
         collection = 'samples'
         query_parameters = {}    # This dictionary will store all the query parameters
-        return_chr = {'_id': True, 'sampleid':True}
+        return_chr = {'_id': True, 'file_name':True}
 
         print "finddocs_samples_chipseq, chip =  %s" % chip
 
@@ -265,13 +274,13 @@ class MongoEpigeneticsWrapper():
             if chip == "All":
                 query_parameters['haswaves'] = True
                 if self.database == 'yeast_epigenetics':
-                    return_chr["type  (ip, mock, input)"] = True
+                    return_chr["type"] = True
                 else:
                     return_chr["chip"] = True
             else:
                 if self.database == 'yeast_epigenetics':
-                    query_parameters["type  (ip, mock, input)"] = chip
-                    return_chr["type  (ip, mock, input)"] = True
+                    query_parameters["type"] = chip
+                    return_chr["type"] = True
                 else:
                     query_parameters["chip"] = chip
                     return_chr["chip"] = True
