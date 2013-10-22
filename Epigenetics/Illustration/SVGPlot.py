@@ -89,11 +89,14 @@ class Plot(object):
                     fill = "black", font_size = bigfont * 2)
             self.elements.append(Message)
 
-        #tail = 1
+        # tail = 1
         first = True
 
         # create path objects for each peak
         heights = []
+        if not waves:
+            return
+
         for (pos, height, stddev, sample_id) in waves:
             heights.append(height)
         self.maxh = max(heights)
@@ -101,7 +104,7 @@ class Plot(object):
         print "scale_y: ", self.scale_y
         for (pos, height, stddev, sample_id) in waves:
 
-            ##TODO: Remove makegaussian_horizonal function, no longer needed.
+            # #TODO: Remove makegaussian_horizonal function, no longer needed.
             '''
             X, Y = self.makegaussian_horizontal(self.start, self.end, pos, tail, self.start, float(height), stddev)
             # print "X: ", X
@@ -128,21 +131,21 @@ class Plot(object):
             for i in range(2, len(X)):
                 d += (" " + str(X[i]) + "," + str(Y[i]))
             '''
-            #path points will be at (-3stddev,0), (0,height), (3stddev,0)
-            #Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
-            X = [-3*stddev,-1*stddev,-1*stddev,0,stddev,stddev,3*stddev]
-            Y = [0,0,height,height,height,0,0]
+            # path points will be at (-3stddev,0), (0,height), (3stddev,0)
+            # Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
+            X = [-3 * stddev, -1 * stddev, -1 * stddev, 0, stddev, stddev, 3 * stddev]
+            Y = [0, 0, height, height, height, 0, 0]
             X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
             # Scale Y and inverse the coordinates
             Y = [round(y * self.scale_y, 2) for y in Y]
             Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
-            d = "M " + str(X[0]) + "," + str(Y[0]) + " C" #point 1
-            for i in range(1,7):
+            d = "M " + str(X[0]) + "," + str(Y[0]) + " C"    # point 1
+            for i in range(1, 7):
                 d += " " + str(X[i]) + "," + str(Y[i])
-            
-            #print "d is: ", d
-            
-            
+
+            # print "d is: ", d
+
+
 
             if first:
                 print "palette.sample_color: ", self.palette.samples_color
@@ -154,9 +157,11 @@ class Plot(object):
             self.elements.append(Path(stroke = types_color, stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
                            fill = types_color, fill_opacity = 0.5, d = d))
-        #fix to truncate curves at border (to hide them)
-        self.elements.append(Rect(insert = (-1,0), size = (31,520), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
-        self.elements.append(Rect(insert = (self.width-239,0), size = (250,520), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
+
+        # fix to truncate curves at border (to hide them)
+        self.elements.append(Rect(insert = (-1, 0), size = (31, 520), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
+        self.elements.append(Rect(insert = (self.width - 239, 0), size = (250, 520), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
+
 
     def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
         '''convert this information into elements of the svg image'''
@@ -315,16 +320,16 @@ class Plot(object):
         '''
         print "self.maxh is: ", self.maxh
         print "ceil: ", ceil(self.maxh)
-        steps = round(self.maxh/5,1)
-        print "steps: ",steps
-        labels = [0,steps,2*steps, 3*steps, 4*steps, 5*steps]
-        #ytics = [round(self.height - self.BOTTOM_MARGIN - y * self.scale_y, 3) for y in labels]
+        steps = round(self.maxh / 5, 1)
+        print "steps: ", steps
+        labels = [0, steps, 2 * steps, 3 * steps, 4 * steps, 5 * steps]
+        # ytics = [round(self.height - self.BOTTOM_MARGIN - y * self.scale_y, 3) for y in labels]
         print "height: ", self.height
         print "dimy: ", self.dimension_y
         print "bottommarg: ", self.BOTTOM_MARGIN
-        ytics = [round(self.height-self.BOTTOM_MARGIN-(self.dimension_y/5*y),3) for y in range(0,6)]
+        ytics = [round(self.height - self.BOTTOM_MARGIN - (self.dimension_y / 5 * y), 3) for y in range(0, 6)]
         print "ytics: ", ytics
-        #ytics = [round((self.height - self.dimension_y) - (y * self.dimension_y), 3) for y in labels]
+        # ytics = [round((self.height - self.dimension_y) - (y * self.dimension_y), 3) for y in labels]
         spacing = (ytics[0] - ytics[1]) / 2
         for tic, label in zip(ytics, labels):
             ticline = Rect(insert = (self.MARGIN - 2, tic), size = (5, 1), fill = legend_color)
@@ -362,7 +367,7 @@ class Plot(object):
                 tic_x = tic_x + 2
             ticmarker = (Text(label, insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
             self.elements.append(ticline)
-            #self.elements.append(ticline2)
+            # self.elements.append(ticline2)
             self.elements.append(ticmarker)
 
     @staticmethod
