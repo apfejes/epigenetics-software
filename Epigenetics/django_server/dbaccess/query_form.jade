@@ -10,7 +10,7 @@ body
         h1 Query Human Epigenetics Database
     
     #wrapper
-        form(action='/dbaccess/query_form/',method='post')
+        form(name="main", action='/dbaccess/query_form/', method='post')
             input(type="hidden", id="width", name="width", value = "")
             input(type="hidden", id="height", name="height", value = "")
             input(type="hidden", id="sample_index", name="sample_index", value = sample_index)
@@ -164,8 +164,8 @@ script(type='text/javascript')
       base += "&show_dist=" + show_dist
       base += "&width=" + window.innerWidth
       base += "&height=" + window.innerHeight
-      base += "&type_index=" + types_index.value
-      base += "&sample_index=" + sample_index.value
+      base += "&type_index=" + JSON.stringify(document.forms.main.types_index.value)
+      base += "&sample_index=" + JSON.stringify(document.forms.main.sample_index.value)
       
       return base
     }

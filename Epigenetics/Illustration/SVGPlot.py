@@ -99,8 +99,6 @@ class Plot(object):
         self.maxh = max(heights)
         self.scale_y = self.dimension_y / self.maxh
 
-        sample_count = 0
-        samples_color = {}
         for (pos, height, stddev, sample_id) in waves:
             # print "    Peak", pos, height, stddev
             X, Y = self.makegaussian_horizontal(self.start, self.end, pos, tail, self.start, float(height), stddev)
@@ -136,7 +134,6 @@ class Plot(object):
             self.elements.append(Path(stroke = sample_color, stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
                            fill = sample_color, fill_opacity = 0.5, d = d))
-        self.samples_color = sample_color
 
     def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
         '''convert this information into elements of the svg image'''

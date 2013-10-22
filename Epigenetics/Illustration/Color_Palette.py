@@ -6,6 +6,7 @@ Created on 2013-07-11
 import types
 import ast
 import json
+from PIL.TiffTags import TYPES
 
 class ColorPalette():
     '''
@@ -98,15 +99,8 @@ class ColorPalette():
 
     def set_colors_dict(self, types_index, samples):
         '''return the list of colour/sample mappings'''
-        if type(samples) is types.DictionaryType:
-            self.samples_color = samples
-        else:
-            self.samples_color = ast.literal_eval(json.loads('%s' % samples))
-
-        if type(types_index) is types.DictionaryType:
-            self.types_color = types_index
-        else:
-            self.types_color = ast.literal_eval(json.loads('%s' % types_index))
+        self.samples_color = samples
+        self.types_color = types_index
 
 
 
