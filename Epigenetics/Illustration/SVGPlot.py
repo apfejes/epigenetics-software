@@ -8,7 +8,7 @@ from svgwrite.shapes import Rect, Circle
 from svgwrite.text import Text
 from svgwrite.drawing import Drawing
 from svgwrite.path import Path
-from math import fabs, exp, sqrt, log
+from math import fabs, exp, sqrt, log, ceil
 import Color_Palette
 from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, smallfont, legend_color
 # from PlotUtilities import medfont
@@ -98,7 +98,7 @@ class Plot(object):
             heights.append(height)
         self.maxh = max(heights)
         self.scale_y = self.dimension_y / self.maxh
-
+        print "scale_y: ", self.scale_y
         for (pos, height, stddev, sample_id) in waves:
 
             ##TODO: Remove makegaussian_horizonal function, no longer needed.
@@ -139,9 +139,6 @@ class Plot(object):
             d = "M " + str(X[0]) + "," + str(Y[0]) + " C" #point 1
             for i in range(1,7):
                 d += " " + str(X[i]) + "," + str(Y[i])
-
-            
-            
             
             #print "d is: ", d
             
@@ -159,7 +156,7 @@ class Plot(object):
                            fill = types_color, fill_opacity = 0.5, d = d))
         #fix to truncate curves at border (to hide them)
         self.elements.append(Rect(insert = (0,0), size = (30,520), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
-        self.elements.append(Rect(insert = (1199,0), size = (250,520), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
+        self.elements.append(Rect(insert = (self.width-239,0), size = (250,520), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
 
     def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
         '''convert this information into elements of the svg image'''
@@ -272,7 +269,7 @@ class Plot(object):
             self.add_xtics()
 
             # TODO: Have both of these run, depending on which data is present
-            # self.add_ytics_chipseq()
+            self.add_ytics_chipseq()
             self.add_ytics_methylation()
 
             # self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
@@ -311,12 +308,25 @@ class Plot(object):
 
     def add_ytics_chipseq(self):
         ''' Add Y ticks to the svg plot '''
+        '''
         scale_tics = 64
         labels = [i for i in range(0, int(self.maxh) + 1, scale_tics)]
         while len(labels) < 4:
             scale_tics /= 2
             labels += [i for i in range(0, int(self.maxh) + 1, scale_tics) if i not in labels]
-        ytics = [round(self.height - self.BOTTOM_MARGIN - y * self.scale_y, 3) for y in labels]
+        '''
+        print "self.maxh is: ", self.maxh
+        print "ceil: ", ceil(self.maxh)
+        steps = round(self.maxh/5,2)
+        print "steps: ",steps
+        labels = [0,steps,2*steps, 3*steps, 4*steps, 5*steps]
+        #ytics = [round(self.height - self.BOTTOM_MARGIN - y * self.scale_y, 3) for y in labels]
+        print "height: ", self.height
+        print "dimy: ", self.dimension_y
+        print "bottommarg: ", self.BOTTOM_MARGIN
+        ytics = [round(self.height-self.BOTTOM_MARGIN-(self.dimension_y/5*y),3) for y in range(0,6)]
+        print "ytics: ", ytics
+        #ytics = [round((self.height - self.dimension_y) - (y * self.dimension_y), 3) for y in labels]
         spacing = (ytics[0] - ytics[1]) / 2
         for tic, label in zip(ytics, labels):
             ticline = Rect(insert = (self.MARGIN - 2, tic), size = (5, 1), fill = legend_color)
@@ -340,11 +350,11 @@ class Plot(object):
         spacing = (ytics[0] - ytics[1]) / 2
         for tic, label in zip(ytics, labels):
 
-            ticline = Rect(insert = (self.MARGIN - 2, tic), size = (5, 1), fill = legend_color)
+            ticline = Rect(insert = (self.width - 242, tic), size = (5, 1), fill = legend_color)
             if tic - spacing > self.MARGIN:
-                ticline2 = Rect(insert = (self.MARGIN - 2, tic - spacing), size = (2, 1), fill = legend_color)
+                ticline2 = Rect(insert = (self.width - 239, tic - spacing), size = (2, 1), fill = legend_color)
                 self.elements.append(ticline2)
-            tic_x = self.MARGIN - smallfont * 2
+            tic_x = self.width - 245 + smallfont * 2
             tic_y = tic + 1
             if len(str(label)) == 1:
                 tic_x = tic_x + 3
@@ -352,7 +362,7 @@ class Plot(object):
                 tic_x = tic_x + 2
             ticmarker = (Text(label, insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
             self.elements.append(ticline)
-            self.elements.append(ticline2)
+            #self.elements.append(ticline2)
             self.elements.append(ticmarker)
 
     @staticmethod
