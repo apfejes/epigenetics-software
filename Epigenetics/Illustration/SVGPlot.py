@@ -100,14 +100,14 @@ class Plot(object):
         self.scale_y = self.dimension_y / self.maxh
 
         for (pos, height, stddev, sample_id) in waves:
-            #for each wave:
-            print "    Peak", pos, height, stddev
+
+
             '''
             X, Y = self.makegaussian_horizontal(self.start, self.end, pos, tail, self.start, float(height), stddev)
-            print "X: ", X
-            print "Y: ", Y
+            # print "X: ", X
+            # print "Y: ", Y
             X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
-            #TODO: This is not the right fix for this bug! Occurs when peak is outside region.
+            # TODO: This is not the right fix for this bug! Occurs when peak is outside region.
             if len(X) < 2 :
                 continue
             for x in X:    # Adjust peaks on the edge of the plotting area so they don't look skewed.
@@ -144,13 +144,13 @@ class Plot(object):
             if first:
                 print "palette.sample_color: ", self.palette.samples_color
                 first = False
-                if sample_id not in self.palette.samples_color:
+                if sample_id not in self.palette.types_color:
                     print "resetting sample colours - %s not found in palette.sample_color" % (sample_id)
                     self.palette.set_colors_dict({}, {})
-            sample_color = self.palette.colour_assignment_group(sample_id)
-            self.elements.append(Path(stroke = sample_color, stroke_width = 0.1,
+            types_color = self.palette.colour_assignment_group(sample_id)
+            self.elements.append(Path(stroke = types_color, stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
-                           fill = sample_color, fill_opacity = 0.5, d = d))
+                           fill = types_color, fill_opacity = 0.5, d = d))
 
     def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
         '''convert this information into elements of the svg image'''

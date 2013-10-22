@@ -82,7 +82,7 @@ body
               #selection_element
                 input(type='button',value = '>>>', title="Pan right 60%", name='MoreRight', onClick="window.open(newURL('MoreRight'),'_self');", class = "medbutton")
             #option_elements
-              if organism = 'human'
+              if organism == 'human'
                 #selection_element
                   label(for='tss') Tss:
                      if tss
@@ -104,10 +104,10 @@ body
                           input(id='datapoints', size = '8', type='checkbox', name="datapoints")
                 #selection_element
                   label(for='show_dist') Show sample type distribution:
-                      if show_dist
-                          input(id='show_dist', size = '8', type='checkbox', name="show_dist", checked)
-                      else
-                          input(id='show_dist', size = '8', type='checkbox', name="show_dist")
+                    if show_dist
+                      input(id='show_dist', size = '8', type='checkbox', name="show_dist", checked)
+                    else
+                      input(id='show_dist', size = '8', type='checkbox', name="show_dist")
          #left
            |!{plot}
          #right
@@ -147,9 +147,13 @@ script(type='text/javascript')
       var e = document.getElementById("cpg");
       var cpg = e.checked;
       var e = document.getElementById("datapoints");
-      var datapoints = e.checked;
+      if (e) {
+        var datapoints = e.checked;
+      }
       var e = document.getElementById("show_dist");
-      var show_dist = e.checked;
+      if (e) {
+        var show_dist = e.checked;
+      }
       
       base += "?chromosome=" + chromosome.value
       base += "&start=" + start.value
@@ -160,8 +164,12 @@ script(type='text/javascript')
       base += "&action=" + action
       base += "&tss=" + tss
       base += "&cpg=" + cpg
-      base += "&datapoints=" + datapoints
-      base += "&show_dist=" + show_dist
+      if (datapoints) {
+        base += "&datapoints=" + datapoints
+      }
+      if (show_dist) {
+        base += "&show_dist=" + show_dist
+      }
       base += "&width=" + window.innerWidth
       base += "&height=" + window.innerHeight
       base += "&types_index=" + encodeURIComponent(document.forms.main.types_index.value)
