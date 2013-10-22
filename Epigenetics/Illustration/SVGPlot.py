@@ -89,7 +89,7 @@ class Plot(object):
                     fill = "black", font_size = bigfont * 2)
             self.elements.append(Message)
 
-        tail = 1
+        #tail = 1
         first = True
 
         # create path objects for each peak
@@ -101,7 +101,7 @@ class Plot(object):
 
         for (pos, height, stddev, sample_id) in waves:
 
-
+            ##TODO: Remove makegaussian_horizonal function, no longer needed.
             '''
             X, Y = self.makegaussian_horizontal(self.start, self.end, pos, tail, self.start, float(height), stddev)
             # print "X: ", X
@@ -130,14 +130,20 @@ class Plot(object):
             '''
             #path points will be at (-3stddev,0), (0,height), (3stddev,0)
             #Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
-            d = "M" + str(-3*stddev) + "," + str(0) + " C " #point 1
-            d+= str(-1*stddev) + "," + str(0) + " "         #control point 1
-            d+= str(-1*stddev) + "," + str(height) + " "    #control point 2
-            d+= str(0) + "," + str(height) + " "            #point 2
-            d+= str(stddev) + "," + str(height) + " "       #control point 3
-            d+= str(stddev) + "," + str(0) + " "            #control point 4
-            d+= str(3*stddev) + "," + str(0)                #point 3
+            X = [-3*stddev,-1*stddev,-1*stddev,0,stddev,stddev,3*stddev]
+            Y = [0,0,height,height,height,0,0]
+            X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
+            # Scale Y and inverse the coordinates
+            Y = [round(y * self.scale_y, 2) for y in Y]
+            Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
+            d = "M " + str(X[0]) + "," + str(Y[0]) + " C" #point 1
+            for i in range(1,7):
+                d += " " + str(X[i]) + "," + str(Y[i])
+
             
+            
+            
+            #print "d is: ", d
             
             
 
