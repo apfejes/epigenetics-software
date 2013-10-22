@@ -23,7 +23,10 @@ def get_axis(width, margin, height, bottom_margin, right_margin):
     y_axis = Rect(insert = (margin, margin),
         size = (1, height - (margin + bottom_margin)),    # viewing area is the height, minus the top margin and bottom margin.
         fill = legend_color)
-    return (x_axis, y_axis)
+    y_axis2 = Rect(insert = (width-right_margin, margin),
+        size = (1, height - (margin + bottom_margin)),    # viewing area is the height, minus the top margin and bottom margin.
+        fill = legend_color)
+    return (x_axis, y_axis, y_axis2)
 
 
 def add_tss(annotations, margin, height, scale_x, offset_x, bottom_margin):
