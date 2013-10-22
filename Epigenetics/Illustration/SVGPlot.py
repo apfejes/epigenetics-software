@@ -309,13 +309,7 @@ class Plot(object):
 
     def add_ytics_chipseq(self):
         ''' Add Y ticks to the svg plot '''
-        '''
-        scale_tics = 64
-        labels = [i for i in range(0, int(self.maxh) + 1, scale_tics)]
-        while len(labels) < 4:
-            scale_tics /= 2
-            labels += [i for i in range(0, int(self.maxh) + 1, scale_tics) if i not in labels]
-        '''
+
         steps = round(self.maxh / 5, 1)
         labels = [0, steps, 2 * steps, 3 * steps, 4 * steps, 5 * steps]
         ytics = [round(self.height - self.BOTTOM_MARGIN - (self.dimension_y / 5 * y), 3) for y in range(0, 6)]
