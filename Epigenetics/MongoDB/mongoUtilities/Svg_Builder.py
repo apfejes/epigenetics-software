@@ -57,11 +57,16 @@ class Svg_Builder():
         if types_index:    # if types index, assume types and sample index both need to be restored to preserve colours.
             self.drawing.set_sample_index(types_index, sample_index)
 
-        if self.methylation:
-            self.drawing.build_methylation(self.error_message, self.pos_betas_dict, self.sample_peaks, show_points, show_dist)
-
+        ##NOTE: Peaks must go before methylation, otherwise white boxes cover methylation labels.
         if self.peaks:    # information about waves is already pushed by MEW.
             self.drawing.build_chipseq(self.error_message, self.waves)
+            self.drawing.add_ytics_chipseq()
+
+        if self.methylation:
+            self.drawing.build_methylation(self.error_message, self.pos_betas_dict, self.sample_peaks, show_points, show_dist)
+            self.drawing.add_ytics_methylation()
+
+
 
 
         # TODO: Insert error handling here, if methylation and no methylation data, drop out
