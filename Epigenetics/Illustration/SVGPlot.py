@@ -157,6 +157,9 @@ class Plot(object):
             self.elements.append(Path(stroke = types_color, stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
                            fill = types_color, fill_opacity = 0.5, d = d))
+        #fix to truncate curves at border (to hide them)
+        self.elements.append(Rect(insert = (0,0), size = (30,520), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
+        self.elements.append(Rect(insert = (1199,0), size = (250,520), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
 
     def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
         '''convert this information into elements of the svg image'''
