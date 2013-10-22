@@ -109,15 +109,15 @@ def process_request(request):
     elif end > start:
         end = int(end)
 
-    if end < start + 20:
-        end = start + 20
-
     action_factor = q.get("action", None)    # don't save the "action factor" parameter.
     if action_factor and (start >= 0) and (end >= 0):
         if 'Right' in action_factor or 'Left' in action_factor:
             start, end = panning(action_factor, int(start), int(end))
         elif 'In' in action_factor or 'Out' in action_factor:
-            start, end = zoom(action_factor, int(start), int(end))
+                start, end = zoom(action_factor, int(start), int(end))
+
+    if end < start + 20:    # last chance to catch if you've zoomed in too far.
+        end = start + 20
 
     p['start'] = start
     p['end'] = end
