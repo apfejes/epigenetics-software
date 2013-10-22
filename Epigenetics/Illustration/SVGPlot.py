@@ -8,7 +8,7 @@ from svgwrite.shapes import Rect, Circle
 from svgwrite.text import Text
 from svgwrite.drawing import Drawing
 from svgwrite.path import Path
-from math import fabs, exp, sqrt, log, ceil
+from math import fabs, exp, sqrt, log
 import Color_Palette
 from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, smallfont, legend_color
 # from PlotUtilities import medfont
@@ -103,8 +103,6 @@ class Plot(object):
         self.scale_y = self.dimension_y / self.maxh
         print "scale_y: ", self.scale_y
         for (pos, height, stddev, sample_id) in waves:
-
-            # #TODO: Remove makegaussian_horizonal function, no longer needed.
             '''
             X, Y = self.makegaussian_horizontal(self.start, self.end, pos, tail, self.start, float(height), stddev)
             # print "X: ", X
@@ -318,18 +316,9 @@ class Plot(object):
             scale_tics /= 2
             labels += [i for i in range(0, int(self.maxh) + 1, scale_tics) if i not in labels]
         '''
-        print "self.maxh is: ", self.maxh
-        print "ceil: ", ceil(self.maxh)
         steps = round(self.maxh / 5, 1)
-        print "steps: ", steps
         labels = [0, steps, 2 * steps, 3 * steps, 4 * steps, 5 * steps]
-        # ytics = [round(self.height - self.BOTTOM_MARGIN - y * self.scale_y, 3) for y in labels]
-        print "height: ", self.height
-        print "dimy: ", self.dimension_y
-        print "bottommarg: ", self.BOTTOM_MARGIN
         ytics = [round(self.height - self.BOTTOM_MARGIN - (self.dimension_y / 5 * y), 3) for y in range(0, 6)]
-        print "ytics: ", ytics
-        # ytics = [round((self.height - self.dimension_y) - (y * self.dimension_y), 3) for y in labels]
         spacing = (ytics[0] - ytics[1]) / 2
         for tic, label in zip(ytics, labels):
             ticline = Rect(insert = (self.MARGIN - 2, tic), size = (5, 1), fill = legend_color)
@@ -370,6 +359,7 @@ class Plot(object):
             # self.elements.append(ticline2)
             self.elements.append(ticmarker)
 
+    """this function no longer used
     @staticmethod
     def makegaussian_horizontal(start, end, pos, tail, offset, innerheight, stddev):
         ''' create gausian distributions on the plot '''
@@ -393,6 +383,7 @@ class Plot(object):
         stddev = float(stddev)
         Y = [round(innerheight * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
         return X, Y
+    """
 
     @staticmethod
     def makegaussian_vertical(stddev, innerheight):
