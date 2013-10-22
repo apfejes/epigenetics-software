@@ -1,7 +1,7 @@
 '''
 Created on 2013-06-10
 
-@author: sperez
+@author: sperez, sbrown
 '''
 
 from svgwrite.shapes import Rect, Circle
