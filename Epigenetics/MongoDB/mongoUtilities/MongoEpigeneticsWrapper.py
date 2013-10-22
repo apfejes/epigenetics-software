@@ -189,17 +189,8 @@ class MongoEpigeneticsWrapper():
 
         for doc in samplesdocs:
             sample_id = str(doc['_id'])
-            #print "DEBUG: Looking at %s" % doc["_id"]
-            #print "DEBUG: doc[] is ", doc
-            #print "DEBUG: chip is: ", chip
             if self.database == 'yeast_epigenetics':
-                doc_chip = str(doc['_id'])
-                '''
-                if "type" in doc: #if sample has a type:
-                    doc_chip = str(doc['type'])
-                else:
-                    doc_chip = None
-                '''
+                doc_chip = str(doc['_id'])    # TODO: Replace this with a sample name or other identifier from the db.
             else:
                 doc_chip = str(doc['chip'])
             if doc_chip == chip or chip is None or chip == "All":

@@ -83,8 +83,8 @@ def process_request(request):
 
     p['organism'] = str(q.get("organism", "human"))
     p['collection'] = q.get("collection", "methylation")
-    p['chipseq'] = q.get("chipseq", None)    # list of chip seq samples available
-    p['project'] = q.get('project', None)
+    p['chipseq'] = q.get("chipseq", "All")    # list of chip seq samples available
+    p['project'] = q.get('project', "All")
     p['chromosome'] = q.get("chromosome", None)
     p['tss'] = to_boolean(q.get("tss", False))
     p['cpg'] = to_boolean(q.get("cpg", False))
@@ -201,7 +201,7 @@ def view_query_form(request):
             docs = m.query(parameters)
             if parameters['tss'] or parameters['cpg']:
                 m.getannotations(docs)
-            #print "DEBUG: parameters: ", parameters
+            # print "DEBUG: parameters: ", parameters
             svg, sample_index, types_index = m.svg_builder.svg(to_string = True,
                             title = "%s Chip-Seq on %s (%i - %i)" %
                             (str.capitalize(parameters['organism']),
