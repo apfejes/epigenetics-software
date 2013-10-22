@@ -100,7 +100,9 @@ class Plot(object):
         self.scale_y = self.dimension_y / self.maxh
 
         for (pos, height, stddev, sample_id) in waves:
+            #for each wave:
             print "    Peak", pos, height, stddev
+            '''
             X, Y = self.makegaussian_horizontal(self.start, self.end, pos, tail, self.start, float(height), stddev)
             print "X: ", X
             print "Y: ", Y
@@ -125,7 +127,19 @@ class Plot(object):
             d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
             for i in range(2, len(X)):
                 d += (" " + str(X[i]) + "," + str(Y[i]))
-
+            '''
+            #path points will be at (-3stddev,0), (0,height), (3stddev,0)
+            #Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
+            d = "M" + str(-3*stddev) + "," + str(0) + " C " #point 1
+            d+= str(-1*stddev) + "," + str(0) + " "         #control point 1
+            d+= str(-1*stddev) + "," + str(height) + " "    #control point 2
+            d+= str(0) + "," + str(height) + " "            #point 2
+            d+= str(stddev) + "," + str(height) + " "       #control point 3
+            d+= str(stddev) + "," + str(0) + " "            #control point 4
+            d+= str(3*stddev) + "," + str(0)                #point 3
+            
+            
+            
 
             if first:
                 print "palette.sample_color: ", self.palette.samples_color
