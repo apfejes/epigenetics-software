@@ -143,9 +143,13 @@ script(type='text/javascript')
       var e = document.getElementById("project");
       var project = e.options[e.selectedIndex].value;
       var e = document.getElementById("tss");
-      var tss = e.checked;
+      if (e) {
+        var tss = e.checked;
+      }
       var e = document.getElementById("cpg");
-      var cpg = e.checked;
+      if (e) {
+        var cpg = e.checked;
+      }
       var e = document.getElementById("datapoints");
       if (e) {
         var datapoints = e.checked;
@@ -162,8 +166,12 @@ script(type='text/javascript')
       base += "&collection=" + collection
       base += "&project=" + project
       base += "&action=" + action
+      if (tss) {
       base += "&tss=" + tss
+      }
+      if (cpg) {
       base += "&cpg=" + cpg
+      }
       if (datapoints) {
         base += "&datapoints=" + datapoints
       }
