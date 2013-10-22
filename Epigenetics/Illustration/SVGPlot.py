@@ -268,9 +268,7 @@ class Plot(object):
         if self.message is None:
             self.add_xtics()
 
-            # TODO: Have both of these run, depending on which data is present
-            self.add_ytics_chipseq()
-            self.add_ytics_methylation()
+
 
             # self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
             if get_tss:
@@ -317,7 +315,7 @@ class Plot(object):
         '''
         print "self.maxh is: ", self.maxh
         print "ceil: ", ceil(self.maxh)
-        steps = round(self.maxh/5,2)
+        steps = round(self.maxh/5,1)
         print "steps: ",steps
         labels = [0,steps,2*steps, 3*steps, 4*steps, 5*steps]
         #ytics = [round(self.height - self.BOTTOM_MARGIN - y * self.scale_y, 3) for y in labels]
@@ -339,6 +337,8 @@ class Plot(object):
                 tic_x = tic_x + 3
             if len(str(label)) == 2:
                 tic_x = tic_x + 2
+            if len(str(label)) >= 3:
+                tic_x = tic_x - 10
             ticmarker = (Text(label, insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
             self.elements.append(ticline)
             self.elements.append(ticmarker)
