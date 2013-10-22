@@ -95,9 +95,6 @@ def process_request(request):
     p['width'] = int(q.get("width", 1000)) - 100    # width of screen minus 100
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
 
-    print "sample_index from GET/POST:", p['sample_index']
-
-
     start = q.get("start", None)
     if start is None or start == '' or start == True:
         start = 0
@@ -111,15 +108,16 @@ def process_request(request):
         end = start + 1
     elif end > start:
         end = int(end)
-    else:
-        end = start + 1
 
     action_factor = q.get("action", None)    # don't save the "action factor" parameter.
     if action_factor and (start >= 0) and (end >= 0):
         if 'Right' in action_factor or 'Left' in action_factor:
             start, end = panning(action_factor, int(start), int(end))
         elif 'In' in action_factor or 'Out' in action_factor:
-            start, end = zoom(action_factor, int(start), int(end))
+                start, end = zoom(action_factor, int(start), int(end))
+
+    if end < start + 20:    # last chance to catch if you've zoomed in too far.
+        end = start + 20
 
     p['start'] = start
     p['end'] = end

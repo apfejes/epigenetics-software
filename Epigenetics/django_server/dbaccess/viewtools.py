@@ -13,6 +13,9 @@ ZOOM_FACTORS = {'ZoomIn': 1.0 / 1.5, 'ZoomInMore': 1.0 / 3.0,
 PANNING_PERCENTS = {'LessRight':0.3, 'MoreRight':0.6,
                'LessLeft':-0.3, 'MoreLeft':-0.6}
 
+# if you're already zooming down to base pair resolution, don't go any further
+MINIMUM_RESOLUTION = 20
+
 
 def zoom(zoom_symbol, start, end):
     '''This code widens or narrows the window on each side by a zoom factor'''
@@ -20,6 +23,8 @@ def zoom(zoom_symbol, start, end):
     # Adjusts start and end value for new query
     # ex: zoomfactor = 0.1, start = 200, end = 300
     span = (end - start)    # span of 100bp
+    if span < MINIMUM_RESOLUTION:
+        return (start, end)
     zoom_factor = ZOOM_FACTORS[zoom_symbol]
     new_span = span * zoom_factor    # span is now 10bp
     new_start = start + span / 2 - new_span / 2    # start is now 245
