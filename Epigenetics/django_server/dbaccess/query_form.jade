@@ -164,8 +164,8 @@ script(type='text/javascript')
       base += "&show_dist=" + show_dist
       base += "&width=" + window.innerWidth
       base += "&height=" + window.innerHeight
-      base += "&type_index=" + JSON.stringify(document.forms.main.types_index.value)
-      base += "&sample_index=" + JSON.stringify(document.forms.main.sample_index.value)
+      base += "&types_index=" + encodeURIComponent(document.forms.main.types_index.value)
+      base += "&sample_index=" + encodeURIComponent(document.forms.main.sample_index.value)
       
       return base
     }
