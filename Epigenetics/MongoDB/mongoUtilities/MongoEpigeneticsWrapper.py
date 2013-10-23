@@ -120,7 +120,7 @@ class MongoEpigeneticsWrapper():
         if project == 'down syndrome':    # assign default groupby_name (previously name_sampgroup)
             groupby_name = 'sample_group'
         elif project == 'FASD':
-            groupby_name = 'samplegroup'
+            groupby_name = 'fasd'
         elif project == 'Kollman':
             groupby_name = 'sample_group'
         elif project == 'Anne Ellis':
@@ -189,9 +189,9 @@ class MongoEpigeneticsWrapper():
 
         for doc in samplesdocs:
             sample_id = str(doc['_id'])
-            #print "DEBUG: Looking at %s" % doc["_id"]
-            #print "DEBUG: doc[] is ", doc
-            #print "DEBUG: chip is: ", chip
+            # print "DEBUG: Looking at %s" % doc["_id"]
+            # print "DEBUG: doc[] is ", doc
+            # print "DEBUG: chip is: ", chip
             if self.database == 'yeast_epigenetics':
                 doc_chip = str(doc['_id'])
                 '''
