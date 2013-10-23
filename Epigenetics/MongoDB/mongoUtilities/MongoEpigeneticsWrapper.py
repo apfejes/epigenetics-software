@@ -251,13 +251,16 @@ class MongoEpigeneticsWrapper():
         if self.start and self.end:
             extension = 500    # extend the region of query to catch peaks with tails in the region
             query_parameters["pos"] = {"$lte":self.end + extension, "$gte":self.start - extension}
+        # TODO: pass minh to function from browser
+        minh = 4
+        if True:    # self.min_height
+            query_parameters["height"] = {"$gte":minh}
         return_chr = {'_id': False, 'pos': True,
                       'height': True, 'stddev': True,
                       'sample_id': True}
         sortby, sortorder = 'height', (-1)
-        # Will attempt to sort, will sort if not too large.
+        # Will attempt to sort, will sort if not too large. This logic is in runquery
         return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
-        # return self.runquery(collection, query_parameters, return_chr)
 
     def finddocs_samples_chipseq(self, chip):
 
