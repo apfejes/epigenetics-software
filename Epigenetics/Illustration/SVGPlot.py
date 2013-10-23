@@ -157,8 +157,8 @@ class Plot(object):
                            fill = types_color, fill_opacity = 0.5, d = d))
 
         # fix to truncate curves at border (to hide them)
-        self.elements.append(Rect(insert = (-1, 0), size = (31, 520), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
-        self.elements.append(Rect(insert = (self.width - 239, 0), size = (250, 520), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
+        self.elements.append(Rect(insert = (-1, 0), size = (self.MARGIN + 1, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
+        self.elements.append(Rect(insert = (self.width - 239, 0), size = (self.RIGHT_MARGIN, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
 
 
     def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
@@ -310,7 +310,7 @@ class Plot(object):
     def add_ytics_chipseq(self):
         ''' Add Y ticks to the svg plot '''
 
-        steps = round(self.maxh / 5, 1)
+        if self.maxh: steps = round(self.maxh / 5, 1)
         labels = [0, steps, 2 * steps, 3 * steps, 4 * steps, 5 * steps]
         ytics = [round(self.height - self.BOTTOM_MARGIN - (self.dimension_y / 5 * y), 3) for y in range(0, 6)]
         spacing = (ytics[0] - ytics[1]) / 2
