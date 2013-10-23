@@ -86,6 +86,7 @@ def process_request(request):
     p['chipseq'] = q.get("chipseq", "All")    # list of chip seq samples available
     p['project'] = q.get('project', "All")
     p['chromosome'] = q.get("chromosome", None)
+    p['minheight'] = q.get("minheight", None)
     p['tss'] = to_boolean(q.get("tss", False))
     p['cpg'] = to_boolean(q.get("cpg", False))
     p['show_dist'] = to_boolean(q.get("show_dist", False))
@@ -189,6 +190,7 @@ def view_query_form(request):
                            color = 'indigo',
                            height = parameters['height'],
                            width = parameters['width'],
+                           get_minheight = parameters['minheight'],
                            get_tss = parameters['tss'],
                            get_cpg = parameters['cpg'],
                            show_points = parameters['datapoints'],
@@ -210,6 +212,7 @@ def view_query_form(request):
                             color = 'indigo',
                             height = parameters['height'],
                             width = parameters['width'],
+                            get_minheight = parameters['minheight'],
                             get_tss = parameters['tss'],
                             get_cpg = parameters['cpg'],
                             types_index = parameters['types_index'],
@@ -228,6 +231,7 @@ def view_query_form(request):
                             color = 'indigo',
                             height = parameters['height'],
                             width = parameters['width'],
+                            get_minheight = parameters['minheight'],
                             get_tss = parameters['tss'],
                             get_cpg = parameters['cpg'],
                             sample_index = parameters['sample_index'],
@@ -235,7 +239,8 @@ def view_query_form(request):
                             show_dist = parameters['show_dist'],
                             types_index = parameters['types_index'])
 
-    return render(request, 'query_form.jade', {'organism_list':organism_list, 'project_list':project_list,
+    return render(request, 'query_form.jade', {'organism_list':organism_list,
+                                               'project_list':project_list,
                                                'collection_list':collection_list,
                                                'sample_index':sample_index,
                                                'types_index':types_index,
@@ -248,6 +253,7 @@ def view_query_form(request):
                                                'chromosome':parameters['chromosome'],
                                                'start':parameters['start'],
                                                'end':parameters['end'],
+                                               'minheight':parameters['minheight'],
                                                'tss':parameters['tss'],
                                                'cpg':parameters['cpg'],
                                                'datapoints': parameters['datapoints'],
