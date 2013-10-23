@@ -95,6 +95,12 @@ body
                           input(id='cpg', size = '8', type='checkbox', name="cpg", checked)
                       else
                           input(id='cpg', size = '8', type='checkbox', name="cpg")
+              if collection = 'chipseq' or collection = 'methchip'
+                label(for='minheight') Minimum peak height:
+                    if minheight
+                        input(id='minheight',size = '4', type='text', name='minheight', value = minheight)
+                    else
+                        input(id='minheight',size = '4', type='text', value='0', name='minheight')
               if collection = 'methylation' or collection = "methchip"
                 #selection_element
                   label(for='datapoints') Show data points:
@@ -142,6 +148,10 @@ script(type='text/javascript')
       var collection = e.options[e.selectedIndex].value;
       var e = document.getElementById("project");
       var project = e.options[e.selectedIndex].value;
+      var e = document.getElementById("minheight");
+      if (e) {
+        var minheight = e.options[e.selectedIndex].value;
+      }
       var e = document.getElementById("tss");
       if (e) {
         var tss = e.checked;
@@ -166,11 +176,14 @@ script(type='text/javascript')
       base += "&collection=" + collection
       base += "&project=" + project
       base += "&action=" + action
+      if (minheight) {
+        base += "&minheight=" + minheight
+      }
       if (tss) {
-      base += "&tss=" + tss
+        base += "&tss=" + tss
       }
       if (cpg) {
-      base += "&cpg=" + cpg
+        base += "&cpg=" + cpg
       }
       if (datapoints) {
         base += "&datapoints=" + datapoints
