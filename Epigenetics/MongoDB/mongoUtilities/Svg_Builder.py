@@ -37,6 +37,7 @@ class Svg_Builder():
             get_elements = False,
             height = 200.0,
             width = 60.0,
+            get_minheight = False,
             get_tss = False,
             get_cpg = False,
             show_points = False,
