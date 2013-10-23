@@ -193,7 +193,7 @@ class MongoEpigeneticsWrapper():
             # print "DEBUG: doc[] is ", doc
             # print "DEBUG: chip is: ", chip
             if self.database == 'yeast_epigenetics':
-                doc_chip = str(doc['_id'])
+                doc_chip = doc['sample_id'].encode('utf-8')    # using str() did not work.
                 '''
                 if "type" in doc: #if sample has a type:
                     doc_chip = str(doc['type'])
@@ -254,9 +254,10 @@ class MongoEpigeneticsWrapper():
         return_chr = {'_id': False, 'pos': True,
                       'height': True, 'stddev': True,
                       'sample_id': True}
-        # sortby, sortorder = 'height', (-1)
-        # return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
-        return self.runquery(collection, query_parameters, return_chr)
+        sortby, sortorder = 'height', (-1)
+        # Will attempt to sort, will sort if not too large.
+        return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
+        # return self.runquery(collection, query_parameters, return_chr)
 
     def finddocs_samples_chipseq(self, chip):
 
@@ -266,7 +267,7 @@ class MongoEpigeneticsWrapper():
             return {}
         collection = 'samples'
         query_parameters = {}    # This dictionary will store all the query parameters
-        return_chr = {'_id': True, 'file_name':True}
+        return_chr = {'_id': True, 'file_name':True, 'sample_id':True}
 
         print "finddocs_samples_chipseq, chip =  %s" % chip
 
@@ -345,7 +346,10 @@ class MongoEpigeneticsWrapper():
         # print "   From the database %s and collection %s" % (self.database, collection)
         # print "   Find(%s)" % (query_parameters)    # Get documents corresponding to query and sort by sorting parameter
         if sortby:
-            docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
+            if self.mongo.find(collection, query_parameters, return_chr).count() < 100000:
+                docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
+            else:
+                docs = self.mongo.find(collection, query_parameters, return_chr)
         else:
             docs = self.mongo.find(collection, query_parameters, return_chr)
 
