@@ -254,8 +254,9 @@ class MongoEpigeneticsWrapper():
         return_chr = {'_id': False, 'pos': True,
                       'height': True, 'stddev': True,
                       'sample_id': True}
-        sortby, sortorder = 'height', (-1)
-        return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
+        # sortby, sortorder = 'height', (-1)
+        # return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
+        return self.runquery(collection, query_parameters, return_chr)
 
     def finddocs_samples_chipseq(self, chip):
 
