@@ -140,6 +140,9 @@ def view_query_form(request):
     if parameters['height'] < 400:
         parameters['height'] = 400
 
+    if parameters['minheight'] == None:
+        parameters['minheight'] = 0
+
     db_list = [str(x) for x in mongo.database_names()]
     organism_list = []
     for f in db_list:
