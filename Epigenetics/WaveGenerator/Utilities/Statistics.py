@@ -33,7 +33,8 @@ class Kolmogorov_Smirnov(object):
         end = min(m1 + (4 * s1), m2 + (4 * s2))
 
         if start > end:
-            return (0.0, 0.0)
+            # return (0.0, 0.0)
+            return 0.0
 
         if m1 > m2:
             m1 = m1 - m2
@@ -50,7 +51,9 @@ class Kolmogorov_Smirnov(object):
         b4 = b2 * b2
         c2 = m1 * m1
         d2 = m2 * m2
-        term = (a4 * (-b2) * log(s2 / s1)) + (a2 * b4 * log(s2 / s1)) + (a2 * b2 * c2) - (2 * a2 * b2 * m1 * m2) + (a2 * b2 * d2)
+        # term = (a4 * (-b2) * log(s2 / s1)) + (a2 * b4 * log(s2 / s1)) + (a2 * b2 * c2) - (2 * a2 * b2 * m1 * m2) + (a2 * b2 * d2)
+        # either m1 or m2 will always be 0, can remove term, may speed up calculation
+        term = (a4 * (-b2) * log(s2 / s1)) + (a2 * b4 * log(s2 / s1)) + (a2 * b2 * c2) + (a2 * b2 * d2)
 
         if s1 == s2:
             x = (m1 + m2) / 2

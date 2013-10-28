@@ -51,6 +51,15 @@ class MongoUtilities(object):
             results.append("%s - %s" % (c['cell_line'], c['chip']))
         return results
 
+    def get_chip_chip_sample_names(self):
+        '''TODO:missing docstring'''
+        collection = "samples"
+        curs = self.mongo.find(collection, {"haswaves":{"$exists": True}}, {"sample_id": True}).sort("sample_id", 1)
+        results = []
+        for c in curs:
+            results.append("%s" % c['sample_id'])
+        return results
+
     def get_chromosome_names(self):
         '''TODO:missing docstring'''
         collection = "chromosomes"
@@ -60,13 +69,18 @@ class MongoUtilities(object):
             results.append(c['_id'])
         return results
 
-    def get_sample_id_from_name(self, name):
+    def get_sample_id_from_name(self, name, db):
         '''TODO:missing docstring'''
         collection = "samples"
         results = []
-        if " - " in name:
-            parts = name.split(" - ")
-        curs = self.mongo.find(collection, {"cell_line": parts[0], "chip": parts[1]}, {"_id": True})
+        if db == "yeast_epigenetics":
+            curs = self.mongo.find(collection, {"sample_id":name}, {"_id": True})
+        else:
+            # not sure if this works...
+            if " - " in name:
+                parts = name.split(" - ")
+            curs = self.mongo.find(collection, {"cell_line": parts[0], "chip": parts[1]}, {"_id": True})
+
         for c in curs:
             results.append(c['_id'])
         return results

@@ -1,7 +1,7 @@
 '''
 Created on 2013-04-15
 
-@author: afejes
+@author: afejes, sbrown
 '''
 
 
@@ -58,7 +58,7 @@ class WavePair():
 
 
     def to_string(self):
-        '''convet a wave pair to a string for printing.'''
+        '''convert a wave pair to a string for printing.'''
         return str(self.chromosome) + "\t" + str(self.pos1) + "\t" + \
             str(self.pos2) + "\t" + str(self.stddev1) + "\t" + \
             str(self.stddev2) + "\t" + str(self.ht1) + "\t" + \
@@ -70,21 +70,23 @@ class WavePair():
         return "Wavepair"
 
 
-def run():
+def run(output, db):
     '''Main module to run the compare'''
     # build mongo connection
     print "opening connection(s) to MongoDB..."
-    db_name = "human_epigenetics"
+    db_name = db
     mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
     util = common_utilities.MongoUtilities(mongo)    # get names of available samples
 
     print_queue = multiprocessing.Queue()
     # launch thread to read and process the print queue
-    print_thread = PrintThread.StringWriter(print_queue, "/home/afejes/temp/", "waves.txt", True, True)
+    print_thread = PrintThread.StringWriter(print_queue, output, "waves.txt", True, True)
 
     # ask user for name of sample
-
-    results = util.get_chip_seq_sample_names()
+    if db == "yeast_epigenetics":
+        results = util.get_chip_chip_sample_names()
+    else:
+        results = util.get_chip_seq_sample_names()
     s = [len(results)]
     c = 1
     for r in results:
@@ -92,45 +94,50 @@ def run():
         print ("%i. %s") % (c, r)
         c += 1
     print "here are the names of available samples: which one do you want to use as a sample?"
-    user_input = raw_input("enter the number(s). If using more than one, separate by a coma:")
 
+    user_input = raw_input("enter the number(s). If using more than one, separate by a comma: ")
     samples = []
     if "," in user_input:
         t = [int(o) for o in user_input.split(",")]
+        for y in t:
+            if y > c:
+                print "at least one of your input numbers is too big. Quitting"
+                sys.exit()
         for i in t:
             samples.append(s[i])
     else:
-        y = int(user_input)
-        if y > s[0]:
-            print "input number too big.  Quitting"
+        t = int(user_input)
+        if t > c:
+            print "your input number is too big. Quitting"
             sys.exit()
         samples.append(s[int(user_input)])
     print samples
     # ask user for name of control()
 
     # process s and samples.
-
-    results = util.get_chip_seq_sample_names()
-    s = [len(results)]
-    c = 1
-    for r in results:
-        s.append(r)
-        print ("%i. %s") % (c, r)
-        c += 1
-    print "here are the names of available samples: which one do you want to use as a control?"
-    user_input = raw_input("enter the number(s). If using more than one, separate by a coma:")
-
+    # no need to print samples out again...
+    # s = [len(results)]
+    # c = 1
+    # for r in results:
+    #    s.append(r)
+    #    print ("%i. %s") % (c, r)
+    #    c += 1
+    # print "here are the names of available samples: which one do you want to use as a control?"
+    print "which one do you want to use as a control?"
+    user_input = raw_input("enter the number(s). If using more than one, separate by a comma: ")
     controls = []
-
-
     if "," in user_input:
         t = [int(o) for o in user_input.split(",")]
+        for y in t:
+            if y > c:
+                print "one of your input numbers is too big. Quitting"
+                sys.exit()
         for i in t:
             controls.append(s[i])
     else:
         y = int(user_input)
-        if y > s[0]:
-            print "input number too big.  Quitting"
+        if y > c:
+            print "your input number is too big. Quitting"
             sys.exit()
         controls.append(s[int(user_input)])
     print controls
@@ -139,10 +146,10 @@ def run():
 
     # id_s = map(util.get_sample_id_from_name, samples)
     # id_r = map(util.get_sample_id_from_name, controls)
-    id_s = [util.get_sample_id_from_name(s) for s in samples]
-    id_r = [util.get_sample_id_from_name(c) for c in controls]
+    id_s = [util.get_sample_id_from_name(s, db) for s in samples]
+    id_r = [util.get_sample_id_from_name(c, db) for c in controls]
 
-    # print "sample ids", id_s
+    # print "sample ids", id_s    #these are the ObjectIds
     # print "control ids", id_r
     x = []
     y = []
@@ -158,9 +165,9 @@ def run():
             # print "i %s" % i
             cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, [("chr", 1)])
             waves2 = common_utilities.CreateListFromCursor(cursor)
-            # print "list1.length", len(list1)
-            # for j in range(len(list1)):
-            #    print list1[j]
+            # print "waves1.length", len(waves1)
+            # for j in range(len(waves1)):
+            #   print waves1[j]
         # figure out which peaks are same between the two samples.
         both = []
 
@@ -168,8 +175,12 @@ def run():
         j = 0
         max_i = len(waves1)
         max_j = len(waves2)
+        # print "max_i: ", max_i
+        # print "max_j: ", max_j
+
         while (i < max_i and j < max_j):
             chromosome = waves1[i]['chr']
+            # print "DEBUG: Round 1 chromosome: ", chromosome
             pos_i = waves1[i]['pos']
             sdv_i = waves1[i]['stddev']
             ht_i = waves1[i]['height']
@@ -240,60 +251,78 @@ def run():
     print "ODR - explicit fit: coeff %s err %s" % (coeff, err)
         # normalize the heights
 
-    # bp = scatterplot.ScatterPlot("/home/afejes/temp/test_plot.svg", 1200, 600)
+    # bp = scatterplot.ScatterPlot("/home/sbrown/temp/test.svg", 1200, 600)
     # bp.add_and_zip_data(x, y)
     # bp.add_regression(coeff)
     # bp.build()
     # bp.save()
 
     # filter out from control
-    paired_data = []
-    max_i = len(waves1)
-    max_j = len(waves2)
-    while (i < max_i and j < max_j):
-        chromosome = waves1[i]['chr']
-        pos_i = waves1[i]['pos']
-        sdv_i = waves1[i]['stddev']
-        ht_i = waves1[i]['height']
-        jt = j - 1
-        none_found = True
-        best = None
-        while jt >= 0 and waves2[jt]['pos'] > (pos_i - 4 * sdv_i) :
-            # print "jt - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[jt]['pos'], waves2[jt]['stddev']
-            pvalue = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
-            if (pvalue != 0):
-                w = WavePair(chromosome, i, jt, pvalue, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
-                if best is None:
-                    best = w
-                    none_found = False
-                elif pvalue < best.pvalue:
-                    best = w
-                    none_found = False
-            jt -= 1
-        while j < max_j and waves2[j]['pos'] < (pos_i + 4 * sdv_i):
-            # print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
-            pvalue = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
-            if (pvalue != 0):
-                w = WavePair(chromosome, i, j, pvalue, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
-                if best is None:
-                    best = w
-                    none_found = False
-                elif pvalue < best.pvalue:
-                    best = w
-                    none_found = False
-            j += 1
-        if none_found:
-            w = WavePair(chromosome, i, -1, -1, pos_i, -1, sdv_i, -1, ht_i, 0)
-            paired_data.append(w)
-        else:
-            paired_data.append(best)
+    for chromosome in chromosomes:    # for each chromosome
+        print "chromosome %s" % chromosome
+        waves1 = None
+        waves2 = None
+        for i in id_s:
+            # print "i %s" % i
+            cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, [("chr", 1)])
+            waves1 = common_utilities.CreateListFromCursor(cursor)
+        for i in id_r:
+            # print "i %s" % i
+            cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, [("chr", 1)])
+            waves2 = common_utilities.CreateListFromCursor(cursor)
+        paired_data = []
+        i = 0
+        j = 0
+        max_i = len(waves1)
+        max_j = len(waves2)
+        while (i < max_i and j < max_j):
+            chromosome = waves1[i]['chr']
+            # print "DEBUG: Round 2 chromosome: ", chromosome
+            # print "DEBUG: waves1[i]: ", waves1[i]
+            pos_i = waves1[i]['pos']
+            sdv_i = waves1[i]['stddev']
+            ht_i = waves1[i]['height']
+            jt = j - 1
+            none_found = True
+            best = None
+            while jt >= 0 and waves2[jt]['pos'] > (pos_i - 4 * sdv_i) :
+                # print "jt - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[jt]['pos'], waves2[jt]['stddev']
+                pvalue = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
+                if (pvalue != 0):
+                    w = WavePair(chromosome, i, jt, pvalue, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
+                    if best is None:
+                        best = w
+                        none_found = False
+                    elif pvalue < best.p:
+                        best = w
+                        none_found = False
+                jt -= 1
+            while j < max_j and waves2[j]['pos'] < (pos_i + 4 * sdv_i):
+                # print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
+                pvalue = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
+                if (pvalue != 0):
+                    w = WavePair(chromosome, i, j, pvalue, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
+                    if best is None:
+                        best = w
+                        none_found = False
+                    elif pvalue < best.p:
+                        best = w
+                        none_found = False
+                j += 1
 
-        i += 1
+            # print "DEBUG: wavepair is: ", w.to_string()
+            if none_found:
+                w = WavePair(chromosome, i, -1, -1, pos_i, -1, sdv_i, -1, ht_i, 0)
+                paired_data.append(w)
+            else:
+                paired_data.append(best)
 
-    print "The list of paried data is %i:" % (len(paired_data))
-    for b in paired_data:
-        if (b.get_ht1 > b.get_ht2 * coeff):
-            print_queue.put(b.to_string())
+            i += 1
+
+        print "The list of paired data for chromosome %s is %i:" % (chromosome, len(paired_data))
+        for b in paired_data:
+            if (b.ht1 > b.ht2 * coeff):
+                print_queue.put(b.to_string())
 
 
 
@@ -320,11 +349,13 @@ def f(B, x):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 1:
-        print ("This program requires the name of the database config file.")
-        print" eg. python ImportWaveToDB.py /directory/database.conf"
+    if len(sys.argv) <= 3:
+        print ("This program requires the name of the database config file, output path, and name of database.")
+        print" eg. python ImportWaveToDB.py /directory/database.conf directory/output/ yeast_epigenetics"
         sys.exit()
     conf_file = sys.argv[1]
+    output = sys.argv[2]
+    db = sys.argv[3]
     param = Parameters.parameter(conf_file)
-    run()
+    run(output, db)
     print "Completed."
