@@ -67,6 +67,7 @@ def put_assigned(map_queues, item, max_threads):
     '''Use the min_index to determine which queue should be used.  Then place 
     the new item in the queue'''
     i = random_index(max_threads)
+    # print "item %i Assigned to random thread: %i " % (item.start, i)
     # i = min_index(map_queues, max_threads)
     try:
         map_queues[i].put(item, False)
@@ -179,14 +180,15 @@ def process_WIG_reads(PARAM, map_queues, print_queue, worker_processes):
         if line.startswith('fixedStep'):
             count += 1
             if not firstpass:
-                ##this dumps the previous region into queue
+                # #this dumps the previous region into queue
+                # print("map queue added for %i %s %i - worker %i" % (len(thismap), current_chromosome, position, worker_processes))
                 put_assigned(map_queues,
                              MappingItem.Item(thismap, current_chromosome,
                                               position),
-                             worker_processes)  
+                             worker_processes)
             else:
                 firstpass = False
-            #now look at current region
+            # now look at current region
             a = line.split()
             t = a[1].split("=")
             chromosome = t[1]
@@ -197,19 +199,20 @@ def process_WIG_reads(PARAM, map_queues, print_queue, worker_processes):
             thismap = []
             # break string into components
             # get chromosome name and position of map
-            
+
 
             if chromosome != current_chromosome:
                 if current_chromosome != None:
-                    print_queue.put("chromosome %s had %i regions of enrichment" % (current_chromosome, count-1))
-                    #count-1 since remove first 'fixedStep' of new chrom.
-                    count = 1 #to take into account the first 'fixedStep' line of new chrom.
+                    print_queue.put("chromosome %s had %i regions of enrichment" % (current_chromosome, count - 1))
+                    # count-1 since remove first 'fixedStep' of new chrom.
+                    count = 1    # to take into account the first 'fixedStep' line of new chrom.
                 current_chromosome = chromosome
-                #count = 0
+                # count = 0
         else:
             thismap.append(float(line))
-    #endfor
+    # endfor
     if len(thismap) > 0:
+        # print("map queue added for %i %s %i - worker %i" % (len(thismap), current_chromosome, position, worker_processes))
         put_assigned(map_queues, MappingItem.Item(thismap, current_chromosome, position), worker_processes)
     print_queue.put("chromosome %s had %i regions of enrichment" % (current_chromosome, count))
     filereader.close()
@@ -232,8 +235,8 @@ def main(PARAM):
 
         # launch thread to read and process the print queue'''
         # print_thread = PrintThread.StringWriter(print_queue)
-        #print_thread = PrintThread.StringWriter(print_queue, "/home/afejes/temp/", "wavegenerator.txt", False, True)
-        print_thread = PrintThread.StringWriter(print_queue, PARAM.get_parameter("output_path"), PARAM.get_parameter("file_name")+"_wavegenerator.txt", False, True)
+        # print_thread = PrintThread.StringWriter(print_queue, "/home/afejes/temp/", "wavegenerator.txt", False, True)
+        print_thread = PrintThread.StringWriter(print_queue, PARAM.get_parameter("output_path"), PARAM.get_parameter("file_name") + "_wavegenerator.txt", False, True)
         print_queue.put("Print queue and thread have started")
 
 
@@ -322,12 +325,16 @@ def main(PARAM):
                 temp += map_queues[x].qsize()
 
             pause = temp / 1000
-            if pause > 20:
+            if temp == 0:
+                pause = 0
+            elif pause > 20:
                 pause = 20
-            if pause < 2:
+            elif pause < 2:
                 pause = 2
+
             print_queue.put("there are %i items remaining in the map queue.  will poll again in %i seconds" % (temp, pause))
-            time.sleep(pause)
+            if temp > 0:
+                time.sleep(pause)
         for proc in procs:
             proc.join()
         for queue in map_queues:
@@ -349,11 +356,10 @@ def main(PARAM):
             pass
         else:
             while print_queue.qsize() > 0:
-                print "waiting on print_queue to empty", print_queue.qsize()
                 time.sleep(1)
+                print "waiting on print_queue to empty (%i items remaining) " % print_queue.qsize()
             print_thread.END_PROCESSES = True
-        print  ("print_queue closed")
-
+        print "print_queue closed"
         print "Shutdown complete"
 
 if __name__ == "__main__":
@@ -363,28 +369,28 @@ if __name__ == "__main__":
             print arg
     # sys.argv[1] must provide the file name of the input file.
     '''
-       
+
     if len(sys.argv) <= 1 :
         print "USAGE: python TheWaveGenerator.py param.file [input_file [output_path]]"
-        
+
         sys.exit()
 
     param = create_param_obj(sys.argv[1])
-    
-    #override parameter file with cmdline args
+
+    # override parameter file with cmdline args
     if len(sys.argv) >= 3 :
-        param.set_parameter("input_file", sys.argv[2]) #override input_file
-        #set file_name in param to be based on input file.
+        param.set_parameter("input_file", sys.argv[2])    # override input_file
+        # set file_name in param to be based on input file.
         ofile = StringUtils.rreplace(os.path.basename(sys.argv[2]), '.wig', '', 1)
-        param.set_parameter("file_name", ofile) #override output file_name (.waves gets added later)
+        param.set_parameter("file_name", ofile)    # override output file_name (.waves gets added later)
     if len(sys.argv) == 4 :
-        param.set_parameter("output_path", sys.argv[3]) #override output_path
-        
-    print "param file: ",sys.argv[1]
-    print "input_file: ",param.get_parameter("input_file")
-    print "output_path: ",param.get_parameter("output_path")
-    print "output_file_name: ",param.get_parameter("file_name")
-    
-        
+        param.set_parameter("output_path", sys.argv[3])    # override output_path
+
+    print "param file: ", sys.argv[1]
+    print "input_file: ", param.get_parameter("input_file")
+    print "output_path: ", param.get_parameter("output_path")
+    print "output_file_name: ", param.get_parameter("file_name")
+
+
     main(param)
 

@@ -14,8 +14,8 @@ import cProfile
 
 END_PROCESS = None
 
-    # don't let the main process get too far ahead
-max_sigma = 300
+
+max_sigma = 300    # don't let the main process get too far ahead
 
 class MapDecomposer(multiprocessing.Process):
 
@@ -56,10 +56,13 @@ class MapDecomposer(multiprocessing.Process):
         '''returns position and height of the highest point in the map'''
         pos = 0
         height = 0
+        # print "ignore = ", ignore
         for i in range(0, len(coverage_map)):
+            # print "i = %i %f" % (i, coverage_map[i])
             if height < coverage_map[i] :
                 height = coverage_map[i]
                 pos = i
+        # print " --> returning %s" % ({'position':pos, 'height':height}) - verified, working correctly without ignore
         return {'position':pos, 'height':height}
 
 
@@ -143,29 +146,45 @@ class MapDecomposer(multiprocessing.Process):
 
     @staticmethod
     def to_be_tested(sample):
-        '''decide which samples are to be tested'''
+        '''decide which values in the map are to be tested, eg, don't test valleys in the sample.'''
         sample.sort()
+        already_tested = set()
+        for j in sample:
+            already_tested.add(j[0])
         to_be_tested = set()
-        for i in range(len(sample) - 1):
-            if i == 0 and sample[i][1] > sample[i + 1][1]:
-                if sample[i + 1][0] - sample[i][0] > 1:
-                    t = int((sample[i + 1][0] - sample[i][0]) / 2) + sample[i][0]
-                    if t not in to_be_tested:
+        maximal_sigma = 0
+        for i in range(len(sample) - 1):    # zero to length of the set, minus 2.  Because you will be testing len +1
+            if sample[i][1] > maximal_sigma:
+                maximal_sigma = sample[i][1]
+            if i == 0 and sample[i][1] > sample[i + 1][1]:    # if first value in poled Sigmas, and greater than the second value,
+                if sample[i + 1][0] - sample[i][0] > 1:    # check to see if the sigma difference is greater than one,
+                    t = int((sample[i + 1][0] - sample[i][0]) / 2) + sample[i][0]    # then add the midpoint.
+                    if t not in already_tested and t not in to_be_tested:
                         to_be_tested.add(t)
             elif i == len(sample) and sample[i][1] > sample[i - 1][1]:
                 if sample[i][0] - sample[i - 1][0] > 1:
                     t = int((sample[i][0] - sample[i - 1][0]) / 2) + sample[i - 1][0]
-                    if t not in to_be_tested:
+                    if t not in already_tested and t not in to_be_tested:
                         to_be_tested.add(t)
-            elif sample[i][1] >= sample[i - 1][1] and sample[i][1] >= sample[i + 1][1]:
+            elif sample[i][1] > sample[i - 1][1] and sample[i][1] > sample[i + 1][1]:
                 if sample[i + 1][0] - sample[i][0] > 1:
                     t = int((sample[i + 1][0] - sample[i][0]) / 2) + sample[i][0]
-                    if t not in to_be_tested:
+                    if t not in already_tested and t not in to_be_tested:
                         to_be_tested.add(t)
                 if sample[i][0] - sample[i - 1][0] > 1:
                     t = int((sample[i][0] - sample[i - 1][0]) / 2) + sample[i - 1][0]
-                    if t not in to_be_tested:
+                    if t not in already_tested and t not in to_be_tested:
                         to_be_tested.add(t)
+        if sample[len(sample) - 1][1] > maximal_sigma:
+                maximal_sigma = sample[len(sample) - 1][1]
+        for i in range(len(sample) - 1):
+            # print "testing sample[i][1] (%i) == maximal_sigma (%i) and sample[i + 1][1]  (%i)  == maximal_sigma and (sample[i + 1][0] - sample[i][0] (%i) > 1):" % (sample[i][1], maximal_sigma, sample[i + 1][1], (sample[i + 1][0] - sample[i][0]))
+            if sample[i][1] == maximal_sigma and sample[i + 1][1] == maximal_sigma and (sample[i + 1][0] - sample[i][0] > 1):
+                for t in range(sample[i][0], sample[i + 1][0]):
+                    if t not in already_tested and t not in to_be_tested:
+                        to_be_tested.add(t)
+
+
         return to_be_tested
 
     @staticmethod
@@ -173,18 +192,34 @@ class MapDecomposer(multiprocessing.Process):
         '''returns the best mu from the possible list'''
         start = 0
         end = 0
-        height = 0    # this is actually the best sigma value
+        height = -1    # this is actually the best sigma value
+        best_height = height
+        best_pos = 0
+
         for t in testing:
             if t[1] > height:
                 start = t[0]
-                end = 0
+                end = start
                 height = t[1]
             elif t[1] == height:
                 end = t[0]
-        if not end == 0:
-            return (int((end - start) / 2) + start, height)
+            elif t[1] < height:
+                if height > best_height:
+                    best_height = height
+                    best_pos = int((end - start) / 2) + start
+                height = t[1]
+                start = t[0]
+        if height > best_height:
+            best_height = height
+            best_pos = int((end - start) / 2) + start
+
+        if best_height <= 1:
+            # print "get_mu found no reasonable sigmas"
+            return None, None
         else :
-            return (start, height)
+            # print "best_height = ", best_height
+            # print "pos = ", best_pos
+            return best_pos, best_height
 
     def process_map(self, item):
         '''takes in a coverage map object and begins the process of identifying
@@ -197,44 +232,53 @@ class MapDecomposer(multiprocessing.Process):
         min_height = MapDecomposer.PARAM.get_parameter("min_height")
         number_waves = MapDecomposer.PARAM.get_parameter("number_waves")
 
-        lastWave_pos = 0
+       # DEBUGGING = False
+
+        # if item.start == 10067:
+        #    DEBUGGING = True
+        # else:
+        #    DEBUGGING = False
+
+        mu = None
         if number_waves:
             wave_number = 1
         else:
             wave_number = None
-        # print("heights %f, %f, %f (cur, highest, min)" % (cur_height, highest_point, min_height))
+        # if DEBUGGING:
+            # print("heights %f, %f, %f (cur, highest, min)" % (cur_height, highest_point, min_height))
         while cur_height >= 0.2 * highest_point and cur_height >= min_height:
-
             p = v.get('position')
-            if lastWave_pos == p:
-                break
-            else:
-                lastWave_pos = p
             width = 40    # for now, must be divisible by 10
             tested = []
             for i in range(p - width, p + width, 10):
                 if i > 0 and i < len(n):
                     this_sigma = self.best_fit_newton(n, i, cur_height)
-                    tested.append((i - (p - width), this_sigma))
+                    tested.append((i, this_sigma))
             tbt = self.to_be_tested(tested)
             while len(tbt) > 0:
                 for t in tbt:
-                    tested.append((t, self.best_fit_newton(n, (t + (p - width)), cur_height)))
+                    tested.append((t, self.best_fit_newton(n, t, cur_height)))
                 tbt = []
                 tbt = self.to_be_tested(tested)
-            best = self.get_mu(tested)    # returns mu and sigma.
-            mu = best[0] + (p - width)
-            sigma = best[1]
-            peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, cur_height, wave_number))
-            # print "appended a wave"
-            n = self.subtract_gausian(n, cur_height, sigma, mu)    # subtract gausian
+            mu, sigma = self.get_mu(tested)    # returns mu and sigma.
+
+            if mu != None:
+                peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, cur_height, wave_number))
+                # if DEBUGGING:
+                #    print "appended a wave - %s peak=%i sigma=%f cur_ht=%f #=%i" % (item.chr, mu + item.start, sigma, cur_height, wave_number)
+                #    print "before:", n
+                n = self.subtract_gausian(n, cur_height, sigma, mu)    # subtract gausian
+                # if DEBUGGING:
+                #    print "after:", n
+                if number_waves:
+                    wave_number += 1
             v = MapDecomposer.get_tallest_point(n)    # re-calculate tallest point
             cur_height = v.get('height')
-            if number_waves:
-                wave_number += 1
+            # if DEBUGGING:
+                # print "Current ht: %i min ht: %i, min cut off ht: %f" % (cur_height, min_height, 0.2 * highest_point)
             # repeat
-        for n in peaks:
-            MapDecomposer.wave_queue.put(n)
+        for pk in peaks:
+            MapDecomposer.wave_queue.put(pk)
         return None
 
 
