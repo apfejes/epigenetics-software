@@ -120,7 +120,7 @@ class MongoEpigeneticsWrapper():
         if project == 'down syndrome':    # assign default groupby_name (previously name_sampgroup)
             groupby_name = 'sample_group'
         elif project == 'FASD':
-            groupby_name = 'samplegroup'
+            groupby_name = 'fasd'
         elif project == 'Kollman':
             groupby_name = 'sample_group'
         elif project == 'Anne Ellis':
