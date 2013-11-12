@@ -91,7 +91,7 @@ class StringWriter(threading.Thread):
             #        continue'''
         try:
             if queue != None:
-                while len(queue) > 0:
+                while queue.qsize() > 0:
                     string = queue.get()    # grabs string from queue
                     self.process_string(string)    # print retrieved string
         finally:
