@@ -86,6 +86,9 @@ def compare_BED_and_waves(bedfile, wavesfile, output, thresh):
             print "waiting on print_queue to empty", print_queue.qsize()
             time.sleep(1)
         print_thread.END_PROCESSES = True
+        while print_thread.IS_CLOSED == False:
+            print "waiting for print_thread to close"
+            time.sleep(1)
 
     # quick summary statistics
     unassigned = 0
