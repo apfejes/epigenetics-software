@@ -252,8 +252,9 @@ class MongoEpigeneticsWrapper():
             extension = 500    # extend the region of query to catch peaks with tails in the region
             query_parameters["pos"] = {"$lte":self.end + extension, "$gte":self.start - extension}
 
-        minh = float(minh)
         print "minh: ", minh
+        minh = float(minh)
+
         query_parameters["height"] = {"$gte":minh}
         return_chr = {'_id': False, 'pos': True,
                       'height': True, 'stddev': True,
@@ -269,7 +270,10 @@ class MongoEpigeneticsWrapper():
         if self.error_message != '' :    # If there are existing error messages, don't perform these operations.
             return {}
         collection = 'samples'
-        query_parameters = {}    # This dictionary will store all the query parameters
+        # TODO: Remove these restrictions from query parameters!
+        # query_parameters = {}    # {"sample_id":{"$in":["02/08/2012_WT_IP_S9.6", "01/24/2012_WT_IP_S9.7", "04/12/2013_RNaseH_IP_S9.8", "04/12/2013_Sen1_IP_S9.9", "04/20/2013_RNaseH_IP_S9.10", "04/20/2013_Sen1_IP_S9.11"]}}    # This dictionary will store all the query parameters
+        # query_parameters = {"sample_id":{"$in":["2/28/2012_HTZ1-FLAG::KAN_IP_mFLAG", "4/4/2012_HTZ1-FLAG::KAN_IP_mFLAG"]}}
+        query_parameters = {"sample_id":"missing_waves"}
         return_chr = {'_id': True, 'file_name':True, 'sample_id':True}
 
         print "finddocs_samples_chipseq, chip =  %s" % chip
