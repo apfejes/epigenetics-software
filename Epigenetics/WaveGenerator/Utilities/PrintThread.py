@@ -13,6 +13,7 @@ import exceptions
 import os
 END_PROCESSES = False
 
+
 queue = None
 
 class StringWriter(threading.Thread):
@@ -21,7 +22,7 @@ class StringWriter(threading.Thread):
     concurrency issues and allows a multithreaded/multiprocess program to have 
     consistently clean output.'''
 
-
+    IS_CLOSED = False
 
     def __init__(self, queue_var, output_path = None, file_name = None, supress_print = False, thread = True):
         '''initialize the StringWriter'''
@@ -29,6 +30,7 @@ class StringWriter(threading.Thread):
         threading.Thread.__init__(self)
         global queue    # IGNORE:W0603 - acceptable use of a global variable.
         queue = queue_var
+
         self.supress_print = supress_print
         if file_name != None:
             self.printout = True
@@ -68,6 +70,7 @@ class StringWriter(threading.Thread):
                 if END_PROCESSES:
                     print("print thread received signal to quit")
                     self.f.close()
+                    self.IS_CLOSED = True
                     break
                 else:
                     continue
@@ -86,4 +89,9 @@ class StringWriter(threading.Thread):
             #    else:
             #        continue'''
 
+    def is_closed(self):
+        if self.IS_CLOSED:
+            return True
+        else :
+            return False
 
