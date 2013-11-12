@@ -22,7 +22,7 @@ class StringWriter(threading.Thread):
     concurrency issues and allows a multithreaded/multiprocess program to have 
     consistently clean output.'''
 
-    IS_CLOSED = False
+
 
     def __init__(self, queue_var, output_path = None, file_name = None, supress_print = False, thread = True):
         '''initialize the StringWriter'''
@@ -32,11 +32,13 @@ class StringWriter(threading.Thread):
         queue = queue_var
 
         self.supress_print = supress_print
+        self.IS_CLOSED = True
         if file_name != None:
             self.printout = True
             path = os.path.dirname(os.path.abspath(__file__))
             path = path.rsplit("/", 1)
             self.f = open(output_path + '/' + file_name, 'w')
+            self.IS_CLOSED = False
         else:
             self.printout = False
         if thread:
@@ -70,7 +72,6 @@ class StringWriter(threading.Thread):
                 if END_PROCESSES:
                     print("print thread received signal to quit")
                     self.f.close()
-                    self.IS_CLOSED = True
                     break
                 else:
                     continue
@@ -88,10 +89,14 @@ class StringWriter(threading.Thread):
             #        break
             #    else:
             #        continue'''
+        try:
+            while queue != None and len(queue) > 0:
+                string = queue.get()    # grabs string from queue
+                self.process_string(string)    # print retrieved string
+        finally:
+            self.f.close()
+            self.IS_CLOSED = True
 
     def is_closed(self):
-        if self.IS_CLOSED:
-            return True
-        else :
-            return False
+        return self.IS_CLOSED
 
