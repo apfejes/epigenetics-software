@@ -67,6 +67,7 @@ class StringWriter(threading.Thread):
             except Queue.Empty():
                 if END_PROCESSES:
                     print("print thread received signal to quit")
+                    self.f.close()
                     break
                 else:
                     continue
