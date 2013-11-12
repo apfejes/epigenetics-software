@@ -232,20 +232,11 @@ class MapDecomposer(multiprocessing.Process):
         min_height = MapDecomposer.PARAM.get_parameter("min_height")
         number_waves = MapDecomposer.PARAM.get_parameter("number_waves")
 
-       # DEBUGGING = False
-
-        # if item.start == 10067:
-        #    DEBUGGING = True
-        # else:
-        #    DEBUGGING = False
-
         mu = None
         if number_waves:
             wave_number = 1
         else:
             wave_number = None
-        # if DEBUGGING:
-            # print("heights %f, %f, %f (cur, highest, min)" % (cur_height, highest_point, min_height))
         while cur_height >= 0.2 * highest_point and cur_height >= min_height:
             p = v.get('position')
             width = 40    # for now, must be divisible by 10
@@ -264,18 +255,11 @@ class MapDecomposer(multiprocessing.Process):
 
             if mu != None:
                 peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, cur_height, wave_number))
-                # if DEBUGGING:
-                #    print "appended a wave - %s peak=%i sigma=%f cur_ht=%f #=%i" % (item.chr, mu + item.start, sigma, cur_height, wave_number)
-                #    print "before:", n
                 n = self.subtract_gausian(n, cur_height, sigma, mu)    # subtract gausian
-                # if DEBUGGING:
-                #    print "after:", n
                 if number_waves:
                     wave_number += 1
             v = MapDecomposer.get_tallest_point(n)    # re-calculate tallest point
             cur_height = v.get('height')
-            # if DEBUGGING:
-                # print "Current ht: %i min ht: %i, min cut off ht: %f" % (cur_height, min_height, 0.2 * highest_point)
             # repeat
         for pk in peaks:
             MapDecomposer.wave_queue.put(pk)
@@ -303,11 +287,9 @@ class MapDecomposer(multiprocessing.Process):
         while True:
             try:
                 map_item = self.map_queue.get(True)    # grabs map from queue\
-                # print "got an item."
                 if map_item is None:
                     break
                 self.process_map(map_item)
-                # print "map processed"
             except KeyboardInterrupt:
                 self.print_queue.put("ignoring Ctrl-C for worker process")
             except Queue.Empty:
