@@ -90,9 +90,10 @@ class StringWriter(threading.Thread):
             #    else:
             #        continue'''
         try:
-            while queue != None and len(queue) > 0:
-                string = queue.get()    # grabs string from queue
-                self.process_string(string)    # print retrieved string
+            if queue != None:
+                while len(queue) > 0:
+                    string = queue.get()    # grabs string from queue
+                    self.process_string(string)    # print retrieved string
         finally:
             self.f.close()
             self.IS_CLOSED = True
