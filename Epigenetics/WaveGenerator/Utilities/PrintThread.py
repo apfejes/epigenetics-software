@@ -11,7 +11,7 @@ import traceback
 import Queue
 import exceptions
 import os
-END_PROCESSES = False
+
 
 
 queue = None
@@ -33,6 +33,7 @@ class StringWriter(threading.Thread):
 
         self.supress_print = supress_print
         self.IS_CLOSED = True
+        self.END_PROCESSES = False
         if file_name != None:
             self.printout = True
             path = os.path.dirname(os.path.abspath(__file__))
@@ -62,15 +63,14 @@ class StringWriter(threading.Thread):
     def run(self):
         '''run the process - handle incoming threads'''
         # global queue
-        while not END_PROCESSES:
+        while not self.END_PROCESSES:
             try:
                 if queue is None:
                     break
                 string = queue.get()    # grabs string from queue
                 self.process_string(string)    # print retrieved string
             except Queue.Empty():
-                if END_PROCESSES:
-                    print("print thread received signal to quit")
+                if self.END_PROCESSES:
                     self.f.close()
                     break
                 else:
