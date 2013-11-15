@@ -9,25 +9,19 @@ import LinkedList
 
 
 class FakeAlignedRead():
-    '''class to fake an aligned read'''
 
-    @staticmethod
-    def type():
-        '''announces that this object is a FakeAlignedRead, if asked'''
+    def type(self):
         print ("FakeAlignedRead")
 
     def __init__(self, aend, alen, rev):
-        '''initialize the object with two ends and a strand'''
         self.aend = aend
         self.alen = alen
         self.is_reverse = rev
 
 class Test(unittest.TestCase):
-    '''Class for unit tests on the Linked list implementation'''
 
-    @staticmethod
-    def type():
-        '''announces that this object is a Test of LinkedList, if asked'''
+
+    def type(self):
         print ("TestLinkedList")
 
     def setUp(self):
@@ -35,13 +29,11 @@ class Test(unittest.TestCase):
         pass
 
     def tearDown(self):
-        '''doesn't do much - but you could put things here if you need to handle them at the end of the test'''
         pass
 
 
     def test_append(self):
-        '''test the append function'''
-        # setup
+        '''setup'''
         LL = LinkedList.LL()
         LL.append("thing1")
         LL.append("thing2")
@@ -67,8 +59,7 @@ class Test(unittest.TestCase):
         self.assertEqual(LL.size(), 4)
 
     def test_pop_head(self):
-        '''test the ability to pop a read off the head of the list'''
-        # setup
+        '''setup'''
         LL = LinkedList.LL()
         LL.append("thing1")
         LL.append("thing2")

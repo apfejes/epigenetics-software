@@ -25,8 +25,6 @@ class StringWriter(threading.Thread):
 
 
     def __init__(self, queue_var, output_path = None, file_name = None, supress_print = False, thread = True):
-        '''initialize the StringWriter'''
-
         threading.Thread.__init__(self)
         global queue    # IGNORE:W0603 - acceptable use of a global variable.
         queue = queue_var
@@ -49,11 +47,9 @@ class StringWriter(threading.Thread):
 
     @staticmethod
     def type():
-        '''announces that this object is a String writer of the PrintThread, if asked'''
         return "PrintThread.StringWriter"
 
     def process_string(self, string):
-        '''process strings being sent to the print thread'''
         if (self.printout):
             self.f.write(string)
             self.f.write("\n")
@@ -61,7 +57,6 @@ class StringWriter(threading.Thread):
             print string
 
     def run(self):
-        '''run the process - handle incoming threads'''
         # global queue
         while not self.END_PROCESSES:
             try:
