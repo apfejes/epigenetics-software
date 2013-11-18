@@ -32,7 +32,7 @@ class Kolmogorov_Smirnov(object):
         start = max(m1 - (4 * s1), m2 - (4 * s2))
         end = min(m1 + (4 * s1), m2 + (4 * s2))
 
-        if start > end:
+        if start >= end:
             # return (0.0, 0.0)
             return 0.0
 
