@@ -37,6 +37,7 @@ class Svg_Builder():
             get_elements = False,
             height = 200.0,
             width = 60.0,
+            get_minheight = False,
             get_tss = False,
             get_cpg = False,
             show_points = False,
@@ -57,10 +58,11 @@ class Svg_Builder():
         if types_index:    # if types index, assume types and sample index both need to be restored to preserve colours.
             self.drawing.set_sample_index(types_index, sample_index)
 
-        ##NOTE: Peaks must go before methylation, otherwise white boxes cover methylation labels.
+        # #NOTE: Peaks must go before methylation, otherwise white boxes cover methylation labels.
         if self.peaks:    # information about waves is already pushed by MEW.
             self.drawing.build_chipseq(self.error_message, self.waves)
-            self.drawing.add_ytics_chipseq()
+            if self.waves:
+                self.drawing.add_ytics_chipseq()
 
         if self.methylation:
             self.drawing.build_methylation(self.error_message, self.pos_betas_dict, self.sample_peaks, show_points, show_dist)

@@ -75,7 +75,7 @@ class MongoEpigeneticsWrapper():
 
         if self.peaks:
             sample_ids = self.organize_samples_chipseq(parameters['chipseq'])
-            docs = self.finddocs_waves(sample_ids)    # get peak info for region queried
+            docs = self.finddocs_waves(sample_ids, parameters['minheight'])    # get peak info for region queried
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
             if self.database == 'human_epigenetics':
                 annotation_docs = self.finddocs_annotations()    # get the gene annotations info
@@ -192,7 +192,7 @@ class MongoEpigeneticsWrapper():
             # print "DEBUG: doc[] is ", doc
             # print "DEBUG: chip is: ", chip
             if self.database == 'yeast_epigenetics':
-                doc_chip = str(doc['_id'])
+                doc_chip = doc['sample_id'].encode('utf-8')    # using str() did not work.
                 '''
                 if "type" in doc: #if sample has a type:
                     doc_chip = str(doc['type'])
@@ -232,7 +232,7 @@ class MongoEpigeneticsWrapper():
         return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
 
 
-    def finddocs_waves(self, sample_ids = None):
+    def finddocs_waves(self, sample_ids = None, minh = 0):
 
         '''Finds documents corresponding to collection and type of query'''
 
@@ -250,12 +250,17 @@ class MongoEpigeneticsWrapper():
         if self.start and self.end:
             extension = 500    # extend the region of query to catch peaks with tails in the region
             query_parameters["pos"] = {"$lte":self.end + extension, "$gte":self.start - extension}
+
+        print "minh: ", minh
+        minh = float(minh)
+
+        query_parameters["height"] = {"$gte":minh}
         return_chr = {'_id': False, 'pos': True,
                       'height': True, 'stddev': True,
                       'sample_id': True}
-        # sortby, sortorder = 'height', (-1)
-        # return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
-        return self.runquery(collection, query_parameters, return_chr)
+        sortby, sortorder = 'height', (-1)
+        # Will attempt to sort, will sort if not too large. This logic is in runquery
+        return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
 
     def finddocs_samples_chipseq(self, chip):
 
@@ -264,8 +269,11 @@ class MongoEpigeneticsWrapper():
         if self.error_message != '' :    # If there are existing error messages, don't perform these operations.
             return {}
         collection = 'samples'
-        query_parameters = {}    # This dictionary will store all the query parameters
-        return_chr = {'_id': True, 'file_name':True}
+        # TODO: Remove these restrictions from query parameters!
+        # query_parameters = {}    # {"sample_id":{"$in":["02/08/2012_WT_IP_S9.6", "01/24/2012_WT_IP_S9.7", "04/12/2013_RNaseH_IP_S9.8", "04/12/2013_Sen1_IP_S9.9", "04/20/2013_RNaseH_IP_S9.10", "04/20/2013_Sen1_IP_S9.11"]}}    # This dictionary will store all the query parameters
+        # query_parameters = {"sample_id":{"$in":["2/28/2012_HTZ1-FLAG::KAN_IP_mFLAG", "4/4/2012_HTZ1-FLAG::KAN_IP_mFLAG"]}}
+        query_parameters = {"sample_id":"missing_waves"}
+        return_chr = {'_id': True, 'file_name':True, 'sample_id':True}
 
         print "finddocs_samples_chipseq, chip =  %s" % chip
 
@@ -344,7 +352,10 @@ class MongoEpigeneticsWrapper():
         # print "   From the database %s and collection %s" % (self.database, collection)
         # print "   Find(%s)" % (query_parameters)    # Get documents corresponding to query and sort by sorting parameter
         if sortby:
-            docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
+            if self.mongo.find(collection, query_parameters, return_chr).count() < 100000:
+                docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
+            else:
+                docs = self.mongo.find(collection, query_parameters, return_chr)
         else:
             docs = self.mongo.find(collection, query_parameters, return_chr)
 

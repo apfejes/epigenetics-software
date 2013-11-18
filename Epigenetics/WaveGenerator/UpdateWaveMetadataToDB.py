@@ -31,18 +31,18 @@ import StringUtils
 
 def run(PARAM, metadata_file, db_name):
     '''reads metadata_file, and updates sample entries in database'''
-    
+
     while not os.path.isfile(metadata_file):
         print "Unable to find file %s" % metadata_file
         sys.exit()
-    
+
     print "Data being imported into database: ", db_name
-    
+
     print "opening connection(s) to MongoDB..."
     mongo = Mongo_Connector.MongoConnector(PARAM.get_parameter("server"), PARAM.get_parameter("port"), db_name)
-    
+
     print "processing %s..." % metadata_file
-    
+
     f = open(metadata_file, 'r')
     firstrow = True
     collection_name = 'samples'
@@ -50,13 +50,13 @@ def run(PARAM, metadata_file, db_name):
         sample_update = {}
         if not firstrow:
             a = line.split("\t")
-            ## Find file name
-            file_name = StringUtils.rreplace(a[0],".CEL",".normalized.waves",1)
+            # # Find file name
+            file_name = StringUtils.rreplace(a[0], ".CEL", ".normalized.waves", 1)
             print "Checking for file %s in database %s" % (file_name, db_name)
-            #check if entry exists in database
+            # check if entry exists in database
             if mongo.find(collection_name, {"file_name":file_name}, {"_id":1}).count() > 0 :
                 print "Entry exists; updating metadata for ", file_name
-                #Update other parameters
+                # Update other parameters
                 sample_update["exp_date"] = a[1]
                 sample_update["strain_number"] = a[2]
                 sample_update["strain_background"] = a[3]
@@ -71,10 +71,12 @@ def run(PARAM, metadata_file, db_name):
                 sample_update["protocol"] = a[12]
                 sample_update["crosslinking_time"] = a[13]
                 sample_update["pubmed_id"] = a[14]
-                sample_update["comments"] = a[15]
-                if a[15] == "\n":
+                sample_update["sample_id"] = a[15]
+                sample_update["comments"] = a[16]
+                if a[16] == "\n":
                     sample_update["comments"] = ""
-                #update entries
+
+                # update entries
                 mongo.update(collection_name, {"file_name":file_name}, {"$set": sample_update})
                 print "Finished updating metadata for ", file_name
             else:
@@ -83,6 +85,8 @@ def run(PARAM, metadata_file, db_name):
             firstrow = False
     print "Done all updates from metadata file ", metadata_file
     mongo.close()
+
+
 
 
 

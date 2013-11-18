@@ -77,7 +77,7 @@ class WavePair():
     def set_b(self, value):
         '''update bin number for pair'''
         self.b = value
-
+    
     def set_fc(self, value):
         '''update fold change for pair'''
         self.fc = value
@@ -98,7 +98,7 @@ def run(output, db):
 
     print_queue = multiprocessing.Queue()
     # launch thread to read and process the print queue
-    print_thread = PrintThread.StringWriter(print_queue, output, "waves.txt", True, True)
+    print_thread = PrintThread.StringWriter(print_queue, output, "waves_nobg_2way.txt", True, True)
 
     # ask user for name of sample
     if db == "yeast_epigenetics":
@@ -169,10 +169,18 @@ def run(output, db):
     id_s = [util.get_sample_id_from_name(s, db) for s in samples]
     id_r = [util.get_sample_id_from_name(c, db) for c in controls]
 
+    
+    
+    
+    # no need to do normalization for now...
+    '''
+    
+    
     # print "sample ids", id_s    #these are the ObjectIds
     # print "control ids", id_r
     x = []
     y = []
+    all_peaks = []
     for chromosome in chromosomes:    # for each chromosome
         print "chromosome %s" % chromosome
         waves1 = None
@@ -188,6 +196,10 @@ def run(output, db):
             # print "waves1.length", len(waves1)
             # for j in range(len(waves1)):
             #   print waves1[j]
+        
+        
+        
+        
         # figure out which peaks are same between the two samples.
         both = []
 
@@ -278,8 +290,12 @@ def run(output, db):
     # bp.save()
 
     # filter out from control
-
+    
+    '''
+    
+    
     # Collect all wavepairs that have a pair
+    # Remove background peaks for each chromosome
     all_paired = []
     all_unpaired = []
     for chromosome in chromosomes:    # for each chromosome
@@ -288,12 +304,46 @@ def run(output, db):
         waves2 = None
         for i in id_s:
             # print "i %s" % i
-            cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, [("chr", 1)])
+            cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, [("pos", 1)])
             waves1 = common_utilities.CreateListFromCursor(cursor)
+            # print waves1
         for i in id_r:
             # print "i %s" % i
-            cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, [("chr", 1)])
+            cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, [("pos", 1)])
             waves2 = common_utilities.CreateListFromCursor(cursor)
+        
+        print "\nNow determining background levels for height of peaks on chromosome ", chromosome
+        bins = 70   # based on max peak height of 7
+        counts = [0] * bins
+        thresh = [0] * bins
+        for i in range(0, bins):
+            thresh[i] = (i + 1) * 0.1
+        for i in (waves1 + waves2):
+            # combine h1 and h2 to determine background levels
+            counts[int(i['height'] / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
+            counts[int(i['height'] / 0.1)] += 1    # increment count where height2 is in bin of size 0.1
+        print "counts are: ", counts
+        x = []
+        y = []
+        for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
+            x.append(thresh[i])
+            y.append(counts[i])
+        print "x is ", x
+        print "y is ", y
+        slr = scipystats.linregress(x, y)
+        slope = slr[0]
+        intercept = slr[1]
+        print "slope: %s and intercept: %s for background peak height" % (slope, intercept)
+        # find x-intercept, threshold for noise-signal
+        xint = abs(intercept/slope)
+        print "height threshold between noise and signal is ", xint
+        # REMOVE background peaks
+        waves1[:] = [x for x in waves1 if x['height'] > xint]
+        waves2[:] = [x for x in waves2 if x['height'] > xint]
+        
+        
+        
+        # find pairs
         paired_data = []
         i = 0
         j = 0
@@ -309,7 +359,7 @@ def run(output, db):
             jt = j - 1
             none_found = True
             best = None
-            while jt >= 0 and waves2[jt]['pos'] > (pos_i - 4 * sdv_i) :
+            while jt >= 0 and (waves2[jt]['pos'] + 4 * waves2[jt]['stddev']) > (pos_i - 4 * sdv_i) :
                 # print "jt - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[jt]['pos'], waves2[jt]['stddev']
                 pvalue = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
                 if (pvalue != 0):
@@ -321,7 +371,7 @@ def run(output, db):
                         best = w
                         none_found = False
                 jt -= 1
-            while j < max_j and waves2[j]['pos'] < (pos_i + 4 * sdv_i):
+            while j < max_j and (waves2[j]['pos'] - 4 * waves2[j]['stddev']) < (pos_i + 4 * sdv_i):
                 # print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
                 pvalue = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
                 if (pvalue != 0):
@@ -344,6 +394,43 @@ def run(output, db):
                 all_paired.append(best)
 
             i += 1
+            
+        # Now find unique peaks in waves2
+        # find pairs
+        i = 0
+        j = 0
+        while (i < max_i and j < max_j):
+            chromosome = waves1[i]['chr']
+            # print "DEBUG: checking waves2"
+            # print "DEBUG: waves1[i]: ", waves1[i]
+            pos_j = waves2[j]['pos']
+            sdv_j = waves2[j]['stddev']
+            ht_j = waves2[j]['height']
+            it = i - 1
+            none_found = True
+            best = None
+            while it >= 0 and (waves1[it]['pos'] + 4 * waves1[it]['stddev']) > (pos_j - 4 * sdv_j) :
+                # print "checking %s, %s" % (it, j)
+                pvalue = stats.ks_test(pos_j, sdv_j, waves1[it]['pos'], waves1[it]['stddev'])
+                if (pvalue != 0):
+                    none_found = False
+                it -= 1
+            while i < max_i and (waves1[i]['pos'] - 4 * waves1[i]['stddev']) < (pos_j + 4 * sdv_j):
+                # print "checking %s, %s" % (i, j)
+                pvalue = stats.ks_test(pos_j, sdv_j, waves1[i]['pos'], waves1[i]['stddev'])
+                if (pvalue != 0):
+                    none_found = False
+                i += 1
+
+            # print "DEBUG: wavepair is: ", w.to_string()
+            if none_found:
+                w = WavePair(chromosome, -1, j, -1, -1, pos_j, -1, sdv_j, 0, ht_j)
+                paired_data.append(w)
+                all_unpaired.append(w)
+
+            j += 1
+            
+            
 
         # SCOTT NOTE:
             # why does this only write if ht1>ht2? Don't we want both?
@@ -424,72 +511,44 @@ def run(output, db):
     # print paired data:
     # for i in all_paired:
     #    print_queue.put(i.to_string())
-
-    print "\nNow determining background levels for height of peaks"
-    bins = 70    # based on max peak height of 7
-    counts = [0] * bins
-    thresh = [0] * bins
-    for i in range(0, bins):
-        thresh[i] = (i + 1) * 0.1
+    
+    # determine fold change for paired peaks
     for i in all_paired:
-        # combine h1 and h2 to determine background levels
-        counts[int(i.ht1 / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
-        counts[int(i.ht2 / 0.1)] += 1    # increment count where height2 is in bin of size 0.1
-    print "counts are: ", counts
-    x = []
-    y = []
-    for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
-        x.append(thresh[i])
-        y.append(counts[i])
-    print "x is ", x
-    print "y is ", y
-    slr = scipystats.linregress(x, y)
-    slope = slr[0]
-    intercept = slr[1]
-    print "slope: %s and intercept: %s" % (slope, intercept)
-    # find x-intercept, threshold for noise-signal
-    xint = abs(intercept / slope)
-    print "height threshold between noise and signal is ", xint
-    # change noise heights to 1.0
-    for i in all_paired:
-        if i.ht1 <= xint:
-            i.ht1 = 1.0
-        if i.ht2 <= xint:
-            i.ht2 = 1.0
         i.set_fc(math.log(i.ht1 / i.ht2, 2))
         # print peaks with significant enrichment/depletion
         # if(i.fc != 0):
         #    print_queue.put(i.to_string())
-
+    
     # determine "fold change" for unpaired peaks
     for i in all_unpaired:
-        if i.ht1 <= xint:
-            i.ht1 = 1.0
-        i.set_fc(math.log(i.ht1 / 1.0, 2))
-
+        if i.ht1 == 0:    # unique control peak
+            i.set_fc(math.log(1.0 / i.ht2, 2))
+        else:    # unique sample peak
+            i.set_fc(math.log(i.ht1 / 1.0, 2))
+    
     # now all entries in "all_paired" have fdr and fc, all entries in "all_unpaired" have fdr of -1, fc
-
+    
     # print everything, and significant results
     alldata = all_paired + all_unpaired
-    user_fc = 1.5
+    user_fc = 1.0
     for i in alldata:
         print_queue.put(i.to_string())
-
-
+        
+        
     if print_thread is None or not print_thread.is_alive():
         pass
     else:
         while print_queue.qsize() > 0:
             print "waiting on print_queue to empty", print_queue.qsize()
             time.sleep(1)
-        print_thread.END_PROCESSES = True
-
-
-
+        print_thread.END_PROCESSES = True   
+        
+        
+    
     # print significant results to separate file
     print_queue2 = multiprocessing.Queue()
     # launch thread to read and process the print queue
-    print_thread2 = PrintThread.StringWriter(print_queue2, output, "result.txt", True, True)
+    print_thread2 = PrintThread.StringWriter(print_queue2, output, "result_nobg_2way.txt", True, True)
 
     print "Now printing significant peaks to results file"
     for i in alldata:
