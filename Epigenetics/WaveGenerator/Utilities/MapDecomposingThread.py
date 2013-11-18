@@ -52,7 +52,7 @@ class MapDecomposer(multiprocessing.Process):
                         MapDecomposer.gausian_value_at_peak(i)
 
     @staticmethod
-    def get_tallest_point(coverage_map):
+    def get_tallest_point(coverage_map, ignore = []):
         '''returns position and height of the highest point in the map'''
         pos = 0
         height = 0
@@ -60,8 +60,9 @@ class MapDecomposer(multiprocessing.Process):
         for i in range(0, len(coverage_map)):
             # print "i = %i %f" % (i, coverage_map[i])
             if height < coverage_map[i] :
-                height = coverage_map[i]
-                pos = i
+                if i not in ignore:
+                    height = coverage_map[i]
+                    pos = i
         # print " --> returning %s" % ({'position':pos, 'height':height}) - verified, working correctly without ignore
         return {'position':pos, 'height':height}
 
@@ -212,13 +213,13 @@ class MapDecomposer(multiprocessing.Process):
         if height > best_height:
             best_height = height
             best_pos = int((end - start) / 2) + start
-
         if best_height <= 1:
             # print "get_mu found no reasonable sigmas"
             return None, None
         else :
             # print "best_height = ", best_height
             # print "pos = ", best_pos
+            # print "return: start = %i, end = %i, height = %i (best: pos = %i, ht= %i)" % (start, end, height, best_pos, best_height)
             return best_pos, best_height
 
     def process_map(self, item):
@@ -231,7 +232,7 @@ class MapDecomposer(multiprocessing.Process):
         cur_height = v.get('height')
         min_height = MapDecomposer.PARAM.get_parameter("min_height")
         number_waves = MapDecomposer.PARAM.get_parameter("number_waves")
-
+        ignore = []
         mu = None
         if number_waves:
             wave_number = 1
@@ -246,11 +247,13 @@ class MapDecomposer(multiprocessing.Process):
                     this_sigma = self.best_fit_newton(n, i, cur_height)
                     tested.append((i, this_sigma))
             tbt = self.to_be_tested(tested)
+
             while len(tbt) > 0:
                 for t in tbt:
                     tested.append((t, self.best_fit_newton(n, t, cur_height)))
                 tbt = []
                 tbt = self.to_be_tested(tested)
+
             mu, sigma = self.get_mu(tested)    # returns mu and sigma.
 
             if mu != None:
@@ -258,7 +261,11 @@ class MapDecomposer(multiprocessing.Process):
                 n = self.subtract_gausian(n, cur_height, sigma, mu)    # subtract gausian
                 if number_waves:
                     wave_number += 1
-            v = MapDecomposer.get_tallest_point(n)    # re-calculate tallest point
+            else:
+                ignore.append(p)
+                v = MapDecomposer.get_tallest_point(n, ignore)    # re-calculate tallest point
+            v = MapDecomposer.get_tallest_point(n, ignore)    # re-calculate tallest point
+
             cur_height = v.get('height')
             # repeat
         for pk in peaks:
