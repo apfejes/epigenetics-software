@@ -8,6 +8,7 @@ import os, sys
 from numpy import log, mean, std
 from math import sqrt
 import math
+import Svg_Builder
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
@@ -21,8 +22,6 @@ sys.path.insert(0, _root_dir + os.sep + "Illustration")
 
 
 from bson.objectid import ObjectId
-from MongoDB.mongoUtilities import Svg_Builder
-
 # directory_for_svgs = "/home/sperez/Documents/svg_temp/"
 
 class MongoEpigeneticsWrapper():
