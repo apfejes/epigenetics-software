@@ -154,7 +154,11 @@ class MapDecomposer(multiprocessing.Process):
             already_tested.add(j[0])
         to_be_tested = set()
         maximal_sigma = 0
-        for i in range(len(sample) - 1):    # zero to length of the set, minus 2.  Because you will be testing len +1
+
+        slen = len(sample);
+        if slen <= 1:
+            return to_be_tested
+        for i in range(slen - 1):    # zero to length of the set, minus 2.  Because you will be testing len +1
             if sample[i][1] > maximal_sigma:
                 maximal_sigma = sample[i][1]
             if i == 0 and sample[i][1] > sample[i + 1][1]:    # if first value in poled Sigmas, and greater than the second value,
@@ -162,7 +166,7 @@ class MapDecomposer(multiprocessing.Process):
                     t = int((sample[i + 1][0] - sample[i][0]) / 2) + sample[i][0]    # then add the midpoint.
                     if t not in already_tested and t not in to_be_tested:
                         to_be_tested.add(t)
-            elif i == len(sample) and sample[i][1] > sample[i - 1][1]:
+            elif i == slen and sample[i][1] > sample[i - 1][1]:
                 if sample[i][0] - sample[i - 1][0] > 1:
                     t = int((sample[i][0] - sample[i - 1][0]) / 2) + sample[i - 1][0]
                     if t not in already_tested and t not in to_be_tested:
@@ -176,16 +180,14 @@ class MapDecomposer(multiprocessing.Process):
                     t = int((sample[i][0] - sample[i - 1][0]) / 2) + sample[i - 1][0]
                     if t not in already_tested and t not in to_be_tested:
                         to_be_tested.add(t)
-        if sample[len(sample) - 1][1] > maximal_sigma:
-                maximal_sigma = sample[len(sample) - 1][1]
-        for i in range(len(sample) - 1):
+        if slen > 1 and sample[slen - 1][1] > maximal_sigma:
+                maximal_sigma = sample[slen - 1][1]
+        for i in range(slen - 1):
             # print "testing sample[i][1] (%i) == maximal_sigma (%i) and sample[i + 1][1]  (%i)  == maximal_sigma and (sample[i + 1][0] - sample[i][0] (%i) > 1):" % (sample[i][1], maximal_sigma, sample[i + 1][1], (sample[i + 1][0] - sample[i][0]))
             if sample[i][1] == maximal_sigma and sample[i + 1][1] == maximal_sigma and (sample[i + 1][0] - sample[i][0] > 1):
                 for t in range(sample[i][0], sample[i + 1][0]):
                     if t not in already_tested and t not in to_be_tested:
                         to_be_tested.add(t)
-
-
         return to_be_tested
 
     @staticmethod
