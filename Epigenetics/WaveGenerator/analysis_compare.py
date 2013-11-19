@@ -163,12 +163,17 @@ def compare_BED_and_waves(bedfile, wavesfile, output, thresh):
     f.close()
     print "%s waves were unassigned to a BED bin." % unassigned
     for i in range(0, maxperbin + 1):
-        print "# of bins with %s peaks: %s" % (i, counts[i])
+        print "# of bins with %s waves: \t%s" % (i, counts[i])
 
 if __name__ == "__main__":
-
+    if len(sys.argv) <= 3:
+        print ("This program requires the name of the ChIP-chip bed file, ChIP-chip waves file, and output/path")
+        print" eg. python analysis_compare.py /directory/database.conf directory/output/ yeast_epigenetics"
+        sys.exit()
+    bed = sys.argv[1]
+    wave = sys.argv[2]
+    out = sys.argv[3]
     thresh = raw_input("Enter the threshold for peak height: ")
     thresh = float(thresh)
-    compare_BED_and_waves("/home/sbrown/Brainstorm/09-08-11_Z_yaf9.bed", "/home/sbrown/Phoebe_CEL/WAVES/partial_files/09-08-11-Z_yaf9_TRP_IP.normalized.waves", "/home/sbrown/temp", thresh)
-    # body of main goes here
-    # pass output/path to compare_BED_and_waves
+    compare_BED_and_waves(bed, wave, out, thresh)
+
