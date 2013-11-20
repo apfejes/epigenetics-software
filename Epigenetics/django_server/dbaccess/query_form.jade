@@ -6,141 +6,139 @@ html
   
 body
     
-    a(href='http://kruncher.cmmt.ubc.ca:8880/dbaccess/') 
-      #header
-        h1 Kobor Lab Epigenetics Database - Query
-    
-    #wrapper
-        form(name="main", action='/dbaccess/query_form/', method='post')
-            input(type="hidden", id="width", name="width", value = "")
-            input(type="hidden", id="height", name="height", value = "")
-            input(type="hidden", id="sample_index", name="sample_index", value = sample_index)
-            input(type="hidden", id="types_index", name="types_index", value = types_index)
-            script(type='text/javascript')
-                document.getElementById('width').value = window.innerWidth;
-                document.getElementById('height').value = window.innerHeight;
-            div(align='center')
-                fieldset
-                    label(for='organism') Organism:
-                        select(name='organism', id='organism')
-                            - each org in organism_list
-                                  - if org == organism
-                                       option(value=org, selected)=org
-                                  - else 
-                                       option(value=org)=org
-                    label(for='collection') Collection:
-                       - if collection_list
-                           - var col = collection_list.items()
-                           select(name='collection',id='collection')
-                             - for x,y in col
-                               - if x == collection
-                                   option(value=x, selected)=y
-                               - else
-                                   option(value=x)=y
-                    label(for='project') Project:
-                        select(name='project', id='project',multiple)
-                          - each pt in project_list
-                            - if pt == project
-                                option(value=pt, selected)=pt
-                            - else 
-                                option(value=pt)=pt
-                    label(for='chipseq') Chip-Seq:
-                        select(name='chipseq', id='chipseq',multiple)
-                          - each cs in chip_list
-                            option(value=cs)=cs
-                    label(for='chromosome') Chromosome:
-                        if chromosome
-                            input(id='chromosome',size = '6', type='text', name='chromosome', value = chromosome)
-                        else
-                            input(id='chromosome',size = '6', type='text', value='',placeholder='1,2,...X,Y', name='chromosome')
-                    label(for='start') Start:
-                        if start
-                            input(id='start',size = '8', type='text', value=start,name='start')
-                        else 
-                            input(id='start',size = '8', type='text', value='',name='start')
-                        
-                    label(for='end') End:
-                        if end
-                            input(id='end', size = '8', type='text', value=end, name='end')
-                        else
-                            input(id='end', size = '8', type='text', value='', name='end')
-                    input(type='submit',value='Query!', class ="bigbutton")
-            #zoompan
-              #selection_element
-                input(type='button',value = '<<<', title="Pan left 60%", name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self');", class = "medbutton")
-              #selection_element
-                input(type='button',value = '<<',title="Pan left 30%", name='LessLeft', onClick="window.open(newURL('LessLeft'),'_self');", class = "medbutton")
-              #selection_element
-                input(type='button',value = '--', title="Zoom Out x3", name='ZoomOutMore', onClick="window.open(newURL('ZoomOutMore'),'_self');", class = "medbutton")
-              #selection_element
-                input(type='button',value = '-',title='Zoom Out x1.5', name='ZoomOut', onClick="window.open(newURL('ZoomOut'),'_self');", class = "medbutton")
-              #selection_element
-                input(type='button',value = '+',title='Zoom In x1.5', name='ZoomIn', onClick="window.open(newURL('ZoomIn'),'_self');", class = "medbutton")
-              #selection_element
-                input(type='button',value = '++',title='Zoom In x3', name='ZoomInMore', onClick="window.open(newURL('ZoomInMore'),'_self');", class = "medbutton")
-              #selection_element
-                input(type='button',value = '>>', title="Pan right 30%", name='LessRight', onClick="window.open(newURL('LessRight'),'_self');", class = "medbutton")
-              #selection_element
-                input(type='button',value = '>>>', title="Pan right 60%", name='MoreRight', onClick="window.open(newURL('MoreRight'),'_self');", class = "medbutton")
-            #option_elements
-              if organism == 'human'
-                #selection_element
-                  label(for='tss') Tss:
-                     if tss
-                          input(id='tss', size = '8', type='checkbox', name="tss", checked)
-                      else
-                          input(id='tss', size = '8', type='checkbox', name="tss")
-                #selection_element
-                  label(for='cpg') CpG Islands:
-                      if cpg
-                          input(id='cpg', size = '8', type='checkbox', name="cpg", checked)
-                      else
-                          input(id='cpg', size = '8', type='checkbox', name="cpg")
-              if collection = 'chipseq' or collection = 'methchip'
-                label(for='minheight') Minimum peak height:
-                    if minheight
-                        input(id='minheight',size = '4', type='text', name='minheight', value = minheight)
-                    else
-                        input(id='minheight',size = '4', type='text', value='0', name='minheight')
+  a(href='http://kruncher.cmmt.ubc.ca:8880/dbaccess/') 
+    #header
+      h1 Kobor Lab Epigenetics Database - Query
+  
+  #wrapper
+    form(name="main", action='/dbaccess/query_form/', method='post')
+      input(type="hidden", id="width", name="width", value = "")
+      input(type="hidden", id="height", name="height", value = "")
+      input(type="hidden", id="sample_index", name="sample_index", value = sample_index)
+      input(type="hidden", id="types_index", name="types_index", value = types_index)
+      script(type='text/javascript')
+        document.getElementById('width').value = window.innerWidth;
+        document.getElementById('height').value = window.innerHeight;
+      div(align='center')
+        fieldset
+          label(for='organism') Organism:
+            select(name='organism', id='organism')
+              - each org in organism_list
+                - if org == organism
+                  option(value=org, selected)=org
+                - else 
+                  option(value=org)=org
+          label(for='collection') Collection:
+            - if collection_list
+              - var col = collection_list.items()
+              select(name='collection',id='collection')
+                - for x,y in col
+                  - if x == collection
+                    option(value=x, selected)=y
+                  - else
+                    option(value=x)=y
+          label(for='project') Project:
+            select(name='project', id='project',multiple)
+              - each pt in project_list
+                - if pt == project
+                  option(value=pt, selected)=pt
+                - else 
+                  option(value=pt)=pt
+          label(for='chipseq') Chip-Seq:
+            select(name='chipseq', id='chipseq',multiple)
+              - each cs in chip_list
+                option(value=cs)=cs
+          label(for='chromosome') Chromosome:
+            if chromosome
+              input(id='chromosome',size = '6', type='text', name='chromosome', value = chromosome)
+            else
+              input(id='chromosome',size = '6', type='text', value='',placeholder='1,2,...X,Y', name='chromosome')
+          label(for='start') Start:
+            if start
+              input(id='start',size = '8', type='text', value=start,name='start')
+            else 
+              input(id='start',size = '8', type='text', value='',name='start')
+          label(for='end') End:
+            if end
+              input(id='end', size = '8', type='text', value=end, name='end')
+            else
+              input(id='end', size = '8', type='text', value='', name='end')
+          input(type='submit',value='Query!', class ="bigbutton")
+      #zoompan
+        #selection_element
+          input(type='button',value = '<<<', title="Pan left 60%", name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self');", class = "medbutton")
+        #selection_element
+          input(type='button',value = '<<',title="Pan left 30%", name='LessLeft', onClick="window.open(newURL('LessLeft'),'_self');", class = "medbutton")
+        #selection_element
+          input(type='button',value = '--', title="Zoom Out x3", name='ZoomOutMore', onClick="window.open(newURL('ZoomOutMore'),'_self');", class = "medbutton")
+        #selection_element
+          input(type='button',value = '-',title='Zoom Out x1.5', name='ZoomOut', onClick="window.open(newURL('ZoomOut'),'_self');", class = "medbutton")
+        #selection_element
+          input(type='button',value = '+',title='Zoom In x1.5', name='ZoomIn', onClick="window.open(newURL('ZoomIn'),'_self');", class = "medbutton")
+        #selection_element
+          input(type='button',value = '++',title='Zoom In x3', name='ZoomInMore', onClick="window.open(newURL('ZoomInMore'),'_self');", class = "medbutton")
+        #selection_element
+          input(type='button',value = '>>', title="Pan right 30%", name='LessRight', onClick="window.open(newURL('LessRight'),'_self');", class = "medbutton")
+        #selection_element
+          input(type='button',value = '>>>', title="Pan right 60%", name='MoreRight', onClick="window.open(newURL('MoreRight'),'_self');", class = "medbutton")
+      #option_elements
+        if organism == 'human'
+          #selection_element
+            label(for='tss') Tss:
+              if tss
+                input(id='tss', size = '8', type='checkbox', name="tss", checked)
               else
-                input(type="hidden", id="minheight", name="minheight", value = '0')
-              if collection = 'methylation' or collection = "methchip"
-                #selection_element
-                  label(for='datapoints') Show data points:
-                      if datapoints
-                          input(id='datapoints', size = '8', type='checkbox', name="datapoints", checked)
-                      else
-                          input(id='datapoints', size = '8', type='checkbox', name="datapoints")
-                #selection_element
-                  label(for='show_dist') Show sample type distribution:
-                    if show_dist
-                      input(id='show_dist', size = '8', type='checkbox', name="show_dist", checked)
-                    else
-                      input(id='show_dist', size = '8', type='checkbox', name="show_dist")
-         #left
-           |!{plot}
-         #right
-           h3 Group Index
-           - if types_index.items
-               - var samples = types_index.items()
-               - var t = samples.sort()
-               - for k, v in samples
-                   font(color=v)
-                     !{k}
-                   br  
-           - else 
-             | No Data Found                   
-           h3 Sample Index
-           - if sample_index.items
-               - var samples = sample_index.items()
-               - var t = samples.sort()
-               - for k,v in samples
-                   font(color=v)
-                     !{k}
-                   br 
-           - else 
-             | No Data Found
-
+                input(id='tss', size = '8', type='checkbox', name="tss")
+          #selection_element
+            label(for='cpg') CpG Islands:
+              if cpg
+                input(id='cpg', size = '8', type='checkbox', name="cpg", checked)
+              else
+                input(id='cpg', size = '8', type='checkbox', name="cpg")
+        if collection = 'chipseq' or collection = 'methchip'
+          label(for='minheight') Minimum peak height:
+            if minheight
+              input(id='minheight',size = '4', type='text', name='minheight', value = minheight)
+            else
+              input(id='minheight',size = '4', type='text', value='0', name='minheight')
+        else
+          input(type="hidden", id="minheight", name="minheight", value = '0')
+        if collection = 'methylation' or collection = "methchip"
+          #selection_element
+            label(for='datapoints') Show data points:
+              if datapoints
+                input(id='datapoints', size = '8', type='checkbox', name="datapoints", checked)
+              else
+                input(id='datapoints', size = '8', type='checkbox', name="datapoints")
+          #selection_element
+            label(for='show_dist') Show sample type distribution:
+              if show_dist
+                input(id='show_dist', size = '8', type='checkbox', name="show_dist", checked)
+              else
+                input(id='show_dist', size = '8', type='checkbox', name="show_dist")
+    #left
+       |!{plot}
+    #right
+      h3 Group Index
+      - if types_index.items
+        - var samples = types_index.items()
+        - var t = samples.sort()
+        - for k, v in samples
+          font(color=v)
+            !{k}
+          br  
+      - else 
+        | No Data Found                   
+      h3 Sample Index
+      - if sample_index.items
+        - var samples = sample_index.items()
+        - var t = samples.sort()
+        - for k,v in samples
+          font(color=v)
+            !{k}
+          br 
+      - else 
+        | No Data Found
 
 script(type='text/javascript')
     function newURL(action){  
