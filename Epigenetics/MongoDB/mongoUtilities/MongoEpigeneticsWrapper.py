@@ -141,9 +141,9 @@ class MongoEpigeneticsWrapper():
         elif project == 'CARE':
             groupby_name = 'gender'
         elif project == "HASM":
-            groupby_name = 'gender'
-        elif project == "DEII":
             groupby_name = 'sample_group'
+        elif project == "DEII":
+            groupby_name = 'exposure'
         elif project == "All":
             groupby_name = 'project'
         elif project == "Tissue":
