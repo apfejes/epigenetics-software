@@ -119,7 +119,7 @@ def FindBaseline(file_name, normalize = False):
             data[g].setv(v)
     # create wig file
     f_w_name = StringUtils.rreplace(file_name, '.BEDlike', '', 1)
-    f_w_name = StringUtils.rreplace(f_w_name, 'BED', 'WIG', 1)      ##should these two lines just replace .BEDlike with .WIG?
+    f_w_name = StringUtils.rreplace(f_w_name, 'BED', 'WIG', 1)    # #should these two lines just replace .BEDlike with .WIG?
     trackname = os.path.basename(f_w_name)
 
     # print "Writing to %s" % (f_w_name)
@@ -149,20 +149,25 @@ def FindBaseline(file_name, normalize = False):
         # print "x of len: %i/%i" % (x, l)
         if data[x].chromosome != current_chr:
             if len(coverage_map) > 0:
-                wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)    #for yeast chromosome nomenclature (roman numeral)
-                #wigfile.add_map(coverage_map, current_chr, block_left)
+                wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)    # for yeast chromosome nomenclature (roman numeral)
+                # wigfile.add_map(coverage_map, current_chr, block_left)
                 coverage_map = []
             # TODO: taper off chromosome
             # TODO: taper "on" new chromosome
             print "New Chromosome %s (%s)" % (data[x].chromosome, chr_yeast[data[x].chromosome])
             current_chr = data[x].chromosome    # switch chromosomes,
-        block_left = data[x - 1].position + 2    # shift by 1, and block starts after the zero.
-        last_bp = data[x - 1].position + 1
+        if data[x - 1].chromosome == data[x].chromosome:
+            block_left = data[x - 1].position + 2    # shift by 1, and block starts after the zero.
+            last_bp = data[x - 1].position + 1
+        else:
+            block_left = data[x].position + 2
+            last_bp = data[x].position + 1
+
         # print "x=%i data=%i, value=%f" % (x, data[x].position + 1, data[x].value)
-        while x < l and data[x].value >= 0:
+        while x < l and data[x].value >= 0 and data[x].chromosome == current_chr:
             diff = (data[x].position + 1) - last_bp
-            if diff > 6:
-                diff = 6
+            # if diff > 6:
+            #    diff = 6
             if (diff > 1):
                 slope = float(data[x].value - last_ht) / (diff)    # slope between the two
                 for y in range(1, diff):
@@ -173,7 +178,7 @@ def FindBaseline(file_name, normalize = False):
                 a += 1
             last_bp = data[x].position + 1
             last_ht = data[x].value
-            if x < l - 1 and data[x + 1].value <= 0:
+            if x < l - 1 and (data[x + 1].value <= 0 or data[x + 1].chromosome != current_chr):
                 diff = (data[x + 1].position + 1) - (data[x].position + 1)
                 slope = float(0 - data[x].value) / (diff)
                 for y in range(1, diff):
@@ -185,8 +190,9 @@ def FindBaseline(file_name, normalize = False):
             x += 1
             last_ht = 0
         if len(coverage_map) > 0:
-            wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left) #for yeast chromosome nomenclature (roman numeral)
-            #wigfile.add_map(coverage_map, current_chr, block_left)
+            wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)    # for yeast chromosome nomenclature (roman numeral)
+            print "writing map"
+            # wigfile.add_map(coverage_map, current_chr, block_left)
             coverage_map = []
     # gc.enable()
 
