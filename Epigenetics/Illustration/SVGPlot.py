@@ -8,7 +8,7 @@ from svgwrite.shapes import Rect, Circle
 from svgwrite.text import Text
 from svgwrite.drawing import Drawing
 from svgwrite.path import Path
-from math import fabs, exp, sqrt, log
+from math import fabs
 import Color_Palette
 from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, smallfont, legend_color
 # from PlotUtilities import medfont
@@ -20,7 +20,8 @@ class Plot(object):
 
     METHYLATION_DOT_RADIUS = 2
     METHYLATION_DISTR_HT = 12.0
-    DISTR_STROKE = 0.5
+    DISTR_SHIFT = 0
+    DISTR_STROKE = 0.75
     BOTTOM_MARGIN = 120    # 120 pixels
     RIGHT_MARGIN = 240
     MARGIN = 30
@@ -82,6 +83,28 @@ class Plot(object):
         return self.palette.get_type_colors()
 
 
+    def make_gausian(self, pos, height, stddev, sample_id, horizontal = True, y_median = 0, sigmas = 3):
+        # path points will be at (-3stddev,0), (0,height), (3stddev,0)
+        # Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
+        X = [-sigmas * stddev, -1 * stddev, -1 * stddev, 0, stddev, stddev, sigmas * stddev]
+        Y = [0, 0, height, height, height, 0, 0]
+
+        if horizontal == True:
+            X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
+            # Scale Y and inverse the coordinates
+            Y = [round(y * self.scale_y, 2) for y in Y]
+            Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
+        else:
+            S = [round(((pos - self.start) * self.scale_x) + y + self.MARGIN + self.DISTR_SHIFT, 2) for y in Y]
+            Y = [round(((x + y_median) * self.scale_y), 2) for x in X]
+            X = S
+        d = "M " + str(X[0]) + "," + str(Y[0]) + " C"    # point 1
+        for i in range(1, 7):
+            d += " " + str(X[i]) + "," + str(Y[i])
+        # print "d is: ", d
+        return d
+
+
     def build_chipseq(self, message, waves):
         '''convert loaded data into svg images'''
         if message:
@@ -103,48 +126,7 @@ class Plot(object):
         self.scale_y = self.dimension_y / self.maxh
         print "scale_y: ", self.scale_y
         for (pos, height, stddev, sample_id) in waves:
-            '''
-            X, Y = self.makegaussian_horizontal(self.start, self.end, pos, tail, self.start, float(height), stddev)
-            # print "X: ", X
-            # print "Y: ", Y
-            X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
-            # TODO: This is not the right fix for this bug! Occurs when peak is outside region.
-            if len(X) < 2 :
-                continue
-            for x in X:    # Adjust peaks on the edge of the plotting area so they don't look skewed.
-                if x < (self.MARGIN + 1):
-                    X.insert(0, self.MARGIN)
-                    Y.insert(0, tail)
-                    break
-                if x > (self.width - 1):
-                    X.append(self.width)
-                    Y.append(tail)
-                    break
-            # Scale Y and inverse the coordinates
-            Y = [round(y * self.scale_y, 2) for y in Y]
-            Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
-            # d is the list of coordinates with commands such as
-            # M for "move to' to initiate curve and S for smooth curve
-            d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
-            for i in range(2, len(X)):
-                d += (" " + str(X[i]) + "," + str(Y[i]))
-            '''
-            # path points will be at (-3stddev,0), (0,height), (3stddev,0)
-            # Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
-            X = [-3 * stddev, -1 * stddev, -1 * stddev, 0, stddev, stddev, 3 * stddev]
-            Y = [0, 0, height, height, height, 0, 0]
-            X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
-            # Scale Y and inverse the coordinates
-            Y = [round(y * self.scale_y, 2) for y in Y]
-            Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
-            d = "M " + str(X[0]) + "," + str(Y[0]) + " C"    # point 1
-            for i in range(1, 7):
-                d += " " + str(X[i]) + "," + str(Y[i])
-
-            # print "d is: ", d
-
-
-
+            d = self.make_gausian(pos, height, stddev, sample_id)
             if first:
                 print "palette.sample_color: ", self.palette.samples_color
                 first = False
@@ -164,6 +146,7 @@ class Plot(object):
     def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
         '''convert this information into elements of the svg image'''
         all_y = []
+        self.scale_y = 1
 
         if message:
             Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
@@ -210,13 +193,14 @@ class Plot(object):
                     s = round(s * self.dimension_y, 3)
 
                     if s != 0.0:
-                        gaussian_y, gaussian_x = self.makegaussian_vertical(s, self.METHYLATION_DISTR_HT)    # reverse output arguments for sideways gaussians
-                        gaussian_x = [coord + x - 1 for coord in gaussian_x]
-                        gaussian_y = [item + m for item in gaussian_y]
-                        d = "M"
-
-                        for i in range(0, len(gaussian_x)):
-                            d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
+                        d = self.make_gausian(position, self.METHYLATION_DISTR_HT, s, sample_id, False, m)
+#                         gaussian_y, gaussian_x = self.makegaussian_vertical(s, self.METHYLATION_DISTR_HT)    # reverse output arguments for sideways gaussians
+#                         gaussian_x = [coord + x - 1 for coord in gaussian_x]
+#                         gaussian_y = [item + m for item in gaussian_y]
+#                         d = "M"
+#
+#                         for i in range(0, len(gaussian_x)):
+#                             d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
 
                         gaussian = (Path(stroke = type_color,
                                          stroke_width = self.DISTR_STROKE,
@@ -353,35 +337,12 @@ class Plot(object):
             # self.elements.append(ticline2)
             self.elements.append(ticmarker)
 
-    """this function no longer used
-    @staticmethod
-    def makegaussian_horizontal(start, end, pos, tail, offset, innerheight, stddev):
-        ''' create gausian distributions on the plot '''
-        endpts = int((sqrt((-2) * stddev * stddev * log(float(tail) / innerheight))))
-        spacing = 64
-        n_points = 0
-        while n_points < 25 and spacing >= 2:
-            X = []
-            for i in range (-stddev, stddev, spacing):
-                X.append(float(i))
-            for i in range (-endpts, -stddev, spacing):
-                X.append(float(i))
-            for i in range (stddev, endpts, spacing):
-                X.append(float(i))
-            n_points = len(X)
-            spacing /= 2
-        if (endpts) not in X:
-            X.append(endpts)
-        X.sort()
-        X = [float(x) for x in X if 0 <= (x + pos - offset) < (end - start)]
-        stddev = float(stddev)
-        Y = [round(innerheight * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
-        return X, Y
-    """
-
+    '''
     @staticmethod
     def makegaussian_vertical(stddev, innerheight):
-        ''' create gausian distributions on the plot '''
+         create gausian distributions on the plot 
+        
+        
         endpts = (sqrt((-2) * stddev * stddev * log(1.0 / innerheight)))
         X = [0]
         X.extend([round(stddev * 2.0 * (i / 9.0) - stddev, 3) for i in range(0, 10)])    # add 10 points  near mean
@@ -391,3 +352,28 @@ class Plot(object):
         X.sort()
         Y = [round(innerheight * exp(-x ** 2 / (2.0 * stddev * stddev)), 3) for x in X]
         return X, Y
+        
+    def make_gausian(self, pos, height, stddev, sample_id, horizontal):
+        # path points will be at (-3stddev,0), (0,height), (3stddev,0)
+        # Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
+        X = [-3 * stddev, -1 * stddev, -1 * stddev, 0, stddev, stddev, 3 * stddev]
+        Y = [0, 0, height, height, height, 0, 0]
+
+        if horizontal == True:
+            X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
+            # Scale Y and inverse the coordinates
+            Y = [round(y * self.scale_y, 2) for y in Y]
+            Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
+        else:
+            X = [round((x - self.start + pos) * self.scale_y, 2) + self.MARGIN for y in Y]
+            # Scale Y and inverse the coordinates
+            Y = [round(x * self.scale_x, 2) for x in X]
+            Y = [(self.height - self.BOTTOM_MARGIN - x) for x in X]
+        d = "M " + str(X[0]) + "," + str(Y[0]) + " C"    # point 1
+        for i in range(1, 7):
+            d += " " + str(X[i]) + "," + str(Y[i])
+
+        # print "d is: ", d
+        return d        
+        
+    '''
