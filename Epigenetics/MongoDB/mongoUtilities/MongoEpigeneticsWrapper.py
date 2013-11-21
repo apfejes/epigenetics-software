@@ -270,9 +270,11 @@ class MongoEpigeneticsWrapper():
             return {}
         collection = 'samples'
         # TODO: Remove these restrictions from query parameters!
-        # query_parameters = {}    # {"sample_id":{"$in":["02/08/2012_WT_IP_S9.6", "01/24/2012_WT_IP_S9.7", "04/12/2013_RNaseH_IP_S9.8", "04/12/2013_Sen1_IP_S9.9", "04/20/2013_RNaseH_IP_S9.10", "04/20/2013_Sen1_IP_S9.11"]}}    # This dictionary will store all the query parameters
+        # query_parameters = {}    # This dictionary will store all the query parameters
         # query_parameters = {"sample_id":{"$in":["2/28/2012_HTZ1-FLAG::KAN_IP_mFLAG", "4/4/2012_HTZ1-FLAG::KAN_IP_mFLAG"]}}
-        query_parameters = {"sample_id":"missing_waves"}
+        query_parameters = {"use":{"$exists":False}}
+        # query_parameters = {"sample_id":{"$in":["02/08/2012_WT_IP_S9.6", "01/24/2012_WT_IP_S9.7", "04/12/2013_RNaseH_IP_S9.8", "04/12/2013_Sen1_IP_S9.9", "04/20/2013_RNaseH_IP_S9.10", "04/20/2013_Sen1_IP_S9.11"]}}
+        # query_parameters = {"sample_id":{"$in":["08/01/2009_HTZ1-FLAG::KAN yaf9::KAN pRS314_IP_mFLAG"]}}
         return_chr = {'_id': True, 'file_name':True, 'sample_id':True}
 
         print "finddocs_samples_chipseq, chip =  %s" % chip
