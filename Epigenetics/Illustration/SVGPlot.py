@@ -11,6 +11,7 @@ from svgwrite.path import Path
 from math import fabs
 import Color_Palette
 from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, smallfont, legend_color
+import string
 # from PlotUtilities import medfont
 
 class Plot(object):
@@ -50,6 +51,9 @@ class Plot(object):
         self.dimension_x = 0
         self.scale_x = 0
 
+
+
+
     def set_properties(self, filename, title, start, end, width, height):
         '''Set the properties of the canvas on which you'll want to generate your image '''
         self.elements = []
@@ -69,6 +73,10 @@ class Plot(object):
         self.plot = Drawing(filename, size = canvas_size)
         background = Rect(insert = (0, 0), size = canvas_size, fill = "white")
         self.plot.add(background)
+
+        magic_box = Text(" ", id = "sample_name", insert = ((self.MARGIN + 20), (self.MARGIN + 20)),
+                    fill = "black", font_size = bigfont)
+        self.elements.append(magic_box)
 
     def set_sample_index(self, types, samples):
         '''overwrite the sample_index to preserve colours from previous set.'''
@@ -136,7 +144,8 @@ class Plot(object):
             types_color = self.palette.colour_assignment_group(sample_id)
             self.elements.append(Path(stroke = types_color, stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
-                           fill = types_color, fill_opacity = 0.5, d = d))
+                           fill = types_color, fill_opacity = 0.5, d = d,
+                        onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" % (''.join(s for s in sample_id if s in string.printable))))
 
         # fix to truncate curves at border (to hide them)
         self.elements.append(Rect(insert = (-1, 0), size = (self.MARGIN + 1, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
@@ -206,9 +215,6 @@ class Plot(object):
                                        d = d))
 
                         self.elements.insert(1, gaussian)
-            magic_box = Text(" ", id = "sample_name", insert = ((self.MARGIN + 20), (self.MARGIN + 20)),
-                    fill = "black", font_size = bigfont)
-            self.elements.append(magic_box)
 
 
     def save(self):
