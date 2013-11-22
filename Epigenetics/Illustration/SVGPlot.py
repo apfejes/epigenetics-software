@@ -12,7 +12,6 @@ from math import fabs
 import Color_Palette
 from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, smallfont, legend_color
 import string
-# from PlotUtilities import medfont
 
 class Plot(object):
     '''
@@ -27,9 +26,6 @@ class Plot(object):
     RIGHT_MARGIN = 240
     MARGIN = 30
     palette = Color_Palette.ColorPalette()    # APF - reset on each iteration through the sorter.
-    colors = [('indigo', 'slateblue'), ('red', 'orange'),
-                  ('green', 'limegreen'), ('orange', 'yellow')]
-
 
 
     def __init__(self):
@@ -68,8 +64,7 @@ class Plot(object):
         self.dimension_x = self.width - self.MARGIN - self.RIGHT_MARGIN
         self.scale_x = float(self.dimension_x) / (self.end - self.start)    # this is a scaling variable
 
-        # create drawing
-        canvas_size = (str(self.width) + "px" , str(self.height) + "px")
+        canvas_size = (str(self.width) + "px" , str(self.height) + "px")    # create drawing
         self.plot = Drawing(filename, size = canvas_size)
         background = Rect(insert = (0, 0), size = canvas_size, fill = "white")
         self.plot.add(background)
@@ -92,8 +87,9 @@ class Plot(object):
 
 
     def make_gausian(self, pos, height, stddev, sample_id, horizontal = True, y_median = 0, sigmas = 3):
-        # path points will be at (-3stddev,0), (0,height), (3stddev,0)
-        # Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
+        ''' path points will be at (-3stddev,0), (0,height), (3stddev,0)
+            Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
+         '''
         X = [-sigmas * stddev, -1 * stddev, -1 * stddev, 0, stddev, stddev, sigmas * stddev]
         Y = [0, 0, height, height, height, 0, 0]
 
@@ -109,7 +105,6 @@ class Plot(object):
         d = "M " + str(X[0]) + "," + str(Y[0]) + " C"    # point 1
         for i in range(1, 7):
             d += " " + str(X[i]) + "," + str(Y[i])
-        # print "d is: ", d
         return d
 
 
@@ -119,12 +114,9 @@ class Plot(object):
             Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
                     fill = "black", font_size = bigfont * 2)
             self.elements.append(Message)
+        first = True    # tail = 1
 
-        # tail = 1
-        first = True
-
-        # create path objects for each peak
-        heights = []
+        heights = []    # create path objects for each peak
         if not waves:
             return
 
@@ -162,13 +154,9 @@ class Plot(object):
                     fill = "black", font_size = bigfont * 2)
             self.elements.append(Message)
 
-
         for position in pos_betas_dict.keys():
             for y, _sample, _sample_type in pos_betas_dict[position]:
                 all_y.append(y)
-        # self.max_y_value = max(all_y)    # (max y value - value /y height) + margin gives you position
-            # / self.max_y_value
-
         first = True
         for position in pos_betas_dict.keys():
             x = round(float(position - self.start) * self.scale_x, 2) + self.MARGIN
@@ -188,8 +176,6 @@ class Plot(object):
                             self.palette.set_colors_dict({}, {})
                     type_color, sample_color = self.palette.colour_assignment(sample_type, sample_id)
                     point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color,
-                                   # title = sample_id)
-                                   # onmouseover = "evt.target.setAttribute('fill', '#000000');")
                                    onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" % (sample_id))
                     self.elements.append(point)
 
@@ -336,6 +322,5 @@ class Plot(object):
                 tic_x = tic_x + 2
             ticmarker = (Text(label, insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
             self.elements.append(ticline)
-            # self.elements.append(ticline2)
             self.elements.append(ticmarker)
 
