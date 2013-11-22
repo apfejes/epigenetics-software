@@ -68,9 +68,6 @@ class Svg_Builder():
             self.drawing.build_methylation(self.error_message, self.pos_betas_dict, self.sample_peaks, show_points, show_dist)
             self.drawing.add_ytics_methylation()
 
-
-
-
         # TODO: Insert error handling here, if methylation and no methylation data, drop out
         # TODO: Insert error handling here, if chipseq and no chipseq data, drop out
         # TODO: Insert error handling here, if both and no data, drop out
