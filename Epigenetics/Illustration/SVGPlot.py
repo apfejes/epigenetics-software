@@ -8,9 +8,10 @@ from svgwrite.shapes import Rect, Circle
 from svgwrite.text import Text
 from svgwrite.drawing import Drawing
 from svgwrite.path import Path
-from math import fabs, exp, sqrt, log
+from math import fabs
 import Color_Palette
 from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, smallfont, legend_color
+import string
 # from PlotUtilities import medfont
 
 class Plot(object):
@@ -20,7 +21,8 @@ class Plot(object):
 
     METHYLATION_DOT_RADIUS = 2
     METHYLATION_DISTR_HT = 12.0
-    DISTR_STROKE = 0.5
+    DISTR_SHIFT = 0
+    DISTR_STROKE = 0.75
     BOTTOM_MARGIN = 120    # 120 pixels
     RIGHT_MARGIN = 240
     MARGIN = 30
@@ -49,6 +51,9 @@ class Plot(object):
         self.dimension_x = 0
         self.scale_x = 0
 
+
+
+
     def set_properties(self, filename, title, start, end, width, height):
         '''Set the properties of the canvas on which you'll want to generate your image '''
         self.elements = []
@@ -69,6 +74,10 @@ class Plot(object):
         background = Rect(insert = (0, 0), size = canvas_size, fill = "white")
         self.plot.add(background)
 
+        magic_box = Text(" ", id = "sample_name", insert = ((self.MARGIN + 20), (self.MARGIN + 20)),
+                    fill = "black", font_size = bigfont)
+        self.elements.append(magic_box)
+
     def set_sample_index(self, types, samples):
         '''overwrite the sample_index to preserve colours from previous set.'''
         self.palette.set_colors_dict(types, samples)
@@ -80,6 +89,28 @@ class Plot(object):
     def get_types_index(self):
         ''' Return the sample index so that it can be used in HTML'''
         return self.palette.get_type_colors()
+
+
+    def make_gausian(self, pos, height, stddev, sample_id, horizontal = True, y_median = 0, sigmas = 3):
+        # path points will be at (-3stddev,0), (0,height), (3stddev,0)
+        # Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
+        X = [-sigmas * stddev, -1 * stddev, -1 * stddev, 0, stddev, stddev, sigmas * stddev]
+        Y = [0, 0, height, height, height, 0, 0]
+
+        if horizontal == True:
+            X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
+            # Scale Y and inverse the coordinates
+            Y = [round(y * self.scale_y, 2) for y in Y]
+            Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
+        else:
+            S = [round(((pos - self.start) * self.scale_x) + y + self.MARGIN + self.DISTR_SHIFT, 2) for y in Y]
+            Y = [round(((x + y_median) * self.scale_y), 2) for x in X]
+            X = S
+        d = "M " + str(X[0]) + "," + str(Y[0]) + " C"    # point 1
+        for i in range(1, 7):
+            d += " " + str(X[i]) + "," + str(Y[i])
+        # print "d is: ", d
+        return d
 
 
     def build_chipseq(self, message, waves):
@@ -103,48 +134,7 @@ class Plot(object):
         self.scale_y = self.dimension_y / self.maxh
         print "scale_y: ", self.scale_y
         for (pos, height, stddev, sample_id) in waves:
-            '''
-            X, Y = self.makegaussian_horizontal(self.start, self.end, pos, tail, self.start, float(height), stddev)
-            # print "X: ", X
-            # print "Y: ", Y
-            X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
-            # TODO: This is not the right fix for this bug! Occurs when peak is outside region.
-            if len(X) < 2 :
-                continue
-            for x in X:    # Adjust peaks on the edge of the plotting area so they don't look skewed.
-                if x < (self.MARGIN + 1):
-                    X.insert(0, self.MARGIN)
-                    Y.insert(0, tail)
-                    break
-                if x > (self.width - 1):
-                    X.append(self.width)
-                    Y.append(tail)
-                    break
-            # Scale Y and inverse the coordinates
-            Y = [round(y * self.scale_y, 2) for y in Y]
-            Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
-            # d is the list of coordinates with commands such as
-            # M for "move to' to initiate curve and S for smooth curve
-            d = "M" + str(X[0]) + "," + str(Y[0]) + " " + str(X[1]) + "," + str(Y[1])
-            for i in range(2, len(X)):
-                d += (" " + str(X[i]) + "," + str(Y[i]))
-            '''
-            # path points will be at (-3stddev,0), (0,height), (3stddev,0)
-            # Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
-            X = [-3 * stddev, -1 * stddev, -1 * stddev, 0, stddev, stddev, 3 * stddev]
-            Y = [0, 0, height, height, height, 0, 0]
-            X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
-            # Scale Y and inverse the coordinates
-            Y = [round(y * self.scale_y, 2) for y in Y]
-            Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
-            d = "M " + str(X[0]) + "," + str(Y[0]) + " C"    # point 1
-            for i in range(1, 7):
-                d += " " + str(X[i]) + "," + str(Y[i])
-
-            # print "d is: ", d
-
-
-
+            d = self.make_gausian(pos, height, stddev, sample_id)
             if first:
                 print "palette.sample_color: ", self.palette.samples_color
                 first = False
@@ -154,7 +144,8 @@ class Plot(object):
             types_color = self.palette.colour_assignment_group(sample_id)
             self.elements.append(Path(stroke = types_color, stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
-                           fill = types_color, fill_opacity = 0.5, d = d))
+                           fill = types_color, fill_opacity = 0.5, d = d,
+                        onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" % (''.join(s for s in sample_id if s in string.printable))))
 
         # fix to truncate curves at border (to hide them)
         self.elements.append(Rect(insert = (-1, 0), size = (self.MARGIN + 1, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
@@ -164,6 +155,7 @@ class Plot(object):
     def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
         '''convert this information into elements of the svg image'''
         all_y = []
+        self.scale_y = 1
 
         if message:
             Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
@@ -195,7 +187,10 @@ class Plot(object):
                             print "resetting sample colours - %s not found in palette.sample_color" % (key)
                             self.palette.set_colors_dict({}, {})
                     type_color, sample_color = self.palette.colour_assignment(sample_type, sample_id)
-                    point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color)
+                    point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color,
+                                   # title = sample_id)
+                                   # onmouseover = "evt.target.setAttribute('fill', '#000000');")
+                                   onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" % (sample_id))
                     self.elements.append(point)
 
             if show_peaks:
@@ -210,14 +205,7 @@ class Plot(object):
                     s = round(s * self.dimension_y, 3)
 
                     if s != 0.0:
-                        gaussian_y, gaussian_x = self.makegaussian_vertical(s, self.METHYLATION_DISTR_HT)    # reverse output arguments for sideways gaussians
-                        gaussian_x = [coord + x - 1 for coord in gaussian_x]
-                        gaussian_y = [item + m for item in gaussian_y]
-                        d = "M"
-
-                        for i in range(0, len(gaussian_x)):
-                            d = d + (" " + str(gaussian_x[i]) + "," + str(gaussian_y[i]))
-
+                        d = self.make_gausian(position, self.METHYLATION_DISTR_HT, s, sample_id, False, m)
                         gaussian = (Path(stroke = type_color,
                                          stroke_width = self.DISTR_STROKE,
                                          stroke_linecap = 'round',
@@ -226,7 +214,8 @@ class Plot(object):
                                          fill_opacity = 0.1,
                                        d = d))
 
-                        self.elements.append(gaussian)
+                        self.elements.insert(1, gaussian)
+
 
     def save(self):
         ''' push loaded elements to the the plot, clear out the elements. '''
@@ -270,16 +259,13 @@ class Plot(object):
 
         if self.message is None:
             self.add_xtics()
-
-
-
             # self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
             if get_tss:
                 for tss in add_tss(annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
-                    self.elements.append(tss)
+                    self.elements.insert(0, tss)
             if get_cpg:
                 for cpg in add_cpg(annotations, self.MARGIN, self.height, self.width, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
-                    self.elements.append(cpg)
+                    self.elements.insert(0, cpg)
 
     def add_xtics(self):
         ''' Create X tics on the plot'''
@@ -353,41 +339,3 @@ class Plot(object):
             # self.elements.append(ticline2)
             self.elements.append(ticmarker)
 
-    """this function no longer used
-    @staticmethod
-    def makegaussian_horizontal(start, end, pos, tail, offset, innerheight, stddev):
-        ''' create gausian distributions on the plot '''
-        endpts = int((sqrt((-2) * stddev * stddev * log(float(tail) / innerheight))))
-        spacing = 64
-        n_points = 0
-        while n_points < 25 and spacing >= 2:
-            X = []
-            for i in range (-stddev, stddev, spacing):
-                X.append(float(i))
-            for i in range (-endpts, -stddev, spacing):
-                X.append(float(i))
-            for i in range (stddev, endpts, spacing):
-                X.append(float(i))
-            n_points = len(X)
-            spacing /= 2
-        if (endpts) not in X:
-            X.append(endpts)
-        X.sort()
-        X = [float(x) for x in X if 0 <= (x + pos - offset) < (end - start)]
-        stddev = float(stddev)
-        Y = [round(innerheight * exp(-x * x / (2 * stddev * stddev)), 2) for x in X]
-        return X, Y
-    """
-
-    @staticmethod
-    def makegaussian_vertical(stddev, innerheight):
-        ''' create gausian distributions on the plot '''
-        endpts = (sqrt((-2) * stddev * stddev * log(1.0 / innerheight)))
-        X = [0]
-        X.extend([round(stddev * 2.0 * (i / 9.0) - stddev, 3) for i in range(0, 10)])    # add 10 points  near mean
-        X.extend([round(abs(stddev - endpts) * (i / 4.0) + stddev, 3) for i in range(0, 5)])
-        X.extend([round(abs(stddev - endpts) * (i / 4.0) - 2.0 * stddev, 3) for i in range(0, 5)])
-
-        X.sort()
-        Y = [round(innerheight * exp(-x ** 2 / (2.0 * stddev * stddev)), 3) for x in X]
-        return X, Y
