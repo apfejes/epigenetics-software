@@ -26,7 +26,7 @@ import StringUtils
 
 
 
-def compare_BED_and_waves(bedfile, wavesfile, output):
+def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
     # body of function goes here
 
     chromosomes = {1:"I", 2:"II", 3:"III", 4:"IV", 5:"V", 6:"VI", 7:"VII", 8:"VIII", 9:"IX", 10:"X", 11:"XI", 12:"XII", 13:"XIII", 14:"XIV", 15:"XV", 16:"XVI"}
@@ -48,33 +48,36 @@ def compare_BED_and_waves(bedfile, wavesfile, output):
             wave["used"] = False
             waves.append(wave)
     f.close()
-
-    # print "\nNow determining background levels for height of peaks"
-    bins = 70    # based on max peak height of 7
-    counts = [0] * bins
-    thresh = [0] * bins
-    for i in range(0, bins):
-        thresh[i] = (i + 1) * 0.1
-    for i in waves:
-        # check all heights to determine background levels
-        counts[int(i['height'] / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
-    # print "counts are: ", counts
-    x = []
-    y = []
-    for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
-        x.append(thresh[i])
-        y.append(counts[i])
-    # print "x is ", x
-    # print "y is ", y
-    slr = scipystats.linregress(x, y)
-    slope = slr[0]
-    intercept = slr[1]
-    # print "slope: %s and intercept: %s for background peak height" % (slope, intercept)
-    # find x-intercept, threshold for noise-signal
-    xint = abs(intercept / slope)
-    # print "height threshold between noise and signal is ", xint
-    thresh = round(xint, 2)
-
+    
+    if(autothresh):
+        # print "\nNow determining background levels for height of peaks"
+        bins = 70    # based on max peak height of 7
+        counts = [0] * bins
+        thresh = [0] * bins
+        for i in range(0, bins):
+            thresh[i] = (i + 1) * 0.1
+        for i in waves:
+            # check all heights to determine background levels
+            counts[int(i['height'] / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
+        # print "counts are: ", counts
+        x = []
+        y = []
+        for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
+            x.append(thresh[i])
+            y.append(counts[i])
+        # print "x is ", x
+        # print "y is ", y
+        slr = scipystats.linregress(x, y)
+        slope = slr[0]
+        intercept = slr[1]
+        # print "slope: %s and intercept: %s for background peak height" % (slope, intercept)
+        # find x-intercept, threshold for noise-signal
+        xint = abs(intercept / slope)
+        # print "height threshold between noise and signal is ", xint
+        thresh = round(xint, 2)
+    else:
+        usr_in = raw_input("What would you like to use as the minimum wave height? ")
+        thresh = float(usr_in)
     # remove waves that don't meet threshold
     waves[:] = [x for x in waves if x['height'] > thresh]
 
@@ -164,9 +167,33 @@ def compare_BED_and_waves(bedfile, wavesfile, output):
     # quick summary statistics
     print_queue.put("nwaves\tnbins\tavgBinSize")
     unassigned = 0
+    un_height = 0
     for i in waves:
         if not i["used"]:
             unassigned += 1
+            un_height += i["height"]
+            # print i['height']
+
+    # for each bin of height 0.5, determine % of waves not mapped
+    total = [0] * 13
+    unmap = [0] * 13
+    for i in waves:
+        total[int(i['height'] / 0.5) - 2] += 1    # TODO: this is almost certainly wrong!
+        if not i['used']:
+            unmap[int(i['height'] / 0.5) - 2] += 1    # TODO: most certainly wrong.
+    # TODO: Print these values in some meaningful way.
+    prop = [0.0] * 13
+    for i in range(0,len(prop)):
+        if total[i] != 0:
+            prop[i] = float(unmap[i]) / float(total[i])
+        else:
+            prop[i] = 0
+    print "Proportions of unused waves in each bin:"
+    print "[1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0]"
+    print unmap
+    print total
+    print prop
+
     # print "%s waves were unassigned to a BED bin." % unassigned
 
     print "Max per bin is:", maxperbin
@@ -186,6 +213,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output):
         sizes[int(a[4])].append(int(a[2]) - int(a[1]))
     f.close()
     print "%s waves were unassigned to a BED bin." % unassigned
+    print "Average height of waves not part of a bin:", (un_height / unassigned)
     print_queue.put(str(unassigned) + "\t0\t0")
     for i in range(0, maxperbin + 1):
         tot = 0
@@ -218,5 +246,10 @@ if __name__ == "__main__":
     bed = sys.argv[1]
     wave = sys.argv[2]
     out = sys.argv[3]
-    compare_BED_and_waves(bed, wave, out)
+    user_in = raw_input("Would you like the program to automatically determine the wave height threshold? (Y/N): ")
+    if user_in == "Y" or user_in == "y":
+        at = True
+    else:
+        at = False
+    compare_BED_and_waves(bed, wave, out, at)
 
