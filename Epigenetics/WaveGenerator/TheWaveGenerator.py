@@ -108,8 +108,8 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
         if current_chromosome != chromosome:
             # push currently buffered reads to map maker, so mapping can begin
             # again from the start of the next chromosome.
-            read_left = alignedreadobjpet.left_end()
-            read_right = alignedreadobjpet.right_end()
+            read_left = alignedreadobjpet.left_end
+            read_right = alignedreadobjpet.right_end
             if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get_parameter("max_pet_length"):
                 continue    # simply move to the
             if not new_block:    # flush current reads to map
@@ -151,7 +151,6 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
             else:
                 coverage_map = mapmaker.makeIslands(block_left, block_right,
                                                     reads_list)
-
                 put_assigned(map_queues, MappingItem.Item(coverage_map, chromosome, block_left), worker_processes)
                 # mapprocessor.add_map(coverage_map, current_chromosome, block_left)
                 if PARAM.get_parameter("make_wig"):
