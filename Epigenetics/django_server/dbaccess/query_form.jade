@@ -28,23 +28,23 @@ body
                   option(value=org, selected)=org
                 - else 
                   option(value=org)=org
-          label(for='collection') Collection:
+          label(for='collection', id='collection_label') Collection:
             - if collection_list
               - var col = collection_list.items()
-              select(name='collection',id='collection')
+              select(name='collection',id='collection', onchange='update_view()')
                 - for x,y in col
                   - if x == collection
                     option(value=x, selected)=y
                   - else
                     option(value=x)=y
-          label(for='project') Project:
-            select(name='project', id='project',multiple)
+          label(for='project', id='project_label') Project:
+            select(name='project', id='project', multiple)
               - each pt in project_list
                 - if pt == project
                   option(value=pt, selected)=pt
                 - else 
                   option(value=pt)=pt
-          label(for='chipseq') Chip-Seq:
+          label(for='chipseq', id='chipseq_label') Chip-Seq:
             select(name='chipseq', id='chipseq',multiple)
               - each cs in chip_list
                 option(value=cs)=cs
@@ -141,6 +141,30 @@ body
         | No Data Found
 
 script(type='text/javascript')
+    function update_view(){
+      var e = document.getElementById("collection");
+
+      if (e.value == "methchip") {
+        document.getElementById("project").style.display='';
+        document.getElementById("chipseq").style.display='';
+        document.getElementById("project_label").style.display='';
+        document.getElementById("chipseq_label").style.display='';
+      }
+      if (e.value == "methylation") {
+        document.getElementById("project").style.display='';
+        document.getElementById("project_label").style.display='';
+        document.getElementById("chipseq").style.display='none';
+        document.getElementById("chipseq_label").style.display='none';
+      }
+      if (e.value == "chipseq") {
+        document.getElementById("project").style.display='none';
+        document.getElementById("project_label").style.display='none';
+        document.getElementById("chipseq").style.display='';
+        document.getElementById("chipseq_label").style.display='';
+      }
+    
+    }
+    
     function newURL(action){  
       var base = '/dbaccess/query_form/';
       var e = document.getElementById("organism");
@@ -199,5 +223,8 @@ script(type='text/javascript')
       
       return base
     }
+    
+    //run the scripts to set the initial view.
+    update_view();
     
     
