@@ -1,5 +1,5 @@
 '''
-Created on 2013-11-12
+Created on 2013-11-22
 
 @author: sbrown
 '''
@@ -26,7 +26,7 @@ import StringUtils
 
 
 
-def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
+def find_waves_in_promoter(orffile, wavesfile, output, autothresh):
     # body of function goes here
 
     chromosomes = {1:"I", 2:"II", 3:"III", 4:"IV", 5:"V", 6:"VI", 7:"VII", 8:"VIII", 9:"IX", 10:"X", 11:"XI", 12:"XII", 13:"XIII", 14:"XIV", 15:"XV", 16:"XVI"}
@@ -48,7 +48,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
             wave["used"] = False
             waves.append(wave)
     f.close()
-    
+
     if(autothresh):
         # print "\nNow determining background levels for height of peaks"
         bins = 70    # based on max peak height of 7
@@ -83,17 +83,30 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
 
     waves.sort(key = lambda x: (x['chr'], x['pos']))    # list sorted by position
 
+    usr_in = raw_input("Distance upstream of TSS to check for waves: ")
+    prom = int(usr_in)
+
     bed = []
-    f = open(bedfile, 'r')
+    f = open(orffile, 'r')
+    next(f)
     for line in f:
         a = line.split("\t")
-        region = {}
-        region["chr"] = "chr" + chromosomes[int(a[0].replace("chr", ""))]
-        # print "chromosome is: ", region["chr"]
-        region["start"] = int(a[1])
-        region["end"] = int(a[2])
-        region["intensity"] = float(a[3].rstrip())
-        bed.append(region)
+        if int(a[1]) == 17:    # assumed mitochondrial chromosome
+            pass
+        else:
+            region = {}
+            region['gene'] = a[0]
+            # print a[1]
+            region["chr"] = "chr" + chromosomes[int(a[1])]
+            # print "chromosome is: ", region["chr"]
+            region["start"] = int(a[2])
+            if int(a[4]) == 1:
+                region["start"] = int(a[2]) - prom
+                region["end"] = int(a[2])
+            else:
+                region["start"] = int(a[3])
+                region["end"] = int(a[3]) + prom
+            bed.append(region)
 
     bed.sort(key = lambda x: (x['chr'], x['start']))
 
@@ -101,9 +114,10 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
 
     print_queue = multiprocessing.Queue()
     # launch thread to read and process the print queue
-    print_thread = PrintThread.StringWriter(print_queue, output, StringUtils.rreplace(os.path.basename(bedfile), ".bed", "_" + str(thresh) + "_summary.txt", 1), True, True)
+    # print "printing to: ", output + StringUtils.rreplace(os.path.basename(wavesfile), ".normalized.waves", "_" + str(thresh) + "_summary.txt", 1)
+    print_thread = PrintThread.StringWriter(print_queue, output, StringUtils.rreplace(os.path.basename(wavesfile), ".normalized.waves", "_" + str(thresh) + "_promoter_summary.txt", 1), True, True)
 
-    print "Now finding peaks in each region..."
+    print "Now finding peaks in each promoter..."
     w = 0
     b = 0
     count = 0
@@ -122,7 +136,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
             # wave is past bin, move to next bin
             # write to file
             # print "b: %i, w: %i, wave is AFTER, start: %s, end: %s, pos: %s, %s %s" % (b, w, bed[b]['start'], bed[b]['end'], waves[w]['pos'], bed[b]['chr'], waves[w]['chr'])
-            print_queue.put(bed[b]['chr'] + "\t" + str(bed[b]['start']) + "\t" + str(bed[b]['end']) + "\t" + str(bed[b]["intensity"]) + "\t" + str(count) + "\t" + str(height))
+            print_queue.put(bed[b]['gene'] + "\t" + bed[b]['chr'] + "\t" + str(bed[b]['start']) + "\t" + str(bed[b]['end']) + "\t" + str(count) + "\t" + str(height))
             b += 1
             count = 0
             height = 0
@@ -142,7 +156,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
         count = 0
         height = 0
 
-        print_queue.put(str(chrom) + "\t" + str(start) + "\t" + str(end) + "\t" + str(bed[b]["intensity"]) + "\t" + str(count) + "\t" + str(height))
+        print_queue.put(bed[b]['gene'] + "\t" + str(chrom) + "\t" + str(start) + "\t" + str(end) + "\t" + str(count) + "\t" + str(height))
         b += 1
 
     # end printing
@@ -161,7 +175,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
 
     print_queue = multiprocessing.Queue()
     # launch thread to read and process the print queue
-    print_thread = PrintThread.StringWriter(print_queue, output, StringUtils.rreplace(os.path.basename(bedfile), ".bed", "_" + str(thresh) + "_counts.txt", 1), True, True)
+    print_thread = PrintThread.StringWriter(print_queue, output, StringUtils.rreplace(os.path.basename(wavesfile), ".normalized.waves", "_" + str(thresh) + "_promoter_counts.txt", 1), True, True)
 
 
     # quick summary statistics
@@ -183,15 +197,15 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
             unmap[int(i['height'] / 0.5) - 2] += 1    # TODO: most certainly wrong.
     # TODO: Print these values in some meaningful way.
     prop = [0.0] * 13
-    for i in range(0,len(prop)):
+    for i in range(0, len(prop)):
         if total[i] != 0:
             prop[i] = float(unmap[i]) / float(total[i])
         else:
             prop[i] = 0
     print "Proportions of unused waves in each bin:"
     print "[1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0]"
-    print unmap
     print total
+    print unmap
     print prop
 
     # print "%s waves were unassigned to a BED bin." % unassigned
@@ -202,7 +216,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
     counts = [0] * (maxperbin + 1)
     # sizes = [[]] * (maxperbin + 1)
     sizes = [[] for x in range(0, maxperbin + 1)]
-    f = open(output + StringUtils.rreplace(os.path.basename(bedfile), ".bed", "_" + str(thresh) + "_summary.txt", 1), 'r', 0)
+    f = open(output + StringUtils.rreplace(os.path.basename(wavesfile), ".normalized.waves", "_" + str(thresh) + "_promoter_summary.txt", 1), 'r', 0)
 
     ln = 0
     for line in f:
@@ -210,10 +224,10 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
         a = line.split("\t")
         # print "on line ", ln, " \n line is: ", line, " \nand value is: ", a[4]
         counts[int(a[4])] += 1
-        sizes[int(a[4])].append(int(a[2]) - int(a[1]))
+        sizes[int(a[4])].append(int(a[3]) - int(a[2]))
     f.close()
-    print "%s waves were unassigned to a BED bin." % unassigned
-    print "Average height of waves not part of a bin:", (un_height / unassigned)
+    print "%s waves were unassigned to a promoter bin." % unassigned
+    print "Average height of waves not part of a promoter:", (un_height / unassigned)
     print_queue.put(str(unassigned) + "\t0\t0")
     for i in range(0, maxperbin + 1):
         tot = 0
@@ -225,7 +239,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
             avg = float(tot) / len(sizes[i])
         else:
             avg = 0
-        print "# of bins with %s waves: %s, and average size is: %s" % (i, counts[i], avg)
+        print "# of promoters with %s waves: %s, and average size is: %s" % (i, counts[i], avg)
         print_queue.put(str(i) + "\t" + str(counts[i]) + "\t" + str(avg))
 
     # end printing
@@ -240,10 +254,10 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
 
 if __name__ == "__main__":
     if len(sys.argv) <= 3:
-        print ("This program requires the name of the ChIP-chip bed file, ChIP-chip waves file, and output/path")
-        print" eg. python analysis_compare.py /directory/database.conf directory/output/ yeast_epigenetics"
+        print ("This program requires the name of the orf file, ChIP-chip waves file, and output/path")
+        print" eg. python waves_in_promoters.py ~/orf.txt ~/sample.waves ~/output"
         sys.exit()
-    bed = sys.argv[1]
+    orf = sys.argv[1]
     wave = sys.argv[2]
     out = sys.argv[3]
     user_in = raw_input("Would you like the program to automatically determine the wave height threshold? (Y/N): ")
@@ -251,5 +265,5 @@ if __name__ == "__main__":
         at = True
     else:
         at = False
-    compare_BED_and_waves(bed, wave, out, at)
+    find_waves_in_promoter(orf, wave, out, at)
 
