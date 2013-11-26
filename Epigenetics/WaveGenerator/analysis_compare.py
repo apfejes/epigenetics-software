@@ -26,7 +26,7 @@ import StringUtils
 
 
 
-def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
+def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
     # body of function goes here
 
     chromosomes = {1:"I", 2:"II", 3:"III", 4:"IV", 5:"V", 6:"VI", 7:"VII", 8:"VIII", 9:"IX", 10:"X", 11:"XI", 12:"XII", 13:"XIII", 14:"XIV", 15:"XV", 16:"XVI"}
@@ -48,38 +48,65 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
             wave["used"] = False
             waves.append(wave)
     f.close()
-    
+
     if(autothresh):
-        # print "\nNow determining background levels for height of peaks"
-        bins = 70    # based on max peak height of 7
-        counts = [0] * bins
-        thresh = [0] * bins
-        for i in range(0, bins):
-            thresh[i] = (i + 1) * 0.1
-        for i in waves:
-            # check all heights to determine background levels
-            counts[int(i['height'] / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
-        # print "counts are: ", counts
-        x = []
-        y = []
-        for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
-            x.append(thresh[i])
-            y.append(counts[i])
-        # print "x is ", x
-        # print "y is ", y
-        slr = scipystats.linregress(x, y)
-        slope = slr[0]
-        intercept = slr[1]
-        # print "slope: %s and intercept: %s for background peak height" % (slope, intercept)
-        # find x-intercept, threshold for noise-signal
-        xint = abs(intercept / slope)
-        # print "height threshold between noise and signal is ", xint
-        thresh = round(xint, 2)
+        if(heisig):
+            # print "\nNow determining background levels for height of peaks"
+            bins = 70    # based on max peak height of 7
+            counts = [0] * bins
+            thresh = [0] * bins
+            for i in range(0, bins):
+                thresh[i] = (i + 1) * 0.1
+            for i in waves:
+                # check all heights to determine background levels
+                counts[int(i['height'] / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
+            # print "counts are: ", counts
+            x = []
+            y = []
+            for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
+                x.append(thresh[i])
+                y.append(counts[i])
+            # print "x is ", x
+            # print "y is ", y
+            slr = scipystats.linregress(x, y)
+            slope = slr[0]
+            intercept = slr[1]
+            # print "slope: %s and intercept: %s for background peak height" % (slope, intercept)
+            # find x-intercept, threshold for noise-signal
+            xint = abs(intercept / slope)
+            print "height threshold between noise and signal is ", xint
+            thresh = round(xint, 2)
+        else:
+            # determine threshold for sigma
+            bins = 300    # based on max sigma of 300
+            counts = [0] * bins
+            threshes = [0] * bins
+            for i in range(0, bins):
+                threshes[i] = (i + 1)
+            for i in waves:
+                # check all heights to determine background levels
+                counts[int(i['stddev'])] += 1    # increment count where height1 is in bin of size 0.1
+            # print "counts are: ", counts
+            highest = 0
+            ind = -1
+            for i in range(0, bins):
+                if counts[i] > highest:
+                    highest = counts[i]
+                    ind = i
+            thresh = threshes[ind]
+            print "sigma threshold between noise and signal is ", thresh
     else:
-        usr_in = raw_input("What would you like to use as the minimum wave height? ")
-        thresh = float(usr_in)
+        if(heisig):
+            usr_in = raw_input("What would you like to use as the minimum wave height? ")
+            thresh = float(usr_in)
+        else:
+            usr_in = raw_input("What would you like to use as the minimum wave sigma? ")
+            thresh = int(usr_in)
     # remove waves that don't meet threshold
-    waves[:] = [x for x in waves if x['height'] > thresh]
+    if(heisig):
+        waves[:] = [x for x in waves if x['height'] > thresh]
+    else:
+        waves[:] = [x for x in waves if x['stddev'] > thresh]
 
     waves.sort(key = lambda x: (x['chr'], x['pos']))    # list sorted by position
 
@@ -183,7 +210,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh):
             unmap[int(i['height'] / 0.5) - 2] += 1    # TODO: most certainly wrong.
     # TODO: Print these values in some meaningful way.
     prop = [0.0] * 13
-    for i in range(0,len(prop)):
+    for i in range(0, len(prop)):
         if total[i] != 0:
             prop[i] = float(unmap[i]) / float(total[i])
         else:
@@ -246,10 +273,21 @@ if __name__ == "__main__":
     bed = sys.argv[1]
     wave = sys.argv[2]
     out = sys.argv[3]
-    user_in = raw_input("Would you like the program to automatically determine the wave height threshold? (Y/N): ")
-    if user_in == "Y" or user_in == "y":
-        at = True
+    sh = raw_input("Would you like to use a wave height, or wave sigma threshold? [h]eight or [s]igma: ")
+    if sh == "h" or sh == "H":
+        sh = True
+    elif sh == "s" or sh == "S":
+        sh = False
     else:
+        print "invalid entry."
+        sys.exit()
+    at = raw_input("Would you like the program to automatically determine the threshold? (Y/N): ")
+    if at == "Y" or at == "y":
+        at = True
+    elif at == "N" or at == "n":
         at = False
-    compare_BED_and_waves(bed, wave, out, at)
+    else:
+        print "invalid entry."
+        sys.exit()
+    compare_BED_and_waves(bed, wave, out, at, sh)
 
