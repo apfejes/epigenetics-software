@@ -224,7 +224,10 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
     # print "%s waves were unassigned to a BED bin." % unassigned
 
     print "Max per bin is:", maxperbin
-    print "Height threshold applied to waves:", thresh
+    if(heisig):
+        print "Height threshold applied to waves:", thresh
+    else:
+        print "Sigma threshold applied to waves:", thresh
 
     counts = [0] * (maxperbin + 1)
     # sizes = [[]] * (maxperbin + 1)
