@@ -137,7 +137,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
     height = 0
 
     while b < len(bed) and w < len(waves):
-        if(waves[w]['chr'] == bed[b]['chr'] and waves[w]['pos'] >= bed[b]['start'] and waves[w]['pos'] <= bed[b]['end']):
+        if(waves[w]['chr'] == bed[b]['chr'] and (waves[w]['pos'] + 3 * waves[w]['stddev']) >= bed[b]['start'] and (waves[w]['pos'] - 3 * waves[w]['stddev']) <= bed[b]['end']):
             # print "found a wave in bin ", b
             count += 1
             if count > maxperbin:
@@ -145,7 +145,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
             height += waves[w]['height']
             waves[w]['used'] = True
             w += 1
-        elif waves[w]['chr'] > bed[b]['chr'] or (waves[w]['pos'] > bed[b]['end'] and waves[w]['chr'] == bed[b]['chr']):
+        elif waves[w]['chr'] > bed[b]['chr'] or ((waves[w]['pos'] - 3 * waves[w]['stddev']) > bed[b]['end'] and waves[w]['chr'] == bed[b]['chr']):
             # wave is past bin, move to next bin
             # write to file
             # print "b: %i, w: %i, wave is AFTER, start: %s, end: %s, pos: %s, %s %s" % (b, w, bed[b]['start'], bed[b]['end'], waves[w]['pos'], bed[b]['chr'], waves[w]['chr'])
