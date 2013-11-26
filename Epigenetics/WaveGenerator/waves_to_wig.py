@@ -90,13 +90,20 @@ def convert_waves_to_wig(wavesfile, output, autothresh):
 
     print_queue.put("track type=wiggle_0 name='" + os.path.basename(wavesfile) + "_WIG'")
     for w in waves:
-        print_queue.put("fixedStep chrom=" + w['chr'] + " start=" + str(w['pos'] - 3 * w['stddev']) + " step=1")
+        start = w['pos'] - 3 * w['stddev']
+        offset = 0
+        if start < 1:
+            offset = 0 - start + 1
+            start = start + offset
+        print_queue.put("fixedStep chrom=" + w['chr'] + " start=" + str(start) + " step=1")
         # determine max pdf (where x = mu)
         maxpdf = 1.0 / (w['stddev'] * math.sqrt(2.0 * math.pi))
         height = w['height']
         factor = height / maxpdf
         # calculate y-value for pdf curve at each step (+/- 3 stddev from position)
         for i in range(0, (6 * w['stddev'])):
+            if i < offset:
+                pass
             x = float(i)
             mu = 3.0 * w['stddev']
             exponent = -1 * ((x - mu) * (x - mu) / (2.0 * w['stddev'] * w['stddev']))
