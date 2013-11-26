@@ -230,7 +230,7 @@ class MapDecomposer(multiprocessing.Process):
         peaks = []
         n = list(item.coverage_map)    # creates a new, independent list
         v = MapDecomposer.get_tallest_point(n)    # identify tallest point
-        highest_point = v.get('height')
+        # highest_point = v.get('height')
         cur_height = v.get('height')
         min_height = MapDecomposer.PARAM.get_parameter("min_height")
         number_waves = MapDecomposer.PARAM.get_parameter("number_waves")
@@ -240,10 +240,17 @@ class MapDecomposer(multiprocessing.Process):
             wave_number = 1
         else:
             wave_number = None
-        while cur_height >= 0.2 * highest_point and cur_height >= min_height:
+        # used to be: cur_height >= 0.2 * highest_point
+        DEBUGGING = False
+        if item.start == "7723432":
+            DEBUGGING = True
+
+        while cur_height >= min_height:
             p = v.get('position')
             width = 40    # for now, must be divisible by 10
             tested = []
+            if DEBUGGING:
+                print "Map at item.start (%s %i) is\n:%s" % (item.chromosome, item.start, n)
             for i in range(p - width, p + width, 10):
                 if i > 0 and i < len(n):
                     this_sigma = self.best_fit_newton(n, i, cur_height)
