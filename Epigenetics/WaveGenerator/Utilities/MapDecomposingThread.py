@@ -112,9 +112,10 @@ class MapDecomposer(multiprocessing.Process):
         high_sigma = max_sigma - 1
 #        if MapDecomposer.sigma_test(coverage_map, max_sigma - 1, i, height):    # still too high
 #            sys.exit("max sigma not set high enough - halting")
-        sigma = int((high_sigma - low_sigma) / 2.0)
+        # sigma = int((high_sigma - low_sigma) / 2.0)
+        sigma = int((high_sigma - low_sigma) / 2.0) + low_sigma
         while low_sigma != high_sigma - 1:
-            if not self.sigma_test(coverage_map, sigma, i, height):    # still too high
+            if not self.sigma_test_2(coverage_map, sigma, i, height):    # still too high
                 high_sigma = sigma
             else:    # still too low
                 low_sigma = sigma
@@ -123,6 +124,29 @@ class MapDecomposer(multiprocessing.Process):
 
 
     def sigma_test(self, coverage_map, sigma, i, height):
+        '''find the best sigma for this particular peak'''
+        area_over = 0
+        area_under = 0
+        s = 3 * sigma
+        base = self.sigma_height_table[sigma][0]
+        map_len = len(coverage_map)
+        for x in xrange(-s, s):
+            t = i + x
+            if (t >= 0 and x < 900 and t < map_len):
+                expected = height * (self.sigma_height_table[sigma][abs(x)] / base)
+                actual = coverage_map[t]
+                if actual < expected:
+                    area_over += (expected - actual)
+                    area_under += actual
+                elif actual > expected:
+                    area_under += expected
+        if area_over > (area_under / sigma):
+            return False
+        if sigma >= 299:
+            return False
+        return True
+
+    def sigma_test_2(self, coverage_map, sigma, i, height):
         '''find the best sigma for this particular peak'''
         area_over = 0
         area_under = 0
@@ -242,7 +266,7 @@ class MapDecomposer(multiprocessing.Process):
             wave_number = None
         # used to be: cur_height >= 0.2 * highest_point
         DEBUGGING = False
-        if item.start == "7723432":
+        if item.start == 300021:
             DEBUGGING = True
 
         while cur_height >= min_height:
@@ -250,7 +274,7 @@ class MapDecomposer(multiprocessing.Process):
             width = 40    # for now, must be divisible by 10
             tested = []
             if DEBUGGING:
-                print "Map at item.start (%s %i) is\n:%s" % (item.chromosome, item.start, n)
+                print "Map at item.start (%s %i) is:\n%s" % (item.chr, item.start, n)
             for i in range(p - width, p + width, 10):
                 if i > 0 and i < len(n):
                     this_sigma = self.best_fit_newton(n, i, cur_height)
