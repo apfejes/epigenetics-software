@@ -75,7 +75,8 @@ class MongoEpigeneticsWrapper():
 
         if self.peaks:
             sample_ids = self.organize_samples_chipseq(parameters['chipseq'])
-            docs = self.finddocs_waves(sample_ids, parameters['minheight'])    # get peak info for region queried
+            cursor = self.finddocs_waves(sample_ids, minh = parameters['minheight'])    # get peak info for region queried
+            docs = CreateListFromCursor(cursor)
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
             if self.database == 'human_epigenetics':
                 annotation_docs = self.finddocs_annotations()    # get the gene annotations info
@@ -190,9 +191,6 @@ class MongoEpigeneticsWrapper():
         Sets the default group_by property of each dataset. 
         '''
 
-        if chip == ["All"]:
-            return chip
-
         samplesdocs = self.finddocs_samples_chipseq(chip)
         if samplesdocs is None:
             self.error_message = 'No samples found'
@@ -232,7 +230,12 @@ class MongoEpigeneticsWrapper():
 
     def finddocs_waves(self, sample_ids, minh = 0):
 
-        '''Finds documents corresponding to collection and type of query'''
+        '''Finds documents corresponding to collection and type of query
+        
+          sample_ids is a dictionary of sample _id's and unique names  (sample_id)
+          It must be converted to an array for queries, unless the "All" parameter is used,
+          in which case you don't need to use them for querying at all. 
+        '''
 
         if self.error_message != '' :    # If there are existing error messages, don't perform these operations.
             return {}
@@ -243,10 +246,7 @@ class MongoEpigeneticsWrapper():
         for key in sample_ids:
             samples.append(ObjectId(key))
 
-
         query_parameters['chr'] = self.chromosome
-        if sample_ids == ["All"]:
-            pass
         if (len(samples) > 1):
             query_parameters["sample_id"] = {"$in":samples}
         else:
@@ -255,10 +255,12 @@ class MongoEpigeneticsWrapper():
             extension = 500    # extend the region of query to catch peaks with tails in the region
             query_parameters["pos"] = {"$lte":self.end + extension, "$gte":self.start - extension}
 
-        print "minh: ", minh
         minh = float(minh)
+        if (minh > 0):
+            print "--->minh: ", minh
+            query_parameters["height"] = {"$gte":minh}
 
-        query_parameters["height"] = {"$gte":minh}
+
         return_chr = {'_id': False, 'pos': True,
                       'height': True, 'stddev': True,
                       'sample_id': True}
