@@ -39,19 +39,19 @@ def create_param_obj(param_file):
 def run(PARAM, wave_data_file, wave_input_file, db_name):
     '''simple script for reading in a wave file and inserting it into a table in a mongodb database.'''
 
-    #wave_data_file = raw_input('wave file to load: ')
+    # wave_data_file = raw_input('wave file to load: ')
     while not os.path.isfile(wave_data_file):
         print "Unable to find file %s" % wave_data_file
-        #wave_data_file = raw_input('wave file to load: ')
+        # wave_data_file = raw_input('wave file to load: ')
         sys.exit()
-    #wave_input_file = raw_input('parameter file used to generate waves: ')
+    # wave_input_file = raw_input('parameter file used to generate waves: ')
     while not os.path.isfile(wave_input_file):
         print "Unable to find file %s" % wave_input_file
-        #wave_input_file = raw_input('parameter file used to generate waves: ')
+        # wave_input_file = raw_input('parameter file used to generate waves: ')
         sys.exit()
-    #cell_line = raw_input('Insert name of the cell line: ')
-    #chip = raw_input('Name of the ChIP target : ')
-    
+    # cell_line = raw_input('Insert name of the cell line: ')
+    # chip = raw_input('Name of the ChIP target : ')
+
     print "Patient data can be entered after this insert via UpdateWaveMetadataToDB script."
     '''
     patient_data = str.lower(raw_input("Do you have patient data to enter for this sample [y/n]:"))
@@ -99,13 +99,14 @@ def run(PARAM, wave_data_file, wave_input_file, db_name):
     '''
     print "processing %s..." % wave_input_file
     sample = create_param_obj(wave_input_file)
-    #sample['cell_line'] = "" ##stored as strain_background in metadata update file
-    #sample['chip'] = "" ##stored as antibody in metadata update file
+    # sample['cell_line'] = "" ##stored as strain_background in metadata update file
+    # sample['chip'] = "" ##stored as antibody in metadata update file
     sample['haswaves'] = True    # used to indicate a sample has wave data
-    #overwrite param file input and output names
+    # overwrite param file input and output names
     sample['input_file'] = StringUtils.rreplace(wave_data_file, '.waves', '.wig', 1)
     sample['output_path'] = os.path.dirname(wave_data_file) + "/"
     sample['file_name'] = os.path.basename(wave_data_file)
+    sample['hide'] = True    # Default to hiding samples. Only once metadata is added is hide set to False
     collection_name = "samples"
     sample_id = mongo.insert(collection_name, sample)
 
