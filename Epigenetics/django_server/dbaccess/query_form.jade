@@ -130,30 +130,22 @@ body
     #left
        |!{plot}
     #right
-      - var meth_sel = methylation_project
+
       h3 Group Index
       - if types_index.items
         - var samples = types_index.items()
         - var t = samples.sort()
         - for k, v in samples
-          - if k in meth_sel
+          - if k in methylation_project
+            font(color=v)
+              !{k}
+            br  
+          - if k in chipseq_project
             font(color=v)
               !{k}
             br  
       - else 
         | No Data Found                   
-      h3 Sample Index
-      - if sample_index.items
-        - var samples = sample_index.items()
-        - var t = samples.sort()
-        - for k,v in samples
-          - var pro = k.split("-")[0];
-          - if pro in meth_sel
-            font(color=v)
-              !{k}
-            br 
-      - else 
-        | No Data Found
 
 script(type='text/javascript')
     function getselected(selectobject) {
@@ -179,7 +171,7 @@ script(type='text/javascript')
       i = 0;
       for (pro in zzz) {
         if (meth_sel.indexOf(zzz[pro]) >= 0) { 
-          document.getElementById("methylation").options[i]=new Option(zzz[pro], zzz[pro], false, true);
+          document.getElementById("methylation").options[i]=new Option(zzz[pro], zzz[pro], true, true);
         } else { 
           document.getElementById("methylation").options[i]=new Option(zzz[pro], zzz[pro], false, false);
         }
@@ -194,7 +186,7 @@ script(type='text/javascript')
       i = 0;
       for (pro in zzz) {
         if (cs_sel.indexOf(zzz[pro]) >= 0) { 
-          document.getElementById("chipseq").options[i]=new Option(zzz[pro], zzz[pro], false, true);
+          document.getElementById("chipseq").options[i]=new Option(zzz[pro], zzz[pro], true, true);
         } else { 
           document.getElementById("chipseq").options[i]=new Option(zzz[pro], zzz[pro], false, false);
         }
@@ -237,6 +229,8 @@ script(type='text/javascript')
       var collection = e.options[e.selectedIndex].value;
       var e = document.getElementById("methylation");
       var methylation = getselected(e)
+      var e = document.getElementById("chipseq");
+      var chipseq = getselected(e)
       var e = document.getElementById("minheight");
       if (e) {
         var minheight = e.value;
@@ -263,7 +257,8 @@ script(type='text/javascript')
       base += "&end=" + end.value
       base += "&organism=" + organism
       base += "&collection=" + collection
-      base += "&methylation=" + methylation.split(",")
+      base += "&methylation=" + encodeURIComponent(methylation)
+      base += "&chipseq=" + encodeURIComponent(chipseq)
       base += "&action=" + action
       if (minheight) {
         base += "&minheight=" + minheight

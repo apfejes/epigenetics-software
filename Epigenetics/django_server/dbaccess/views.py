@@ -83,8 +83,19 @@ def process_request(request):
 
     p['organism'] = str(q.get("organism", "human"))
     p['collection'] = q.get("collection", "methylation")
+    p['chipseq_project'] = []
     p['chipseq'] = q.getlist("chipseq", ["All"])    # list of chip seq samples available
-    p['methylation_project'] = q.getlist('methylation', ["All"])
+    temp = q.getlist('chipseq', ["All"])
+    for t in temp:
+        ti = t.split(",")
+        for tj in ti:
+            p['chipseq_project'].append(tj)
+    p['methylation_project'] = []
+    temp = q.getlist('methylation', ["All"])
+    for t in temp:
+        ti = t.split(",")
+        for tj in ti:
+            p['methylation_project'].append(tj)
     p['chromosome'] = q.get("chromosome", None)
     p['minheight'] = q.get("minheight", None)
     p['tss'] = to_boolean(q.get("tss", False))
@@ -96,7 +107,9 @@ def process_request(request):
     p['width'] = int(q.get("width", 1000)) - 100    # width of screen minus 100
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
 
-    print "Request method = %s, methylation_project = %s" % (request.method, p['methylation_project'])
+    # print "Request method = %s, methylation_project = %s" % (request.method, p['methylation_project'])
+
+    print "types_index at start: ", p['types_index']
 
 
     start = q.get("start", 0)
@@ -263,7 +276,7 @@ def view_query_form(request):
                                                'sample_index':sample_index,
                                                'types_index':types_index,
                                                'chipseq_list':chipseq_list,
-                                               'chipseq':parameters['chipseq'],
+                                               'chipseq_project':parameters['chipseq_project'],
                                                'plot':mark_safe(svg),
                                                'organism':parameters['organism'],
                                                'methylation_project':parameters['methylation_project'],
