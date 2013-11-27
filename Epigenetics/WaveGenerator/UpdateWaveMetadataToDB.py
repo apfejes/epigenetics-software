@@ -75,6 +75,7 @@ def run(PARAM, metadata_file, db_name):
                 sample_update["comments"] = a[16]
                 if a[16] == "\n":
                     sample_update["comments"] = ""
+                    sample_update['hide'] = False    # now that metadata is added, unhide sample
 
                 # update entries
                 mongo.update(collection_name, {"file_name":file_name}, {"$set": sample_update})
