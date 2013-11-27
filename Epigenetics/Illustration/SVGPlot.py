@@ -176,7 +176,7 @@ class Plot(object):
                             self.palette.set_colors_dict({}, {})
                     type_color, sample_color = self.palette.colour_assignment(sample_type, sample_id)
                     point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color,
-                                   onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" % (sample_id))
+                                   onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s-%s\'" % (sample_type, sample_id))
                     self.elements.append(point)
 
             if show_peaks:
