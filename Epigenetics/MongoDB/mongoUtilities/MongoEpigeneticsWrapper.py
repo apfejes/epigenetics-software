@@ -284,6 +284,11 @@ class MongoEpigeneticsWrapper():
         return_chr = {'_id': True, 'sample_id':True}
         # query_parameters = {}    # This dictionary will store all the query parameters
 
+        if sample_id == ["All"]:
+            query_parameters = {"haswaves":True}
+        elif isinstance(sample_id, list):
+            query_parameters = {"haswaves":True, "sample_id":{"$in":sample_id}}
+
         else:
             query_parameters = {"haswaves":True, "sample_id":sample_id}
         # query_parameters = {"sample_id":{"$in":["02/08/2012_WT_IP_S9.6", "01/24/2012_WT_IP_S9.7", "04/12/2013_RNaseH_IP_S9.8", "04/12/2013_Sen1_IP_S9.9", "04/20/2013_RNaseH_IP_S9.10", "04/20/2013_Sen1_IP_S9.11"]}}
