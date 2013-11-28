@@ -139,7 +139,7 @@ def run(PARAM, wave_data_file, wave_input_file, db_name, test):
             wave["sample_id"] = sample_id
             to_insert.append(wave)
             # mongo.insert("waves", wave)
-            if count % 100000 == 0:
+            if count % 8000 == 0:
                 print "%i lines processed" % count
                 mongo.insert("waves", to_insert)
                 to_insert = []
