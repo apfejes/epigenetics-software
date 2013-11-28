@@ -36,7 +36,7 @@ def create_param_obj(param_file):
         sys.exit()
 
 
-def run(PARAM, wave_data_file, wave_input_file, db_name):
+def run(PARAM, wave_data_file, wave_input_file, db_name, test):
     '''simple script for reading in a wave file and inserting it into a table in a mongodb database.'''
 
     # wave_data_file = raw_input('wave file to load: ')
@@ -107,6 +107,9 @@ def run(PARAM, wave_data_file, wave_input_file, db_name):
     sample['output_path'] = os.path.dirname(wave_data_file) + "/"
     sample['file_name'] = os.path.basename(wave_data_file)
     sample['hide'] = True    # Default to hiding samples. Only once metadata is added is hide set to False
+    if test:
+        sample['hide'] = False
+        sample['sample_id'] = "00test" + os.path.basename(wave_data_file)
     collection_name = "samples"
     sample_id = mongo.insert(collection_name, sample)
 
@@ -149,16 +152,20 @@ def run(PARAM, wave_data_file, wave_input_file, db_name):
     mongo.close()
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 4:
-        print ("This program requires the name of the database config file, the name of the input file, name of wave parameter file, and database")
-        print " eg. python ImportWaveToDB.py /directory/database.conf input/file.name.waves, parameter/wigtest.input test"
+    if len(sys.argv) <= 5:
+        print ("This program requires the name of the database config file, the name of the input file, name of wave parameter file, database, and [1] for test, [0] for sample")
+        print " eg. python ImportWaveToDB.py /directory/database.conf input/file.name.waves, parameter/wigtest.input test 1"
         print " for instance, you can find a demo file in Epigenetics/MongoDB/database.conf "
         sys.exit()
     conf_file = sys.argv[1]
     in_file = sys.argv[2]
     wp_file = sys.argv[3]
     db = sys.argv[4]
+    if int(sys.argv[5]) == 1:
+        test = True
+    else:
+        test = False
     p = Parameters.parameter(conf_file)
-    run(p, in_file, wp_file, db)
+    run(p, in_file, wp_file, db, test)
     print "Completed."
 

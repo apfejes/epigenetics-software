@@ -93,7 +93,7 @@ def FindBaseline(index, file_name, ps):
 
 def ProduceStats(records, ps):
     '''write out the baseline values for each probe'''
-    #pass parameter for where to save file
+    # pass parameter for where to save file
     output = open(sys.argv[2], 'w')
     for r in range(0, len(ps[0])):
         avg = 0.0
@@ -109,63 +109,32 @@ if __name__ == "__main__":
         print('path to BEDlike files, and path to save baseline file must be given as a parameter.')
         sys.exit()
     starttime = time.time()
-    #files = os.listdir(sys.argv[1])
-    #The following file names sent by plu to use as normal baseline:
+    # files = os.listdir(sys.argv[1])
+    # The following file names sent by plu to use as normal baseline, with all IP and mock removed:
     files = ['011912_GLY240_INPUT.BEDlike',
-        '011912_GLY240_Rtt107-FLAG.BEDlike',
-        '011912_MKY6_FLAG.BEDlike',
-        '2011-03-30_MycEaf7_Input.BEDlike',
-        '2011-12-16_IN_MycEaf7.BEDlike',
-        '2011-12-17_Myc_WTnotag.BEDlike',
-        '2012-1-10_Input_MycEaf7.BEDlike',
-        '2012-1-10_Myc_BYMock.BEDlike',
-        '2012-1-10_noAB_MycEaf7.BEDlike',
-        '2012-2-7_BY_Eaf1-Flag_Input.BEDlike',
-        '2012-2-7_Flag_BYmock.BEDlike',
-        '2012-2-7_W303_Eaf1-Flag_Input.BEDlike',
-        '2012-2-7_W303_Eaf1-Flag_Input.BEDlike',
-        '2012-2-28_Input_H2AZ-Flag_pRS314.BEDlike',
-        '2012-2-29_FLAG_mock_pRS314.BEDlike',
-        '2012-4-4_H2AZ_Flag_pRS314_Input.BEDlike',
-        '2012-03-01_input_H2A.Z.BEDlike',
-        '2012-03-01_mock_WT.BEDlike',
-        '08-09-09_Z_Input_RNA.BEDlike',
-        '08-09-10_H3K79me2_Input.BEDlike',
-        '08-09-11-K727G-input.BEDlike',
-        '08-11-07_H3K79me2_G2_Input.BEDlike',
-        '09_03_10_G1_Input.BEDlike',
-        '09-07-21_MKY7_input.BEDlike',
-        '11-03-17_146input_Howe.BEDlike',
-        '11-03-17_WTinput_Howe.BEDlike',
-        '120427_GLY241_Rtt107-FLAG_realign.BEDlike',
-        '2012-4-4_H2AZ_Flag_pRS314_IP.BEDlike',
-        '2012-03-01_H2A.Z.BEDlike',
-        '2012-06-05_SIR2_WT_IP.BEDlike',
-        '2012-07-12_SIR2_IP.BEDlike',
-        '08-09-10_H3K79me3_IP.BEDlike',
-        '08-09-30_H3K79me2_IP.BEDlike',
-        '09-04-21_H3_MKY564_IP.BEDlike',
-        '09-04-21_H3_Z-FLAG_IP.BEDlike',
-        '11-02-15_Rpb3_WT.BEDlike',
-        '11-03-14_Rpb3_WT_IP.BEDlike',
-        'untagged_control_others.BEDlike',
-        '12-08-02inputH3K79me3.BEDlike',
-        #'2012-2-7_Flag_Bymock.BEDlike',
-        '12-01-07_Cdk8flag_flag_input.BEDlike',
-        'BY-input.BEDlike',
-        '09-06-03_pRS315_bre1deletion_IP.BEDlike',
-        '09-06-12_ubp8-10_H2Bub_Input.BEDlike',
-        '09-05-01_K123A_H2Bub_IP.BEDlike',
-        '09-05-06-K123A-H2Bub_Input.BEDlike',
-        '2011-03-29_hieter_WT_h2a.BEDlike',
-        '12-01-07_BY_Flag_antibody.BEDlike',
-        '12-08-02mky5H3K79me3.BEDlike',
-        'Rpb3WTrep1.BEDlike',
-        'WTH3K36me3rep1.BEDlike',
-        'WTCdk8-flagrep1.BEDlike',
-        'WTCet1-flagrep1.BEDlike',
-        'WTElf1-flagrep1.BEDlike'
-        ]
+             '2011-03-30_MycEaf7_Input.BEDlike',
+             '2011-12-16_IN_MycEaf7.BEDlike',
+             '2012-1-10_Input_MycEaf7.BEDlike',
+             '2012-2-7_BY_Eaf1-Flag_Input.BEDlike',
+             '2012-2-7_W303_Eaf1-Flag_Input.BEDlike',
+             '2012-2-7_W303_Eaf1-Flag_Input.BEDlike',
+             '2012-2-28_Input_H2AZ-Flag_pRS314.BEDlike',
+             '2012-4-4_H2AZ_Flag_pRS314_Input.BEDlike',
+             '2012-03-01_input_H2A.Z.BEDlike',
+             '08-09-09_Z_Input_RNA.BEDlike',
+             '08-09-10_H3K79me2_Input.BEDlike',
+             '08-09-11-K727G-input.BEDlike',
+             '08-11-07_H3K79me2_G2_Input.BEDlike',
+             '09_03_10_G1_Input.BEDlike',
+             '09-07-21_MKY7_input.BEDlike',
+             '11-03-17_146input_Howe.BEDlike',
+             '11-03-17_WTinput_Howe.BEDlike',
+             '12-08-02inputH3K79me3.BEDlike',
+             '12-01-07_Cdk8flag_flag_input.BEDlike',
+             'BY-input.BEDlike',
+             '09-06-12_ubp8-10_H2Bub_Input.BEDlike',
+             '09-05-06-K123A-H2Bub_Input.BEDlike']
+
     num_probes = 2635714
     print "initializing array..."
     probeset = [[0.0 for y in xrange(num_probes)] for x in xrange(0, len(files) + 1)]

@@ -16,13 +16,19 @@ body
       input(type="hidden", id="height", name="height", value = "")
       input(type="hidden", id="sample_index", name="sample_index", value = sample_index)
       input(type="hidden", id="types_index", name="types_index", value = types_index)
+      input(type="hidden", id="methylation_avail", name="methylation_avail", value=methylation_list)
+      input(type="hidden", id="chipseq_avail", name="chipseq_avail", value=chipseq_list)
+      input(type="hidden", id="organism_inuse", name="organism_inuse", value=organism)
+      input(type="hidden", id="methylation_selected", name="methylation_selected", value=methylation_project)
+      input(type="hidden", id="chipseq_selected", name="chipseq_selected", value=chipseq_project)
+      
       script(type='text/javascript')
         document.getElementById('width').value = window.innerWidth;
         document.getElementById('height').value = window.innerHeight;
       div(align='center')
         fieldset
           label(for='organism') Organism:
-            select(name='organism', id='organism')
+            select(name='organism', id='organism', onchange='update_data_by_org()')
               - each org in organism_list
                 - if org == organism
                   option(value=org, selected)=org
@@ -37,17 +43,22 @@ body
                     option(value=x, selected)=y
                   - else
                     option(value=x)=y
-          label(for='project', id='project_label') Project:
-            select(name='project', id='project', multiple)
-              - each pt in project_list
-                - if pt == project
-                  option(value=pt, selected)=pt
+          label(for='methylation', id='methylation_label') Methylation Set:
+            select(name='methylation', id='methylation', multiple="multiple")
+              - var mo = methylation_list[organism]
+              - each mt in mo
+                - if mt == methylation_project
+                  option(value=mt, selected)=mt
                 - else 
-                  option(value=pt)=pt
+                  option(value=mt)=mt
           label(for='chipseq', id='chipseq_label') Chip-Seq:
-            select(name='chipseq', id='chipseq',multiple)
-              - each cs in chip_list
-                option(value=cs)=cs
+            select(name='chipseq', id='chipseq', multiple)
+              - var cso = chipseq_list[organism]
+              - each cs in cso
+                - if cs == chipseq_project
+                  option(value=cs, selected)=cs
+                - else
+                  option(value=cs)=cs
           label(for='chromosome') Chromosome:
             if chromosome
               input(id='chromosome',size = '6', type='text', name='chromosome', value = chromosome)
@@ -119,51 +130,96 @@ body
     #left
        |!{plot}
     #right
+
       h3 Group Index
       - if types_index.items
         - var samples = types_index.items()
         - var t = samples.sort()
         - for k, v in samples
-          font(color=v)
-            !{k}
-          br  
+          - if k in methylation_project
+            font(color=v)
+              !{k}
+            br  
+          - if k in chipseq_project
+            font(color=v)
+              !{k}
+            br  
       - else 
         | No Data Found                   
-      h3 Sample Index
-      - if sample_index.items
-        - var samples = sample_index.items()
-        - var t = samples.sort()
-        - for k,v in samples
-          font(color=v)
-            !{k}
-          br 
-      - else 
-        | No Data Found
 
 script(type='text/javascript')
+    function getselected(selectobject) {
+        var results = [];
+        for (var i=0; i<selectobject.options.length; i++) {
+          if (selectobject.options[i].selected) {
+            var option = selectobject.options[i];
+            var value = option.value;
+            results.push(value);
+          }
+        }
+        return results;
+    }
+    
+
+    function update_data_by_org() {
+      organism_inuse.value = document.getElementById("organism").value
+      var e = document.getElementById("methylation");
+      e.options.length=0;
+      var mo = JSON.parse(methylation_avail.value.replace(/'/g, '"'));
+      var zzz = mo[organism_inuse.value];
+      var meth_sel = methylation_selected.value;
+      i = 0;
+      for (pro in zzz) {
+        if (meth_sel.indexOf(zzz[pro]) >= 0) { 
+          document.getElementById("methylation").options[i]=new Option(zzz[pro], zzz[pro], true, true);
+        } else { 
+          document.getElementById("methylation").options[i]=new Option(zzz[pro], zzz[pro], false, false);
+        }
+        i++;
+      }
+      
+      var e = document.getElementById("chipseq")
+      e.options.length=0;
+      var cso = JSON.parse(chipseq_avail.value.replace(/'/g, '"'));
+      var zzz = cso[organism_inuse.value];
+      var cs_sel = chipseq_selected.value;
+      i = 0;
+      for (pro in zzz) {
+        if (cs_sel.indexOf(zzz[pro]) >= 0) { 
+          document.getElementById("chipseq").options[i]=new Option(zzz[pro], zzz[pro], true, true);
+        } else { 
+          document.getElementById("chipseq").options[i]=new Option(zzz[pro], zzz[pro], false, false);
+        }
+        i++;
+      }
+      
+    }
+
     function update_view(){
       var e = document.getElementById("collection");
 
       if (e.value == "methchip") {
-        document.getElementById("project").style.display='';
+        document.getElementById("methylation").style.display='';
         document.getElementById("chipseq").style.display='';
-        document.getElementById("project_label").style.display='';
+        document.getElementById("methylation_label").style.display='';
         document.getElementById("chipseq_label").style.display='';
       }
       if (e.value == "methylation") {
-        document.getElementById("project").style.display='';
-        document.getElementById("project_label").style.display='';
+        document.getElementById("methylation").style.display='';
+        document.getElementById("methylation_label").style.display='';
         document.getElementById("chipseq").style.display='none';
         document.getElementById("chipseq_label").style.display='none';
       }
       if (e.value == "chipseq") {
-        document.getElementById("project").style.display='none';
-        document.getElementById("project_label").style.display='none';
+        document.getElementById("methylation").style.display='none';
+        document.getElementById("methylation_label").style.display='none';
         document.getElementById("chipseq").style.display='';
         document.getElementById("chipseq_label").style.display='';
       }
     
     }
+    
+
     
     function newURL(action){  
       var base = '/dbaccess/query_form/';
@@ -171,8 +227,10 @@ script(type='text/javascript')
       var organism = e.options[e.selectedIndex].value;
       var e = document.getElementById("collection");
       var collection = e.options[e.selectedIndex].value;
-      var e = document.getElementById("project");
-      var project = e.options[e.selectedIndex].value;
+      var e = document.getElementById("methylation");
+      var methylation = getselected(e)
+      var e = document.getElementById("chipseq");
+      var chipseq = getselected(e)
       var e = document.getElementById("minheight");
       if (e) {
         var minheight = e.value;
@@ -199,7 +257,8 @@ script(type='text/javascript')
       base += "&end=" + end.value
       base += "&organism=" + organism
       base += "&collection=" + collection
-      base += "&project=" + project
+      base += "&methylation=" + encodeURIComponent(methylation)
+      base += "&chipseq=" + encodeURIComponent(chipseq)
       base += "&action=" + action
       if (minheight) {
         base += "&minheight=" + minheight
@@ -224,7 +283,9 @@ script(type='text/javascript')
       return base
     }
     
+        
     //run the scripts to set the initial view.
     update_view();
+    update_data_by_org();
     
     

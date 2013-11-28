@@ -137,7 +137,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
     height = 0
 
     while b < len(bed) and w < len(waves):
-        if(waves[w]['chr'] == bed[b]['chr'] and (waves[w]['pos'] + 3 * waves[w]['stddev']) >= bed[b]['start'] and (waves[w]['pos'] - 3 * waves[w]['stddev']) <= bed[b]['end']):
+        if(waves[w]['chr'] == bed[b]['chr'] and (waves[w]['pos'] + 1 * waves[w]['stddev']) >= bed[b]['start'] and (waves[w]['pos'] - 1 * waves[w]['stddev']) <= bed[b]['end']):
             # print "found a wave in bin ", b
             count += 1
             if count > maxperbin:
@@ -145,7 +145,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
             height += waves[w]['height']
             waves[w]['used'] = True
             w += 1
-        elif waves[w]['chr'] > bed[b]['chr'] or ((waves[w]['pos'] - 3 * waves[w]['stddev']) > bed[b]['end'] and waves[w]['chr'] == bed[b]['chr']):
+        elif waves[w]['chr'] > bed[b]['chr'] or ((waves[w]['pos'] - 1 * waves[w]['stddev']) > bed[b]['end'] and waves[w]['chr'] == bed[b]['chr']):
             # wave is past bin, move to next bin
             # write to file
             # print "b: %i, w: %i, wave is AFTER, start: %s, end: %s, pos: %s, %s %s" % (b, w, bed[b]['start'], bed[b]['end'], waves[w]['pos'], bed[b]['chr'], waves[w]['chr'])
@@ -242,9 +242,10 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
         counts[int(a[4])] += 1
         sizes[int(a[4])].append(int(a[2]) - int(a[1]))
     f.close()
-    print "%s waves were unassigned to a BED bin." % unassigned
+    print "%s waves of %s were unassigned to a BED bin (%f%%)." % (unassigned, len(waves), round(float(unassigned) / len(waves) * 100, 2))
     print "Average height of waves not part of a bin:", (un_height / unassigned)
     print_queue.put(str(unassigned) + "\t0\t0")
+    print "Total number of bins:", len(bed)
     for i in range(0, maxperbin + 1):
         tot = 0
         # print len(sizes[i])
@@ -255,8 +256,13 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
             avg = float(tot) / len(sizes[i])
         else:
             avg = 0
-        print "# of bins with %s waves: %s, and average size is: %s" % (i, counts[i], avg)
-        print_queue.put(str(i) + "\t" + str(counts[i]) + "\t" + str(avg))
+
+        if i != 0:
+            print_queue.put(str(i) + "\t" + str(counts[i]) + "\t" + str(avg))
+        else:
+            print "%i bins have no waves mapped to them (%s%%)" % (counts[i], float(counts[i]) / len(bed) * 100)
+            print "%i bins have at least 1 wave mapped to them." % (len(bed) - counts[i])
+            print_queue.put(str(i) + "\t" + str(counts[i]) + "\t" + str(avg))
 
     # end printing
     if print_thread is None or not print_thread.is_alive():

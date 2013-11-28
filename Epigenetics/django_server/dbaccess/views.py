@@ -79,12 +79,23 @@ def process_request(request):
 
     p = {}    # parameters obtained
 
-    print "q =", q
+    # print "q =", q
 
     p['organism'] = str(q.get("organism", "human"))
     p['collection'] = q.get("collection", "methylation")
-    p['chipseq'] = q.get("chipseq", "All")    # list of chip seq samples available
-    p['project'] = q.get('project', "All")
+    p['chipseq_project'] = []
+    p['chipseq'] = q.getlist("chipseq", ["All"])    # list of chip seq samples available
+    temp = q.getlist('chipseq', ["All"])
+    for t in temp:
+        ti = t.split(",")
+        for tj in ti:
+            p['chipseq_project'].append(tj)
+    p['methylation_project'] = []
+    temp = q.getlist('methylation', ["All"])
+    for t in temp:
+        ti = t.split(",")
+        for tj in ti:
+            p['methylation_project'].append(tj)
     p['chromosome'] = q.get("chromosome", None)
     p['minheight'] = q.get("minheight", None)
     p['tss'] = to_boolean(q.get("tss", False))
@@ -95,6 +106,11 @@ def process_request(request):
     p['types_index'] = ast.literal_eval(str(q.get("types_index", '{}')))
     p['width'] = int(q.get("width", 1000)) - 100    # width of screen minus 100
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
+
+    # print "Request method = %s, methylation_project = %s" % (request.method, p['methylation_project'])
+
+    print "types_index at start: ", p['types_index']
+
 
     start = q.get("start", 0)
     if start is None or start == '' or start == True:
@@ -149,20 +165,32 @@ def view_query_form(request):
         if f.endswith("_epigenetics"):
             organism_list.append(f.replace("_epigenetics", ""))
 
-    proj_list = mongo[parameters['organism'] + "_epigenetics"]['samples'].distinct("project")
-    project_list = [str(x) for x in proj_list]
-    project_list.append("All")
-    project_list.append("Tissue")
-    project_list.sort()
-    print "project_list ", project_list
-    print "project:", parameters['project']
 
-    chip_list = mongo[parameters['organism'] + "_epigenetics"]['samples'].find({'haswaves': True}).distinct('chip')
-    chipseq_list = [str(x) for x in chip_list]
-    chipseq_list.append("All")
-    chipseq_list.sort()
-    print "chipseq_list ", chipseq_list
-    print "chipseq:", parameters['chipseq']
+
+    methylation_list = {}
+    chipseq_list = {}
+    for o in organism_list:
+        proj_list = mongo[o + "_epigenetics"]['samples'].distinct("project")
+        proj_list.sort()
+        op_list = [x.encode('utf-8') for x in proj_list]
+        op_list.insert(0, "All")
+        op_list.append("Tissue")
+        methylation_list[o] = op_list
+        chip_list = []
+        if (o == "yeast"):
+            chip_list = mongo[o + "_epigenetics"]['samples'].find({'haswaves': True}).distinct('sample_id')
+        else:
+            chip_list = mongo[o + "_epigenetics"]['samples'].find({'haswaves': True}).distinct('chip')
+        chip_list.sort()
+        chip_list.insert(0, "All")
+        cs_list = [x.encode('utf-8') for x in chip_list]
+        chipseq_list[o] = cs_list
+    # print "methylation_list ", methylation_list
+    # print "methylation_project:", parameters['methylation_project']
+
+
+    # print "chipseq_list ", chipseq_list
+    # print "chipseq:", parameters['chipseq']
 
     database = parameters['organism'] + "_epigenetics"
 
@@ -243,15 +271,15 @@ def view_query_form(request):
                             types_index = parameters['types_index'])
 
     return render(request, 'query_form.jade', {'organism_list':organism_list,
-                                               'project_list':project_list,
+                                               'methylation_list':methylation_list,
                                                'collection_list':collection_list,
                                                'sample_index':sample_index,
                                                'types_index':types_index,
-                                               'chip_list':chipseq_list,
-                                               'chipseq':parameters['chipseq'],
+                                               'chipseq_list':chipseq_list,
+                                               'chipseq_project':parameters['chipseq_project'],
                                                'plot':mark_safe(svg),
                                                'organism':parameters['organism'],
-                                               'project':parameters['project'],
+                                               'methylation_project':parameters['methylation_project'],
                                                'collection':parameters['collection'],
                                                'chromosome':parameters['chromosome'],
                                                'start':parameters['start'],

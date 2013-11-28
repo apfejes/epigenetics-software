@@ -163,7 +163,7 @@ class MapDecomposer(multiprocessing.Process):
                     area_under += actual
                 elif actual > expected:
                     area_under += expected
-        if area_over > (area_under / sigma):
+        if area_over > 16 * (area_under / sigma):    # make smarter? Require more than just a single bar?
             return False
         if sigma >= 299:
             return False
@@ -266,8 +266,8 @@ class MapDecomposer(multiprocessing.Process):
             wave_number = None
         # used to be: cur_height >= 0.2 * highest_point
         DEBUGGING = False
-        if item.start == 300021:
-            DEBUGGING = True
+        # if item.start == 300021:
+        #    DEBUGGING = True
 
         while cur_height >= min_height:
             p = v.get('position')

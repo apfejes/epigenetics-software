@@ -45,7 +45,7 @@ class row():
 
 def ReadBaseline(file_name, ps):
     bed = open(file_name, 'r')    # open file
-    #file like: chr1    0    7.497689
+    # file like: chr1    0    7.497689
     #           chr1    4    7.500031
     linecount = 0
     for line in bed:
@@ -98,8 +98,8 @@ def ProduceStats(records, ps):
 '''
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print('path to BEDlike files must be given as a parameter, baseline file must be given as second parameter.')
+    if len(sys.argv) < 3:
+        print('path to BEDlike files must be given as a parameter, baseline file must be given as second parameter, output path as third.')
         sys.exit()
     starttime = time.time()
     files = os.listdir(sys.argv[1])
@@ -111,11 +111,11 @@ if __name__ == "__main__":
     ReadBaseline(sys.argv[2], probeset)
 
     print "done."
-    #op = StringUtils.rreplace(sys.argv[1], 'BED', 'NORMAL', 1)
+    # op = StringUtils.rreplace(sys.argv[1], 'BED', 'NORMAL', 1)
     for i, f in enumerate(files):
         filetime = time.time()
         of = StringUtils.rreplace(f, '.BEDlike', '.normalized.BEDlike', 1)
-        ApplyBaseline(i + 1, "%s%s" % (sys.argv[1], f), "%s%s" % (sys.argv[1], of), probeset)    # first file is first file, use zero for chr/pos
+        ApplyBaseline(i + 1, "%s%s" % (sys.argv[1], f), "%s%s" % (sys.argv[3], of), probeset)    # first file is first file, use zero for chr/pos
         print "File %i - %s processed in %f seconds" % (i + 1, f, time.time() - filetime)
-    #ProduceStats(len(files) + 1, probeset)
+    # ProduceStats(len(files) + 1, probeset)
     print 'Completed in %s seconds' % int((time.time() - starttime))
