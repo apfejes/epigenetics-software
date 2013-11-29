@@ -21,6 +21,8 @@ body
       input(type="hidden", id="organism_inuse", name="organism_inuse", value=organism)
       input(type="hidden", id="methylation_selected", name="methylation_selected", value=methylation_project)
       input(type="hidden", id="chipseq_selected", name="chipseq_selected", value=chipseq_project)
+      input(type="hidden", id="groupby_selected", name="groupby_selected", value=groupby_selected)
+      input(type="hidden", id="groupby_avail", name="groupby_avail", value=groupby)
       
       script(type='text/javascript')
         document.getElementById('width').value = window.innerWidth;
@@ -44,13 +46,16 @@ body
                   - else
                     option(value=x)=y
           label(for='methylation', id='methylation_label') Methylation Set:
-            select(name='methylation', id='methylation', multiple="multiple")
+            select(name='methylation', id='methylation', multiple="multiple", onchange="update_groupby()")
               - var mo = methylation_list[organism]
               - each mt in mo
                 - if mt == methylation_project
                   option(value=mt, selected)=mt
                 - else 
                   option(value=mt)=mt
+          label(for='groupby', id='groupby_label') Group By:
+            select(name='groupby', id='groupby')
+              option(value='')=''
           label(for='chipseq', id='chipseq_label') Chip-Seq:
             select(name='chipseq', id='chipseq', multiple)
               - var cso = chipseq_list[organism]
@@ -132,22 +137,20 @@ body
     #right
 
       h3 Group Index
+        div index
+        
       - if types_index.items
-        - var samples = types_index.items()
-        - var t = samples.sort()
-        - for k, v in samples
-          - if k in methylation_project
-            font(color=v)
-              !{k}
-            br  
-          - if k in chipseq_project
-            font(color=v)
-              !{k}
-            br  
+        - var samples = types_index.keys()
+        - each s in samples
+            font(color=types_index.get(s))
+              !{s}
+            br    
       - else 
         | No Data Found                   
 
 script(type='text/javascript')
+    
+
     function getselected(selectobject) {
         var results = [];
         for (var i=0; i<selectobject.options.length; i++) {
@@ -160,22 +163,80 @@ script(type='text/javascript')
         return results;
     }
     
+    function update_groupby() {
+      var e = document.getElementById("methylation");
+      var methylation = getselected(e)
+      if (methylation.indexOf("All") > 0) {
+        e.options[0].selected = True
+      }
+      var e = document.getElementById("groupby");
+      e.options.length=0;
+      
+      i = 0;
+      if (methylation.length > 1 || methylation == "All") {
+        document.getElementById("groupby").options[i]=new Option('project', 'project', true, true);
+      } else {
+        var gb_sel = groupby_selected.value
+        var gb_all = JSON.parse(groupby_avail.value.replace(/'/g, '"'));
+        var gb_av = gb_all[organism_inuse.value][methylation]['available']
+        if (gb_av.length == 1 || !(gb_av instanceof Array)) {
+          document.getElementById("groupby").options[i]=new Option(gb_av, gb_av, true, true);
+        } else {
+          for (gb in gb_av) {  
+            if (gb_sel == gb_av[gb]) { 
+              document.getElementById("groupby").options[i]=new Option(gb_av[gb], gb_av[gb], true, true);
+            } else { 
+              document.getElementById("groupby").options[i]=new Option(gb_av[gb], gb_av[gb], false, false);
+            }
+            i++;
+          }
+        }
+      }
+    
+    
+    }
+
+
 
     function update_data_by_org() {
       organism_inuse.value = document.getElementById("organism").value
       var e = document.getElementById("methylation");
       e.options.length=0;
       var mo = JSON.parse(methylation_avail.value.replace(/'/g, '"'));
-      var zzz = mo[organism_inuse.value];
-      var meth_sel = methylation_selected.value;
+      var meth_by_org = mo[organism_inuse.value];
+      var meth_sel = JSON.parse(methylation_selected.value.replace(/'/g, '"'));
       i = 0;
-      for (pro in zzz) {
-        if (meth_sel.indexOf(zzz[pro]) >= 0) { 
-          document.getElementById("methylation").options[i]=new Option(zzz[pro], zzz[pro], true, true);
+      for (pro in meth_by_org) {
+        if (meth_sel.indexOf(meth_by_org[pro]) >= 0) { 
+          document.getElementById("methylation").options[i]=new Option(meth_by_org[pro], meth_by_org[pro], true, true);
         } else { 
-          document.getElementById("methylation").options[i]=new Option(zzz[pro], zzz[pro], false, false);
+          document.getElementById("methylation").options[i]=new Option(meth_by_org[pro], meth_by_org[pro], false, false);
         }
         i++;
+      }
+      
+      
+      var e = document.getElementById("groupby");
+      e.options.length=0;
+      i = 0;
+      if (meth_sel.length > 1) {
+        document.getElementById("groupby").options[i]=new Option('project', 'project', true, true);
+      } else {
+        var gb_sel = groupby_selected.value
+        var gb_all = JSON.parse(groupby_avail.value.replace(/'/g, '"'));
+        var gb_av = gb_all[organism_inuse.value][meth_sel]['available']
+        if (gb_av.length == 1 || !(gb_av instanceof Array)) {
+          document.getElementById("groupby").options[i]=new Option(gb_av, gb_av, true, true);
+        } else {
+          for (gb in gb_av) {  
+            if (gb_sel == gb_av[gb]) { 
+              document.getElementById("groupby").options[i]=new Option(gb_av[gb], gb_av[gb], true, true);
+            } else { 
+              document.getElementById("groupby").options[i]=new Option(gb_av[gb], gb_av[gb], false, false);
+            }
+            i++;
+          }
+        }
       }
       
       var e = document.getElementById("chipseq")
@@ -203,16 +264,22 @@ script(type='text/javascript')
         document.getElementById("chipseq").style.display='';
         document.getElementById("methylation_label").style.display='';
         document.getElementById("chipseq_label").style.display='';
+        document.getElementById("groupby").style.display='';
+        document.getElementById("groupby_label").style.display='';
       }
       if (e.value == "methylation") {
         document.getElementById("methylation").style.display='';
         document.getElementById("methylation_label").style.display='';
+        document.getElementById("groupby").style.display='';
+        document.getElementById("groupby_label").style.display='';
         document.getElementById("chipseq").style.display='none';
         document.getElementById("chipseq_label").style.display='none';
       }
       if (e.value == "chipseq") {
         document.getElementById("methylation").style.display='none';
         document.getElementById("methylation_label").style.display='none';
+        document.getElementById("groupby").style.display='none';
+        document.getElementById("groupby_label").style.display='none';
         document.getElementById("chipseq").style.display='';
         document.getElementById("chipseq_label").style.display='';
       }
@@ -229,6 +296,8 @@ script(type='text/javascript')
       var collection = e.options[e.selectedIndex].value;
       var e = document.getElementById("methylation");
       var methylation = getselected(e)
+      var e = document.getElementById("groupby");
+      var groupby = e.options[e.selectedIndex].value;
       var e = document.getElementById("chipseq");
       var chipseq = getselected(e)
       var e = document.getElementById("minheight");
@@ -258,6 +327,7 @@ script(type='text/javascript')
       base += "&organism=" + organism
       base += "&collection=" + collection
       base += "&methylation=" + encodeURIComponent(methylation)
+      base += "&groupby=" + groupby
       base += "&chipseq=" + encodeURIComponent(chipseq)
       base += "&action=" + action
       if (minheight) {
@@ -287,5 +357,6 @@ script(type='text/javascript')
     //run the scripts to set the initial view.
     update_view();
     update_data_by_org();
+    
     
     
