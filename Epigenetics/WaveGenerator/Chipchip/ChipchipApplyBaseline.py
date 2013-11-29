@@ -50,13 +50,16 @@ def ReadBaseline(file_name, ps):
     linecount = 0
     for line in bed:
         a = line.split("\t")
-        ps[0][linecount] = "%s\t%s" % (a[0], a[1])
-        ps[1][linecount] = float(a[2])
-        linecount += 1
+        if a[0] == "chrNo":
+            pass
+        else:
+            ps[0][linecount] = "%s\t%s" % (a[0], a[1])
+            ps[1][linecount] = float(a[2])
+            linecount += 1
     bed.close()
 
 
-def ApplyBaseline(index, file_in, file_out, ps):
+def ApplyBaseline(index, file_in, file_out, ps, scale):
 
 
     bed = open(file_in, 'r')    # open file
@@ -79,10 +82,24 @@ def ApplyBaseline(index, file_in, file_out, ps):
                 print "incorrectly paired probe!%s\t%i and %s (linecount = %i)" % (a[0], int(a[1]), ps[0][linecount], linecount)
                 print "file with error: %s" % (file_in)
                 sys.exit()
-            bout.write("%s\t%i\t%f\n" % (a[0], int(a[1]), float(a[2]) - float(ps[1][linecount])))
+            bout.write("%s\t%i\t%f\n" % (a[0], int(a[1]), float(a[2]) - (scale * float(ps[1][linecount]))))
             linecount += 1
 
     bed.close()
+
+
+def FindAverageProbeIntensity(ps, signal = 0.2):
+    '''finds the average intensity across all probes, ignoring the top [signal]% of probes'''
+    ps2 = ps[1][:]    # just intensities
+    # sort
+    ps2.sort()
+    cutoff = int(len(ps2) * (1 - signal))
+    values = ps2[0:cutoff]
+    tot = 0
+    for i in range(0, len(values)):
+        tot += values[i]
+    avg = tot / len(values)
+    return avg
 
 '''
 def ProduceStats(records, ps):
@@ -103,19 +120,30 @@ if __name__ == "__main__":
         sys.exit()
     starttime = time.time()
     files = os.listdir(sys.argv[1])
-    num_probes = 2635715
+    num_probes = 2635714
     print "initializing array..."
-    probeset = [[0.0 for y in xrange(num_probes + 2)] for x in xrange(0, 2)]
+    probeset = [[0.0 for y in xrange(num_probes)] for x in xrange(0, 2)]
     print "reading baseline from %s" % (sys.argv[2])
     print "probeset[%i][%i]" % (len(probeset), len(probeset[0]))
     ReadBaseline(sys.argv[2], probeset)
-
+    blaverage = FindAverageProbeIntensity(probeset)
+    print "baseline average probe intensity is:", blaverage
     print "done."
     # op = StringUtils.rreplace(sys.argv[1], 'BED', 'NORMAL', 1)
     for i, f in enumerate(files):
         filetime = time.time()
         of = StringUtils.rreplace(f, '.BEDlike', '.normalized.BEDlike', 1)
-        ApplyBaseline(i + 1, "%s%s" % (sys.argv[1], f), "%s%s" % (sys.argv[3], of), probeset)    # first file is first file, use zero for chr/pos
+        bedprobes = [[0.0 for y in xrange(num_probes)] for x in xrange(0, 2)]
+        print "determining average probe intensity from %s%s" % (sys.argv[1], f)
+        print "bedprobes[%i][%i]" % (len(bedprobes), len(bedprobes[0]))
+        ReadBaseline("%s%s" % (sys.argv[1], f), bedprobes)
+        bedaverage = FindAverageProbeIntensity(bedprobes)
+        print "average probe intensity is:", bedaverage
+        scaling = float(bedaverage) / blaverage
+        if scaling < 1:
+            scaling = 1
+        print "baseline needs to be scaled by a factor of", scaling
+        ApplyBaseline(i + 1, "%s%s" % (sys.argv[1], f), "%s%s" % (sys.argv[3], of), probeset, scaling)    # first file is first file, use zero for chr/pos
         print "File %i - %s processed in %f seconds" % (i + 1, f, time.time() - filetime)
     # ProduceStats(len(files) + 1, probeset)
     print 'Completed in %s seconds' % int((time.time() - starttime))
