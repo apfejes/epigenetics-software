@@ -87,14 +87,15 @@ def run(PARAM, wave_data_file, wave_input_file, db_name, test):
     print "Thanks - Data has been collected."
     print "opening connection(s) to MongoDB..."
     mongo = Mongo_Connector.MongoConnector(PARAM.get_parameter("server"), PARAM.get_parameter("port"), db_name)
-    mongo.ensure_index("sample", "_id")
-    mongo.ensure_index("sample", "haswaves")
-    mongo.ensure_index("sample", {"haswaves", "use"})
-    mongo.ensure_index("waves", "_id")
-    mongo.ensure_index("waves", "pos")
-    mongo.ensure_index("waves", {"chr", "pos"})
-    mongo.ensure_index("waves", {"chr", "pos", "sample_id"})
-    mongo.ensure_index("waves", {"sample_id", "height"})
+    # TODO: Make this work
+#     mongo.ensure_index("sample", "_id")
+#     mongo.ensure_index("sample", "haswaves")
+#     mongo.ensure_index("sample", {("haswaves", 1), ("use", 1)})
+#     mongo.ensure_index("waves", "_id")
+#     mongo.ensure_index("waves", "pos")
+#     mongo.ensure_index("waves", {"chr":1, "pos":1})
+#     mongo.ensure_index("waves", {"chr":1, "pos":1, "sample_id":1})
+#     mongo.ensure_index("waves", {"sample_id":1, "height":1})
 
     '''Changing to not update this information, will update later from metadata file (see directly below)
     print "processing %s..." % wave_input_file
