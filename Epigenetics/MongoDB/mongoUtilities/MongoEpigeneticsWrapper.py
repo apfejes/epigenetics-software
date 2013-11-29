@@ -66,7 +66,7 @@ class MongoEpigeneticsWrapper():
 
         # TODO: Make sure that if "both" is picked, that the two pieces of code work together, and don't overwrite each other.
         if self.methylation:
-            sample_ids = self.organize_samples_methylation(parameters['methylation_project'], sample_label, sample_group)
+            sample_ids = self.organize_samples_methylation(parameters['methylation_project'], sample_label, sample_group, parameters['groupby_selected'])
             cursor = self.finddocs_annotations()    # get probe and annotation info for region queried
             docs = CreateListFromCursor(cursor)
             probes = self.getprobes(docs)    # get list of probe ids
@@ -106,7 +106,7 @@ class MongoEpigeneticsWrapper():
         return None
 
 
-    def organize_samples_methylation(self, project, sample_label, sample_group):
+    def organize_samples_methylation(self, project, sample_label, sample_group, groupby_name):
         '''
         Finds the sample_ids of the project and sample group user is interested in
         saves a dictionary of the form {sample_id: (sample_label, sample_group)
@@ -115,51 +115,12 @@ class MongoEpigeneticsWrapper():
         '''
 
         sampleid_name = 'sampleid'    # previously name_samplabel
-        groupby_name = 'samplegroup'
         print "project name = %s" % project
         project = [str(p) for p in project]
         if len(project) == 1:
             project = project[0]
 
-        if len(project) > 1:
-            groupby_name = 'project'
-        elif project == 'down syndrome':    # assign default groupby_name (previously name_sampgroup)
-            groupby_name = 'sample_group'
-        elif project == 'FASD':
-            groupby_name = 'fasd'
-        elif project == 'Kollman':
-            groupby_name = 'sample_group'
-        elif project == 'Anne Ellis':
-            groupby_name = 'treatment'
-        elif project == 'Wisconsin':
-            groupby_name = 'tissuetype'
-        elif project == 'Valproate':
-            groupby_name = 'sample_group'
-        elif project == 'Roberts':
-            groupby_name = 'sample_group'
-        elif project == 'GTProject':
-            groupby_name = 'gender'
-        elif project == 'McMaster':
-            groupby_name = 'infected'
-        elif project == 'PAWS':
-            groupby_name = 'sample_group'
-        elif project == 'Pygmies_Bantu':
-            groupby_name = 'treatment'
-        elif project == 'CARE':
-            groupby_name = 'gender'
-        elif project == "HASM":
-            groupby_name = 'sample_group'
-        elif project == "DEII":
-            groupby_name = 'exposure'
-        elif project == "All":
-            groupby_name = 'project'
-        elif project == "Tissue":
-            groupby_name = 'project'
-        else:
-            print "Project name not recognized (MEW - 147): %s" % (project)
-            return {}
-
-        if project != "All" and project != "Tissue":    # if "All",then special case, don't use project in the query!
+        if groupby_name != 'project':    # if "All",then special case, don't use project in the query!
             samplesdocs = self.finddocs_samples_methylation(sample_group = groupby_name, project = project)
         # print "sampledocs %s" % (samplesdocs)
         else:
@@ -179,7 +140,7 @@ class MongoEpigeneticsWrapper():
             doc_sample_label = doc[sampleid_name]
             if doc_sample_group == sample_group or sample_group is None:
                 if doc_sample_label == sample_label or sample_label is None:
-                    sample_ids[sample_id] = (doc_sample_label, doc_sample_group)
+                    sample_ids[sample_id] = (str(doc_sample_label), str(doc_sample_group))
         return sample_ids
 
 
@@ -314,7 +275,10 @@ class MongoEpigeneticsWrapper():
             return {}
         collection = 'samples'
         query_parameters = {}    # This dictionary will store all the query parameters
-        return_chr = {'_id': True, 'sampleid':True, sample_group:True, 'project':True}
+        return_chr = {'_id': True, 'sampleid':True, 'project':True}
+        if sample_group != 'project':
+            return_chr[sample_group] = True
+
 
         query_parameters['haswaves'] = {'$exists':False}
         if project != "All" and project != "Tissue":
@@ -412,6 +376,7 @@ class MongoEpigeneticsWrapper():
             sample_id = str(methyldata['sampleid'])
             sample = sample_ids[sample_id][0]
             stype = sample_ids[sample_id][1]
+
             beta = methyldata['beta']
             if math.isnan(beta):
                 continue

@@ -12,11 +12,14 @@ from pymongo.mongo_client import MongoClient
 import os, sys
 import ast
 
+
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(os.path.dirname(_cur_dir))
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
+sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "common_utilities")
 from MongoDB.mongoUtilities import MongoEpigeneticsWrapper
+from MongoDB.mongoUtilities.common_utilities import CreateListFromCursor
 mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
 
 
@@ -95,7 +98,8 @@ def process_request(request):
     for t in temp:
         ti = t.split(",")
         for tj in ti:
-            p['methylation_project'].append(tj)
+            p['methylation_project'].append(tj.encode('utf-8'))
+    p['groupby_selected'] = q.get("groupby", None)
     p['chromosome'] = q.get("chromosome", None)
     p['minheight'] = q.get("minheight", None)
     p['tss'] = to_boolean(q.get("tss", False))
@@ -169,12 +173,11 @@ def view_query_form(request):
 
     methylation_list = {}
     chipseq_list = {}
+    groupby_list = {}
     for o in organism_list:
         proj_list = mongo[o + "_epigenetics"]['samples'].distinct("project")
         proj_list.sort()
         op_list = [x.encode('utf-8') for x in proj_list]
-        op_list.insert(0, "All")
-        op_list.append("Tissue")
         methylation_list[o] = op_list
         chip_list = []
         if (o == "yeast"):
@@ -182,12 +185,29 @@ def view_query_form(request):
         else:
             chip_list = mongo[o + "_epigenetics"]['samples'].find({'haswaves': True}).distinct('chip')
         chip_list.sort()
-        chip_list.insert(0, "All")
         cs_list = [x.encode('utf-8') for x in chip_list]
         chipseq_list[o] = cs_list
-    # print "methylation_list ", methylation_list
-    # print "methylation_project:", parameters['methylation_project']
 
+        gb = CreateListFromCursor(mongo[o + "_epigenetics"]['sample_groups'].find())
+        byproj = {}
+        for x in gb:
+            a = x['available']
+            if len(a) > 1:
+                a = [y.encode('utf-8') for y in x['available']]
+            else:
+                a = x['available'][0].encode('utf-8')
+            byproj[x['project'].encode('utf-8')] = {'default':x['default'].encode('utf-8'), 'available':a}
+        groupby_list[o] = byproj
+
+    if (len(parameters['methylation_project']) > 1 or "All" in  parameters['methylation_project']) :
+        parameters['groupby_selected'] = 'project'
+    elif (parameters['groupby_selected'] == None and len(parameters['methylation_project']) == 1) or \
+             (parameters['methylation_project'][0] not in methylation_list[parameters['organism']]) or \
+             (parameters['groupby_selected'] not in groupby_list[parameters['organism']][parameters['methylation_project'][0]]['available']):
+        parameters['groupby_selected'] = groupby_list[parameters['organism']][parameters['methylation_project'][0]]['default']
+    else:
+        parameters['groupby_selected'] = parameters['groupby_selected'].encode('utf-8')
+    print "Groupby Selected is now :", parameters['groupby_selected']
 
     # print "chipseq_list ", chipseq_list
     # print "chipseq:", parameters['chipseq']
@@ -290,5 +310,8 @@ def view_query_form(request):
                                                'datapoints': parameters['datapoints'],
                                                'show_dist':parameters['show_dist'],
                                                'width':parameters['width'],
-                                               'height':parameters['height']})
+                                               'height':parameters['height'],
+                                               'groupby':groupby_list,
+                                               'groupby_selected':parameters['groupby_selected']}
+                  )
 

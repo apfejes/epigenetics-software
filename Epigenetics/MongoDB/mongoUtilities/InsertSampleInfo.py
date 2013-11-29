@@ -2,6 +2,11 @@
 Created on 2013-04-12
 
 @author: jyeung
+
+
+This Code is Deprecated - Nov 28th, 2013.
+
+
 '''
 
 from time import time

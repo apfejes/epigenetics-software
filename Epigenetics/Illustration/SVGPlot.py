@@ -1,7 +1,7 @@
 '''
 Created on 2013-06-10
 
-@author: sperez, sbrown
+@author: sperez, sbrown, afejes
 '''
 
 from svgwrite.shapes import Rect, Circle
@@ -128,7 +128,7 @@ class Plot(object):
         for (pos, height, stddev, sample_id) in waves:
             d = self.make_gausian(pos, height, stddev, sample_id)
             if first:
-                print "palette.sample_color: ", self.palette.samples_color
+                # print "palette.sample_color: ", self.palette.samples_color
                 first = False
                 if sample_id not in self.palette.types_color:
                     print "resetting sample colours - %s not found in palette.sample_color" % (sample_id)
@@ -169,7 +169,7 @@ class Plot(object):
                     # print "sample Grouping = %s" % (self.sample_grouping)
                     key = "%s-%s" % (sample_type, sample_id)
                     if first:
-                        print "palette.sample_color: ", self.palette.samples_color
+                        # print "palette.sample_color: ", self.palette.samples_color
                         first = False
                         if key not in self.palette.samples_color:
                             print "resetting sample colours - %s not found in palette.sample_color" % (key)
@@ -186,7 +186,7 @@ class Plot(object):
                     else:
                         type_color = self.palette.colour_assignment_group(sample_type)
                         self.gausian_colour[sample_type] = type_color
-                    (m, s) = sample_peaks[position][sample_type]
+                    m, s = sample_peaks[position][sample_type]
                     m = round((1 - m) * self.dimension_y, 2) + self.MARGIN
                     s = round(s * self.dimension_y, 3)
 
