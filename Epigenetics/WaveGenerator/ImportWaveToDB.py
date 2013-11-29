@@ -87,6 +87,14 @@ def run(PARAM, wave_data_file, wave_input_file, db_name, test):
     print "Thanks - Data has been collected."
     print "opening connection(s) to MongoDB..."
     mongo = Mongo_Connector.MongoConnector(PARAM.get_parameter("server"), PARAM.get_parameter("port"), db_name)
+    mongo.ensure_index("sample", "_id")
+    mongo.ensure_index("sample", "haswaves")
+    mongo.ensure_index("sample", {"haswaves", "use"})
+    mongo.ensure_index("waves", "_id")
+    mongo.ensure_index("waves", "pos")
+    mongo.ensure_index("waves", {"chr", "pos"})
+    mongo.ensure_index("waves", {"chr", "pos", "sample_id"})
+    mongo.ensure_index("waves", {"sample_id", "height"})
 
     '''Changing to not update this information, will update later from metadata file (see directly below)
     print "processing %s..." % wave_input_file
@@ -139,7 +147,7 @@ def run(PARAM, wave_data_file, wave_input_file, db_name, test):
             wave["sample_id"] = sample_id
             to_insert.append(wave)
             # mongo.insert("waves", wave)
-            if count % 8000 == 0:
+            if count % 10000 == 0:
                 print "%i lines processed" % count
                 mongo.insert("waves", to_insert)
                 to_insert = []
