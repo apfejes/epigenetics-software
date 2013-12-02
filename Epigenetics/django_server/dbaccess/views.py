@@ -110,10 +110,6 @@ def process_request(request):
     p['width'] = int(q.get("width", 1000)) - 100    # width of screen minus 100
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
 
-    # print "Request method = %s, methylation_project = %s" % (request.method, p['methylation_project'])
-    print "chipseq project at start: ", p['chipseq_project']
-    print "methylation project at start: ", p['methylation_project']
-
     start = q.get("start", 0)
     if start is None or start == '' or start == True:
         start = 0
