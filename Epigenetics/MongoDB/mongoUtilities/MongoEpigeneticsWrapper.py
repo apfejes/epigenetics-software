@@ -75,7 +75,7 @@ class MongoEpigeneticsWrapper():
 
         if self.peaks:
             sample_ids = self.organize_samples_chipseq(parameters['chipseq'])
-            cursor = self.finddocs_waves(sample_ids, minh = parameters['minheight'])    # get peak info for region queried
+            cursor = self.finddocs_waves(sample_ids, minh = parameters['minheight'], mins = parameters['minsigma'])    # get peak info for region queries
             docs = CreateListFromCursor(cursor)
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
             if self.database == 'human_epigenetics':
@@ -189,7 +189,7 @@ class MongoEpigeneticsWrapper():
         return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
 
 
-    def finddocs_waves(self, sample_ids, minh = 0):
+    def finddocs_waves(self, sample_ids, minh = 0, mins = 0):
 
         '''Finds documents corresponding to collection and type of query
         
@@ -220,6 +220,11 @@ class MongoEpigeneticsWrapper():
         if (minh > 0):
             print "--->minh: ", minh
             query_parameters["height"] = {"$gte":minh}
+
+        mins = float(mins)
+        if (mins > 0):
+            print "--->mins: ", mins
+            query_parameters["stddev"] = {"$gte":mins}
 
 
         return_chr = {'_id': False, 'pos': True,
