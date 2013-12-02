@@ -23,6 +23,7 @@ body
       input(type="hidden", id="chipseq_selected", name="chipseq_selected", value=chipseq_project)
       input(type="hidden", id="groupby_selected", name="groupby_selected", value=groupby_selected)
       input(type="hidden", id="groupby_avail", name="groupby_avail", value=groupby)
+      input(type="hidden", id="sv", name="sv", value=plot)
       
       script(type='text/javascript')
         document.getElementById('width').value = window.innerWidth;
@@ -141,6 +142,7 @@ body
     #left
        |!{plot}
     #right
+      <button type="button" onclick='download_svg()'>Download SVG</button>
 
       h3 Group Index
         div index
@@ -371,6 +373,20 @@ script(type='text/javascript')
       base += "&sample_index=" + encodeURIComponent(document.forms.main.sample_index.value)
       
       return base
+    }
+    
+    
+    function download_svg() {
+    
+      window.URL = window.URL || window.webkitURL;
+      var a = document.createElement('a');
+      var e = document.getElementById("sv");
+      plot = e.value;
+      var blob = new Blob([plot], {'type':'text\/plain'});
+      a.href = window.URL.createObjectURL(blob);
+      a.download = 'filename.svg';
+      a.click();
+      
     }
     
         
