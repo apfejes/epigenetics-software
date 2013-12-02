@@ -164,96 +164,106 @@ script(type='text/javascript')
     }
     
     function update_groupby() {
-      var e = document.getElementById("methylation");
-      var methylation = getselected(e)
-      if (methylation.indexOf("All") > 0) {
-        e.options[0].selected = True
-      }
-      var e = document.getElementById("groupby");
-      e.options.length=0;
+      var z = document.getElementById("collection");
+      var collect = getselected(z)
+      if (collect == "methylation" || collect == "methchip") {
       
-      i = 0;
-      if (methylation.length > 1 || methylation == "All") {
-        document.getElementById("groupby").options[i]=new Option('project', 'project', true, true);
-      } else {
-        var gb_sel = groupby_selected.value
-        var gb_all = JSON.parse(groupby_avail.value.replace(/'/g, '"'));
-        var gb_av = gb_all[organism_inuse.value][methylation]['available']
-        if (gb_av.length == 1 || !(gb_av instanceof Array)) {
-          document.getElementById("groupby").options[i]=new Option(gb_av, gb_av, true, true);
+      
+        var e = document.getElementById("methylation");
+        var methylation = getselected(e)
+        var e = document.getElementById("groupby");
+        e.options.length=0;
+      
+        i = 0;
+        if (methylation.length > 1 || methylation == "All") {
+          document.getElementById("groupby").options[i]=new Option('project', 'project', true, true);
         } else {
-          for (gb in gb_av) {  
-            if (gb_sel == gb_av[gb]) { 
-              document.getElementById("groupby").options[i]=new Option(gb_av[gb], gb_av[gb], true, true);
-            } else { 
-              document.getElementById("groupby").options[i]=new Option(gb_av[gb], gb_av[gb], false, false);
+          var gb_sel = groupby_selected.value
+          var gb_all = JSON.parse(groupby_avail.value.replace(/'/g, '"'));
+          var gb_av = gb_all[organism_inuse.value][methylation]['available']
+          if (gb_av.length == 1 || !(gb_av instanceof Array)) {
+            document.getElementById("groupby").options[i]=new Option(gb_av, gb_av, true, true);
+          } else {
+            for (gb in gb_av) {  
+              if (gb_sel == gb_av[gb]) { 
+                document.getElementById("groupby").options[i]=new Option(gb_av[gb], gb_av[gb], true, true);
+              } else { 
+                document.getElementById("groupby").options[i]=new Option(gb_av[gb], gb_av[gb], false, false);
+              }
+              i++;
             }
-            i++;
           }
         }
       }
-    
-    
     }
 
 
 
     function update_data_by_org() {
       organism_inuse.value = document.getElementById("organism").value
-      var e = document.getElementById("methylation");
-      e.options.length=0;
-      var mo = JSON.parse(methylation_avail.value.replace(/'/g, '"'));
-      var meth_by_org = mo[organism_inuse.value];
-      var meth_sel = JSON.parse(methylation_selected.value.replace(/'/g, '"'));
-      i = 0;
-      for (pro in meth_by_org) {
-        if (meth_sel.indexOf(meth_by_org[pro]) >= 0) { 
-          document.getElementById("methylation").options[i]=new Option(meth_by_org[pro], meth_by_org[pro], true, true);
-        } else { 
-          document.getElementById("methylation").options[i]=new Option(meth_by_org[pro], meth_by_org[pro], false, false);
+      var z = document.getElementById("collection");
+      var collect = getselected(z)
+      if (collect == "methylation" || collect == "methchip") {
+        var e = document.getElementById("methylation");
+        e.options.length=0;
+        var mo = JSON.parse(methylation_avail.value.replace(/'/g, '"'));
+        var meth_by_org = mo[organism_inuse.value];
+        var meth_sel = JSON.parse(methylation_selected.value.replace(/'/g, '"'));
+        
+        i = 0;
+        for (pro in meth_by_org) {
+          if (meth_sel.indexOf(meth_by_org[pro]) >= 0) { 
+            document.getElementById("methylation").options[i]=new Option(meth_by_org[pro], meth_by_org[pro], true, true);
+          } else { 
+            document.getElementById("methylation").options[i]=new Option(meth_by_org[pro], meth_by_org[pro], false, false);
+          }
+          i++;
         }
-        i++;
-      }
-      
-      
-      var e = document.getElementById("groupby");
-      e.options.length=0;
-      i = 0;
-      if (meth_sel.length > 1) {
-        document.getElementById("groupby").options[i]=new Option('project', 'project', true, true);
-      } else {
-        var gb_sel = groupby_selected.value
-        var gb_all = JSON.parse(groupby_avail.value.replace(/'/g, '"'));
-        var gb_av = gb_all[organism_inuse.value][meth_sel]['available']
-        if (gb_av.length == 1 || !(gb_av instanceof Array)) {
-          document.getElementById("groupby").options[i]=new Option(gb_av, gb_av, true, true);
+        
+        if (meth_sel == "") {
+          e.options[0].selected = true
+          methylation_selected.value = getselected(e);
+          meth_sel = methylation_selected.value
+        }
+        var e = document.getElementById("groupby");
+        e.options.length=0;
+        i = 0;
+        if (meth_sel.length > 1) {
+          document.getElementById("groupby").options[i]=new Option('project', 'project', true, true);
         } else {
-          for (gb in gb_av) {  
-            if (gb_sel == gb_av[gb]) { 
-              document.getElementById("groupby").options[i]=new Option(gb_av[gb], gb_av[gb], true, true);
-            } else { 
-              document.getElementById("groupby").options[i]=new Option(gb_av[gb], gb_av[gb], false, false);
+          var gb_sel = groupby_selected.value
+          var gb_all = JSON.parse(groupby_avail.value.replace(/'/g, '"'));
+          var gb_av = gb_all[organism_inuse.value][meth_sel]['available']
+          if (gb_av.length == 1 || !(gb_av instanceof Array)) {
+            document.getElementById("groupby").options[i]=new Option(gb_av, gb_av, true, true);
+          } else {
+            for (gb in gb_av) {  
+              if (gb_sel == gb_av[gb]) { 
+                document.getElementById("groupby").options[i]=new Option(gb_av[gb], gb_av[gb], true, true);
+              } else { 
+                document.getElementById("groupby").options[i]=new Option(gb_av[gb], gb_av[gb], false, false);
+              }
+              i++;
             }
-            i++;
           }
         }
       }
-      
-      var e = document.getElementById("chipseq")
-      e.options.length=0;
-      var cso = JSON.parse(chipseq_avail.value.replace(/'/g, '"'));
-      var zzz = cso[organism_inuse.value];
-      var cs_sel = chipseq_selected.value;
-      i = 0;
-      for (pro in zzz) {
-        if (cs_sel.indexOf(zzz[pro]) >= 0) { 
-          document.getElementById("chipseq").options[i]=new Option(zzz[pro], zzz[pro], true, true);
-        } else { 
-          document.getElementById("chipseq").options[i]=new Option(zzz[pro], zzz[pro], false, false);
+      if (collect == "chipseq" || collect == "methchip") {
+        var e = document.getElementById("chipseq")
+        e.options.length=0;
+        var cso = JSON.parse(chipseq_avail.value.replace(/'/g, '"'));
+        var zzz = cso[organism_inuse.value];
+        var cs_sel = chipseq_selected.value;
+        i = 0;
+        for (pro in zzz) {
+          if (cs_sel.indexOf(zzz[pro]) >= 0) { 
+            document.getElementById("chipseq").options[i]=new Option(zzz[pro], zzz[pro], true, true);
+          } else { 
+            document.getElementById("chipseq").options[i]=new Option(zzz[pro], zzz[pro], false, false);
+          }
+          i++;
         }
-        i++;
       }
-      
     }
 
     function update_view(){
