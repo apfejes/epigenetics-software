@@ -87,14 +87,13 @@ def process_request(request):
     p['organism'] = str(q.get("organism", "human"))
     p['collection'] = q.get("collection", "methylation")
     p['chipseq_project'] = []
-    p['chipseq'] = q.getlist("chipseq", ["All"])    # list of chip seq samples available
-    temp = q.getlist('chipseq', ["All"])
+    temp = q.getlist('chipseq', [])
     for t in temp:
         ti = t.split(",")
         for tj in ti:
             p['chipseq_project'].append(tj)
     p['methylation_project'] = []
-    temp = q.getlist('methylation', ["All"])
+    temp = q.getlist('methylation', [])
     for t in temp:
         ti = t.split(",")
         for tj in ti:
@@ -112,9 +111,8 @@ def process_request(request):
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
 
     # print "Request method = %s, methylation_project = %s" % (request.method, p['methylation_project'])
-
-    print "types_index at start: ", p['types_index']
-
+    print "chipseq project at start: ", p['chipseq_project']
+    print "methylation project at start: ", p['methylation_project']
 
     start = q.get("start", 0)
     if start is None or start == '' or start == True:
@@ -199,24 +197,38 @@ def view_query_form(request):
             byproj[x['project'].encode('utf-8')] = {'default':x['default'].encode('utf-8'), 'available':a}
         groupby_list[o] = byproj
 
-    if (len(parameters['methylation_project']) > 1 or "All" in  parameters['methylation_project']) :
-        parameters['groupby_selected'] = 'project'
-    elif (parameters['groupby_selected'] == None and len(parameters['methylation_project']) == 1) or \
-             (parameters['methylation_project'][0] not in methylation_list[parameters['organism']]) or \
-             (parameters['groupby_selected'] not in groupby_list[parameters['organism']][parameters['methylation_project'][0]]['available']):
-        parameters['groupby_selected'] = groupby_list[parameters['organism']][parameters['methylation_project'][0]]['default']
-    else:
-        parameters['groupby_selected'] = parameters['groupby_selected'].encode('utf-8')
-    print "Groupby Selected is now :", parameters['groupby_selected']
+
+
+
 
     # print "chipseq_list ", chipseq_list
     # print "chipseq:", parameters['chipseq']
 
-    database = parameters['organism'] + "_epigenetics"
-
     # variables:
     methylation, peaks = process_collection(parameters['collection'])
 
+    if not methylation:
+        parameters['methylation_project'] = None
+    if not peaks:
+        parameters['chipseq_project'] = None
+
+    if methylation:
+        if (len(parameters['methylation_project']) == 0) or (len(parameters['methylation_project']) > 1 or "All" in parameters['methylation_project']) :
+            parameters['groupby_selected'] = 'project'
+        elif parameters['methylation_project'][0] not in groupby_list[parameters['organism']]:
+            parameters['groupby_selected'] = 'project'
+        elif (parameters['groupby_selected'] == None and len(parameters['methylation_project']) == 1) :
+            parameters['groupby_selected'] = groupby_list[parameters['organism']][parameters['methylation_project'][0]]['default']
+        elif parameters['methylation_project'][0] not in methylation_list[parameters['organism']] :
+            parameters['groupby_selected'] = groupby_list[parameters['organism']][parameters['methylation_project'][0]]['default']
+        elif parameters['groupby_selected'] not in groupby_list[parameters['organism']][parameters['methylation_project'][0]]['available']:
+            parameters['groupby_selected'] = groupby_list[parameters['organism']][parameters['methylation_project'][0]]['default']
+        else:
+            parameters['groupby_selected'] = parameters['groupby_selected'].encode('utf-8')
+        print "Groupby Selected is now :", parameters['groupby_selected']
+
+
+    database = parameters['organism'] + "_epigenetics"
     print("creating Mongo Wrapper on Database")
 
     m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks, parameters['start'], parameters['end'])

@@ -209,7 +209,6 @@ script(type='text/javascript')
         var mo = JSON.parse(methylation_avail.value.replace(/'/g, '"'));
         var meth_by_org = mo[organism_inuse.value];
         var meth_sel = JSON.parse(methylation_selected.value.replace(/'/g, '"'));
-        
         i = 0;
         for (pro in meth_by_org) {
           if (meth_sel.indexOf(meth_by_org[pro]) >= 0) { 

@@ -74,7 +74,7 @@ class MongoEpigeneticsWrapper():
             annotation_docs = docs
 
         if self.peaks:
-            sample_ids = self.organize_samples_chipseq(parameters['chipseq'])
+            sample_ids = self.organize_samples_chipseq(parameters['chipseq_project'])
             cursor = self.finddocs_waves(sample_ids, minh = parameters['minheight'])    # get peak info for region queried
             docs = CreateListFromCursor(cursor)
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
