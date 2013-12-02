@@ -179,7 +179,7 @@ script(type='text/javascript')
         e.options.length=0;
       
         i = 0;
-        if (methylation.length > 1 || methylation == "All") {
+        if (methylation.length > 1) {
           document.getElementById("groupby").options[i]=new Option('project', 'project', true, true);
         } else {
           var gb_sel = groupby_selected.value
@@ -212,7 +212,7 @@ script(type='text/javascript')
         e.options.length=0;
         var mo = JSON.parse(methylation_avail.value.replace(/'/g, '"'));
         var meth_by_org = mo[organism_inuse.value];
-        var meth_sel = JSON.parse(methylation_selected.value.replace(/'/g, '"'));
+        meth_sel = methylation_selected.value.indexOf('\'') >0 ? JSON.parse(methylation_selected.value.replace(/'/g, '"')) : methylation_selected.value;
         i = 0;
         for (pro in meth_by_org) {
           if (meth_sel.indexOf(meth_by_org[pro]) >= 0) { 
@@ -296,6 +296,7 @@ script(type='text/javascript')
         document.getElementById("chipseq").style.display='';
         document.getElementById("chipseq_label").style.display='';
       }
+    update_data_by_org();
     }
 
 
