@@ -36,22 +36,22 @@ def create_param_obj(param_file):
         sys.exit()
 
 
-def run(PARAM, wave_data_file, wave_input_file, db_name):
+def run(PARAM, wave_data_file, wave_input_file, db_name, test):
     '''simple script for reading in a wave file and inserting it into a table in a mongodb database.'''
 
-    #wave_data_file = raw_input('wave file to load: ')
+    # wave_data_file = raw_input('wave file to load: ')
     while not os.path.isfile(wave_data_file):
         print "Unable to find file %s" % wave_data_file
-        #wave_data_file = raw_input('wave file to load: ')
+        # wave_data_file = raw_input('wave file to load: ')
         sys.exit()
-    #wave_input_file = raw_input('parameter file used to generate waves: ')
+    # wave_input_file = raw_input('parameter file used to generate waves: ')
     while not os.path.isfile(wave_input_file):
         print "Unable to find file %s" % wave_input_file
-        #wave_input_file = raw_input('parameter file used to generate waves: ')
+        # wave_input_file = raw_input('parameter file used to generate waves: ')
         sys.exit()
-    #cell_line = raw_input('Insert name of the cell line: ')
-    #chip = raw_input('Name of the ChIP target : ')
-    
+    # cell_line = raw_input('Insert name of the cell line: ')
+    # chip = raw_input('Name of the ChIP target : ')
+
     print "Patient data can be entered after this insert via UpdateWaveMetadataToDB script."
     '''
     patient_data = str.lower(raw_input("Do you have patient data to enter for this sample [y/n]:"))
@@ -87,6 +87,16 @@ def run(PARAM, wave_data_file, wave_input_file, db_name):
     print "Thanks - Data has been collected."
     print "opening connection(s) to MongoDB..."
     mongo = Mongo_Connector.MongoConnector(PARAM.get_parameter("server"), PARAM.get_parameter("port"), db_name)
+    # TODO: Make this work
+#     mongo.ensure_index("samples", "_id")
+#     mongo.ensure_index("samples", "haswaves")
+#     mongo.ensure_index("samples", {("haswaves", 1), ("use", 1)})
+#     mongo.ensure_index("waves", "_id")
+#     mongo.ensure_index("waves", "pos")
+#     mongo.ensure_index("waves", {"chr":1, "pos":1})
+#     mongo.ensure_index("waves", {"chr":1, "pos":1, "sample_id":1})
+#     mongo.ensure_index("waves", {"sample_id":1, "height":1})
+#     mongo.ensure_index("waves", {"sample_id":1, "stddev":1})
 
     '''Changing to not update this information, will update later from metadata file (see directly below)
     print "processing %s..." % wave_input_file
@@ -99,13 +109,17 @@ def run(PARAM, wave_data_file, wave_input_file, db_name):
     '''
     print "processing %s..." % wave_input_file
     sample = create_param_obj(wave_input_file)
-    #sample['cell_line'] = "" ##stored as strain_background in metadata update file
-    #sample['chip'] = "" ##stored as antibody in metadata update file
+    # sample['cell_line'] = "" ##stored as strain_background in metadata update file
+    # sample['chip'] = "" ##stored as antibody in metadata update file
     sample['haswaves'] = True    # used to indicate a sample has wave data
-    #overwrite param file input and output names
+    # overwrite param file input and output names
     sample['input_file'] = StringUtils.rreplace(wave_data_file, '.waves', '.wig', 1)
     sample['output_path'] = os.path.dirname(wave_data_file) + "/"
     sample['file_name'] = os.path.basename(wave_data_file)
+    sample['hide'] = True    # Default to hiding samples. Only once metadata is added is hide set to False
+    if test:
+        sample['hide'] = False
+        sample['sample_id'] = "00test" + os.path.basename(wave_data_file)
     collection_name = "samples"
     sample_id = mongo.insert(collection_name, sample)
 
@@ -135,7 +149,7 @@ def run(PARAM, wave_data_file, wave_input_file, db_name):
             wave["sample_id"] = sample_id
             to_insert.append(wave)
             # mongo.insert("waves", wave)
-            if count % 100000 == 0:
+            if count % 10000 == 0:
                 print "%i lines processed" % count
                 mongo.insert("waves", to_insert)
                 to_insert = []
@@ -148,16 +162,20 @@ def run(PARAM, wave_data_file, wave_input_file, db_name):
     mongo.close()
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 4:
-        print ("This program requires the name of the database config file, the name of the input file, name of wave parameter file, and database")
-        print " eg. python ImportWaveToDB.py /directory/database.conf input/file.name.waves, parameter/wigtest.input test"
+    if len(sys.argv) <= 5:
+        print ("This program requires the name of the database config file, the name of the input file, name of wave parameter file, database, and [1] for test, [0] for sample")
+        print " eg. python ImportWaveToDB.py /directory/database.conf input/file.name.waves, parameter/wigtest.input test 1"
         print " for instance, you can find a demo file in Epigenetics/MongoDB/database.conf "
         sys.exit()
     conf_file = sys.argv[1]
     in_file = sys.argv[2]
     wp_file = sys.argv[3]
     db = sys.argv[4]
+    if int(sys.argv[5]) == 1:
+        test = True
+    else:
+        test = False
     p = Parameters.parameter(conf_file)
-    run(p, in_file, wp_file, db)
+    run(p, in_file, wp_file, db, test)
     print "Completed."
 

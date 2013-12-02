@@ -75,7 +75,7 @@ class MongoEpigeneticsWrapper():
 
         if self.peaks:
             sample_ids = self.organize_samples_chipseq(parameters['chipseq_project'])
-            cursor = self.finddocs_waves(sample_ids, minh = parameters['minheight'])    # get peak info for region queried
+            cursor = self.finddocs_waves(sample_ids, minh = parameters['minheight'], mins = parameters['minsigma'])    # get peak info for region queries
             docs = CreateListFromCursor(cursor)
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
             if self.database == 'human_epigenetics':
@@ -189,7 +189,7 @@ class MongoEpigeneticsWrapper():
         return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
 
 
-    def finddocs_waves(self, sample_ids, minh = 0):
+    def finddocs_waves(self, sample_ids, minh = 0, mins = 0):
 
         '''Finds documents corresponding to collection and type of query
         
@@ -221,6 +221,11 @@ class MongoEpigeneticsWrapper():
             print "--->minh: ", minh
             query_parameters["height"] = {"$gte":minh}
 
+        mins = float(mins)
+        if (mins > 0):
+            print "--->mins: ", mins
+            query_parameters["stddev"] = {"$gte":mins}
+
 
         return_chr = {'_id': False, 'pos': True,
                       'height': True, 'stddev': True,
@@ -244,10 +249,12 @@ class MongoEpigeneticsWrapper():
         collection = 'samples'
         return_chr = {'_id': True, 'sample_id':True}
         # query_parameters = {}    # This dictionary will store all the query parameters
+
         if sample_id == ["All"]:
             query_parameters = {"haswaves":True}
         elif isinstance(sample_id, list):
             query_parameters = {"haswaves":True, "sample_id":{"$in":sample_id}}
+
         else:
             query_parameters = {"haswaves":True, "sample_id":sample_id}
         # query_parameters = {"sample_id":{"$in":["02/08/2012_WT_IP_S9.6", "01/24/2012_WT_IP_S9.7", "04/12/2013_RNaseH_IP_S9.8", "04/12/2013_Sen1_IP_S9.9", "04/20/2013_RNaseH_IP_S9.10", "04/20/2013_Sen1_IP_S9.11"]}}

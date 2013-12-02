@@ -29,7 +29,7 @@ import StringUtils
 
 
 
-def run(PARAM, metadata_file, db_name):
+def run(PARAM, metadata_file, db_name, tohide):
     '''reads metadata_file, and updates sample entries in database'''
 
     while not os.path.isfile(metadata_file):
@@ -75,6 +75,10 @@ def run(PARAM, metadata_file, db_name):
                 sample_update["comments"] = a[16]
                 if a[16] == "\n":
                     sample_update["comments"] = ""
+                if tohide:
+                    sample_update['hide'] = True
+                else:
+                    sample_update['hide'] = False    # now that metadata is added, unhide sample
 
                 # update entries
                 mongo.update(collection_name, {"file_name":file_name}, {"$set": sample_update})
@@ -91,14 +95,22 @@ def run(PARAM, metadata_file, db_name):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 3:
-        print ("This program requires the name of the database config file, the name of the metadata file, and database")
-        print " eg. python ImportWaveToDB.py /directory/database.conf input/metadata.tsv test"
+    if len(sys.argv) <= 4:
+        print ("This program requires the name of the database config file, the name of the metadata file, database, and hidden bit (1 to hide)")
+        print " eg. python ImportWaveToDB.py /directory/database.conf input/metadata.tsv test 1"
         print " for instance, you can find a demo config file in Epigenetics/MongoDB/database.conf "
         sys.exit()
     conf_file = sys.argv[1]
     in_file = sys.argv[2]
     db = sys.argv[3]
+    hidden = int(sys.argv[4])
+    if hidden != 1 and hidden != 0:
+        print "invalid bit for argument 'hidden' - must be 1 or 0"
+        sys.exit()
+    elif hidden == 1:
+        hidden = True
+    else:
+        hidden = False
     p = Parameters.parameter(conf_file)
-    run(p, in_file, db)
+    run(p, in_file, db, hidden)
     print "Completed."

@@ -1,5 +1,5 @@
 '''
-Created on 2013-11-22
+Created on 2013-11-26
 
 @author: sbrown
 '''
@@ -50,20 +50,27 @@ def convert_waves_to_wig(wavesfile, output, autothresh):
     f.close()
 
     if(autothresh):
-        # print "\nNow determining background levels for height of peaks"
-        bins = 70    # based on max peak height of 7
+        # print "\nNow determining background levels for sigma of peaks"
+        bins = 300    # based on max sigma of 300
         counts = [0] * bins
-        thresh = [0] * bins
+        threshes = [0] * bins
         for i in range(0, bins):
-            thresh[i] = (i + 1) * 0.1
+            threshes[i] = (i + 1)
         for i in waves:
             # check all heights to determine background levels
-            counts[int(i['height'] / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
+            counts[int(i['stddev'])] += 1    # increment count where height1 is in bin of size 0.1
         # print "counts are: ", counts
+        highest = 0
+        ind = -1
+        for i in range(0, bins):
+            if counts[i] > highest:
+                highest = counts[i]
+                ind = i
+        print "Most common sigma:", threshes[ind]
         x = []
         y = []
-        for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
-            x.append(thresh[i])
+        for i in range(ind, ind + 5):    # from highest peak forward 5
+            x.append(threshes[i])
             y.append(counts[i])
         # print "x is ", x
         # print "y is ", y
@@ -75,11 +82,12 @@ def convert_waves_to_wig(wavesfile, output, autothresh):
         xint = abs(intercept / slope)
         # print "height threshold between noise and signal is ", xint
         thresh = round(xint, 2)
+        print "sigma threshold between noise and signal is ", thresh
     else:
-        usr_in = raw_input("What would you like to use as the minimum wave height? ")
-        thresh = float(usr_in)
+        usr_in = raw_input("What would you like to use as the minimum wave sigma? ")
+        thresh = int(usr_in)
     # remove waves that don't meet threshold
-    waves[:] = [x for x in waves if x['height'] > thresh]
+    waves[:] = [x for x in waves if x['stddev'] > thresh]
 
     waves.sort(key = lambda x: (x['chr'], x['pos']))    # list sorted by position
 
@@ -110,7 +118,7 @@ def convert_waves_to_wig(wavesfile, output, autothresh):
             numer = math.exp(exponent)
             denom = w['stddev'] * math.sqrt(2.0 * math.pi)
             y = numer / denom
-            print_queue.put(str(y * factor))
+            print_queue.put(str(round(float(y * factor), 2)))
 
     # end printing
     if print_thread is None or not print_thread.is_alive():
@@ -127,11 +135,11 @@ def convert_waves_to_wig(wavesfile, output, autothresh):
 if __name__ == "__main__":
     if len(sys.argv) <= 2:
         print ("This program requires the name of the .waves file  and output/path")
-        print" eg. python waves_to_bed.py ~/output"
+        print" eg. python waves_to_wig_sigma.py ~/output"
         sys.exit()
     wave = sys.argv[1]
     out = sys.argv[2]
-    user_in = raw_input("Would you like the program to automatically determine the wave height threshold? (Y/N): ")
+    user_in = raw_input("Would you like the program to automatically determine the wave width threshold? (Y/N): ")
     if user_in == "Y" or user_in == "y":
         at = True
     else:

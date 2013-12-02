@@ -191,7 +191,7 @@ def FindBaseline(file_name, normalize = False):
             last_ht = 0
         if len(coverage_map) > 0:
             wigfile.add_map(coverage_map, chr_yeast[current_chr], block_left)    # for yeast chromosome nomenclature (roman numeral)
-            print "writing map"
+            # print "writing map"
             # wigfile.add_map(coverage_map, current_chr, block_left)
             coverage_map = []
     # gc.enable()

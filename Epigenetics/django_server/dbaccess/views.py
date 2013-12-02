@@ -101,6 +101,7 @@ def process_request(request):
     p['groupby_selected'] = q.get("groupby", None)
     p['chromosome'] = q.get("chromosome", None)
     p['minheight'] = q.get("minheight", None)
+    p['minsigma'] = q.get("minsigma", None)
     p['tss'] = to_boolean(q.get("tss", False))
     p['cpg'] = to_boolean(q.get("cpg", False))
     p['show_dist'] = to_boolean(q.get("show_dist", False))
@@ -156,6 +157,9 @@ def view_query_form(request):
 
     if parameters['minheight'] == None:
         parameters['minheight'] = 0
+
+    if parameters['minsigma'] == None:
+        parameters['minsigma'] = 0
 
     db_list = [str(x) for x in mongo.database_names()]
     organism_list = []
@@ -250,6 +254,7 @@ def view_query_form(request):
                            height = parameters['height'],
                            width = parameters['width'],
                            get_minheight = parameters['minheight'],
+                           get_minsigma = parameters['minsigma'],
                            get_tss = parameters['tss'],
                            get_cpg = parameters['cpg'],
                            show_points = parameters['datapoints'],
@@ -272,6 +277,7 @@ def view_query_form(request):
                             height = parameters['height'],
                             width = parameters['width'],
                             get_minheight = parameters['minheight'],
+                            get_minsigma = parameters['minsigma'],
                             get_tss = parameters['tss'],
                             get_cpg = parameters['cpg'],
                             types_index = parameters['types_index'],
@@ -291,6 +297,7 @@ def view_query_form(request):
                             height = parameters['height'],
                             width = parameters['width'],
                             get_minheight = parameters['minheight'],
+                            get_minsigma = parameters['minsigma'],
                             get_tss = parameters['tss'],
                             get_cpg = parameters['cpg'],
                             sample_index = parameters['sample_index'],
@@ -313,6 +320,7 @@ def view_query_form(request):
                                                'start':parameters['start'],
                                                'end':parameters['end'],
                                                'minheight':parameters['minheight'],
+                                               'minsigma':parameters['minsigma'],
                                                'tss':parameters['tss'],
                                                'cpg':parameters['cpg'],
                                                'datapoints': parameters['datapoints'],

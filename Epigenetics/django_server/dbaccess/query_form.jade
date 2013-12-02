@@ -117,8 +117,14 @@ body
               input(id='minheight',size = '4', type='text', name='minheight', value = minheight)
             else
               input(id='minheight',size = '4', type='text', value='0', name='minheight')
+          label(for='minsigma') Minimum peak sigma:
+            if minsigma
+              input(id='minsigma',size = '4', type='text', name='minsigma', value = minsigma)
+            else
+              input(id='minsigma',size = '4', type='text', value='0', name='minsigma')
         else
           input(type="hidden", id="minheight", name="minheight", value = '0')
+          input(type="hidden", id="minsigma", name="minsigma", value = '0')
         if collection = 'methylation' or collection = "methchip"
           #selection_element
             label(for='datapoints') Show data points:
@@ -310,6 +316,10 @@ script(type='text/javascript')
       if (e) {
         var minheight = e.value;
       }
+      var e = document.getElementById("minsigma");
+      if (e) {
+        var minsigma = e.value;
+      }
       var e = document.getElementById("tss");
       if (e) {
         var tss = e.checked;
@@ -338,6 +348,9 @@ script(type='text/javascript')
       base += "&action=" + action
       if (minheight) {
         base += "&minheight=" + minheight
+      }
+      if (minsigma) {
+        base += "&minsigma=" + minsigma
       }
       if (tss) {
         base += "&tss=" + tss

@@ -1,5 +1,5 @@
 '''
-This will set use to true or false for samples identified.
+This will set hide to true or false for samples identified.
 Used to "hide" samples in database from online browser and other analysis.
 Created on Nov 19, 2013
 
@@ -17,23 +17,27 @@ import Mongo_Connector
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print('Sample name to update must be given, along with setting.')
-        print("example: python SetSampleUsage.py sample.normalized.waves false")
+    if len(sys.argv) < 4:
+        print('Sample name to update must be given, along with setting and database.')
+        print("example: python SetSampleUsage.py sample.normalized.waves false yeast_epigenetics")
         sys.exit()
     proj_name = sys.argv[1]
-    setting = str(sys.argv[2])
+    setting = sys.argv[2].lower()
     if setting != "true" and setting != "false":
         print("setting must be 'true' or 'false', without quotes.")
         sys.exit()
+    elif setting == "true":
+        setting = True
+    else:
+        setting = False
 
 
-    db_name = "yeast_epigenetics"
+    db_name = sys.argv[3]
     mongodb = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
     found = mongodb.find("samples", {"file_name":proj_name}, {"_id": True}).count()
-    print "found %s sample(s) matching %s to update use to %s " % (found, proj_name, setting)
+    print "found %s sample(s) matching %s to update hide to %s " % (found, proj_name, setting)
     sample_update = {}
-    sample_update["use"] = setting
+    sample_update["hide"] = setting
     mongodb.update("samples", {"file_name":proj_name}, {"$set": sample_update})
 
 
