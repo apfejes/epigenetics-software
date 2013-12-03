@@ -23,11 +23,7 @@ body
       input(type="hidden", id="chipseq_selected", name="chipseq_selected", value=chipseq_project)
       input(type="hidden", id="groupby_selected", name="groupby_selected", value=groupby_selected)
       input(type="hidden", id="groupby_avail", name="groupby_avail", value=groupby)
-      input(type="hidden", id="sv", name="sv", value=plot)
-      
-      script(type='text/javascript')
-        document.getElementById('width').value = window.innerWidth;
-        document.getElementById('height').value = window.innerHeight;
+      input(type="hidden", id="sv", name="sv", value=plot, disabled="disabled")
       div(align='center')
         fieldset
           label(for='organism') Organism:
@@ -145,7 +141,6 @@ body
       <button type="button" onclick='download_svg()'>Download SVG</button>
 
       h3 Group Index
-        div index
         
       - if types_index.items
         - var samples = types_index.keys()
@@ -157,7 +152,8 @@ body
         | No Data Found                   
 
 script(type='text/javascript')
-    
+    document.getElementById('width').value = window.innerWidth;
+    document.getElementById('height').value = window.innerHeight;
 
     function getselected(selectobject) {
         var results = [];
@@ -384,13 +380,12 @@ script(type='text/javascript')
       plot = e.value;
       var blob = new Blob([plot], {'type':'text\/plain'});
       a.href = window.URL.createObjectURL(blob);
-      a.download = 'filename.svg';
+      a.download = 'plot_area.svg';
       a.click();
       
     }
     
-        
-    //run the scripts to set the initial view.
+       
     update_view();
     update_data_by_org();
     
