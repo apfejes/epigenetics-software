@@ -48,14 +48,17 @@ class parameter(object):
             print ""
             sys.exit()
 
-    def set_parameter(self, key, value):
+    def set(self, key, value):
         '''set a parameter with a key value pair'''
         self.parameters[key] = value
 
-    def get_parameter(self, key):
-        '''get a parameter with a key value'''
+    def get(self, key, default = None):
+        '''get a parameter with a key value
+           used to override default behavior of simple get on the parameter object.'''
         if (self.parameters.has_key(key)):
             return self.parameters.get(key)
+        elif default:
+            return default
         else:
             print "invalid lookup of key:", key
             return None

@@ -241,7 +241,7 @@ class Plot(object):
         for axis in get_axis(self.width, self.MARGIN, self.height, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
             self.elements.append(axis)
 
-        print "add_legends, messages are: %s" % self.message
+        # print "add_legends, messages are: %s" % self.message
 
         if self.message is None:
             self.add_xtics()

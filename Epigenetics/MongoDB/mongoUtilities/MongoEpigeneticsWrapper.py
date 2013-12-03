@@ -115,7 +115,7 @@ class MongoEpigeneticsWrapper():
         '''
 
         sampleid_name = 'sampleid'    # previously name_samplabel
-        print "project name = %s" % project
+        # print "project name = %s" % project
         project = [str(p) for p in project]
         if len(project) == 1:
             project = project[0]

@@ -86,7 +86,7 @@ def run(PARAM, wave_data_file, wave_input_file, db_name, test):
 
     print "Thanks - Data has been collected."
     print "opening connection(s) to MongoDB..."
-    mongo = Mongo_Connector.MongoConnector(PARAM.get_parameter("server"), PARAM.get_parameter("port"), db_name)
+    mongo = Mongo_Connector.MongoConnector(PARAM.get("server"), PARAM.get("port"), db_name)
     # TODO: Make this work
 #     mongo.ensure_index("samples", "_id")
 #     mongo.ensure_index("samples", "haswaves")

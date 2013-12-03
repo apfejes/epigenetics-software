@@ -39,7 +39,7 @@ def run(PARAM, metadata_file, db_name, tohide):
     print "Data being imported into database: ", db_name
 
     print "opening connection(s) to MongoDB..."
-    mongo = Mongo_Connector.MongoConnector(PARAM.get_parameter("server"), PARAM.get_parameter("port"), db_name)
+    mongo = Mongo_Connector.MongoConnector(PARAM.get("server"), PARAM.get("port"), db_name)
 
     print "processing %s..." % metadata_file
 
