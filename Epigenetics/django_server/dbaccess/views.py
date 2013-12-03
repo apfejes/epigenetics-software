@@ -179,9 +179,9 @@ def view_query_form(request):
         methylation_list[o] = op_list
         chip_list = []
         if (o == "yeast"):
-            chip_list = mongo[o + "_epigenetics"]['samples'].find({'haswaves': True}).distinct('sample_id')
+            chip_list = mongo[o + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False}).distinct('sample_id')
         else:
-            chip_list = mongo[o + "_epigenetics"]['samples'].find({'haswaves': True}).distinct('chip')
+            chip_list = mongo[o + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False}).distinct('chip')
         chip_list.sort()
         cs_list = [x.encode('utf-8') for x in chip_list]
         chipseq_list[o] = cs_list
