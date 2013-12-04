@@ -14,10 +14,9 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 
-
-database_name = 'human_epigenetics'
-# database_name = 'jake_test'
 arrayQuery = {'array_type': 'humanmethylation450_beadchip'}
 
 
@@ -38,11 +37,13 @@ def AddChrPrefix(collection_name, chr_list):
 
     print 'Done in %i seconds' % (time.time() - starttime)
 
-if __name__ == "__main__":
 
+
+if __name__ == "__main__":
     annotation_name = 'annotations'
 
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
+    p = Parameters.parameter()
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     # mongo.ensure_index(annotation_name, 'chr')  # don't index just on chromosome name
 
     chromosome_list = [str(i) for i in range(1, 22)]    # Create an expected list of chromosomes

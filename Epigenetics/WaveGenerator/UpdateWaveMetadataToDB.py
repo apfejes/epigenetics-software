@@ -100,10 +100,12 @@ if __name__ == '__main__':
         print ("This program requires the name of the database config file, the name of the metadata file, database, and hidden bit (1 to hide)")
         print " eg. python ImportWaveToDB.py /directory/database.conf input/metadata.tsv test 1"
         print " for instance, you can find a demo config file in Epigenetics/MongoDB/database.conf "
+        print " NOTE: This program is being modified - the database.conf file is currently unused. Future versions will allow an override of the default."
         sys.exit()
+    p = Parameters.parameter()
     conf_file = sys.argv[1]
     in_file = sys.argv[2]
-    db = sys.argv[3]
+    p.set('default_database', sys.argv[3])
     hidden = int(sys.argv[4])
     if hidden != 1 and hidden != 0:
         print "invalid bit for argument 'hidden' - must be 1 or 0"
@@ -112,6 +114,6 @@ if __name__ == '__main__':
         hidden = True
     else:
         hidden = False
-    p = Parameters.parameter(conf_file)
-    run(p, in_file, db, hidden)
+    p = Parameters.parameter()
+    run(p, in_file, p.get('default_database'), hidden)
     print "Completed."

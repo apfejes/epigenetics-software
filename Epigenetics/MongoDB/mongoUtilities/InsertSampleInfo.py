@@ -20,16 +20,23 @@ sys.path.insert(0, _cur_dir + os.sep + "mongoUtilities")
 import Mongo_Connector
 import Samples
 
+_root_dir = os.path.dirname(_cur_dir)
+while ("CommonUtils" in _root_dir):
+    _root_dir = os.path.dirname(_root_dir)
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 
-database_name = 'human_epigenetics'
+
+# database_name = 'human_epigenetics'
 # database_name = 'jake_test'
 collection_name = 'samples'
 # filename = '/home/jyeung/Documents/Outputs/Down/down_pData.txt'    # Down meta file
 # filename = '/home/jyeung/Documents/Outputs/Kollman_meaghan_jones/Koll.fin_pData.txt'    # Kollman meta file
 
 
-def InsertSampleInfo(filename, sample_label_identifier):
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
+def InsertSampleInfo(param, filename, sample_label_identifier):
+
+    mongo = Mongo_Connector.MongoConnector(param.get('server'), param.get('port'), param.get('default_database'))
     sample_info = Samples.Samples(filename)
     bulkInsert = sample_info.sampledict(columns_sample, columns_patient, project_name, sample_label_identifier)
     sampid = mongo.insert(collection_name, bulkInsert)
@@ -45,6 +52,8 @@ if __name__ == "__main__":
     project_name = raw_input('Enter the name of the project: ')
     columns_sample = []
     columns_patient = []
+
+    p = Parameters.parameter()
 
     if project_name == 'kollman':
         # Column names for kollman.
@@ -96,8 +105,8 @@ if __name__ == "__main__":
 
     if run == 'yes':
         t0 = time()
-        print('\nInserting samples into db %s and collection %s...' % (database_name, collection_name))
-        InsertSampleInfo(filename, sample_label_identifier)
+        print('\nInserting samples into db %s and collection %s...' % (p.get("default_database"), collection_name))
+        InsertSampleInfo(p, filename, sample_label_identifier)
         duration = time() - t0
         # if int(duration) > 1:
         #    print "Done in ", duration, " seconds."

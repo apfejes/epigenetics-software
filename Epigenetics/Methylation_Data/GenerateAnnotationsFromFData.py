@@ -16,6 +16,8 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 
 def ReadRObject(mongo, rdatafile):
     '''
@@ -77,9 +79,9 @@ if __name__ == "__main__":
         print 'RData filename must be given as the second parameter.'
         print "eg. python GenerateAnnotationFromFData.py /directory/database.RDATA"
         sys.exit()
-    db_name = "human_epigenetics"
-    db = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
+    p = Parameters.parameter()
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     starttime = time.time()
     rfile = sys.argv[1]
-    ReadRObject(db, rfile)
+    ReadRObject(mongo, rfile)
     print('Done in %s seconds') % int((time.time() - starttime))

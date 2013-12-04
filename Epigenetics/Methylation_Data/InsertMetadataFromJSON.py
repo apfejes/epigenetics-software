@@ -53,10 +53,9 @@ if __name__ == "__main__":
     starttime = time.time()
     filename = sys.argv[1]
     db_conf = sys.argv[2]
-    p = Parameters.parameter(db_conf)
-    db_name = "human_epigenetics_temp"
+    p = Parameters.parameter()
     collection = "samples"
-    project_name = raw_input('Enter the name of the project to insert in the ' + collection + ' collection of the ' + db_name + ' database: ')
-    mongodb = Mongo_Connector.MongoConnector(p['server'], p['port'], db_name)
-    importObjectsFromJSON(mongodb, filename, project_name, db_name, collection)
+    project_name = raw_input('Enter the name of the project to insert in the ' + collection + ' collection of the ' + p.get('default_database') + ' database: ')
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
+    importObjectsFromJSON(mongo, filename, project_name, p.get('default_database'), collection)
     print('Done in %s seconds') % int((time.time() - starttime))

@@ -19,6 +19,7 @@ class MongoConnector():
     def __init__(self, machine, port, database_name):
         '''wrapper around connect to Mongo, in order to consolidate all of the 
         necessary connections.'''
+        print "creating connection to %s on port %s with database %s" % (machine, port, database_name)
         try:
             self.mongo = MongoClient(machine, port)
             self.db = self.mongo[database_name]    # Create a collection for inserting documents, user input.

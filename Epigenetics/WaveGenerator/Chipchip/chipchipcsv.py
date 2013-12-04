@@ -25,7 +25,7 @@ print "sys.path: %s" % sys.path
 import CommonUtils.Parameters as Parameters
 import Mongo_Connector
 
-def run():
+def run(db):
     '''function to import chip-chip metadata to mongo database'''
     meta_data_file = "/home/afejes/Chip-chip/ChIPchipMetaData_v1.csv"
 
@@ -36,9 +36,8 @@ def run():
     f = open(meta_data_file, 'r')    # open file
 
     print "opening connection(s) to MongoDB..."
-    db_name = "yeast_epigenetics"
+
     collection_name = "samples"
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
 
     print "processing meta data file..."
     first_line = True
@@ -61,18 +60,16 @@ def run():
                     a[c] = a[c][:-2]
                 meta[headers[c]] = a[c]
             print "Meta %s" % meta
-            mongo.insert(collection_name, meta)
+            db.insert(collection_name, meta)
     f.close()
     print "Collection \'%s\' now contains %i records" % \
-                        (collection_name, mongo.count(collection_name))
+                        (collection_name, db.count(collection_name))
     mongo.close()
 
 if __name__ == '__main__':
-    if len(sys.argv) < 1:
-        print ("This program requires the name of the database config file.")
-        print" eg. python ImportWaveToDB.py /directory/database.conf"
-
-    conf_file = sys.argv[1]
-    p = Parameters.parameter(conf_file)
-    run()
+    p = Parameters.parameter()
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
+    p.set('default_database', "yeast_epigenetics")
+    run(mongo)
+    mongo.close()
     print "Completed."

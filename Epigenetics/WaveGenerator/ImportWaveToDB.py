@@ -10,22 +10,17 @@ import os
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
-sys.path.insert(0, _root_dir)
-sys.path.insert(0, _cur_dir + os.sep + "Utilities")
-sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
-sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
-import CommonUtils.Parameters as Parameters
-import Mongo_Connector
-
-_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
-_root_dir = os.path.dirname(_cur_dir)
 while ("WaveGenerator" in _root_dir):
     _root_dir = os.path.dirname(_root_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir)
+sys.path.insert(0, _cur_dir + os.sep + "Utilities")
+sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
 sys.path.insert(0, _root_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
 
+import Mongo_Connector
+import CommonUtils.Parameters as Parameters
 import StringUtils
 
 def create_param_obj(param_file):
@@ -87,7 +82,7 @@ def run(PARAM, wave_data_file, wave_input_file, db_name, test):
 
     print "Thanks - Data has been collected."
     print "opening connection(s) to MongoDB..."
-    mongo = Mongo_Connector.MongoConnector(PARAM.get("server"), PARAM.get("port"), db_name)
+    mongo = Mongo_Connector.MongoConnector(PARAM.get("server"), PARAM.get("port"), PARAM.get("default_database"))
     # TODO: Make this work
 #     mongo.ensure_index("samples", "_id")
 #     mongo.ensure_index("samples", "haswaves")
@@ -167,6 +162,7 @@ if __name__ == '__main__':
         print ("This program requires the name of the database config file, the name of the input file, name of wave parameter file, database, and [1] for test, [0] for sample")
         print " eg. python ImportWaveToDB.py /directory/database.conf input/file.name.waves, parameter/wigtest.input test 1"
         print " for instance, you can find a demo file in Epigenetics/MongoDB/database.conf "
+        print " Note: this file is in transition - the database.conf file will be optional in future versions and is currently not used. "
         sys.exit()
     conf_file = sys.argv[1]
     in_file = sys.argv[2]
@@ -176,7 +172,7 @@ if __name__ == '__main__':
         test = True
     else:
         test = False
-    p = Parameters.parameter(conf_file)
+    p = Parameters.parameter()
     run(p, in_file, wp_file, db, test)
     print "Completed."
 

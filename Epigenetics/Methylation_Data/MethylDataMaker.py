@@ -15,9 +15,9 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 
-
-database_name = 'human_epigenetics'
 collection_name = 'methylation'
 # directory = '/home/jyeung/Documents/Outputs/Down'
 
@@ -50,11 +50,14 @@ def InsertDataToDB(collection, data):
 
     return number_of_inserts
 
-def InsertMethylData(db_name, coll_name, data):
-    '''TODO:missing docstring'''
+def InsertMethylData(parameters, coll_name, data):
+    '''TODO:missing docstring
+       WARNING - this routine calls parameters, and creates a mongo connection - this does not seem right.
+       '''
     starttime = time.time()
 
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
+    p = Parameters.parameter()
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     collection = mongo.db[coll_name]
     totalfiles = InsertDataToDB(collection, data)
 

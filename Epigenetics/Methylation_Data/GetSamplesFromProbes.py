@@ -22,6 +22,8 @@ sys.path.insert(0, _cur_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 from annotUtilities import plots
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 
 
 database_name = 'human_epigenetics'
@@ -128,6 +130,8 @@ def GetDataFromProbeList(pr_list):
     From a list of goldengateIDs, get data from samples. 
     '''
 
+    p = Parameters.parameter()
+
     # Attach prefix to probename for searching in methylation collection
     probe_list_prefixed = []
     for pr in pr_list:
@@ -137,7 +141,7 @@ def GetDataFromProbeList(pr_list):
 
     # From pr_list, get sample data. Then find number of samples.
 
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     mongo.ensure_index(methylation_collection, 'annotation_id')    # For speed
 
     fQuery = {'$and': [{'annotation_id': {'$in': probe_list_prefixed}}, {'project': 'down'}]}
