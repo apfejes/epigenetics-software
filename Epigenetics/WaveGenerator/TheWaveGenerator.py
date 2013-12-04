@@ -22,7 +22,6 @@ sys.path.insert(0, _cur_dir + os.sep + "Utilities")    # add the utilities folde
 
 # Modules in Utilities
 import MapDecomposingThread
-import Parameters
 import WaveFileThread
 import PrintThread
 import ReadAheadIteratorPET
@@ -41,7 +40,7 @@ sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
 sys.path.insert(0, _root_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
 
 import StringUtils
-
+import CommonUtils.Parameters as Parameters
 
 
 def random_index(num_queues):

@@ -21,7 +21,8 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir + os.sep + "Utilities")
 
-import Parameters
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector, common_utilities
 import PrintThread

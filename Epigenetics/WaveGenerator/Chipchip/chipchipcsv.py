@@ -16,12 +16,13 @@ while ("WaveGenerator" in _root_dir):
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
 # sys.path.insert(0, _root_dir + os.sep + "MongoDB")
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
 sys.path.insert(0, _root_dir + os.sep + "MongoDB")
 _mgutl_dir = _root_dir + os.sep + "MongoDB"
 print "mongo util path: %s" % _mgutl_dir
 print "sys.path: %s" % sys.path
 # sys.path.insert(0, _root_dir + os.sep + "MongoDB")
-import Parameters
+import CommonUtils.Parameters as Parameters
 import Mongo_Connector
 
 def run():
