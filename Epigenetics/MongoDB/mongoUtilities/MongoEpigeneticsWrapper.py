@@ -16,6 +16,8 @@ _root_dir = os.path.dirname(_root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 from common_utilities import CreateListFromCursor
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 
 sys.path.insert(0, _root_dir + os.sep + "Illustration")
 # from .Annotations import showchipseq, showchipandmeth
@@ -30,7 +32,8 @@ class MongoEpigeneticsWrapper():
     def __init__(self, database, methylation, peaks, start, end):
         '''Performs the connection to the Mongo database.'''
         self.database = database
-        self.mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database)
+        self.p = Parameters.parameter()
+        self.mongo = Mongo_Connector.MongoConnector(self.p.get('server'), self.p.get('port'), database)    # database changes based on interface value
         self.methylation = methylation
         self.peaks = peaks
         self.start = start
