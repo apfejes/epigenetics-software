@@ -153,6 +153,17 @@ def run(mongo, output, db):
     print "\n"
     user_fc = float(raw_input("What minimum fold change in peak heights are you interested in: "))
 
+    remove_noise = raw_input("Would you like the program to remove background noise from each sample? [y/n]: ")
+    if remove_noise.lower() == "y":
+        remove_noise = True
+    else:
+        remove_noise = False
+    two_way = raw_input("Would you like to perform a 2-way analysis (find unique peaks in the control sample? [y/n]: ")
+    if two_way.lower() == "y":
+        two_way = True
+    else:
+        two_way = False
+
     chromosomes = util.get_chromosome_names()
     # #TODO: FOLLOWING FOR DEBUGGING ONLY!
     # chromosomes = ["chr1", "chr2"]
@@ -180,8 +191,8 @@ def run(mongo, output, db):
             cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, [("pos", 1)])
             waves2 = common_utilities.CreateListFromCursor(cursor)
 
-        remove_noise = raw_input("Would you like the program to remove background noise from each sample? [y/n]: ")
-        if remove_noise.lower() == "y":
+
+        if remove_noise:
             print "\nNow determining background levels for height of peaks on chromosome ", chromosome
             bins = 70    # based on max peak height of 7
             counts = [0] * bins
@@ -265,8 +276,7 @@ def run(mongo, output, db):
 
             i += 1
 
-        two_way = raw_input("Would you like to perform a 2-way analysis (find unique peaks in the control sample? [y/n]: ")
-        if two_way.lower() == "y":
+        if two_way:
             # Now find unique peaks in waves2
             # find pairs
             i = 0
