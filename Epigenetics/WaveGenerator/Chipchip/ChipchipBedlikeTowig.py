@@ -7,6 +7,7 @@ Converts CEL files to Bed file.
 import sys
 import time
 import os
+import argparse
 # import gc
 
 
@@ -202,10 +203,10 @@ def FindBaseline(file_name, normalize = False):
     print "Wigwriter closed."
 
 if __name__ == "__main__":
-    if len(sys.argv) <= 1:
-        print('BEDlike filename must be given as a parameter.')
-        sys.exit()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("BEDlikefiles", help = "path to BEDlike files", type = str)
+    args = parser.parse_args()
+
     starttime = time.time()
-    bedlike_file = sys.argv[1]
-    FindBaseline(bedlike_file)
+    FindBaseline(args.BEDlikefiles)
     print 'Completed in %s seconds' % int((time.time() - starttime))

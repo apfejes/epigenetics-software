@@ -7,6 +7,7 @@ Created on 2013-04-15
 
 import sys
 import os
+import argparse
 
 # sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
@@ -67,9 +68,15 @@ def run(db):
     mongo.close()
 
 if __name__ == '__main__':
-    p = Parameters.parameter()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
+    parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
+    args = parser.parse_args()
+    p = Parameters.parameter(args.dbconfig)
+    if args.dbname:
+        p.set("default_database", args.dbname)
     mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
-    p.set('default_database', "yeast_epigenetics")
     run(mongo)
     mongo.close()
     print "Completed."

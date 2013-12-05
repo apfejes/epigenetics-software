@@ -9,6 +9,7 @@ import time
 import os
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
+import argparse
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = _cur_dir
 while ("WaveGenerator" in _root_dir):
@@ -55,10 +56,9 @@ def ConvertToBedViaR(cel_file):
     robjects.r('write.table(data, file = \"' + bedfile + '\", append = FALSE, quote = FALSE, row.names = FALSE, sep = "\t")')
 
 if __name__ == "__main__":
-    if len(sys.argv) < 1:
-        print('CEL filename must be given.')
-        sys.exit()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("BEDlikefiles", help = "Name of the CEL file to process", type = str)
+    args = parser.parse_args()
     starttime = time.time()
-    rdata_file = sys.argv[1]
-    ConvertToBedViaR(rdata_file)
+    ConvertToBedViaR(args.BEDlikefiles)
     print('Completed %s seconds') % int((time.time() - starttime))

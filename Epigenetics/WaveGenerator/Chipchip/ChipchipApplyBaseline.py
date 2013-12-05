@@ -7,6 +7,7 @@ Converts CEL files to Bed file.
 import sys
 import time
 import os
+import argparse
 # import gc
 
 
@@ -115,35 +116,40 @@ def ProduceStats(records, ps):
 '''
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print('path to BEDlike files must be given as a parameter, baseline file must be given as second parameter, output path as third.')
-        sys.exit()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("BEDlikefiles", help = "path to BEDlike files", type = str)
+    parser.add_argument("Baselinefile", help = "full path to Baseline file", type = str)
+    parser.add_argument("output_path", help = "path where output will be placed", type = str)
+    args = parser.parse_args()
+
+
+
+
     starttime = time.time()
-    files = os.listdir(sys.argv[1])
     num_probes = 2635714
     print "initializing array..."
     probeset = [[0.0 for y in xrange(num_probes)] for x in xrange(0, 2)]
-    print "reading baseline from %s" % (sys.argv[2])
+    print "reading baseline from %s" % (args.Baselinefile)
     print "probeset[%i][%i]" % (len(probeset), len(probeset[0]))
-    ReadBaseline(sys.argv[2], probeset)
+    ReadBaseline(args.Baselinefile, probeset)
     blaverage = FindAverageProbeIntensity(probeset)
     print "baseline average probe intensity is:", blaverage
     print "done."
     # op = StringUtils.rreplace(sys.argv[1], 'BED', 'NORMAL', 1)
-    for i, f in enumerate(files):
+    for i, f in enumerate(args.BEDlikefiles):
         filetime = time.time()
         of = StringUtils.rreplace(f, '.BEDlike', '.normalized.BEDlike', 1)
         bedprobes = [[0.0 for y in xrange(num_probes)] for x in xrange(0, 2)]
-        print "determining average probe intensity from %s%s" % (sys.argv[1], f)
+        print "determining average probe intensity from %s%s" % (args.BEDlikefiles, f)
         print "bedprobes[%i][%i]" % (len(bedprobes), len(bedprobes[0]))
-        ReadBaseline("%s%s" % (sys.argv[1], f), bedprobes)
+        ReadBaseline("%s%s" % (args.BEDlikefiles, f), bedprobes)
         bedaverage = FindAverageProbeIntensity(bedprobes)
         print "average probe intensity is:", bedaverage
         scaling = float(bedaverage) / blaverage
         if scaling < 1:
             scaling = 1
         print "baseline needs to be scaled by a factor of", scaling
-        ApplyBaseline(i + 1, "%s%s" % (sys.argv[1], f), "%s%s" % (sys.argv[3], of), probeset, scaling)    # first file is first file, use zero for chr/pos
+        ApplyBaseline(i + 1, "%s%s" % (args.BEDlikefiles, f), "%s%s" % (args.output_path, of), probeset, scaling)    # first file is first file, use zero for chr/pos
         print "File %i - %s processed in %f seconds" % (i + 1, f, time.time() - filetime)
     # ProduceStats(len(files) + 1, probeset)
     print 'Completed in %s seconds' % int((time.time() - starttime))

@@ -7,6 +7,7 @@ Converts CEL files to Bed file.
 import sys
 import time
 import os
+import argparse
 # import gc
 
 
@@ -94,7 +95,7 @@ def FindBaseline(index, file_name, ps):
 def ProduceStats(records, ps):
     '''write out the baseline values for each probe'''
     # pass parameter for where to save file
-    output = open(sys.argv[2], 'w')
+    output = open(args.Baselinefile, 'w')
     for r in range(0, len(ps[0])):
         avg = 0.0
         for s in range(1, len(ps)):
@@ -105,9 +106,11 @@ def ProduceStats(records, ps):
     output.close()
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print('path to BEDlike files, and path to save baseline file must be given as a parameter.')
-        sys.exit()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("BEDlikefiles", help = "path to BEDlike files", type = str)
+    parser.add_argument("Baselinefile", help = "path to save Baseline file", type = str)
+    args = parser.parse_args()
+
     starttime = time.time()
     # files = os.listdir(sys.argv[1])
     # The following file names sent by plu to use as normal baseline, with all IP and mock removed:
@@ -142,7 +145,7 @@ if __name__ == "__main__":
     print "done."
     for i, f in enumerate(files):
         filetime = time.time()
-        FindBaseline(i + 1, "%s%s" % (sys.argv[1], f), probeset)    # first file is first file, use zero for chr/pos
+        FindBaseline(i + 1, "%s%s" % (args.BEDlikefiles, f), probeset)    # first file is first file, use zero for chr/pos
         print "File %i - %s processed in %f seconds" % (i + 1, f, time.time() - filetime)
     ProduceStats(len(files) + 1, probeset)
     print 'Completed in %s seconds' % int((time.time() - starttime))
