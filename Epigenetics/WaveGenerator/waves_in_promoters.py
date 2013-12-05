@@ -8,6 +8,7 @@ import sys
 import time
 import os
 from scipy import stats as scipystats
+import argparse
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
@@ -292,28 +293,28 @@ def find_waves_in_promoter(orffile, wavesfile, output, autothresh, heisig):
         print_thread.f.close()
 
 if __name__ == "__main__":
-    if len(sys.argv) <= 3:
-        print ("This program requires the name of the orf file, ChIP-chip waves file, and output/path")
-        print" eg. python waves_in_promoters.py ~/orf.txt ~/sample.waves ~/output"
-        sys.exit()
-    orf = sys.argv[1]
-    wave = sys.argv[2]
-    out = sys.argv[3]
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("orf", help = "The name of the orf file", type = str)
+    parser.add_argument("wave", help = "The name of the wave file", type = str)
+    parser.add_argument("output_path", help = "The location to which the output will be directed", type = str)
+    args = parser.parse_args()
+
     sh = raw_input("Would you like to use a wave height, or wave sigma threshold? [h]eight or [s]igma: ")
-    if sh == "h" or sh == "H":
+    if sh.lower() == "h":
         sh = True
-    elif sh == "s" or sh == "S":
+    elif sh.lower() == "s":
         sh = False
     else:
         print "invalid entry."
         sys.exit()
     at = raw_input("Would you like the program to automatically determine the threshold? (Y/N): ")
-    if at == "Y" or at == "y":
+    if at.lower() == "y":
         at = True
-    elif at == "N" or at == "n":
+    elif at.lower() == "n":
         at = False
     else:
         print "invalid entry."
         sys.exit()
-    find_waves_in_promoter(orf, wave, out, at, sh)
+    find_waves_in_promoter(args.orf, args.wave, args.output_path, at, sh)
 

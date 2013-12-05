@@ -6,6 +6,7 @@ Created on Oct 18, 2013
 
 import sys
 import os
+import argparse
 
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
@@ -30,17 +31,17 @@ import StringUtils
 
 
 
-def run(PARAM, metadata_file, db_name, tohide):
+def run(PARAM, metadata_file, tohide):
     '''reads metadata_file, and updates sample entries in database'''
 
     while not os.path.isfile(metadata_file):
         print "Unable to find file %s" % metadata_file
         sys.exit()
 
-    print "Data being imported into database: ", db_name
+    print "Data being imported into database: ", PARAM.get('default_database')
 
     print "opening connection(s) to MongoDB..."
-    mongo = Mongo_Connector.MongoConnector(PARAM.get("server"), PARAM.get("port"), db_name)
+    mongo = Mongo_Connector.MongoConnector(PARAM.get("server"), PARAM.get("port"), PARAM.get('default_database'))
 
     print "processing %s..." % metadata_file
 
@@ -53,7 +54,7 @@ def run(PARAM, metadata_file, db_name, tohide):
             a = line.split("\t")
             # # Find file name
             file_name = StringUtils.rreplace(a[0], ".CEL", ".normalized.waves", 1)
-            print "Checking for file %s in database %s" % (file_name, db_name)
+            print "Checking for file %s in database %s" % (file_name, PARAM.get('default_database'))
             # check if entry exists in database
             if mongo.find(collection_name, {"file_name":file_name}, {"_id":1}).count() > 0 :
                 print "Entry exists; updating metadata for ", file_name
@@ -96,24 +97,14 @@ def run(PARAM, metadata_file, db_name, tohide):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 4:
-        print ("This program requires the name of the database config file, the name of the metadata file, database, and hidden bit (1 to hide)")
-        print " eg. python ImportWaveToDB.py /directory/database.conf input/metadata.tsv test 1"
-        print " for instance, you can find a demo config file in Epigenetics/MongoDB/database.conf "
-        print " NOTE: This program is being modified - the database.conf file is currently unused. Future versions will allow an override of the default."
-        sys.exit()
-    p = Parameters.parameter()
-    conf_file = sys.argv[1]
-    in_file = sys.argv[2]
-    p.set('default_database', sys.argv[3])
-    hidden = int(sys.argv[4])
-    if hidden != 1 and hidden != 0:
-        print "invalid bit for argument 'hidden' - must be 1 or 0"
-        sys.exit()
-    elif hidden == 1:
-        hidden = True
-    else:
-        hidden = False
-    p = Parameters.parameter()
-    run(p, in_file, p.get('default_database'), hidden)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("metadata_file", help = "meta data file to import", type = str)
+    parser.add_argument("-hide", help = "if this flag is provided, then the hide flag is set to true, otherwise, it is set to false.", action = "store_true")
+    parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
+    parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
+    args = parser.parse_args()
+    p = Parameters.parameter(args.dbconfig)
+    if args.dbname:
+        p.set("default_database", args.dbname)
+    run(p, args.metadata_file, args.hide)
     print "Completed."

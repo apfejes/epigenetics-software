@@ -8,6 +8,7 @@ import sys
 import time
 import os
 from scipy import stats as scipystats
+import argparse
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
@@ -125,16 +126,17 @@ def convert_waves_to_wig(wavesfile, output, autothresh):
     print "Complete."
 
 if __name__ == "__main__":
-    if len(sys.argv) <= 2:
-        print ("This program requires the name of the .waves file  and output/path")
-        print" eg. python waves_to_bed.py ~/output"
-        sys.exit()
-    wave = sys.argv[1]
-    out = sys.argv[2]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("wave", help = "The name of the wave file", type = str)
+    parser.add_argument("output_path", help = "The location to which the output will be directed", type = str)
+    args = parser.parse_args()
     user_in = raw_input("Would you like the program to automatically determine the wave height threshold? (Y/N): ")
-    if user_in == "Y" or user_in == "y":
+    if user_in.lower() == "y":
         at = True
-    else:
+    elif at.lower() == "n":
         at = False
-    convert_waves_to_wig(wave, out, at)
+    else:
+        print "invalid entry."
+        sys.exit()
+    convert_waves_to_wig(args.wave, args.output_path, at)
 

@@ -15,6 +15,7 @@ import os
 import sys
 
 from random import randint
+import argparse
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
@@ -361,30 +362,27 @@ def main(PARAM):
         print "Shutdown complete"
 
 if __name__ == "__main__":
-    '''
-    if len(sys.argv) > 0 :
-        for arg in sys.argv:
-            print arg
-    # sys.argv[1] must provide the file name of the input file.
-    '''
+    parser = argparse.ArgumentParser()
+    parser.add_argument("parameter_file", help = ".input parameterfile", type = str)
+    parser.add_argument("-data_file", help = "override the source file in the parameter input file, containing data upon which waves will be called", type = str)
+    parser.add_argument("-output_path", help = "override the path for output files", type = str)
+    args = parser.parse_args()
+    p = Parameters.parameter(args.dbconfig)
+    if args.dbname:
+        p.set("default_database", args.dbname)
 
-    if len(sys.argv) <= 1 :
-        print "USAGE: python TheWaveGenerator.py param.file [input_file [output_path]]"
-
-        sys.exit()
-
-    param = create_param_obj(sys.argv[1])
+    param = create_param_obj(args.parameter_file)
 
     # override parameter file with cmdline args
     if len(sys.argv) >= 3 :
-        param.set_parameter("input_file", sys.argv[2])    # override input_file
+        param.set_parameter("input_file", args.data_file)    # override input_file
         # set file_name in param to be based on input file.
-        ofile = StringUtils.rreplace(os.path.basename(sys.argv[2]), '.wig', '', 1)
+        ofile = StringUtils.rreplace(os.path.basename(args.data_file), '.wig', '', 1)
         param.set_parameter("file_name", ofile)    # override output file_name (.waves gets added later)
     if len(sys.argv) == 4 :
-        param.set_parameter("output_path", sys.argv[3])    # override output_path
+        param.set_parameter("output_path", args.output_path)    # override output_path
 
-    print "param file: ", sys.argv[1]
+    print "param file: ", args.parameter_file
     print "input_file: ", param.get("input_file")
     print "output_path: ", param.get("output_path")
     print "output_file_name: ", param.get("file_name")

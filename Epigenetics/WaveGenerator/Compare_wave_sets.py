@@ -12,6 +12,7 @@ import time
 import scipy.odr as odr
 from scipy import stats as scipystats
 import math
+import argparse
 
 # from bson.objectid import ObjectId
 
@@ -523,14 +524,14 @@ def f(B, x):
     return B[0] * x
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 3:
-        print ("This program requires the name of the database config file, output path, and name of database.")
-        print" eg. python ImportWaveToDB.py /directory/database.conf directory/output/ yeast_epigenetics"
-        sys.exit()
-    p = Parameters.parameter()
-    conf_file = sys.argv[1]
-    output = sys.argv[2]
-    p.set('default_database', sys.argv[3])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("output_path", help = "path for output", type = str)
+    parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
+    parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
+    args = parser.parse_args()
+    p = Parameters.parameter(args.dbconfig)
+    if args.dbname:
+        p.set("default_database", args.dbname)
     mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
-    run(mongo, output, p.get('default_database'))
+    run(mongo, args.output_path, p.get('default_database'))
     print "Completed."
