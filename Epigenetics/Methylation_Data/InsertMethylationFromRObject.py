@@ -9,12 +9,15 @@ import sys
 import time
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
+import argparse
+
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 import CommonUtils.Types as ty
+import CommonUtils.Parameters as Parameters
 # from platform import system
 
 
@@ -152,14 +155,18 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print('RData filename must be given.')
-        sys.exit()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("rfile", help = "R data file to import", type = str)
+    parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
+    parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
+    args = parser.parse_args()
+    p = Parameters.parameter(args.dbconfig)
+    if args.dbname:
+        p.set("default_database", args.dbname)
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     starttime = time.time()
-    rdata_file = sys.argv[1]
-    db_name = "human_epigenetics"
     collection = "methylation"
-    project_name = raw_input('Enter the name of the project to insert in the ' + collection + ' collection of the ' + db_name + ' database: ')
-    mongodb = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
-    ReadRObject(mongodb, rdata_file, project_name, collection)
+    project_name = raw_input('Enter the name of the project to insert in the ' + collection + ' collection of the ' + p.get('default_database') + ' database: ')
+    ReadRObject(mongo, args.rfile, project_name, collection)
+    mongo.close()
     print('Done in %s seconds') % int((time.time() - starttime))

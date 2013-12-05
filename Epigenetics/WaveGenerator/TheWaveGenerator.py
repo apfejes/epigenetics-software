@@ -374,12 +374,12 @@ if __name__ == "__main__":
     param = create_param_obj(args.parameter_file)
 
     # override parameter file with cmdline args
-    if len(sys.argv) >= 3 :
+    if args.data_file :
         param.set_parameter("input_file", args.data_file)    # override input_file
         # set file_name in param to be based on input file.
         ofile = StringUtils.rreplace(os.path.basename(args.data_file), '.wig', '', 1)
         param.set_parameter("file_name", ofile)    # override output file_name (.waves gets added later)
-    if len(sys.argv) == 4 :
+    if args.output_path == 4 :
         param.set_parameter("output_path", args.output_path)    # override output_path
 
     print "param file: ", args.parameter_file

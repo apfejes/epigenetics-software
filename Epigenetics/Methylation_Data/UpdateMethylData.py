@@ -2,12 +2,16 @@
 Created on 2013-04-15
 
 @author: jyeung
+
+Deprecated software - used to add a tag to projects.
+
 '''
 
 
 import sys
 import os
 import time
+import argparse
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
@@ -56,26 +60,25 @@ def AddProjectInfo(mongo, collection, Query, project):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print('methylation and annotations collection name must be given.')
-        sys.exit()
-    collection_name = sys.argv[1]
-    annotation_name = sys.argv[2]
 
-    p = Parameters.parameter()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("collection", help = "name of collection to search", type = str, default = "methylation")
+    parser.add_argument("annotation", help = "name of property to update", type = str, default = "annotations")
+    parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
+    parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
+    args = parser.parse_args()
+    p = Parameters.parameter(args.dbconfig)
+    if args.dbname:
+        p.set("default_database", args.dbname)
     mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
 
-    # database_name = 'human_epigenetics'
-    p.set('default_databaset', 'jake_test')
-    collection_name = 'methylation'
-    annotation_name = 'annotations'
     annotQuery = {'annotation_id': {'$exists': False}}    # Search for un-updated docs (AddAnnotations)
     projQuery = {'project': {'$exists': False}}    # Seach for un-updated docs (AddProjectInfo)
 
     project_name = raw_input('Enter project name to add to each un-updated document in collection: ')
     print('Adding annotation info to all documents without the field, "annotation_id"...')
-    AddAnnotations(mongo, collection_name, annotation_name, annotQuery)
+    AddAnnotations(mongo, args.collection, args.annotation, annotQuery)
     print('Adding project name to all documents without the field, "project"...')
-    AddProjectInfo(mongo, collection_name, projQuery, project_name)
+    AddProjectInfo(mongo, args.collection, projQuery, project_name)
 
 
