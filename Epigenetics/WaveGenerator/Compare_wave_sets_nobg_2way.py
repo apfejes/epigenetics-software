@@ -181,34 +181,36 @@ def run(mongo, output, db):
             cursor = mongo.find("waves", {"sample_id": i[0], "chr": chromosome}, None, [("pos", 1)])
             waves2 = common_utilities.CreateListFromCursor(cursor)
 
-        print "\nNow determining background levels for height of peaks on chromosome ", chromosome
-        bins = 70    # based on max peak height of 7
-        counts = [0] * bins
-        thresh = [0] * bins
-        for i in range(0, bins):
-            thresh[i] = (i + 1) * 0.1
-        for i in (waves1 + waves2):
-            # combine h1 and h2 to determine background levels
-            counts[int(i['height'] / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
-            # counts[int(i['height'] / 0.1)] += 1    # increment count where height2 is in bin of size 0.1
-        print "counts are: ", counts
-        x = []
-        y = []
-        for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
-            x.append(thresh[i])
-            y.append(counts[i])
-        print "x is ", x
-        print "y is ", y
-        slr = scipystats.linregress(x, y)
-        slope = slr[0]
-        intercept = slr[1]
-        print "slope: %s and intercept: %s for background peak height" % (slope, intercept)
-        # find x-intercept, threshold for noise-signal
-        xint = abs(intercept / slope)
-        print "height threshold between noise and signal is ", xint
-        # REMOVE background peaks
-        waves1[:] = [x for x in waves1 if x['height'] > xint]
-        waves2[:] = [x for x in waves2 if x['height'] > xint]
+        remove_noise = raw_input("Would you like the program to remove background noise from each sample? [y/n]: ")
+        if remove_noise.lower() == "y":
+            print "\nNow determining background levels for height of peaks on chromosome ", chromosome
+            bins = 70    # based on max peak height of 7
+            counts = [0] * bins
+            thresh = [0] * bins
+            for i in range(0, bins):
+                thresh[i] = (i + 1) * 0.1
+            for i in (waves1 + waves2):
+                # combine h1 and h2 to determine background levels
+                counts[int(i['height'] / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
+                # counts[int(i['height'] / 0.1)] += 1    # increment count where height2 is in bin of size 0.1
+            print "counts are: ", counts
+            x = []
+            y = []
+            for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
+                x.append(thresh[i])
+                y.append(counts[i])
+            print "x is ", x
+            print "y is ", y
+            slr = scipystats.linregress(x, y)
+            slope = slr[0]
+            intercept = slr[1]
+            print "slope: %s and intercept: %s for background peak height" % (slope, intercept)
+            # find x-intercept, threshold for noise-signal
+            xint = abs(intercept / slope)
+            print "height threshold between noise and signal is ", xint
+            # REMOVE background peaks
+            waves1[:] = [x for x in waves1 if x['height'] > xint]
+            waves2[:] = [x for x in waves2 if x['height'] > xint]
 
 
 
@@ -264,40 +266,43 @@ def run(mongo, output, db):
 
             i += 1
 
-        # Now find unique peaks in waves2
-        # find pairs
-        i = 0
-        j = 0
-        while (i < max_i and j < max_j):
-            chromosome = waves1[i]['chr']
-            # print "DEBUG: checking waves2"
-            # print "DEBUG: waves1[i]: ", waves1[i]
-            pos_j = waves2[j]['pos']
-            sdv_j = waves2[j]['stddev']
-            ht_j = waves2[j]['height']
-            it = i - 1
-            none_found = True
-            best = None
-            while it >= 0 and (waves1[it]['pos'] + 4 * waves1[it]['stddev']) > (pos_j - 4 * sdv_j) :
-                # print "checking %s, %s" % (it, j)
-                pvalue = stats.ks_test(pos_j, sdv_j, waves1[it]['pos'], waves1[it]['stddev'])
-                if (pvalue != 0):
-                    none_found = False
-                it -= 1
-            while i < max_i and (waves1[i]['pos'] - 4 * waves1[i]['stddev']) < (pos_j + 4 * sdv_j):
-                # print "checking %s, %s" % (i, j)
-                pvalue = stats.ks_test(pos_j, sdv_j, waves1[i]['pos'], waves1[i]['stddev'])
-                if (pvalue != 0):
-                    none_found = False
-                i += 1
+        two_way = raw_input("Would you like to perform a 2-way analysis (find unique peaks in the control sample? [y/n]: ")
+        if two_way.lower() == "y":
+            # Now find unique peaks in waves2
+            # find pairs
+            i = 0
+            j = 0
+            while (i < max_i and j < max_j):
+                chromosome = waves1[i]['chr']
+                # print "DEBUG: checking waves2"
+                # print "DEBUG: waves1[i]: ", waves1[i]
+                pos_j = waves2[j]['pos']
+                sdv_j = waves2[j]['stddev']
+                ht_j = waves2[j]['height']
+                it = i - 1
+                none_found = True
+                best = None
+                while it >= 0 and (waves1[it]['pos'] + 4 * waves1[it]['stddev']) > (pos_j - 4 * sdv_j) :
+                    # print "checking %s, %s" % (it, j)
+                    pvalue = stats.ks_test(pos_j, sdv_j, waves1[it]['pos'], waves1[it]['stddev'])
+                    if (pvalue != 0):
+                        none_found = False
+                    it -= 1
+                while i < max_i and (waves1[i]['pos'] - 4 * waves1[i]['stddev']) < (pos_j + 4 * sdv_j):
+                    # print "checking %s, %s" % (i, j)
+                    pvalue = stats.ks_test(pos_j, sdv_j, waves1[i]['pos'], waves1[i]['stddev'])
+                    if (pvalue != 0):
+                        none_found = False
+                    i += 1
 
-            # print "DEBUG: wavepair is: ", w.to_string()
-            if none_found:
-                w = WavePair(chromosome, -1, j, -1, -1, pos_j, -1, sdv_j, 0, ht_j)
-                paired_data.append(w)
-                all_unpaired.append(w)
+                # print "DEBUG: wavepair is: ", w.to_string()
+                if none_found:
+                    w = WavePair(chromosome, -1, j, -1, -1, pos_j, -1, sdv_j, 0, ht_j)
+                    paired_data.append(w)
+                    all_unpaired.append(w)
 
-            j += 1
+                j += 1
+
 
 
     # Now determine FDR for every peak that has a pair, carry on with pairs that meet user cutoff.
@@ -396,6 +401,7 @@ def run(mongo, output, db):
             print "waiting on print_queue to empty", print_queue.qsize()
             time.sleep(1)
         print_thread.END_PROCESSES = True
+        print_thread.f.close()
 
 
 
@@ -424,6 +430,7 @@ def run(mongo, output, db):
             print "waiting on print_queue to empty", print_queue2.qsize()
             time.sleep(1)
         print_thread2.END_PROCESSES = True
+        print_thread2.f.close()
 
 
 def f(B, x):
