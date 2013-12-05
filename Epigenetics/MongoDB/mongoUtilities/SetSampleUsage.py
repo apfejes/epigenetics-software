@@ -7,6 +7,7 @@ Created on Nov 19, 2013
 '''
 import os
 import sys
+import argparse
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
@@ -18,29 +19,21 @@ import CommonUtils.Parameters as Parameters
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
-        print('Sample name to update must be given, along with setting and database.')
-        print("example: python SetSampleUsage.py sample.normalized.waves false yeast_epigenetics")
-        sys.exit()
-    proj_name = sys.argv[1]
-    setting = sys.argv[2].lower()
-    if setting != "true" and setting != "false":
-        print("setting must be 'true' or 'false', without quotes.")
-        sys.exit()
-    elif setting == "true":
-        setting = True
-    else:
-        setting = False
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project", help = "The name of the project for which the the hide setting will be adjusted", type = str)
+    parser.add_argument("-hide", help = "if this flag is provided, then the hide flag is set to true, otherwise, it is set to false.", action = "store_true")
+    parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
+    parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
+    args = parser.parse_args()
+    p = Parameters.parameter(args.dbconfig)
+    if args.dbname:
+        p.set("default_database", args.dbname)
 
-    p = Parameters.parameter()
-    if sys.argv[3]:
-        p.set('default_database', sys.argv[3])
-    mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
-
-    found = mongodb.find("samples", {"file_name":proj_name}, {"_id": True}).count()
-    print "found %s sample(s) matching %s to update hide to %s " % (found, proj_name, setting)
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
+    found = mongo.find("samples", {"file_name":args.project}, {"_id": True}).count()
+    print "found %s sample(s) matching %s to update hide to %s " % (found, args.project, args.hide)
     sample_update = {}
-    sample_update["hide"] = setting
-    mongodb.update("samples", {"file_name":proj_name}, {"$set": sample_update})
+    sample_update["hide"] = args.hide
+    mongo.update("samples", {"file_name":args.project}, {"$set": sample_update})
 
 

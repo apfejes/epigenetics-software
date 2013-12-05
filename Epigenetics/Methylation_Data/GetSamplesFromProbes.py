@@ -14,6 +14,7 @@ import csv
 import random
 import pymongo
 import matplotlib.pyplot as plt
+import argparse
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
@@ -130,8 +131,6 @@ def GetDataFromProbeList(pr_list):
     From a list of goldengateIDs, get data from samples. 
     '''
 
-    p = Parameters.parameter()
-
     # Attach prefix to probename for searching in methylation collection
     probe_list_prefixed = []
     for pr in pr_list:
@@ -141,7 +140,6 @@ def GetDataFromProbeList(pr_list):
 
     # From pr_list, get sample data. Then find number of samples.
 
-    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     mongo.ensure_index(methylation_collection, 'annotation_id')    # For speed
 
     fQuery = {'$and': [{'annotation_id': {'$in': probe_list_prefixed}}, {'project': 'down'}]}
@@ -474,13 +472,17 @@ def PlotBuccalVsBlood(pr_list_fname, probes_to_plot, mix_frc):
     plt.xticks(range(len(cg_no)), cg_no, size = 'small', rotation = 45)
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print('Filename of probelists must be given in command line.')
-        sys.exit()
-    probe_list_fname = sys.argv[1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("probelist", help = "The file name of the probe list", type = str)
+    parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
+    parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
+    args = parser.parse_args()
+    p = Parameters.parameter(args.dbconfig)
+    if args.dbname:
+        p.set("default_database", args.dbname)
 
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     top_or_bot, skip_rows = AskTopBtmRdn()
-
     starttime = time.time()
 
     # Get dictionary containing probe_list and beta_difference between blood and buccal
@@ -489,9 +491,9 @@ if __name__ == "__main__":
 
 
     if top_or_bot == 'random':
-        probe_list = GetRandomProbesFromHits(probe_list_fname, number_of_random_probes)
+        probe_list = GetRandomProbesFromHits(args.probelist, number_of_random_probes)
     elif (top_or_bot == 'top') or (top_or_bot == 'bottom'):
-        probe_list = GetProbesFromHits(probe_list_fname, skip_rows)
+        probe_list = GetProbesFromHits(args.probelist, skip_rows)
     else:
         print('Neither top, bottom, or random... dont know what to do.')
         sys.exit()
@@ -528,7 +530,7 @@ if __name__ == "__main__":
     for top_hit in tophits:
         count += 1
         samp_mix = EstimateBloodContamination(data_dict, sample_list, control_samples,
-                                              diseased_samples, probe_list_fname, top_hit)
+                                              diseased_samples, args.probelist, top_hit)
         plt.subplot(2, 2, count)
         samps, fracs = PlotSuspectedContamination(samp_mix, top_hit)
         samps_list.append(samps)
@@ -549,8 +551,10 @@ if __name__ == "__main__":
 
     plt.subplot(2, 1, 1)
     mix_frac = 0.25
-    PlotBuccalVsBlood(probe_list_fname, probes_plotted, mix_frac)
+    PlotBuccalVsBlood(args.probelist, probes_plotted, mix_frac)
+    mongo.close()
     print('Time elapsed: %s seconds' % int(time.time() - starttime))
     plt.show()
+
 
 

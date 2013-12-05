@@ -51,5 +51,6 @@ if __name__ == "__main__":
     chromosome_list.append('Y')
     print 'Adding prefix chr to chromosome field in methyl450 arrays...'
     AddChrPrefix(annotation_name, chromosome_list)
+    mongo.close()
 
 

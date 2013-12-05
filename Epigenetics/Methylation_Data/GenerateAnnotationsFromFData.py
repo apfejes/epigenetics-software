@@ -10,6 +10,7 @@ import time
 import os
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
+import argparse
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
@@ -75,13 +76,16 @@ def ReadRObject(mongo, rdatafile):
     return records_added_to_db
 
 if __name__ == "__main__":
-    if len(sys.argv) < 1:
-        print 'RData filename must be given as the second parameter.'
-        print "eg. python GenerateAnnotationFromFData.py /directory/database.RDATA"
-        sys.exit()
-    p = Parameters.parameter()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("rfile", help = "R data file to import", type = str)
+    parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
+    parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
+    args = parser.parse_args()
+    p = Parameters.parameter(args.dbconfig)
+    if args.dbname:
+        p.set("default_database", args.dbname)
+
     mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     starttime = time.time()
-    rfile = sys.argv[1]
-    ReadRObject(mongo, rfile)
+    ReadRObject(mongo, args.rfile)
     print('Done in %s seconds') % int((time.time() - starttime))
