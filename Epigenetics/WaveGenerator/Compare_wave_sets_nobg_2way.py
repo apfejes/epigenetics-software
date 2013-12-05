@@ -9,7 +9,7 @@ import sys
 import os
 import multiprocessing
 import time
-import scipy.odr as odr
+# import scipy.odr as odr
 from scipy import stats as scipystats
 import math
 
@@ -265,40 +265,43 @@ def run(output, db):
 
             i += 1
 
-        # Now find unique peaks in waves2
-        # find pairs
-        i = 0
-        j = 0
-        while (i < max_i and j < max_j):
-            chromosome = waves1[i]['chr']
-            # print "DEBUG: checking waves2"
-            # print "DEBUG: waves1[i]: ", waves1[i]
-            pos_j = waves2[j]['pos']
-            sdv_j = waves2[j]['stddev']
-            ht_j = waves2[j]['height']
-            it = i - 1
-            none_found = True
-            best = None
-            while it >= 0 and (waves1[it]['pos'] + 4 * waves1[it]['stddev']) > (pos_j - 4 * sdv_j) :
-                # print "checking %s, %s" % (it, j)
-                pvalue = stats.ks_test(pos_j, sdv_j, waves1[it]['pos'], waves1[it]['stddev'])
-                if (pvalue != 0):
-                    none_found = False
-                it -= 1
-            while i < max_i and (waves1[i]['pos'] - 4 * waves1[i]['stddev']) < (pos_j + 4 * sdv_j):
-                # print "checking %s, %s" % (i, j)
-                pvalue = stats.ks_test(pos_j, sdv_j, waves1[i]['pos'], waves1[i]['stddev'])
-                if (pvalue != 0):
-                    none_found = False
-                i += 1
+        TWOWAY = False
+        if(TWOWAY):
+            # Now find unique peaks in waves2
+            # find pairs
+            i = 0
+            j = 0
+            while (i < max_i and j < max_j):
+                chromosome = waves1[i]['chr']
+                # print "DEBUG: checking waves2"
+                # print "DEBUG: waves1[i]: ", waves1[i]
+                pos_j = waves2[j]['pos']
+                sdv_j = waves2[j]['stddev']
+                ht_j = waves2[j]['height']
+                it = i - 1
+                none_found = True
+                best = None
+                while it >= 0 and (waves1[it]['pos'] + 4 * waves1[it]['stddev']) > (pos_j - 4 * sdv_j) :
+                    # print "checking %s, %s" % (it, j)
+                    pvalue = stats.ks_test(pos_j, sdv_j, waves1[it]['pos'], waves1[it]['stddev'])
+                    if (pvalue != 0):
+                        none_found = False
+                    it -= 1
+                while i < max_i and (waves1[i]['pos'] - 4 * waves1[i]['stddev']) < (pos_j + 4 * sdv_j):
+                    # print "checking %s, %s" % (i, j)
+                    pvalue = stats.ks_test(pos_j, sdv_j, waves1[i]['pos'], waves1[i]['stddev'])
+                    if (pvalue != 0):
+                        none_found = False
+                    i += 1
 
-            # print "DEBUG: wavepair is: ", w.to_string()
-            if none_found:
-                w = WavePair(chromosome, -1, j, -1, -1, pos_j, -1, sdv_j, 0, ht_j)
-                paired_data.append(w)
-                all_unpaired.append(w)
+                # print "DEBUG: wavepair is: ", w.to_string()
+                if none_found:
+                    w = WavePair(chromosome, -1, j, -1, -1, pos_j, -1, sdv_j, 0, ht_j)
+                    paired_data.append(w)
+                    all_unpaired.append(w)
 
-            j += 1
+                j += 1
+
 
 
     # Now determine FDR for every peak that has a pair, carry on with pairs that meet user cutoff.
