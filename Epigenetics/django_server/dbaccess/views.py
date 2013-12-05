@@ -158,10 +158,10 @@ def view_query_form(request):
     if parameters['height'] < 400:
         parameters['height'] = 400
 
-    if parameters['minheight'] == None:
+    if parameters['minheight'] is None:
         parameters['minheight'] = 0
 
-    if parameters['minsigma'] == None:
+    if parameters['minsigma'] is None:
         parameters['minsigma'] = 0
 
     db_list = [str(x) for x in mongo.database_names()]
@@ -220,7 +220,7 @@ def view_query_form(request):
             parameters['groupby_selected'] = 'project'
         elif parameters['methylation_project'][0] not in groupby_list[parameters['organism']]:
             parameters['groupby_selected'] = 'project'
-        elif (parameters['groupby_selected'] == None and len(parameters['methylation_project']) == 1) :
+        elif (parameters['groupby_selected'] is None and len(parameters['methylation_project']) == 1) :
             parameters['groupby_selected'] = groupby_list[parameters['organism']][parameters['methylation_project'][0]]['default']
         elif parameters['methylation_project'][0] not in methylation_list[parameters['organism']] :
             parameters['groupby_selected'] = groupby_list[parameters['organism']][parameters['methylation_project'][0]]['default']
