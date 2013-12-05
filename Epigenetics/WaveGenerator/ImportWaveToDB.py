@@ -23,6 +23,8 @@ import Mongo_Connector
 import CommonUtils.Parameters as Parameters
 import StringUtils
 
+import argparse
+
 def create_param_obj(param_file):
     '''copy of function in The WaveGenerator - should be refactored to remove redundancy!!'''
     if os.path.exists(param_file):
@@ -32,7 +34,7 @@ def create_param_obj(param_file):
         sys.exit()
 
 
-def run(PARAM, wave_data_file, wave_input_file, db_name, test):
+def run(PARAM, wave_data_file, wave_input_file, test):
     '''simple script for reading in a wave file and inserting it into a table in a mongodb database.'''
 
     # wave_data_file = raw_input('wave file to load: ')
@@ -78,7 +80,7 @@ def run(PARAM, wave_data_file, wave_input_file, db_name, test):
         db_choice = int(raw_input("select a database to insert records into."))
     db_name = db_names[db_choice]
     '''
-    print "Data being imported into database: ", db_name
+    print "Data being imported into database: ", PARAM.get("default_database")
 
     print "Thanks - Data has been collected."
     print "opening connection(s) to MongoDB..."
@@ -158,21 +160,18 @@ def run(PARAM, wave_data_file, wave_input_file, db_name, test):
     mongo.close()
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 5:
-        print ("This program requires the name of the database config file, the name of the input file, name of wave parameter file, database, and [1] for test, [0] for sample")
-        print " eg. python ImportWaveToDB.py /directory/database.conf input/file.name.waves, parameter/wigtest.input test 1"
-        print " for instance, you can find a demo file in Epigenetics/MongoDB/database.conf "
-        print " Note: this file is in transition - the database.conf file will be optional in future versions and is currently not used. "
-        sys.exit()
-    conf_file = sys.argv[1]
-    in_file = sys.argv[2]
-    wp_file = sys.argv[3]
-    db = sys.argv[4]
-    if int(sys.argv[5]) == 1:
-        test = True
-    else:
-        test = False
-    p = Parameters.parameter()
-    run(p, in_file, wp_file, db, test)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("wavefile", help = "Wave file (.wave) to input into the database", type = str)
+    parser.add_argument("parameterfile", help = "Parameter file (.input) to input into the database", type = str)
+    parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
+    parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
+    parser.add_argument("-test", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", action = "store_false")
+    args = parser.parse_args()
+
+    p = Parameters.parameter(args.dbconfig)
+    if args.dbname:
+        p.set("default_database", args.dbname)
+
+    run(p, args.wavefile, args.parameterfile, args.test)
     print "Completed."
 
