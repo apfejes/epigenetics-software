@@ -14,7 +14,8 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 import common_utilities as cu
-
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
@@ -22,11 +23,12 @@ if __name__ == '__main__':
         sys.exit()
     proj_name = sys.argv[1]
 
-    db_name = "human_epigenetics"
-    mongodb = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
-    curs = mongodb.find("samples", {"project":proj_name}, {"_id": True})
+
+    p = Parameters.parameter()
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
+    curs = mongo.find("samples", {"project":proj_name}, {"_id": True})
     samples = cu.CreateListFromOIDs(curs)
-    removed = mongodb.remove("methylation", {"sampleid": {"$in": samples}}, True)
+    removed = mongo.remove("methylation", {"sampleid": {"$in": samples}}, True)
     print "data points removed = %s" % (removed['n'])
-    removed = mongodb.remove("samples", {"project":proj_name}, True)
+    removed = mongo.remove("samples", {"project":proj_name}, True)
     print "samples removed = %s" % (removed['n'])

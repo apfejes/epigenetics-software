@@ -13,6 +13,8 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 import common_utilities as cu
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 
 
 if __name__ == '__main__':
@@ -26,18 +28,19 @@ if __name__ == '__main__':
     file_name = path + probe_name + ".records"
     f = open(file_name, 'w')
 
-    mongodb = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
+    p = Parameters.parameter()
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     # ignore FASD probes.
     proj_name = "FASD"
     print "Ignoring project %s" % (proj_name)
     print "Finding samples to ignore..."
-    curs = mongodb.find("samples", {"project":{"$ne": proj_name}, "tissuetype":"buccal"}, {"_id": True})
+    curs = mongo.find("samples", {"project":{"$ne": proj_name}, "tissuetype":"buccal"}, {"_id": True})
     print "Creating list from Cursor..."
     samples_to_use = cu.CreateListFromOIDs(curs)
     print "found %s samples" % len(samples_to_use)
     # print "sample to use: %s" % samples_to_use
     print "Finding Probes..."
-    curs = mongodb.find("methylation", {"sampleid": {"$in":samples_to_use}, "probeid": probe_name}, {"_id":False, "beta":True})
+    curs = mongo.find("methylation", {"sampleid": {"$in":samples_to_use}, "probeid": probe_name}, {"_id":False, "beta":True})
     print "open file for output: %s" % (file_name)
     i = 0
     for record in curs:

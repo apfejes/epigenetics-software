@@ -11,19 +11,19 @@ class MapMaker():
     '''A class that converts an array of coverage into a map object'''
 
     def __init__(self, PARAM):
-        map_type = PARAM.get_parameter("map_type")
-        frag_length = PARAM.get_parameter("fragment_length")
+        map_type = PARAM.get("map_type")
+        frag_length = PARAM.get("fragment_length")
         if map_type == "Triangle":
             self.coverage_template = ReadModels.Distribution.Triangle(
-                                    PARAM.get_parameter("triangle_min"),
-                                    PARAM.get_parameter("triangle_median"),
+                                    PARAM.get("triangle_min"),
+                                    PARAM.get("triangle_median"),
                                     frag_length)
         elif map_type == "Flat":
             self.coverage_template = ReadModels.Distribution.Flat(frag_length)
         else:
             sys.exit("Unrecognized Readmodel type:", map_type)
 
-        if PARAM.get_parameter("round_leading_edge"):
+        if PARAM.get("round_leading_edge"):
             self.coverage_template = ReadModels.Distribution.round_leading_edge(self.coverage_template)
         self.template_length = len(self.coverage_template)
         # print "template_length", self.template_length

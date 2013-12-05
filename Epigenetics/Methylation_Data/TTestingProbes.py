@@ -22,8 +22,9 @@ sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 from WalkAlongChromosome import CreateSampleGroups
 from annotUtilities import plots
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 
-database_name = 'human_epigenetics'
 methylation_collection = 'methylation'
 samples_collection = 'samples'
 savedirectory = '/home/jyeung/Documents/Presentations/batchplots/'
@@ -190,7 +191,9 @@ if __name__ == "__main__":
 
         print('Finding differentially methylated probes in %s' % project)
         starttime = time.time()
-        mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
+
+        p = Parameters.parameter()
+        mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
         sample_groups = CreateSampleGroups(mongo, project, feature)
 
         diseased = []

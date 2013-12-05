@@ -8,11 +8,14 @@ import os
 import sys
 import time
 import ast
+
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 # from platform import system
 
 
@@ -44,14 +47,15 @@ def importObjectsFromJSON(mongo, filename, proj, database, collection):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print('RData filename must be given.')
         sys.exit()
     starttime = time.time()
     filename = sys.argv[1]
-    db_name = "human_epigenetics_temp"
+    db_conf = sys.argv[2]
+    p = Parameters.parameter()
     collection = "samples"
-    project_name = raw_input('Enter the name of the project to insert in the ' + collection + ' collection of the ' + db_name + ' database: ')
-    mongodb = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
-    importObjectsFromJSON(mongodb, filename, project_name, db_name, collection)
+    project_name = raw_input('Enter the name of the project to insert in the ' + collection + ' collection of the ' + p.get('default_database') + ' database: ')
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
+    importObjectsFromJSON(mongo, filename, project_name, p.get('default_database'), collection)
     print('Done in %s seconds') % int((time.time() - starttime))

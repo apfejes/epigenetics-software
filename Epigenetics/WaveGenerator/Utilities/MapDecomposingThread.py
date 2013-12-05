@@ -256,8 +256,8 @@ class MapDecomposer(multiprocessing.Process):
         v = MapDecomposer.get_tallest_point(n)    # identify tallest point
         # highest_point = v.get('height')
         cur_height = v.get('height')
-        min_height = MapDecomposer.PARAM.get_parameter("min_height")
-        number_waves = MapDecomposer.PARAM.get_parameter("number_waves")
+        min_height = MapDecomposer.PARAM.get("min_height")
+        number_waves = MapDecomposer.PARAM.get("number_waves")
         ignore = []
         mu = None
         if number_waves:

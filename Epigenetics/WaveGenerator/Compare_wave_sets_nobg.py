@@ -20,8 +20,8 @@ _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current fi
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir + os.sep + "Utilities")
-
-import Parameters
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector, common_utilities
 import PrintThread
@@ -88,12 +88,10 @@ class WavePair():
         return "Wavepair"
 
 
-def run(output, db):
+def run(mongo, output, db):
     '''Main module to run the compare'''
     # build mongo connection
     print "opening connection(s) to MongoDB..."
-    db_name = db
-    mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
     util = common_utilities.MongoUtilities(mongo)    # get names of available samples
 
     print_queue = multiprocessing.Queue()
@@ -545,10 +543,11 @@ if __name__ == '__main__':
     if len(sys.argv) <= 3:
         print ("This program requires the name of the database config file, output path, and name of database.")
         print" eg. python ImportWaveToDB.py /directory/database.conf directory/output/ yeast_epigenetics"
+        print" NOTE: This program is being modified - the database.conf file is currently unused. Future versions will allow an override of the default."
         sys.exit()
-    conf_file = sys.argv[1]
+    p = Parameters.parameter()
     output = sys.argv[2]
-    db = sys.argv[3]
-    param = Parameters.parameter(conf_file)
-    run(output, db)
+    p.set('default_database', sys.argv[3])
+    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
+    run(mongo, output, p.get('default_database'))
     print "Completed."

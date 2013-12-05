@@ -12,4 +12,7 @@
 <path>/Epigenetics/CommonUtils</path>
 <path>/Epigenetics/MongoDB/mongoUtilities</path>
 </pydev_pathproperty>
+<pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
+<path>/usr/lib/python2.7/dist-packages/PyQt4</path>
+</pydev_pathproperty>
 </pydev_project>

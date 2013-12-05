@@ -15,6 +15,9 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 import common_utilities as cu
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
+
 
 from bson.objectid import ObjectId
 
@@ -24,9 +27,10 @@ if __name__ == '__main__':
         print('Sample name to delete must be given (file_name.normalized.waves).')
         sys.exit()
     proj_name = sys.argv[1]
+    p = Parameters.parameter()
+    p.set('default_database', "yeast_epigenetics")
+    mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
 
-    db_name = "yeast_epigenetics"
-    mongodb = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
     found = mongodb.find("samples", {"file_name":proj_name}, {"_id": True}).count()
     print "found %s sample(s) to delete with file_name %s" % (found, proj_name)
     curs = mongodb.find("samples", {"file_name":proj_name}, {"_id": True})

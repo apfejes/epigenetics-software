@@ -261,40 +261,40 @@ class ParametersEditor (tk.Toplevel):
 
             # Input Options
             self.input_file_entry.delete(0, tk.END)
-            self.input_file_entry.insert(0, self.parameters.get_parameter('input_file'))
+            self.input_file_entry.insert(0, self.parameters.get('input_file'))
 
             # Extension Options
-            self.map_type_selected.set(self.parameters.get_parameter('map_type'))
-            self.triangle_min_scale.set(self.parameters.get_parameter('triangle_min'))
-            self.triangle_median_scale.set(self.parameters.get_parameter('triangle_median'))
+            self.map_type_selected.set(self.parameters.get('map_type'))
+            self.triangle_min_scale.set(self.parameters.get('triangle_min'))
+            self.triangle_median_scale.set(self.parameters.get('triangle_median'))
             self.fragment_length_entry.delete(0, tk.END)
-            self.fragment_length_entry.insert(0, str(self.parameters.get_parameter('fragment_length')))
-            self.round_leading_edge.set(self.parameters.get_parameter('round_leading_edge'))
-            if (self.parameters.get_parameter('round_leading_edge')):
+            self.fragment_length_entry.insert(0, str(self.parameters.get('fragment_length')))
+            self.round_leading_edge.set(self.parameters.get('round_leading_edge'))
+            if (self.parameters.get('round_leading_edge')):
                 self.round_leading_edge_button.select()
             else:
                 self.round_leading_edge_button.deselect()
             self.max_pet_length_entry.delete(0, tk.END)
-            self.max_pet_length_entry.insert(0, str(self.parameters.get_parameter('max_pet_length')))
+            self.max_pet_length_entry.insert(0, str(self.parameters.get('max_pet_length')))
 
             # Wave Calling Options
             self.min_height_entry.delete(0, tk.END)
-            self.min_height_entry.insert(0, str(self.parameters.get_parameter('min_height')))
+            self.min_height_entry.insert(0, str(self.parameters.get('min_height')))
 
             # Runtime Configuration Options
             self.processor_threads_entry.delete(0, tk.END)
-            self.processor_threads_entry.insert(0, str(self.parameters.get_parameter('processor_threads')))
+            self.processor_threads_entry.insert(0, str(self.parameters.get('processor_threads')))
 
             # Output Options
             self.output_path_entry.delete(0, tk.END)
-            self.output_path_entry.insert(0, self.parameters.get_parameter('output_path'))
+            self.output_path_entry.insert(0, self.parameters.get('output_path'))
             self.file_name_entry.delete(0, tk.END)
-            self.file_name_entry.insert(0, self.parameters.get_parameter('file_name'))
-            if (self.parameters.get_parameter('number_waves')):
+            self.file_name_entry.insert(0, self.parameters.get('file_name'))
+            if (self.parameters.get('number_waves')):
                 self.number_waves_button.select()
             else:
                 self.number_waves_button.deselect()
-            if (self.parameters.get_parameter('make_wig')):
+            if (self.parameters.get('make_wig')):
                 self.make_wig_button.select()
             else:
                 self.make_wig_button.deselect()
@@ -305,7 +305,7 @@ class ParametersEditor (tk.Toplevel):
         if path:
             self.parameters.set_parameter('output_path', path)
             self.output_path_entry.delete(0, tk.END)
-            self.output_path_entry.insert(0, self.parameters.get_parameter('output_path'))
+            self.output_path_entry.insert(0, self.parameters.get('output_path'))
 
     def askinputfile(self):
         '''get input file'''
@@ -313,4 +313,4 @@ class ParametersEditor (tk.Toplevel):
         if filename:
             self.parameters.set_parameter('input_file', filename)
             self.input_file_entry.delete(0, tk.END)
-            self.input_file_entry.insert(0, self.parameters.get_parameter('input_file'))
+            self.input_file_entry.insert(0, self.parameters.get('input_file'))

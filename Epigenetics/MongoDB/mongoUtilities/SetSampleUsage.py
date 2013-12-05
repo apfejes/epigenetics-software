@@ -13,7 +13,8 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
-
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
 
 
 if __name__ == '__main__':
@@ -31,9 +32,11 @@ if __name__ == '__main__':
     else:
         setting = False
 
+    p = Parameters.parameter()
+    if sys.argv[3]:
+        p.set('default_database', sys.argv[3])
+    mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
 
-    db_name = sys.argv[3]
-    mongodb = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, db_name)
     found = mongodb.find("samples", {"file_name":proj_name}, {"_id": True}).count()
     print "found %s sample(s) matching %s to update hide to %s " % (found, proj_name, setting)
     sample_update = {}

@@ -22,7 +22,6 @@ sys.path.insert(0, _cur_dir + os.sep + "Utilities")    # add the utilities folde
 
 # Modules in Utilities
 import MapDecomposingThread
-import Parameters
 import WaveFileThread
 import PrintThread
 import ReadAheadIteratorPET
@@ -41,7 +40,7 @@ sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
 sys.path.insert(0, _root_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
 
 import StringUtils
-
+import CommonUtils.Parameters as Parameters
 
 
 def random_index(num_queues):
@@ -94,8 +93,8 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
     block_right = 0
     reads_list = LinkedList.LL()
     readahead = ReadAheadIteratorPET.ReadAheadIteratorPET(
-                    PARAM.get_parameter("input_file"),
-                    PARAM.get_parameter("fragment_length"), "rb", False)
+                    PARAM.get("input_file"),
+                    PARAM.get("fragment_length"), "rb", False)
     while True:
         # print count, "reads processed"
         alignedreadobjpet = readahead.getNext()
@@ -110,7 +109,7 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
             # again from the start of the next chromosome.
             read_left = alignedreadobjpet.left_end
             read_right = alignedreadobjpet.right_end
-            if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get_parameter("max_pet_length"):
+            if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get("max_pet_length"):
                 continue    # simply move to the
             if not new_block:    # flush current reads to map
                 coverage_map = mapmaker.makeIslands(block_left, block_right,
@@ -120,7 +119,7 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
                              MappingItem.Item(coverage_map, current_chromosome,
                                               block_left),
                              worker_processes)
-                if PARAM.get_parameter("make_wig"):
+                if PARAM.get("make_wig"):
                     wigfile.add_map(coverage_map, current_chromosome,
                                     block_left)
             # reset all variables to move onto new chromosome
@@ -135,7 +134,7 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
 
         read_left = alignedreadobjpet.left_end
         read_right = alignedreadobjpet.right_end
-        if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get_parameter("max_pet_length"):
+        if alignedreadobjpet.is_pet() and math.fabs(read_left - read_right) > PARAM.get("max_pet_length"):
             continue
         if new_block:
             reads_list = LinkedList.LL()
@@ -153,7 +152,7 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
                                                     reads_list)
                 put_assigned(map_queues, MappingItem.Item(coverage_map, chromosome, block_left), worker_processes)
                 # mapprocessor.add_map(coverage_map, current_chromosome, block_left)
-                if PARAM.get_parameter("make_wig"):
+                if PARAM.get("make_wig"):
                     wigfile.add_map(coverage_map, current_chromosome,
                                     block_left)
                 reads_list.destroy()
@@ -169,7 +168,7 @@ def process_WIG_reads(PARAM, map_queues, print_queue, worker_processes):
     current_chromosome = None
     count = 0
     position = 0
-    filereader = open(PARAM.get_parameter("input_file"), 'r')
+    filereader = open(PARAM.get("input_file"), 'r')
     thismap = []
     chromosome = ""
     firstpass = True
@@ -235,35 +234,35 @@ def main(PARAM):
         # launch thread to read and process the print queue'''
         # print_thread = PrintThread.StringWriter(print_queue)
         # print_thread = PrintThread.StringWriter(print_queue, "/home/afejes/temp/", "wavegenerator.txt", False, True)
-        print_thread = PrintThread.StringWriter(print_queue, PARAM.get_parameter("output_path"), PARAM.get_parameter("file_name") + "_wavegenerator.txt", False, True)
+        print_thread = PrintThread.StringWriter(print_queue, PARAM.get("output_path"), PARAM.get("file_name") + "_wavegenerator.txt", False, True)
         print_queue.put("Print queue and thread have started")
 
 
-        if PARAM.get_parameter("input_file").endswith('wig'):
+        if PARAM.get("input_file").endswith('wig'):
             PARAM.set_parameter('type', "WIG")
-            if PARAM.get_parameter("make_wig"):
+            if PARAM.get("make_wig"):
                 PARAM.set_parameter("make_wig", False)
                 print_queue.put("Disabling Wig file generation for wig file input.")
-        elif (PARAM.get_parameter("input_file").endswith('bam') or
-              PARAM.get_parameter("input_file").endswith('sam')):
+        elif (PARAM.get("input_file").endswith('bam') or
+              PARAM.get("input_file").endswith('sam')):
             PARAM.set_parameter('type', "BAM")
         else:
             print_queue.put("Unrecognized file format extension for file: "
-                         % (PARAM.get_parameter("input_file")))
+                         % (PARAM.get("input_file")))
 
         # TODO: test if file exists.
 
 
 
-        if PARAM.get_parameter("make_wig"):    # processor threads
+        if PARAM.get("make_wig"):    # processor threads
             wigfile = WigFileThread.WigFileWriter(None)
-            wigfile.start_wig_writer(PARAM.get_parameter('output_path'),
-                                     PARAM.get_parameter('file_name'))
+            wigfile.start_wig_writer(PARAM.get('output_path'),
+                                     PARAM.get('file_name'))
         wavefile = WaveFileThread.WaveFileWriter(None, wave_queue)
-        wavefile.start_wave_writer(PARAM.get_parameter('output_path'),
-                                   PARAM.get_parameter('file_name'))
+        wavefile.start_wave_writer(PARAM.get('output_path'),
+                                   PARAM.get('file_name'))
 
-        worker_processes = PARAM.get_parameter("processor_threads")
+        worker_processes = PARAM.get("processor_threads")
         for x in range(worker_processes):
             queue = multiprocessing.Queue()
             map_queues.append(queue)
@@ -282,7 +281,7 @@ def main(PARAM):
         print_queue.put("All Processor threads started successfully.")
         print_queue.put("Parameters provided:")
         for par in PARAM.parameters.keys():
-            print_queue.put("%s\t%s" % (par, PARAM.get_parameter(par)))
+            print_queue.put("%s\t%s" % (par, PARAM.get(par)))
         print_queue.put("-------------------------------------------")
 
         print_queue.put("Chromosome processing has started, along with " +
@@ -293,9 +292,9 @@ def main(PARAM):
         # Once a file is opened you can iterate over all of the read mapping to a
         # specified region using fetch(). Each iteration returns a AlignedRead object
         # which represents a single read along with its fields and optional tags:
-        if PARAM.get_parameter('type') == "WIG":
+        if PARAM.get('type') == "WIG":
             process_WIG_reads(PARAM, map_queues, print_queue, worker_processes)
-        elif PARAM.get_parameter('type') == "BAM":
+        elif PARAM.get('type') == "BAM":
             mapmaker = MapMaker.MapMaker(PARAM)
             print_queue.put("Initialized MapMaker object, to convert reads to maps. (completed)")
             process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_processes)
@@ -313,7 +312,7 @@ def main(PARAM):
         print_queue.put("closing process started...")
         # Add Sentinels to end of queue
         print_queue.put("adding terminator sentinels to queue.")
-        # for x in range(PARAM.get_parameter("processor_threads")):
+        # for x in range(PARAM.get("processor_threads")):
         for queue in map_queues:
             queue.put(None)
         temp = -1
@@ -339,7 +338,7 @@ def main(PARAM):
         for queue in map_queues:
             queue.close()
         print_queue.put("Processor threads terminated. Please be patient while buffers are flushed.")
-        if PARAM.get_parameter("make_wig") and wigfile != None:
+        if PARAM.get("make_wig") and wigfile != None:
             print_queue.put("Closing Wigwriter.  This may take some time.")
             wigfile.close_wig_writer()
             print_queue.put("Wigwriter closed.")
@@ -386,9 +385,9 @@ if __name__ == "__main__":
         param.set_parameter("output_path", sys.argv[3])    # override output_path
 
     print "param file: ", sys.argv[1]
-    print "input_file: ", param.get_parameter("input_file")
-    print "output_path: ", param.get_parameter("output_path")
-    print "output_file_name: ", param.get_parameter("file_name")
+    print "input_file: ", param.get("input_file")
+    print "output_path: ", param.get("output_path")
+    print "output_file_name: ", param.get("file_name")
 
 
     main(param)

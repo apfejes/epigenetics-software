@@ -20,6 +20,9 @@ sys.path.insert(0, _cur_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 from annotUtilities import plots
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+import CommonUtils.Parameters as Parameters
+
 
 starttime = time.time()
 database_name = 'human_epigenetics'
@@ -197,6 +200,8 @@ def PlotBetas(db, project_name, chrom):
 
 if __name__ == "__main__":
 
+    p = Parameters.parameter()
+
     down_or_kollman = raw_input('Look at down or kollman project? ')
     if down_or_kollman == 'kollman':
         project = 'kollman'
@@ -230,7 +235,7 @@ if __name__ == "__main__":
                                   chromosome_list))
 
         print('Creating mongo object...')
-        mongo = Mongo_Connector.MongoConnector('kruncher.cmmt.ubc.ca', 27017, database_name)
+        mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
         print('Creating sample groups...')
         SampleGroups = CreateSampleGroups(mongo, project, feature)
         control_samples = SampleGroups[control_group_label]
