@@ -101,10 +101,8 @@ def run(mongo, output, db):
     print_thread = PrintThread.StringWriter(print_queue, output, "waves_comparison_allwaves.txt", True, True)
 
     # ask user for name of sample
-    if db == "yeast_epigenetics":
-        results = util.get_chip_chip_sample_names()
-    else:
-        results = util.get_chip_seq_sample_names()
+
+    results = util.get_chip_sample_names()
     s = [len(results)]
     c = 1
     for r in results:

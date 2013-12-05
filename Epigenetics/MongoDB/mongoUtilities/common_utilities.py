@@ -42,16 +42,7 @@ class MongoUtilities(object):
         '''
         self.mongo = mongo
 
-    def get_chip_seq_sample_names(self):
-        '''TODO:missing docstring'''
-        collection = "samples"
-        curs = self.mongo.find(collection, {"haswaves":{"$exists": True}}, {"cell_line": True, "chip": True})
-        results = []
-        for c in curs:
-            results.append("%s - %s" % (c['cell_line'], c['chip']))
-        return results
-
-    def get_chip_chip_sample_names(self):
+    def get_chip_sample_names(self):
         '''TODO:missing docstring'''
         collection = "samples"
         curs = self.mongo.find(collection, {"haswaves":{"$exists": True}}, {"sample_id": True}).sort("sample_id", 1)
