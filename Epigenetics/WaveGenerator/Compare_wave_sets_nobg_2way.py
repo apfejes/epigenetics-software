@@ -217,9 +217,11 @@ def run(mongo, output, db):
                     minheight = i['height']
 
             print "\nNow determining background levels for height of peaks on chromosome ", chromosome
+            print "maxheight: ", maxheight
             step = round(maxheight / 100.0, 2)
+            # print "step: ", step
             bins = int(maxheight / step) + 1
-            if step == 0:    # if no information for this chromosome
+            if step == 0 or maxheight == -1:    # if no information for this chromosome
                 pass
             else:
                 counts = [0] * bins
@@ -384,6 +386,7 @@ def run(mongo, output, db):
 
     # Now determine FDR for every peak that has a pair, carry on with pairs that meet user cutoff.
     # user_ks_fdr = 0.05    # TODO: input by user
+    print "\nNow determining FDR threshold to use"
     bins = int(len(all_paired) * 0.05)    # bin size is 5% of total number of bins
     print "number of bins: ", bins
     counts = [0] * bins    # holds number of pairs in each bin
