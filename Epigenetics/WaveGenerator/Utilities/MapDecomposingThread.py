@@ -182,7 +182,7 @@ class MapDecomposer(multiprocessing.Process):
                     if t not in already_tested and t not in to_be_tested:
                         to_be_tested.add(t)
         if slen > 1 and sample[slen - 1][1] > maximal_sigma:
-                maximal_sigma = sample[slen - 1][1]
+            maximal_sigma = sample[slen - 1][1]
         for i in range(slen - 1):
             # print "testing sample[i][1] (%i) == maximal_sigma (%i) and sample[i + 1][1]  (%i)  == maximal_sigma and (sample[i + 1][0] - sample[i][0] (%i) > 1):" % (sample[i][1], maximal_sigma, sample[i + 1][1], (sample[i + 1][0] - sample[i][0]))
             if sample[i][1] == maximal_sigma and sample[i + 1][1] == maximal_sigma and (sample[i + 1][0] - sample[i][0] > 1):
