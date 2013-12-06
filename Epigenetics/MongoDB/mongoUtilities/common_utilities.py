@@ -64,14 +64,7 @@ class MongoUtilities(object):
         '''TODO:missing docstring'''
         collection = "samples"
         results = []
-        if db == "yeast_epigenetics":
-            curs = self.mongo.find(collection, {"sample_id":name}, {"_id": True})
-        else:
-            # not sure if this works...
-            if " - " in name:
-                parts = name.split(" - ")
-            curs = self.mongo.find(collection, {"cell_line": parts[0], "chip": parts[1]}, {"_id": True})
-
+        curs = self.mongo.find(collection, {"sample_id":name}, {"_id": True})
         for c in curs:
             results.append(c['_id'])
         return results
