@@ -217,8 +217,6 @@ def run(mongo, output, db):
                     minheight = i['height']
 
             print "\nNow determining background levels for height of peaks on chromosome ", chromosome
-            # bins = 70    # based on max peak height of 7
-            # bins = 101
             step = round(maxheight / 100.0, 2)
             bins = int(maxheight / step) + 1
             if step == 0:    # if no information for this chromosome
@@ -227,16 +225,14 @@ def run(mongo, output, db):
                 counts = [0] * bins
                 thresh = [0] * bins
                 for i in range(0, bins):
-                    # thresh[i] = (i + 1) * 0.1    # 0.1 is step size between bins
                     thresh[i] = (i + 1) * step
                 for i in (waves1 + waves2):
                     # combine h1 and h2 to determine background levels
-                    # counts[int(i['height'] / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
                     # print "height:", i['height']
                     # print "step: ", step
                     # print "ind:", int(i['height'] / step)
                     counts[int(i['height'] / step)] += 1
-                print "counts are: ", counts
+                # print "counts are: ", counts
                 x = []
                 y = []
                 # for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
