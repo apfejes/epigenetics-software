@@ -156,18 +156,28 @@ def run(mongo, output, db):
     remove_noise = raw_input("\nWould you like the program to remove background noise from each sample? [y/n]: ")
     if remove_noise.lower() == "y":
         remove_noise = True
-        hw = raw_input("\nShould the background noise be based on peak height or peak width? [h/w]")
+        hw = raw_input("\nShould the background noise be based on peak height or peak width? [h/w]: ")
         if hw.lower() == "h":
             hw = True
-        else:
+        elif hw.lower() == "w":
             hw = False
-    else:
+        else:
+            print "invalid entry"
+            sys.exit()
+    elif remove_noise.lower() == "n":
         remove_noise = False
+    else:
+        print "invalid entry"
+        sys.exit()
+
     two_way = raw_input("\nWould you like to perform a 2-way analysis (find unique peaks in the control sample? [y/n]: ")
     if two_way.lower() == "y":
         two_way = True
-    else:
+    elif two_way.lower() == "n":
         two_way = False
+    else:
+        print "invalid entry"
+        sys.exit()
 
     chromosomes = util.get_chromosome_names()
     # #TODO: FOLLOWING FOR DEBUGGING ONLY!
@@ -208,38 +218,46 @@ def run(mongo, output, db):
 
             print "\nNow determining background levels for height of peaks on chromosome ", chromosome
             # bins = 70    # based on max peak height of 7
-            bins = 100
-            step = maxheight / 100
-            counts = [0] * bins
-            thresh = [0] * bins
-            for i in range(0, bins):
-                # thresh[i] = (i + 1) * 0.1    # 0.1 is step size between bins
-                thresh[i] = (i + 1) * step
-            for i in (waves1 + waves2):
-                # combine h1 and h2 to determine background levels
-                # counts[int(i['height'] / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
-                counts[int(i['height'] / step)] += 1
-            print "counts are: ", counts
-            x = []
-            y = []
-            # for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
-            for i in range(minheight / step, minheight / step + 5):
-                x.append(thresh[i])
-                y.append(counts[i])
-            print "x is ", x
-            print "y is ", y
-            slr = scipystats.linregress(x, y)
-            slope = slr[0]
-            intercept = slr[1]
-            print "slope: %s and intercept: %s for background peak height" % (slope, intercept)
-            # find x-intercept, threshold for noise-signal
-            xint = abs(intercept / slope)
-            print "height threshold between noise and signal is ", xint
-            # REMOVE background peaks
-            waves1[:] = [x for x in waves1 if x['height'] > xint]
-            waves2[:] = [x for x in waves2 if x['height'] > xint]
+            # bins = 101
+            step = round(maxheight / 100.0, 2)
+            bins = int(maxheight / step) + 1
+            if step == 0:    # if no information for this chromosome
+                pass
+            else:
+                counts = [0] * bins
+                thresh = [0] * bins
+                for i in range(0, bins):
+                    # thresh[i] = (i + 1) * 0.1    # 0.1 is step size between bins
+                    thresh[i] = (i + 1) * step
+                for i in (waves1 + waves2):
+                    # combine h1 and h2 to determine background levels
+                    # counts[int(i['height'] / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
+                    # print "height:", i['height']
+                    # print "step: ", step
+                    # print "ind:", int(i['height'] / step)
+                    counts[int(i['height'] / step)] += 1
+                print "counts are: ", counts
+                x = []
+                y = []
+                # for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
+                for i in range(int(minheight / step), int(minheight / step + 5)):
+                    x.append(thresh[i])
+                    y.append(counts[i])
+                print "x is ", x
+                print "y is ", y
+                slr = scipystats.linregress(x, y)
+                slope = slr[0]
+                intercept = slr[1]
+                print "slope: %s and intercept: %s for background peak height" % (slope, intercept)
+                # find x-intercept, threshold for noise-signal
+                xint = abs(intercept / slope)
+                print "height threshold between noise and signal is ", xint
+                # REMOVE background peaks
+                waves1[:] = [x for x in waves1 if x['height'] > xint]
+                waves2[:] = [x for x in waves2 if x['height'] > xint]
 
         if remove_noise and not hw:    # based on width
+            print "Now determining background levels for width of peaks on chromosome", chromosome
             bins = 300    # based on max sigma of 300
             counts = [0] * bins
             threshes = [0] * bins
@@ -268,7 +286,10 @@ def run(mongo, output, db):
             intercept = slr[1]
             # print "slope: %s and intercept: %s for background peak height" % (slope, intercept)
             # find x-intercept, threshold for noise-signal
-            xint = abs(intercept / slope)
+            if slope != 0:    # mitochondrial data may not exist
+                xint = abs(intercept / slope)
+            else:
+                xint = 0
             thresh = round(xint, 2)
             print "sigma threshold between noise and signal is ", thresh
             waves1[:] = [x for x in waves1 if x['stddev'] > thresh]
