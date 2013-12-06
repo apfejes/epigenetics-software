@@ -106,7 +106,7 @@ class MapDecomposer(multiprocessing.Process):
 
 
 
-    def best_fit_newton(self, coverage_map, i, height):
+    def best_fit_newton(self, coverage_map, i, height, noise_compensation):
         '''i is the position to test for the best fit in the coverage_map.'''
         low_sigma = 1
         high_sigma = max_sigma - 1
@@ -115,7 +115,7 @@ class MapDecomposer(multiprocessing.Process):
         # sigma = int((high_sigma - low_sigma) / 2.0)
         sigma = int((high_sigma - low_sigma) / 2.0) + low_sigma
         while low_sigma != high_sigma - 1:
-            if not self.sigma_test_2(coverage_map, sigma, i, height):    # still too high
+            if not self.sigma_test(coverage_map, sigma, i, height, noise_compensation):    # still too high
                 high_sigma = sigma
             else:    # still too low
                 low_sigma = sigma
@@ -123,7 +123,7 @@ class MapDecomposer(multiprocessing.Process):
         return low_sigma
 
 
-    def sigma_test(self, coverage_map, sigma, i, height):
+    def sigma_test(self, coverage_map, sigma, i, height, noise_compensation = 1):
         '''find the best sigma for this particular peak'''
         area_over = 0
         area_under = 0
@@ -140,30 +140,7 @@ class MapDecomposer(multiprocessing.Process):
                     area_under += actual
                 elif actual > expected:
                     area_under += expected
-        if area_over > (area_under / sigma):
-            return False
-        if sigma >= 299:
-            return False
-        return True
-
-    def sigma_test_2(self, coverage_map, sigma, i, height):
-        '''find the best sigma for this particular peak'''
-        area_over = 0
-        area_under = 0
-        s = 3 * sigma
-        base = self.sigma_height_table[sigma][0]
-        map_len = len(coverage_map)
-        for x in xrange(-s, s):
-            t = i + x
-            if (t >= 0 and x < 900 and t < map_len):
-                expected = height * (self.sigma_height_table[sigma][abs(x)] / base)
-                actual = coverage_map[t]
-                if actual < expected:
-                    area_over += (expected - actual)
-                    area_under += actual
-                elif actual > expected:
-                    area_under += expected
-        if area_over > 16 * (area_under / sigma):    # make smarter? Require more than just a single bar?
+        if area_over > noise_compensation * (area_under / sigma):
             return False
         if sigma >= 299:
             return False
@@ -277,13 +254,13 @@ class MapDecomposer(multiprocessing.Process):
                 print "Map at item.start (%s %i) is:\n%s" % (item.chr, item.start, n)
             for i in range(p - width, p + width, 10):
                 if i > 0 and i < len(n):
-                    this_sigma = self.best_fit_newton(n, i, cur_height)
+                    this_sigma = self.best_fit_newton(n, i, cur_height, MapDecomposer.PARAM.get("noise_compensation"))
                     tested.append((i, this_sigma))
             tbt = self.to_be_tested(tested)
 
             while len(tbt) > 0:
                 for t in tbt:
-                    tested.append((t, self.best_fit_newton(n, t, cur_height)))
+                    tested.append((t, self.best_fit_newton(n, t, cur_height, MapDecomposer.PARAM.get("noise_compensation"))))
                 tbt = []
                 tbt = self.to_be_tested(tested)
 
