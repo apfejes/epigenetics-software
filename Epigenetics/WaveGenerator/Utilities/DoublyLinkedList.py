@@ -69,7 +69,7 @@ class DLL(object):
     def insert_before(self, node, thing):
         '''method for inserting an object (thing) before a specific node'''
         if node == DLL.head:    # test if first node, then use convenience method:#
-            DLL.insert_at_head(thing)    # pylint: disable=E1120
+            DLL.insert_at_head(thing)    # pylint: disable:E1120
             return None
         else:
             newnode = Node(thing)
