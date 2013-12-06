@@ -17,8 +17,7 @@ import sys
 from random import randint
 import argparse
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
-_root_dir = os.path.dirname(_cur_dir)
-sys.path.insert(0, _root_dir)
+sys.path.insert(0, _cur_dir)
 sys.path.insert(0, _cur_dir + os.sep + "Utilities")    # add the utilities folder here
 
 # Modules in Utilities
@@ -31,12 +30,10 @@ import MapMaker
 import WigFileThread
 import MappingItem
 
-_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
 while ("WaveGenerator" in _root_dir):
     _root_dir = os.path.dirname(_root_dir)
 sys.path.insert(0, _root_dir)
-sys.path.insert(0, _cur_dir)
 sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
 sys.path.insert(0, _root_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
 
@@ -240,13 +237,13 @@ def main(PARAM):
 
 
         if PARAM.get("input_file").endswith('wig'):
-            PARAM.set_parameter('type', "WIG")
+            PARAM.set('type', "WIG")
             if PARAM.get("make_wig"):
-                PARAM.set_parameter("make_wig", False)
+                PARAM.set("make_wig", False)
                 print_queue.put("Disabling Wig file generation for wig file input.")
         elif (PARAM.get("input_file").endswith('bam') or
               PARAM.get("input_file").endswith('sam')):
-            PARAM.set_parameter('type', "BAM")
+            PARAM.set('type', "BAM")
         else:
             print_queue.put("Unrecognized file format extension for file: "
                          % (PARAM.get("input_file")))
@@ -366,26 +363,27 @@ if __name__ == "__main__":
     parser.add_argument("parameter_file", help = ".input parameterfile", type = str)
     parser.add_argument("-data_file", help = "override the source file in the parameter input file, containing data upon which waves will be called", type = str)
     parser.add_argument("-output_path", help = "override the path for output files", type = str)
+    parser.add_argument("-noise_compensation", "-nc", help = "increase the amount of noise acceptable for wave calling - set to 16 for chip-chip, 1 for chip_seq.", type = int, default = 1)
     args = parser.parse_args()
-    p = Parameters.parameter(args.dbconfig)
-    if args.dbname:
-        p.set("default_database", args.dbname)
+    p = Parameters.parameter()
 
     param = create_param_obj(args.parameter_file)
+    param.set("noise_compensation", args.noise_compensation)
 
     # override parameter file with cmdline args
     if args.data_file :
-        param.set_parameter("input_file", args.data_file)    # override input_file
+        param.set("input_file", args.data_file)    # override input_file
         # set file_name in param to be based on input file.
         ofile = StringUtils.rreplace(os.path.basename(args.data_file), '.wig', '', 1)
-        param.set_parameter("file_name", ofile)    # override output file_name (.waves gets added later)
+        param.set("file_name", ofile)    # override output file_name (.waves gets added later)
     if args.output_path == 4 :
-        param.set_parameter("output_path", args.output_path)    # override output_path
+        param.set("output_path", args.output_path)    # override output_path
 
     print "param file: ", args.parameter_file
     print "input_file: ", param.get("input_file")
     print "output_path: ", param.get("output_path")
     print "output_file_name: ", param.get("file_name")
+
 
 
     main(param)

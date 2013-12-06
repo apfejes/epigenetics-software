@@ -19,7 +19,7 @@ sys.path.insert(0, _root_dir + os.sep + "WaveGenerator")    # add the utilities 
 sys.path.insert(0, _cur_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
 
 from TheWaveGenerator import main as wg_main
-from Parameters import parameter
+from CommonUtils.Parameters import parameter
 from . import ParametersEditor
 
 class Application(tk.Tk):
@@ -62,7 +62,7 @@ class Application(tk.Tk):
         '''dialog box for opening a new input filename'''
         filename = tkFileDialog.askopenfilename(defaultextension = '.input', title = 'Open File')
         if filename:
-            self.parameters.set_parameter('input_file', filename)
+            self.parameters.set('input_file', filename)
 
 def main():
     '''start the application'''

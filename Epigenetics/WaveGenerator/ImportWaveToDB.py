@@ -114,10 +114,15 @@ def run(PARAM, wave_data_file, wave_input_file, test):
     sample['input_file'] = StringUtils.rreplace(wave_data_file, '.waves', '.wig', 1)
     sample['output_path'] = os.path.dirname(wave_data_file) + "/"
     sample['file_name'] = os.path.basename(wave_data_file)
-    sample['hide'] = True    # Default to hiding samples. Only once metadata is added is hide set to False
-    if test:
+
+    if args.hide:
+        sample['hide'] = True    # Default to not hiding samples. Only once metadata is added is hide set to False
+    else:
         sample['hide'] = False
+    if test:
         sample['sample_id'] = "00test" + os.path.basename(wave_data_file)
+    else:
+        sample['sample_id'] = os.path.basename(wave_data_file)
     collection_name = "samples"
     sample_id = mongo.insert(collection_name, sample)
 
@@ -163,9 +168,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("wavefile", help = "Wave file (.wave) to input into the database", type = str)
     parser.add_argument("parameterfile", help = "Parameter file (.input) to input into the database", type = str)
+    parser.add_argument("-hide", help = "if this flag is provided, then the hide flag is set to true, otherwise, it is set to false.", action = "store_true")
     parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
     parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
-    parser.add_argument("-test", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", action = "store_false")
+    parser.add_argument("-test", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", action = "store_true")
     args = parser.parse_args()
 
     p = Parameters.parameter(args.dbconfig)
