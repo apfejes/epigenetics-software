@@ -156,6 +156,11 @@ def run(mongo, output, db):
     remove_noise = raw_input("\nWould you like the program to remove background noise from each sample? [y/n]: ")
     if remove_noise.lower() == "y":
         remove_noise = True
+        hw = raw_input("\nShould the background noise be based on peak height or peak width? [h/w]")
+        if hw.lower() == "h":
+            hw = True
+        else:
+            hw = False
     else:
         remove_noise = False
     two_way = raw_input("\nWould you like to perform a 2-way analysis (find unique peaks in the control sample? [y/n]: ")
@@ -192,7 +197,7 @@ def run(mongo, output, db):
             waves2 = common_utilities.CreateListFromCursor(cursor)
 
 
-        if remove_noise:
+        if remove_noise and hw:    # based on height
             maxheight = -1
             minheight = 999999
             for i in (waves1 + waves2):
@@ -234,6 +239,40 @@ def run(mongo, output, db):
             waves1[:] = [x for x in waves1 if x['height'] > xint]
             waves2[:] = [x for x in waves2 if x['height'] > xint]
 
+        if remove_noise and not hw:    # based on width
+            bins = 300    # based on max sigma of 300
+            counts = [0] * bins
+            threshes = [0] * bins
+            for i in range(0, bins):
+                threshes[i] = (i + 1)
+            for i in (waves1 + waves2):
+                # check all heights to determine background levels
+                counts[int(i['stddev'])] += 1    # increment count where height1 is in bin of size 0.1
+            # print "counts are: ", counts
+            highest = 0
+            ind = -1
+            for i in range(0, bins):
+                if counts[i] > highest:
+                    highest = counts[i]
+                    ind = i
+            print "Most common sigma:", threshes[ind]
+            x = []
+            y = []
+            for i in range(ind, ind + 5):    # from highest peak forward 5
+                x.append(threshes[i])
+                y.append(counts[i])
+            # print "x is ", x
+            # print "y is ", y
+            slr = scipystats.linregress(x, y)
+            slope = slr[0]
+            intercept = slr[1]
+            # print "slope: %s and intercept: %s for background peak height" % (slope, intercept)
+            # find x-intercept, threshold for noise-signal
+            xint = abs(intercept / slope)
+            thresh = round(xint, 2)
+            print "sigma threshold between noise and signal is ", thresh
+            waves1[:] = [x for x in waves1 if x['stddev'] > thresh]
+            waves2[:] = [x for x in waves2 if x['stddev'] > thresh]
 
 
         # find pairs
