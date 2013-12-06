@@ -141,7 +141,7 @@ if __name__ == "__main__":
     user_in = raw_input("Would you like the program to automatically determine the wave width threshold? (Y/N): ")
     if user_in.lower == "y":
         at = True
-    elif at.lower() == "n":
+    elif user_in.lower() == "n":
         at = False
     else:
         print "invalid entry."
