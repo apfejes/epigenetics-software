@@ -9,18 +9,21 @@ Modified for yeast_epigenetics Oct 23, 2013
 import os
 import sys
 import argparse
+from bson.objectid import ObjectId
+
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
-sys.path.insert(0, _root_dir)
+while ("MongoDB" in _root_dir):
+    _root_dir = os.path.dirname(_root_dir)
+
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector
 import common_utilities as cu
+sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
-import CommonUtils.Parameters as Parameters
-
-
-from bson.objectid import ObjectId
+print "sys.path= ", sys.path
+from CommonUtils import Parameters
 
 
 if __name__ == '__main__':
