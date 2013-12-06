@@ -45,7 +45,7 @@ class MongoUtilities(object):
     def get_chip_sample_names(self):
         '''TODO:missing docstring'''
         collection = "samples"
-        curs = self.mongo.find(collection, {"haswaves":{"$exists": True}}, {"sample_id": True}).sort("sample_id", 1)
+        curs = self.mongo.find(collection, {"haswaves":{"$exists": True}, "hide":False}, {"sample_id": True}).sort("sample_id", 1)
         results = []
         for c in curs:
             results.append("%s" % c['sample_id'])
