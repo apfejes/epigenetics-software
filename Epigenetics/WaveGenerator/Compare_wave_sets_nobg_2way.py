@@ -109,6 +109,7 @@ def run(mongo, output, db):
         s.append(r)
         print ("%i. %s") % (c, r)
         c += 1
+    # SAMPLE SELECTION
     print "here are the names of available samples: which one do you want to use as a sample?"
 
     user_input = raw_input("enter the number(s). If using more than one, separate by a comma: ")
@@ -148,6 +149,7 @@ def run(mongo, output, db):
         controls.append(s[int(user_input)])
     print controls
 
+    # USER PARAMETERS
     print "\n"
     user_ks_fdr = float(raw_input("What False Discovery Rate is acceptable for pairing peaks: "))
     print "\n"
@@ -187,7 +189,7 @@ def run(mongo, output, db):
     id_s = [util.get_sample_id_from_name(s, db) for s in samples]
     id_r = [util.get_sample_id_from_name(c, db) for c in controls]
 
-
+    # GO THROUGH EACH CHROMOSOME AND REMOVE NOISE, PAIR PEAKS
     # Collect all wavepairs that have a pair
     # Remove background peaks for each chromosome
     all_paired = []
@@ -294,7 +296,7 @@ def run(mongo, output, db):
             waves2[:] = [x for x in waves2 if x['stddev'] > thresh]
 
 
-        # find pairs
+        # FIND PAIRS
         paired_data = []
         i = 0
         j = 0
@@ -346,6 +348,7 @@ def run(mongo, output, db):
 
             i += 1
 
+        # FIND UNIQUE PEAKS IN CONTROL
         if two_way:
             # Now find unique peaks in waves2
             # find pairs
