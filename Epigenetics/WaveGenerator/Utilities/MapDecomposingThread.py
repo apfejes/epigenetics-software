@@ -52,10 +52,12 @@ class MapDecomposer(multiprocessing.Process):
                         MapDecomposer.gausian_value_at_peak(i)
 
     @staticmethod
-    def get_tallest_point(coverage_map, ignore = []):
+    def get_tallest_point(coverage_map, ignore = None):
         '''returns position and height of the highest point in the map'''
         pos = 0
         height = 0
+        if ignore is None:    # don't use default parameter ignore = [], as this will create a single instance, which all further modifications will be retained on future invocations.
+            ignore = []
         # print "ignore = ", ignore
         for i in range(0, len(coverage_map)):
             # print "i = %i %f" % (i, coverage_map[i])
@@ -156,7 +158,7 @@ class MapDecomposer(multiprocessing.Process):
         to_be_tested = set()
         maximal_sigma = 0
 
-        slen = len(sample);
+        slen = len(sample)
         if slen <= 1:
             return to_be_tested
         for i in range(slen - 1):    # zero to length of the set, minus 2.  Because you will be testing len +1

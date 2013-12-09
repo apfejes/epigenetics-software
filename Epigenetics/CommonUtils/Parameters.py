@@ -5,13 +5,15 @@ Created on 2013-03-13
 '''
 import os
 import sys
-import CommonUtils.Types as cu
+
 
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
 while ("CommonUtils" in _root_dir):
     _root_dir = os.path.dirname(_root_dir)
+
+import Types as cu
 
 class parameter(object):
     '''

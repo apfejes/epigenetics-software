@@ -145,7 +145,7 @@ def run(mongo, output, db):
     user_input = raw_input("enter the number(s). If using more than one, separate by a comma: ")
     controls = []
     if "," in user_input:
-        t = [int(o) for o in user_input.split(",")]
+        t = [int(q) for q in user_input.split(",")]
         for y in t:
             if y > c:
                 print "one of your input numbers is too big. Quitting"
@@ -161,8 +161,6 @@ def run(mongo, output, db):
     print controls
 
     chromosomes = util.get_chromosome_names()
-    # #TODO: FOLLOWING FOR DEBUGGING ONLY!
-    # chromosomes = ["chr1", "chr2"]
 
     # id_s = map(util.get_sample_id_from_name, samples)
     # id_r = map(util.get_sample_id_from_name, controls)
@@ -529,9 +527,9 @@ if __name__ == '__main__':
     parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
     parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
     args = parser.parse_args()
-    p = Parameters.parameter(args.dbconfig)
+    param = Parameters.parameter(args.dbconfig)
     if args.dbname:
-        p.set("default_database", args.dbname)
-    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
-    run(mongo, args.output_path, p.get('default_database'))
+        param.set("default_database", args.dbname)
+    mongodb = Mongo_Connector.MongoConnector(param.get('server'), param.get('port'), param.get('default_database'))
+    run(mongodb, args.output_path, param.get('default_database'))
     print "Completed."

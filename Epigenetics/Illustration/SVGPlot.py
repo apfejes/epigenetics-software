@@ -11,6 +11,7 @@ from svgwrite.path import Path
 from math import fabs
 import Color_Palette
 from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, smallfont, legend_color
+import string    # IGNORE:W0402 - string is deprecated, but str does not have a printable set.
 
 class Plot(object):
     '''
@@ -46,7 +47,9 @@ class Plot(object):
         self.dimension_x = 0
         self.scale_x = 0
 
-
+        self.scale_y = 0
+        self.maxh = 0
+        self.plot = None
 
 
     def set_properties(self, filename, title, start, end, width, height):
@@ -85,7 +88,7 @@ class Plot(object):
         return self.palette.get_type_colors()
 
 
-    def make_gausian(self, pos, height, stddev, sample_id, horizontal = True, y_median = 0, sigmas = 3):
+    def make_gausian(self, pos, height, stddev, horizontal = True, y_median = 0, sigmas = 3):
         ''' path points will be at (-3stddev,0), (0,height), (3stddev,0)
             Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
          '''
@@ -95,8 +98,8 @@ class Plot(object):
         if horizontal == True:
             X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
             # Scale Y and inverse the coordinates
-            Y = [round(y * self.scale_y, 2) for y in Y]
-            Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
+            Y = [round(y1 * self.scale_y, 2) for y1 in Y]
+            Y = [(self.height - self.BOTTOM_MARGIN - y2) for y2 in Y]
         else:
             S = [round(((pos - self.start) * self.scale_x) + y + self.MARGIN + self.DISTR_SHIFT, 2) for y in Y]
             Y = [round(((x + y_median) * self.scale_y), 2) for x in X]
@@ -125,7 +128,7 @@ class Plot(object):
         self.scale_y = self.dimension_y / self.maxh
         print "scale_y: ", self.scale_y
         for (pos, height, stddev, sample_id) in waves:
-            d = self.make_gausian(pos, height, stddev, sample_id)
+            d = self.make_gausian(pos, height, stddev)
             if first:
                 # print "palette.sample_color: ", self.palette.samples_color
                 first = False
@@ -136,7 +139,7 @@ class Plot(object):
             self.elements.append(Path(stroke = types_color, stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
                            fill = types_color, fill_opacity = 0.5, d = d,
-                        onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" % (''.join(s for s in sample_id if s in str.printable))))
+                        onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" % (''.join(s for s in sample_id if s in string.printable))))
 
         # fix to truncate curves at border (to hide them)
         self.elements.append(Rect(insert = (-1, 0), size = (self.MARGIN + 1, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
@@ -190,7 +193,7 @@ class Plot(object):
                     s = round(s * self.dimension_y, 3)
 
                     if s != 0.0:
-                        d = self.make_gausian(position, self.METHYLATION_DISTR_HT, s, sample_id, False, m)
+                        d = self.make_gausian(position, self.METHYLATION_DISTR_HT, s, False, m)
                         gaussian = (Path(stroke = type_color,
                                          stroke_width = self.DISTR_STROKE,
                                          stroke_linecap = 'round',
@@ -249,7 +252,7 @@ class Plot(object):
                 for tss in add_tss(annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
                     self.elements.insert(0, tss)
             if get_cpg:
-                for cpg in add_cpg(annotations, self.MARGIN, self.height, self.width, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
+                for cpg in add_cpg(annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
                     self.elements.insert(0, cpg)
 
     def add_xtics(self):
@@ -258,12 +261,10 @@ class Plot(object):
 
         while((scale_tics * 10) < self.end - self.start):
             scale_tics *= 10
-        # TODO: fix the line below.
         xtics = [i for i in range(self.start, self.end + 1) if i % (scale_tics) == 0]
         while len(xtics) < 4:
             scale_tics /= 2
-            # TODO: fix the line below.
-            xtics += [i for i in range(self.start, self.end + 1) if i % (scale_tics) == 0 and i not in xtics]
+            xtics += [j for j in range(self.start, self.end + 1) if j % (scale_tics) == 0 and j not in xtics]
         xtics.sort()
         spacing = fabs((self.MARGIN + (xtics[1] - self.start) * self.scale_x) - (self.MARGIN + (xtics[0] - self.start) * self.scale_x)) / 4
         for tic in xtics:

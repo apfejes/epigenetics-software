@@ -13,9 +13,9 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _cur_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
-import Mongo_Connector
 sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
-import CommonUtils.Parameters as Parameters
+import Parameters
+import Mongo_Connector
 
 arrayQuery = {'array_type': 'humanmethylation450_beadchip'}
 
