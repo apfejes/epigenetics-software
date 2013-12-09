@@ -47,7 +47,9 @@ class Plot(object):
         self.dimension_x = 0
         self.scale_x = 0
 
-
+        self.scale_y = 0
+        self.maxh = 0
+        self.plot = None
 
 
     def set_properties(self, filename, title, start, end, width, height):
@@ -86,7 +88,7 @@ class Plot(object):
         return self.palette.get_type_colors()
 
 
-    def make_gausian(self, pos, height, stddev, sample_id, horizontal = True, y_median = 0, sigmas = 3):
+    def make_gausian(self, pos, height, stddev, horizontal = True, y_median = 0, sigmas = 3):
         ''' path points will be at (-3stddev,0), (0,height), (3stddev,0)
             Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
          '''
@@ -96,8 +98,8 @@ class Plot(object):
         if horizontal == True:
             X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
             # Scale Y and inverse the coordinates
-            Y = [round(y * self.scale_y, 2) for y in Y]
-            Y = [(self.height - self.BOTTOM_MARGIN - y) for y in Y]
+            Y = [round(y1 * self.scale_y, 2) for y1 in Y]
+            Y = [(self.height - self.BOTTOM_MARGIN - y2) for y2 in Y]
         else:
             S = [round(((pos - self.start) * self.scale_x) + y + self.MARGIN + self.DISTR_SHIFT, 2) for y in Y]
             Y = [round(((x + y_median) * self.scale_y), 2) for x in X]
@@ -126,7 +128,7 @@ class Plot(object):
         self.scale_y = self.dimension_y / self.maxh
         print "scale_y: ", self.scale_y
         for (pos, height, stddev, sample_id) in waves:
-            d = self.make_gausian(pos, height, stddev, sample_id)
+            d = self.make_gausian(pos, height, stddev)
             if first:
                 # print "palette.sample_color: ", self.palette.samples_color
                 first = False
@@ -191,7 +193,7 @@ class Plot(object):
                     s = round(s * self.dimension_y, 3)
 
                     if s != 0.0:
-                        d = self.make_gausian(position, self.METHYLATION_DISTR_HT, s, sample_id, False, m)
+                        d = self.make_gausian(position, self.METHYLATION_DISTR_HT, s, False, m)
                         gaussian = (Path(stroke = type_color,
                                          stroke_width = self.DISTR_STROKE,
                                          stroke_linecap = 'round',
