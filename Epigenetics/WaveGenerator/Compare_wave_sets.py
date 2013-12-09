@@ -532,6 +532,6 @@ if __name__ == '__main__':
     p = Parameters.parameter(args.dbconfig)
     if args.dbname:
         p.set("default_database", args.dbname)
-    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
-    run(mongo, args.output_path, p.get('default_database'))
+    mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
+    run(mongodb, args.output_path, p.get('default_database'))
     print "Completed."
