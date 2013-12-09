@@ -145,7 +145,7 @@ def run(mongo, output, db):
     user_input = raw_input("enter the number(s). If using more than one, separate by a comma: ")
     controls = []
     if "," in user_input:
-        t = [int(o) for o in user_input.split(",")]
+        t = [int(q) for q in user_input.split(",")]
         for y in t:
             if y > c:
                 print "one of your input numbers is too big. Quitting"
