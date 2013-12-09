@@ -221,6 +221,11 @@ def main(PARAM):
     procs = []
 
 
+    # test if file exists before going any further.
+    if not os.path.isfile(PARAM.get("input_file")):
+        print "Please check the input file path - Unable to find file: %s" % PARAM.get("input_file")
+        sys.exit()
+
     try:
         wave_queue = multiprocessing.Queue()
         print_queue = multiprocessing.Queue()
@@ -235,7 +240,6 @@ def main(PARAM):
         print_thread = PrintThread.StringWriter(print_queue, PARAM.get("output_path"), PARAM.get("file_name") + "_wavegenerator.txt", False, True)
         print_queue.put("Print queue and thread have started")
 
-
         if PARAM.get("input_file").endswith('wig'):
             PARAM.set('type', "WIG")
             if PARAM.get("make_wig"):
@@ -247,10 +251,6 @@ def main(PARAM):
         else:
             print_queue.put("Unrecognized file format extension for file: "
                          % (PARAM.get("input_file")))
-
-        # TODO: test if file exists.
-
-
 
         if PARAM.get("make_wig"):    # processor threads
             wigfile = WigFileThread.WigFileWriter(None)
