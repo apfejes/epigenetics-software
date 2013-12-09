@@ -161,8 +161,6 @@ def run(mongo, output, db):
     print controls
 
     chromosomes = util.get_chromosome_names()
-    # #TODO: FOLLOWING FOR DEBUGGING ONLY!
-    # chromosomes = ["chr1", "chr2"]
 
     # id_s = map(util.get_sample_id_from_name, samples)
     # id_r = map(util.get_sample_id_from_name, controls)
