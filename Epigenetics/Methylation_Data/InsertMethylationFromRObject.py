@@ -15,6 +15,7 @@ _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current fi
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
 import Mongo_Connector
 import CommonUtils.Types as ty
 import CommonUtils.Parameters as Parameters
