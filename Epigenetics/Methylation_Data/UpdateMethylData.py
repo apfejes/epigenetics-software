@@ -51,12 +51,12 @@ def AddAnnotations(collection, annotation, Query):
             print count, time.time() - starttime, 'seconds'
 
 
-def AddProjectInfo(mongo, collection, Query, project):
+def AddProjectInfo(mongodb, collection, Query, project):
     '''function that adds project information to a sample'''
 
     print('Adding project info...')
     projDict = {'$set': {'project': project}}
-    mongo.update(collection, Query, projDict)
+    mongodb.update(collection, Query, projDict)
 
 
 if __name__ == "__main__":
