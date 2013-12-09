@@ -11,6 +11,7 @@ from svgwrite.path import Path
 from math import fabs
 import Color_Palette
 from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, smallfont, legend_color
+import string    # IGNORE:W0402 - string is deprecated, but str does not have a printable set.
 
 class Plot(object):
     '''
@@ -136,7 +137,7 @@ class Plot(object):
             self.elements.append(Path(stroke = types_color, stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
                            fill = types_color, fill_opacity = 0.5, d = d,
-                        onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" % (''.join(s for s in sample_id if s in str.printable))))
+                        onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" % (''.join(s for s in sample_id if s in string.printable))))
 
         # fix to truncate curves at border (to hide them)
         self.elements.append(Rect(insert = (-1, 0), size = (self.MARGIN + 1, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
@@ -249,7 +250,7 @@ class Plot(object):
                 for tss in add_tss(annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
                     self.elements.insert(0, tss)
             if get_cpg:
-                for cpg in add_cpg(annotations, self.MARGIN, self.height, self.width, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN, self.RIGHT_MARGIN):
+                for cpg in add_cpg(annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
                     self.elements.insert(0, cpg)
 
     def add_xtics(self):
@@ -258,12 +259,10 @@ class Plot(object):
 
         while((scale_tics * 10) < self.end - self.start):
             scale_tics *= 10
-        # TODO: fix the line below.
         xtics = [i for i in range(self.start, self.end + 1) if i % (scale_tics) == 0]
         while len(xtics) < 4:
             scale_tics /= 2
-            # TODO: fix the line below.
-            xtics += [i for i in range(self.start, self.end + 1) if i % (scale_tics) == 0 and i not in xtics]
+            xtics += [j for j in range(self.start, self.end + 1) if j % (scale_tics) == 0 and j not in xtics]
         xtics.sort()
         spacing = fabs((self.MARGIN + (xtics[1] - self.start) * self.scale_x) - (self.MARGIN + (xtics[0] - self.start) * self.scale_x)) / 4
         for tic in xtics:
