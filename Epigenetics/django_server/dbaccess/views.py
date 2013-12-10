@@ -133,7 +133,7 @@ def process_request(request):
         if 'Right' in action_factor or 'Left' in action_factor:
             start, end = panning(action_factor, int(start), int(end))
         elif 'In' in action_factor or 'Out' in action_factor:
-                start, end = zoom(action_factor, int(start), int(end))
+            start, end = zoom(action_factor, int(start), int(end))
 
     if end < start + 20:    # last chance to catch if you've zoomed in too far.
         end = start + 20
@@ -249,11 +249,8 @@ def view_query_form(request):
                            (str.capitalize(parameters['organism']),
                                parameters['chromosome'],
                                parameters['start'], parameters['end']),
-                           color = 'indigo',
                            height = parameters['height'],
                            width = parameters['width'],
-                           get_minheight = parameters['minheight'],
-                           get_minsigma = parameters['minsigma'],
                            get_tss = parameters['tss'],
                            get_cpg = parameters['cpg'],
                            show_points = parameters['datapoints'],
@@ -272,11 +269,8 @@ def view_query_form(request):
                             (str.capitalize(parameters['organism']),
                                parameters['chromosome'],
                                parameters['start'], parameters['end']),
-                            color = 'indigo',
                             height = parameters['height'],
                             width = parameters['width'],
-                            get_minheight = parameters['minheight'],
-                            get_minsigma = parameters['minsigma'],
                             get_tss = parameters['tss'],
                             get_cpg = parameters['cpg'],
                             types_index = parameters['types_index'],
@@ -292,11 +286,8 @@ def view_query_form(request):
                             (str.capitalize(parameters['organism']),
                                parameters['chromosome'],
                                parameters['start'], parameters['end']),
-                            color = 'indigo',
                             height = parameters['height'],
                             width = parameters['width'],
-                            get_minheight = parameters['minheight'],
-                            get_minsigma = parameters['minsigma'],
                             get_tss = parameters['tss'],
                             get_cpg = parameters['cpg'],
                             sample_index = parameters['sample_index'],

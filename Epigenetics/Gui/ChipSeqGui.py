@@ -12,6 +12,7 @@ import tkFileDialog
 import os
 import sys
 
+
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
@@ -19,7 +20,7 @@ sys.path.insert(0, _root_dir + os.sep + "WaveGenerator")    # add the utilities 
 sys.path.insert(0, _cur_dir + os.sep + "WaveGenerator" + os.sep + "Utilities")
 
 from TheWaveGenerator import main as wg_main
-from CommonUtils.Parameters import parameter
+from CommonUtils import Parameters
 from . import ParametersEditor
 
 class Application(tk.Tk):
@@ -29,7 +30,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
         self.title("Epigenetics Analysis Suite")
         self.createWidgets()
-        self.parameters = parameter(_root_dir + os.sep + '/WaveGenerator/sample_input_chipseq.input')
+        self.parameters = Parameters.parameter(_root_dir + os.sep + '/WaveGenerator/sample_input_chipseq.input')
 
     def createWidgets(self):
         '''Generate the widgets on the form'''

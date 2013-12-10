@@ -74,13 +74,13 @@ def put_assigned(map_queues, item, max_threads):
 
 def create_param_obj(param_file):
     '''check if file exists, and then create a parameter object for the file.'''
-    p = None
+    ps = None
     if os.path.exists(param_file):
-        p = Parameters.parameter(param_file)
+        ps = Parameters.parameter(param_file)
     else:
         print "Could not find input parameter file"
         sys.exit()
-    return p
+    return ps
 
 def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_processes):
     '''Process reads from BAM or SAM sources.  Apply extensions and calculate maps.'''
@@ -267,15 +267,15 @@ def main(PARAM):
             mapprocessor = MapDecomposingThread.MapDecomposer(PARAM,
                                         wave_queue, print_queue, queue, x)
 
-            p = multiprocessing.Process(target = mapprocessor.run, args = (x,))
-            p.daemon = True
+            proc = multiprocessing.Process(target = mapprocessor.run, args = (x,))
+            proc.daemon = True
             try:
-                p.start()
+                proc.start()
             except KeyboardInterrupt:
-                p.terminate()
+                proc.terminate()
                 for queue in map_queues:
                     queue.empty()
-            procs.append(p)
+            procs.append(proc)
         print_queue.put("All Processor threads started successfully.")
         print_queue.put("Parameters provided:")
         for par in PARAM.parameters.keys():

@@ -80,5 +80,6 @@ if __name__ == "__main__":
     AddAnnotations(mongo, args.collection, args.annotation, annotQuery)
     print('Adding project name to all documents without the field, "project"...')
     AddProjectInfo(mongo, args.collection, projQuery, project_name)
+    mongo.close()
 
 

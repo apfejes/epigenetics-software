@@ -32,26 +32,17 @@ class Svg_Builder():
             sample_index = None,
             filename = None,
             title = None,
-            color = None,
             to_string = False,
             get_elements = False,
             height = 200.0,
             width = 60.0,
-            get_minheight = False,
-            get_minsigma = False,
             get_tss = False,
             get_cpg = False,
             show_points = False,
             show_dist = False):
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
-            Saves the plot as an .svg file or a svg string for webserver rendering
+            Saves the plot as an SVG string for webserver rendering
         '''
-
-        # TODO: Set up mechanism for writing out to file
-#         if filename:
-#             if filename[-4:len(filename)] != '.svg':
-#                 filename += '.svg'
-#             filename = directory_for_svgs + filename
 
         self.drawing = SVGPlot.Plot()
         self.drawing.set_properties(filename, title, self.start, self.end, width, height)

@@ -42,7 +42,6 @@ def importObjectsFromJSON(mongo, filename, proj, collection):
             to_insert = []
         count += 1
     if len(to_insert) > 0:
-        pass
         mongo.insert(collection, to_insert)
     f.close()
 
@@ -61,4 +60,5 @@ if __name__ == "__main__":
     project_name = raw_input('Enter the name of the project to insert in the ' + collection + ' collection of the ' + p.get('default_database') + ' database: ')
     mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     importObjectsFromJSON(mongo, args.jsonfile, project_name, p.get('default_database'), collection)
+    mongo.close()
     print('Done in %s seconds') % int((time.time() - starttime))

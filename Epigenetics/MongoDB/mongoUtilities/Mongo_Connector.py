@@ -23,7 +23,7 @@ class MongoConnector():
         try:
             self.mongo = MongoClient(machine, port)
             self.db = self.mongo[database_name]    # Create a collection for inserting documents, user input.
-        except Exception, e:    # pylint: disable=W0703
+        except Exception, e:    # pylint: disable-msg=W0703
             print e
             sys.exit("Failure to connect to database")
 

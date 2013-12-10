@@ -49,3 +49,4 @@ if __name__ == '__main__':
         print "%s waves removed from %s" % (removed['n'], w)
     removed = mongo.remove("samples", {"file_name":args.samplename}, True)
     print "samples removed = %s" % (removed['n'])
+    mongo.close()

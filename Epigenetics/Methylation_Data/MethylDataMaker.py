@@ -70,5 +70,5 @@ def InsertMethylData(parameters, coll_name, data):
     print("Updating indexes in background...")
     mongo.ensure_index(collection, 'probe_id', {'background':True})
     print('\nDone in %i seconds' % (time.time() - t0))
-
+    mongo.close()
     return None

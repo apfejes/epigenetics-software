@@ -164,10 +164,10 @@ if __name__ == "__main__":
     p = Parameters.parameter(args.dbconfig)
     if args.dbname:
         p.set("default_database", args.dbname)
-    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
+    mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     starttime = time.time()
     collection = "methylation"
     project_name = raw_input('Enter the name of the project to insert in the ' + collection + ' collection of the ' + p.get('default_database') + ' database: ')
-    ReadRObject(mongo, args.rfile, project_name, collection)
-    mongo.close()
+    ReadRObject(mongodb, args.rfile, project_name, collection)
+    mongodb.close()
     print('Done in %s seconds') % int((time.time() - starttime))

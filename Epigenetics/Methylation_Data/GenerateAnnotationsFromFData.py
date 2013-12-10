@@ -85,7 +85,8 @@ if __name__ == "__main__":
     if args.dbname:
         p.set("default_database", args.dbname)
 
-    mongo = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
+    mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     starttime = time.time()
-    ReadRObject(mongo, args.rfile)
+    ReadRObject(mongodb, args.rfile)
+    mongodb.close()
     print('Done in %s seconds') % int((time.time() - starttime))

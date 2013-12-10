@@ -535,4 +535,5 @@ if __name__ == '__main__':
         param.set("default_database", args.dbname)
     mongodb = Mongo_Connector.MongoConnector(param.get('server'), param.get('port'), param.get('default_database'))
     run(mongodb, args.output_path, param.get('default_database'))
+    mongodb.close()
     print "Completed."

@@ -35,5 +35,6 @@ if __name__ == '__main__':
     sample_update = {}
     sample_update["hide"] = args.hide
     mongo.update("samples", {"file_name":args.project}, {"$set": sample_update})
+    mongo.close()
 
 

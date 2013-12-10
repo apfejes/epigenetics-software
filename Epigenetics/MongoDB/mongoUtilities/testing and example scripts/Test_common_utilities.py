@@ -17,7 +17,9 @@ class Test(unittest.TestCase):
         util = common_utilities.MongoUtilities(mongo)
         results = util.get_chip_seq_sample_names()
         print results
+        mongo.close()
         self.assertIsNotNone(results, "No results returned from test_get_chip_seq_samples")
+
 
 
 if __name__ == "__main__":

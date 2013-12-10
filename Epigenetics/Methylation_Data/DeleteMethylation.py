@@ -35,3 +35,4 @@ if __name__ == '__main__':
     print "data points removed = %s" % (removed['n'])
     removed = mongo.remove("samples", {"project":args.project}, True)
     print "samples removed = %s" % (removed['n'])
+    mongo.close()

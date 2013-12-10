@@ -40,3 +40,5 @@ mongo.update('methylation', queryDict, updateDict, True)
 print "Done updating in ", (time() - t0)
 
 mongo.ensure_index('methylation', 'project')
+
+mongo.close()
