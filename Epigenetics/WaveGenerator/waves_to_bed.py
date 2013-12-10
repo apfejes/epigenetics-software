@@ -42,8 +42,8 @@ def convert_waves_to_bed(wavesfile, output, autothresh):
             wave = {}
             wave["chr"] = "chr" + a[0].replace("chr", "").upper()
             wave["pos"] = int(a[1])
-            wave["stddev"] = int(a[2])
-            wave["height"] = float(a[3])
+            wave["height"] = float(a[2])
+            wave["stddev"] = int(a[3])
             wave["used"] = False
             waves.append(wave)
     f.close()
