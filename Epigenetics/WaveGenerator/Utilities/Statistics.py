@@ -34,7 +34,7 @@ class Kolmogorov_Smirnov(object):
 
         if start >= end:
             # return (0.0, 0.0)
-            return 0.0
+            return 1.0
 
         if m1 > m2:
             m1 = m1 - m2
