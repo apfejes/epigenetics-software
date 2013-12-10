@@ -57,10 +57,10 @@ class Kolmogorov_Smirnov(object):
 
         if s1 == s2:
             x = (m1 + m2) / 2
-        elif s1 > s2:
-            x = ((a2 * m2) + sqrt(term) - (b2 * m1)) / (a2 - b2)
-        elif s2 > s1:
-            x = ((a2 * m2) - sqrt(term) - (b2 * m1)) / (a2 - b2)
+        elif s1 < s2:
+            x = (a2 * m2 + sqrt(term) - b2 * m1) / (a2 - b2)
+        elif s2 < s1:
+            x = (a2 * m2 - sqrt(term) - b2 * m1) / (a2 - b2)
         # Return the max distance
         # THIS RETURNS SMALL VALUES FOR DIFFERENT DISTRIBUTION, HIGH FOR SIMILAR
         return fabs(phi((x - m1) / s1) - phi((x - m2) / s2))

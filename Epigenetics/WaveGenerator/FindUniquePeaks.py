@@ -183,7 +183,7 @@ def run(mongo, output, db):
                     if best is None:
                         best = w
                         none_found = False
-                    elif pvalue > best.p:
+                    elif pvalue < best.p:
                         best = w
                         none_found = False
                 jt -= 1
@@ -197,7 +197,7 @@ def run(mongo, output, db):
                     if best is None:
                         best = w
                         none_found = False
-                    elif pvalue > best.p:
+                    elif pvalue < best.p:
                         best = w
                         none_found = False
                 j += 1
