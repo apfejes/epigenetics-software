@@ -1,6 +1,9 @@
 '''
 Created on 2013-12-09
--
+- This script will find peaks that are unique to the chosen sample.
+- First it pairs peaks, and using paired peaks, normalizes peak heights.
+- It then uses unique peaks in the control to determine the character of the noise.
+- Using this information, it removes noise from the unique sample peaks, and returns the unique peaks.
 @author: sbrown
 '''
 
@@ -92,7 +95,7 @@ class WavePair():
 def run(mongo, output, db):
     '''Main module to run the compare'''
 
-    DEBUG_PRINT = False
+    DEBUG_PRINT = True
 
     # build mongo connection
     print "opening connection(s) to MongoDB..."
@@ -171,25 +174,30 @@ def run(mongo, output, db):
             best = None
             while jt >= 0 and (waves2[jt]['pos'] + 4 * waves2[jt]['stddev']) > (pos_i - 4 * sdv_i) :
                 # print "jt - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[jt]['pos'], waves2[jt]['stddev']
+                # stats.ks_test returns large number for similar distribution
                 pvalue = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
-                if (pvalue != 0):
+                if chromosome == "chr1" and pos_i == 951453:
+                    print "sample peak %s paired with %s has p-value %s" % (pos_i, waves2[jt]['pos'], pvalue)
+                if (pvalue != 0.0):
                     w = WavePair(chromosome, i, jt, pvalue, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
                     if best is None:
                         best = w
                         none_found = False
-                    elif pvalue < best.p:
+                    elif pvalue > best.p:
                         best = w
                         none_found = False
                 jt -= 1
             while j < max_j and (waves2[j]['pos'] - 4 * waves2[j]['stddev']) < (pos_i + 4 * sdv_i):
                 # print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
                 pvalue = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
-                if (pvalue != 0):
+                if chromosome == "chr1" and pos_i == 951453:
+                    print "sample peak %s paired with %s has p-value %s" % (pos_i, waves2[j]['pos'], pvalue)
+                if (pvalue != 0.0):
                     w = WavePair(chromosome, i, j, pvalue, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
                     if best is None:
                         best = w
                         none_found = False
-                    elif pvalue < best.p:
+                    elif pvalue > best.p:
                         best = w
                         none_found = False
                 j += 1
@@ -218,13 +226,13 @@ def run(mongo, output, db):
             while it >= 0 and (waves1[it]['pos'] + 4 * waves1[it]['stddev']) > (pos_j - 4 * sdv_j) :
                 # print "checking %s, %s" % (it, j)
                 pvalue = stats.ks_test(pos_j, sdv_j, waves1[it]['pos'], waves1[it]['stddev'])
-                if (pvalue != 0):
+                if (pvalue != 0.0):
                     none_found = False
                 it -= 1
             while i < max_i and (waves1[i]['pos'] - 4 * waves1[i]['stddev']) < (pos_j + 4 * sdv_j):
                 # print "checking %s, %s" % (i, j)
                 pvalue = stats.ks_test(pos_j, sdv_j, waves1[i]['pos'], waves1[i]['stddev'])
-                if (pvalue != 0):
+                if (pvalue != 0.0):
                     none_found = False
                 i += 1
 
@@ -353,7 +361,7 @@ def run(mongo, output, db):
     print_thread = PrintThread.StringWriter(print_queue, output, "paired_waves.txt", True, True)
 
     for i in all_paired:
-        print_queue.put("%s\t%s\t%s\t%s" % (i.ht1, i.ht2, i.stddev1, i.stddev2))
+        print_queue.put("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (i.chromosome, i.pos1, i.pos2, i.ht1, i.ht2, i.stddev1, i.stddev2, i.p))
 
     if print_thread is None or not print_thread.is_alive():
         pass
@@ -419,7 +427,7 @@ def run(mongo, output, db):
         print_thread.END_PROCESSES = True
         print_thread.f.close()
 
-print "Done."
+    print "Done."
 
 
 def f(B, x):
