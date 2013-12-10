@@ -34,7 +34,7 @@ class Kolmogorov_Smirnov(object):
 
         if start >= end:
             # return (0.0, 0.0)
-            return 1.0
+            return 0.0
 
         if m1 > m2:
             m1 = m1 - m2
@@ -63,8 +63,8 @@ class Kolmogorov_Smirnov(object):
         elif s2 > s1:
             x = (a2 * m2 - sqrt(term) - b2 * m1) / (a2 - b2)
         # Return the max distance
+        # THIS RETURNS SMALL VALUES FOR DIFFERENT DISTRIBUTION, HIGH FOR SIMILAR
         return fabs(phi((x - m1) / s1) - phi((x - m2) / s2))
-
 
 
     def __init__(self, params):
