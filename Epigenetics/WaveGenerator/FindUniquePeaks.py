@@ -177,7 +177,7 @@ def run(mongo, output, db):
                 # stats.ks_test returns large number for similar distribution
                 pvalue = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
                 if chromosome == "chr1" and pos_i == 951453:
-                    print "sample peak %s paired with %s has p-value %s" % (pos_i, waves2[jt]['pos'], pvalue)
+                    print "sample peak %s (%s, %s) paired with %s (%s, %s) has p-value %s" % (pos_i, ht_i, sdv_i, waves2[jt]['pos'], waves2[jt]['height'], waves2[jt]['stddev'], pvalue)
                 if (pvalue != 0.0):
                     w = WavePair(chromosome, i, jt, pvalue, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
                     if best is None:
@@ -191,7 +191,7 @@ def run(mongo, output, db):
                 # print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
                 pvalue = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
                 if chromosome == "chr1" and pos_i == 951453:
-                    print "sample peak %s paired with %s has p-value %s" % (pos_i, waves2[j]['pos'], pvalue)
+                    print "sample peak %s (%s, %s) paired with %s (%s, %s) has p-value %s" % (pos_i, ht_i, sdv_i, waves2[j]['pos'], waves2[j]['height'], waves2[j]['stddev'], pvalue)
                 if (pvalue != 0.0):
                     w = WavePair(chromosome, i, j, pvalue, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
                     if best is None:
