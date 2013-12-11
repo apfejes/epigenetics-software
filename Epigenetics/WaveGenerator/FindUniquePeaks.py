@@ -13,7 +13,7 @@ import os
 import multiprocessing
 import time
 import scipy.odr as odr
-from scipy import stats as scipystats
+# from scipy import stats as scipystats
 import argparse
 
 # from bson.objectid import ObjectId
