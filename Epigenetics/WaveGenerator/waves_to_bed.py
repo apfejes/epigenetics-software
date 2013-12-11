@@ -2,6 +2,9 @@
 Created on 2013-11-22
 
 @author: sbrown
+
+Converts .waves file to a .bed file for viewing in UCSC. Assigns a score to each wave based on relative height.
+
 '''
 
 import sys

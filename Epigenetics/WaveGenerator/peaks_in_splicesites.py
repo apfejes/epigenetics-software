@@ -2,6 +2,10 @@
 Created on 2013-12-04
 
 @author: sbrown
+
+This gives localization information regarding peaks in spliced genes.
+Requires a list of spliced genes (KORE: /home/sbrown/Bre1_splicing/SplicedGenes.csv), and a .waves file.
+
 '''
 
 import sys

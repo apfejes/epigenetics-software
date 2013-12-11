@@ -2,6 +2,9 @@
 Created on Oct 18, 2013
 
 @author: sbrown
+
+This allows sample information to be uploaded into the database, designed for yeast ChIP-chip data, although it can be tailored to other sample types.
+
 '''
 
 import sys

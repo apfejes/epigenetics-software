@@ -3,7 +3,7 @@ Created on 2013-12-09
 - This script will find peaks that are unique to the chosen sample.
 - First it pairs peaks, and using paired peaks, normalizes peak heights.
 - It then uses unique peaks in the control to determine the character of the noise.
-- Using this information, it removes noise from the unique sample peaks, and returns the unique peaks.
+- Using this information, it removes noise from the unique sample peaks, and returns the unique peaks in the sample.
 @author: sbrown
 '''
 

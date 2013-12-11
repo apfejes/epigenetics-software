@@ -2,6 +2,9 @@
 Created on 2013-11-22
 
 @author: sbrown
+
+Given a list of genes and a .waves, this will summarize the number of peaks found in promoter regions.
+
 '''
 
 import sys
@@ -50,6 +53,7 @@ def find_waves_in_promoter(orffile, wavesfile, output, autothresh, heisig):
             waves.append(wave)
     f.close()
 
+    # automatically determine noise
     if(autothresh):
         if(heisig):
             # print "\nNow determining background levels for height of peaks"
