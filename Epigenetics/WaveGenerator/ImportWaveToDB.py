@@ -171,7 +171,7 @@ if __name__ == '__main__':
     parser.add_argument("-hide", help = "if this flag is provided, then the hide flag is set to true, otherwise, it is set to false.", action = "store_true")
     parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
     parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
-    parser.add_argument("-test", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", action = "store_true")
+    parser.add_argument("-test", help = "if this flag is provided, then the test flag is set to true (no metadata required to view in db), otherwise, it is set to false.", action = "store_true")
     args = parser.parse_args()
 
     p = Parameters.parameter(args.dbconfig)
