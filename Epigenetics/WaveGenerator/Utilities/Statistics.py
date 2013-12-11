@@ -57,12 +57,15 @@ class Kolmogorov_Smirnov(object):
 
         if s1 == s2:
             x = (m1 + m2) / 2.0
-        elif s1 < s2:
-            x = (a2 * m2 + sqrt(term) - b2 * m1) / (a2 - b2)
-        elif s2 < s1:
-            x = (a2 * m2 - sqrt(term) - b2 * m1) / (a2 - b2)
+            return fabs(phi((x - m1) / s1) - phi((x - m2) / s2))
+        x1 = (a2 * m2 + sqrt(term) - b2 * m1) / (a2 - b2)
+        a1 = fabs(phi((x1 - m1) / s1) - phi((x1 - m2) / s2))
+        x2 = (a2 * m2 - sqrt(term) - b2 * m1) / (a2 - b2)
+        a2 = fabs(phi((x2 - m1) / s1) - phi((x2 - m2) / s2))
         # Return the max distance
-        return fabs(phi((x - m1) / s1) - phi((x - m2) / s2))
+
+
+        return max(a1, a2)
 
 
     def __init__(self, params):
