@@ -178,11 +178,11 @@ def view_query_form(request):
     for o in organism_list:
         proj_list = mongo[o + "_epigenetics"]['samples'].distinct("project")
         proj_list.sort()
-        op_list = [str(x) for x in proj_list]
+        op_list = [str(y) for y in proj_list]
         methylation_list[o] = op_list
         chip_list = mongo[o + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False}).distinct('sample_id')
         chip_list.sort()
-        cs_list = [x.encode('utf-8') for x in chip_list]
+        cs_list = [z.encode('utf-8') for z in chip_list]
         chipseq_list[o] = cs_list
 
         gb = CreateListFromCursor(mongo[o + "_epigenetics"]['sample_groups'].find())
@@ -190,7 +190,7 @@ def view_query_form(request):
         for x in gb:
             a = x['available']
             if len(a) > 1:
-                a = [y.encode('utf-8') for y in x['available']]
+                a = [b.encode('utf-8') for b in x['available']]
             else:
                 a = x['available'][0].encode('utf-8')
             byproj[x['project'].encode('utf-8')] = {'default':x['default'].encode('utf-8'), 'available':a}
