@@ -275,7 +275,7 @@ class MongoEpigeneticsWrapper():
         return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
 
     def finddocs_samples_methylation(self, project = None, sample_label = None,
-                 sample_group = None, chip = None):
+                 sample_group = None):
 
         '''Finds documents corresponding to collection and type of query'''
 
