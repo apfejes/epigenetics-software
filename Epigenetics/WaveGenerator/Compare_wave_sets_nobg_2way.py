@@ -4,7 +4,6 @@ Created on 2013-04-15
 @author: afejes, sbrown
 '''
 
-
 import sys
 import os
 import multiprocessing

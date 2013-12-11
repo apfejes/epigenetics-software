@@ -4,6 +4,9 @@ Created on 2013-04-15
 @author: afejes, sbrown
 '''
 
+'''THIS IS OLD VERSION, USE Compare_wave_sets_nobg_2way.py'''
+
+
 
 import sys
 import os
