@@ -176,9 +176,9 @@ def run(mongo, output, db):
                 # print "jt - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[jt]['pos'], waves2[jt]['stddev']
                 # stats.ks_test returns large number for similar distribution
                 pvalue = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
-                if chromosome == "chr1" and pos_i == 951453:
+                if chromosome == "chr1" and pos_i == 951654:
                     print "sample peak %s (%s, %s) paired with %s (%s, %s) has p-value %s" % (pos_i, ht_i, sdv_i, waves2[jt]['pos'], waves2[jt]['height'], waves2[jt]['stddev'], pvalue)
-                if (pvalue != 0.0):
+                if (pvalue != 1.0):
                     w = WavePair(chromosome, i, jt, pvalue, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
                     if best is None:
                         best = w
@@ -190,9 +190,9 @@ def run(mongo, output, db):
             while j < max_j and (waves2[j]['pos'] - 4 * waves2[j]['stddev']) < (pos_i + 4 * sdv_i):
                 # print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
                 pvalue = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
-                if chromosome == "chr1" and pos_i == 951453:
+                if chromosome == "chr1" and pos_i == 951654:
                     print "sample peak %s (%s, %s) paired with %s (%s, %s) has p-value %s" % (pos_i, ht_i, sdv_i, waves2[j]['pos'], waves2[j]['height'], waves2[j]['stddev'], pvalue)
-                if (pvalue != 0.0):
+                if (pvalue != 1.0):
                     w = WavePair(chromosome, i, j, pvalue, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
                     if best is None:
                         best = w
@@ -226,13 +226,13 @@ def run(mongo, output, db):
             while it >= 0 and (waves1[it]['pos'] + 4 * waves1[it]['stddev']) > (pos_j - 4 * sdv_j) :
                 # print "checking %s, %s" % (it, j)
                 pvalue = stats.ks_test(pos_j, sdv_j, waves1[it]['pos'], waves1[it]['stddev'])
-                if (pvalue != 0.0):
+                if (pvalue != 1.0):
                     none_found = False
                 it -= 1
             while i < max_i and (waves1[i]['pos'] - 4 * waves1[i]['stddev']) < (pos_j + 4 * sdv_j):
                 # print "checking %s, %s" % (i, j)
                 pvalue = stats.ks_test(pos_j, sdv_j, waves1[i]['pos'], waves1[i]['stddev'])
-                if (pvalue != 0.0):
+                if (pvalue != 1.0):
                     none_found = False
                 i += 1
 
@@ -272,6 +272,7 @@ def run(mongo, output, db):
     slr = scipystats.linregress(x, y)
     slope = slr[0]
     intercept = slr[1]
+    print "Calculating line going through KS_test p-value histogram:"
     print "slope: %s and intercept: %s" % (slope, intercept)
     ans = -1    # bin that has FDR <= user FDR
     found_thresh = False
@@ -293,10 +294,15 @@ def run(mongo, output, db):
             found_thresh = True
             # print "Answer is ", ans
 
-        # update ks_FDR value for all peaks in this bin
-        for k in all_paired:
-            if k.b == i:    # if peak in this bin
-                k.set_k(fdr[i])    # set the ks_fdr to this value
+    # update ks_FDR value for all peaks
+    for ap in all_paired:
+        ap.set_k(fdr[ap.b])    # set the ks_fdr to the FDR value for that bin
+        # unpair non-significant pairings
+        if ap.k > user_ks_fdr:
+            sw = WavePair(ap.chromosome, ap.i, -1, -1, ap.pos1, -1, ap.stddev1, -1, ap.ht1, 0)
+            sample_unpaired.append(sw)
+            cw = WavePair(ap.chromosome, -1, ap.j, -1, -1, ap.pos2, -1, ap.stddev2, 0, ap.ht2)
+            control_unpaired.append(cw)
 
     print "KS-means p-value threshold is: %s and FDR is: %s" % (thresh[ans], fdr[ans])
     print "number of peaks that meet this threshold: ", numpeaks
@@ -312,12 +318,13 @@ def run(mongo, output, db):
     print_thread = PrintThread.StringWriter(print_queue, output, "paired_norm_waves.txt", True, True)
     for pairs in all_paired:
         if pairs.k <= user_ks_fdr:
-            ratio = float(pairs.ht1) / pairs.ht2
-            if ratio > (float(1) / 5) and ratio < 5 and pairs.ht1 < 500 and pairs.ht2 < 500:
+            # ratio = float(pairs.ht1) / pairs.ht2
+            # if ratio > (float(1) / 20) and ratio < 20:
+            if True:
                 x.append(pairs.ht1)
                 y.append(pairs.ht2)
                 if DEBUG_PRINT:
-                    print_queue.put("%s\t%s" % (pairs.ht1, pairs.ht2))
+                    print_queue.put("%s\t%s\t%s\t%s\t%s" % (pairs.chromosome, pairs.pos1, pairs.pos2, pairs.ht1, pairs.ht2))
     if print_thread is None or not print_thread.is_alive():
         pass
     else:
@@ -327,7 +334,7 @@ def run(mongo, output, db):
         print_thread.END_PROCESSES = True
         print_thread.f.close()
     # NORMALIZATION
-    print "Calculating normalization required for peaks."
+    print "\nCalculating normalization required for peaks."
     linear = odr.Model(f)
     mydata = odr.Data(x, y)
     myodr = odr.ODR(mydata, linear, [1])
@@ -352,6 +359,7 @@ def run(mongo, output, db):
     # when normalizing, transform control (control height / coeff)
     # ht2 = coeff*ht1
     # TODO: in future, may want to make this fancier.
+    print "Unique control peaks will be scaled by a factor of %s\n" % round(1.0 / coeff, 2)
     for i in control_unpaired:
         i.ht2 = round(float(i.ht2) / float(coeff), 2)
 
