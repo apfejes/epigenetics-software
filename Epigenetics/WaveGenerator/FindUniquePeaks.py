@@ -38,7 +38,7 @@ class WavePair():
     '''An object for holding a pair of waves simultaneously'''
     # i, j, p, pos1, pos2, stddev1, stddev2
 
-    def __init__(self, chromosome, i, j, p, pos1, pos2, stddev1, stddev2, height1, height2, ks_fdr = -1, bin_num = -1, fold_change = ""):
+    def __init__(self, chromosome, i, j, p, pos1, pos2, stddev1, stddev2, height1, height2, ks_fdr = -1, bin_num = -1, fold_change = "", hnoise = -1.0):
         '''set initial values of the two waves'''
         self.chromosome = chromosome
         self.i = i
@@ -53,6 +53,7 @@ class WavePair():
         self.k = ks_fdr
         self.b = bin_num
         self.fc = fold_change
+        self.hfdr = hnoise    # percent noise
 
     def get_ratio_max(self):
         '''use this for calculating the ratio of the two peaks.
@@ -86,6 +87,10 @@ class WavePair():
         '''update fold change for pair'''
         self.fc = value
 
+    def set_hfdr(self, value):
+        '''update height FDR for pair'''
+        self.hfdr = value
+
     @staticmethod
     def type():
         '''return Wavepair when asked'''
@@ -95,6 +100,7 @@ class WavePair():
 def run(mongo, output, db):
     '''Main module to run the compare'''
 
+    # To print all_paired, all_paired (used in normalization), sample_waves (after normalization), control_waves (after normalization)
     DEBUG_PRINT = True
 
     # build mongo connection
@@ -134,9 +140,10 @@ def run(mongo, output, db):
 
     # USER PARAMETERS
     print "\n"
-    user_ks_fdr = float(raw_input("What False Discovery Rate is acceptable for pairing peaks [0.00 - 1.00]: "))
+    # user_ks_fdr = float(raw_input("What False Discovery Rate is acceptable for pairing peaks [0.00 - 1.00]: "))
 
     chromosomes = util.get_chromosome_names()
+    # chromosomes = ["chr1"]    # FOR DEBUGGING
     id_s = [util.get_sample_id_from_name(s, db) for s in samples]
     id_r = [util.get_sample_id_from_name(c, db) for c in controls]
 
@@ -176,7 +183,7 @@ def run(mongo, output, db):
                 # print "jt - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[jt]['pos'], waves2[jt]['stddev']
                 # stats.ks_test returns large number for similar distribution
                 pvalue = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
-                if chromosome == "chr1" and pos_i == 951654:
+                if chromosome == "chr1" and pos_i == 951654 and False:
                     print "sample peak %s (%s, %s) paired with %s (%s, %s) has p-value %s" % (pos_i, ht_i, sdv_i, waves2[jt]['pos'], waves2[jt]['height'], waves2[jt]['stddev'], pvalue)
                 if (pvalue != 1.0):
                     w = WavePair(chromosome, i, jt, pvalue, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
@@ -190,7 +197,7 @@ def run(mongo, output, db):
             while j < max_j and (waves2[j]['pos'] - 4 * waves2[j]['stddev']) < (pos_i + 4 * sdv_i):
                 # print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
                 pvalue = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
-                if chromosome == "chr1" and pos_i == 951654:
+                if chromosome == "chr1" and pos_i == 951654 and False:
                     print "sample peak %s (%s, %s) paired with %s (%s, %s) has p-value %s" % (pos_i, ht_i, sdv_i, waves2[j]['pos'], waves2[j]['height'], waves2[j]['stddev'], pvalue)
                 if (pvalue != 1.0):
                     w = WavePair(chromosome, i, j, pvalue, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
@@ -243,71 +250,86 @@ def run(mongo, output, db):
             j += 1
 
 
-    # Now determine FDR for every peak that has a pair, carry on with pairs that meet user cutoff.
+    # Now determine FDR for PEAK PAIRING, carry on with pairs that meet user cutoff.
     # user_ks_fdr = 0.05
-    print "\nNow determining closest possible FDR to ", user_ks_fdr
-    bins = int(len(all_paired) * 0.05)    # bin size is 5% of total number of bins
-    print "number of bins: ", bins
-    counts = [0] * bins    # holds number of pairs in each bin
-    thresh = [0] * bins    # holds exclusive upperbound of bin
-    fdr = [1] * bins    # holds FDR for pairs in that bin
-    for i in range(0, bins):
-        thresh[i] = (i + 1) * 1.0 / bins    # since possible pvalue threshold from 0 to 1.
-        # print "thresh[%i]: %f" % (i, thresh[i])
-    for i in all_paired:
-        counts[int(i.p / (1.0 / bins))] += 1    # increment count where index is p-value/sizeOfBins
-        i.set_b(int(i.p / (1.0 / bins)))    # set bin number for pair
 
-    # have counts, now find line for noise ignoring first and last bin
-    bot = 1
-    top = bins - 1
-    print "bot: %i, top: %i" % (bot, top)
-    x = []
-    y = []
-    # print "counts used for line: "
-    for i in range(bot, top):
-        x.append(thresh[i])
-        y.append(counts[i])
-        # print thresh[i], counts[i]
-    slr = scipystats.linregress(x, y)
-    slope = slr[0]
-    intercept = slr[1]
-    print "Calculating line going through KS_test p-value histogram:"
-    print "slope: %s and intercept: %s" % (slope, intercept)
-    ans = -1    # bin that has FDR <= user FDR
-    found_thresh = False
-    numpeaks = 0    # number of peaks that meet that FDR
-    # calculate FDR for each bin
-    print "Calculating FDR for each pairing. This may take some time..."
-    false = 0    # number of expected noise peaks
-    total = 0    # total number of peaks encountered
-    for i in range(0, bins):
-        false += intercept    # add expected number of noise in each bin
-        total += counts[i]    # add number of peaks seen
-        fdr[i] = false / total
-        # print "FDR for bin %s is %s" % (i, fdr[i])
+    # TODO: Hardcoded 0.25 as threshold for ks_test p-value
+    # Anthony chose based on histogram of p-values
+    # Develop a more sophisticated FDR test (like what is commented out below)
+#     print "\nNow determining closest possible FDR to ", user_ks_fdr
+#     bins = int(len(all_paired) * 0.05)    # bin size is 5% of total number of bins
+#     print "number of bins: ", bins
+#     counts = [0] * bins    # holds number of pairs in each bin
+#     thresh = [0] * bins    # holds exclusive upperbound of bin
+#     fdr = [1] * bins    # holds FDR for pairs in that bin
+#     for i in range(0, bins):
+#         thresh[i] = (i + 1) * 1.0 / bins    # since possible pvalue threshold from 0 to 1.
+#         # print "thresh[%i]: %f" % (i, thresh[i])
+#     for i in all_paired:
+#         counts[int(i.p / (1.0 / bins))] += 1    # increment count where index is p-value/sizeOfBins
+#         i.set_b(int(i.p / (1.0 / bins)))    # set bin number for pair
+#
+#     # have counts, now find line for noise ignoring first and last bin
+#     bot = 1
+#     top = bins - 1
+#     print "bot: %i, top: %i" % (bot, top)
+#     x = []
+#     y = []
+#     # print "counts used for line: "
+#     for i in range(bot, top):
+#         x.append(thresh[i])
+#         y.append(counts[i])
+#         # print thresh[i], counts[i]
+#     slr = scipystats.linregress(x, y)
+#     slope = slr[0]
+#     intercept = slr[1]
+#     print "Calculating line going through KS_test p-value histogram:"
+#     print "slope: %s and intercept: %s" % (slope, intercept)
+#     ans = -1    # bin that has FDR <= user FDR
+#     found_thresh = False
+#     numpeaks = 0    # number of peaks that meet that FDR
+#     # calculate FDR for each bin
+#     print "Calculating FDR for each pairing. This may take some time..."
+#     false = 0    # number of expected noise peaks
+#     total = 0    # total number of peaks encountered
+#     for i in range(0, bins):
+#         false += intercept    # add expected number of noise in each bin
+#         total += counts[i]    # add number of peaks seen
+#         fdr[i] = false / total
+#         # print "FDR for bin %s is %s" % (i, fdr[i])
+#
+#         # check if exceeded user defined FDR
+#         if not found_thresh and fdr[i] > user_ks_fdr:
+#             ans = i - 1
+#             numpeaks = total - counts[i]
+#             found_thresh = True
+#             # print "Answer is ", ans
+#
+#     # update ks_FDR value for all peaks
+#     for ap in all_paired:
+#         ap.set_k(fdr[ap.b])    # set the ks_fdr to the FDR value for that bin
+#         # unpair non-significant pairings
+#         if ap.k > user_ks_fdr:
+#             sw = WavePair(ap.chromosome, ap.i, -1, -1, ap.pos1, -1, ap.stddev1, -1, ap.ht1, 0)
+#             sample_unpaired.append(sw)
+#             cw = WavePair(ap.chromosome, -1, ap.j, -1, -1, ap.pos2, -1, ap.stddev2, 0, ap.ht2)
+#             control_unpaired.append(cw)
+#
+#     print "KS-means p-value threshold is: %s and FDR is: %s" % (thresh[ans], fdr[ans])
+#     print "number of peaks that meet this threshold: ", numpeaks
+#     print "this is %s%% of the total number of peaks (pairs) analyzed (%s)" % (float(numpeaks) / len(all_paired) * 100, len(all_paired))
+#     print "requested FDR was: ", user_ks_fdr
 
-        # check if exceeded user defined FDR
-        if not found_thresh and fdr[i] > user_ks_fdr:
-            ans = i - 1
-            numpeaks = total - counts[i]
-            found_thresh = True
-            # print "Answer is ", ans
-
-    # update ks_FDR value for all peaks
+    PVAL_THRESH = 0.25
     for ap in all_paired:
-        ap.set_k(fdr[ap.b])    # set the ks_fdr to the FDR value for that bin
         # unpair non-significant pairings
-        if ap.k > user_ks_fdr:
+        if ap.p > PVAL_THRESH:
             sw = WavePair(ap.chromosome, ap.i, -1, -1, ap.pos1, -1, ap.stddev1, -1, ap.ht1, 0)
             sample_unpaired.append(sw)
             cw = WavePair(ap.chromosome, -1, ap.j, -1, -1, ap.pos2, -1, ap.stddev2, 0, ap.ht2)
             control_unpaired.append(cw)
 
-    print "KS-means p-value threshold is: %s and FDR is: %s" % (thresh[ans], fdr[ans])
-    print "number of peaks that meet this threshold: ", numpeaks
-    print "this is %s%% of the total number of peaks (pairs) analyzed (%s)" % (float(numpeaks) / len(all_paired) * 100, len(all_paired))
-    print "requested FDR was: ", user_ks_fdr
+
 
     # CALCULATE NORMALIZATION ON WAVE PAIRS THAT MEET FDR
     print "Collecting wave pairs that meet FDR cutoff."
@@ -317,14 +339,14 @@ def run(mongo, output, db):
     # launch thread to read and process the print queue
     print_thread = PrintThread.StringWriter(print_queue, output, "paired_norm_waves.txt", True, True)
     for pairs in all_paired:
-        if pairs.k <= user_ks_fdr:
-            # ratio = float(pairs.ht1) / pairs.ht2
-            # if ratio > (float(1) / 20) and ratio < 20:
-            if True:
+        # if pairs.k <= user_ks_fdr:
+        if pairs.p <= PVAL_THRESH:
+            ratio = float(pairs.ht1) / pairs.ht2
+            if ratio > (float(1) / 10) and ratio < 10:
                 x.append(pairs.ht1)
                 y.append(pairs.ht2)
                 if DEBUG_PRINT:
-                    print_queue.put("%s\t%s\t%s\t%s\t%s" % (pairs.chromosome, pairs.pos1, pairs.pos2, pairs.ht1, pairs.ht2))
+                    print_queue.put("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (pairs.chromosome, pairs.pos1, pairs.pos2, pairs.ht1, pairs.ht2, pairs.stddev1, pairs.stddev2, pairs.p))
     if print_thread is None or not print_thread.is_alive():
         pass
     else:
@@ -333,13 +355,14 @@ def run(mongo, output, db):
             time.sleep(1)
         print_thread.END_PROCESSES = True
         print_thread.f.close()
+
+
     # NORMALIZATION
     print "\nCalculating normalization required for peaks."
     linear = odr.Model(f)
     mydata = odr.Data(x, y)
     myodr = odr.ODR(mydata, linear, [1])
     myodr.set_job(fit_type = 2)    # do a linear model, then use that to figure out the non-linear model - initial first guess.
-
     # myodr.set_iprint(final = 2)
     fit = myodr.run()
     coeff = fit.beta[::-1]
@@ -347,7 +370,6 @@ def run(mongo, output, db):
     print "linear - least squares : coeff %s err %s" % (coeff, err)
     myodr = odr.ODR(mydata, linear, coeff)
     myodr.set_job(fit_type = 0)
-
     fit2 = myodr.run()
     # fit.pprint()
     if fit2.stopreason[0] == 'Iteration limit reached':
@@ -415,16 +437,69 @@ def run(mongo, output, db):
             print_thread.END_PROCESSES = True
             print_thread.f.close()
 
-    # Remove noise (sigma or height?)
+
+    # Remove noise
     # TODO: figure this out.
+    print "\nNow calculating FDR for noise in peak heights. This may take some time..."
+    # sort control peaks by height (decreasing)
+    control_unpaired.sort(key = lambda x:-x.ht2)
+    # go through, write how many peaks are found greater than or equal to that height
+    # cc is "control counts"
+    cc = []
+    for i in range(0, len(control_unpaired)):
+        # if last peak
+        if i == len(control_unpaired) - 1:
+            cc.append([control_unpaired[i].ht2, i + 1])
+        # else if height same as next peak
+        elif control_unpaired[i].ht2 == control_unpaired[i + 1].ht2:
+            pass
+        else:
+            cc.append([control_unpaired[i].ht2, i + 1])
+
+    # sort sample peaks by height (decreasing)
+    sample_unpaired.sort(key = lambda x:-x.ht1)
+    # go through, write how many peaks are found greater than or equal to that height
+    # sc is "sample counts"
+    sc = []
+    for i in range(0, len(sample_unpaired)):
+        # if last peak
+        if i == len(sample_unpaired) - 1:
+            sc.append([sample_unpaired[i].ht1, i + 1])
+        # else if height same as next peak
+        elif sample_unpaired[i].ht1 == sample_unpaired[i + 1].ht1:
+            pass
+        else:
+            sc.append([sample_unpaired[i].ht1, i + 1])
+
+    # for every sample peak, determine number of peaks in sample >= that peak, and same for control, calculate %noise
+    for i in sample_unpaired:
+        h = i.ht1
+        cv = -1    # control value
+        sv = -1    # sample value
+        for c in range(0, len(cc)):
+            if cc[c][0] < h:    # if contol height less than peak height
+                cv = cc[c - 1][1]    # write "closest without going under"
+                break    # leave for loop
+        if cv == -1:
+            cv = cc[len(cc) - 1][1]
+        for s in range(0, len(sc)):
+            if sc[s][0] < h:
+                sv = sc[s - 1][1]
+                break
+        if sv == -1:
+            sv = sc[len(sc) - 1][1]
+        i.set_hfdr(float(cv) / float(sv))
+        # print "peak of height %s, cv is %s and sv is %s, so hfdr is %s" % (i.ht1, cv, sv, i.hfdr)
+
+
+
     # TODO: PRINT UNIQUE PEAKS IN SAMPLE
     print_queue = multiprocessing.Queue()
     # launch thread to read and process the print queue
     print_thread = PrintThread.StringWriter(print_queue, output, "unique_sample_waves.txt", True, True)
 
     for i in sample_unpaired:
-        if i.ht1 > 20:
-            print_queue.put("%s\t%s\t%s\t%s" % (i.chromosome, i.pos1, i.ht1, i.stddev1))
+        print_queue.put("%s\t%s\t%s\t%s\t%s" % (i.chromosome, i.pos1, i.ht1, i.stddev1, i.hfdr))
 
     if print_thread is None or not print_thread.is_alive():
         pass
