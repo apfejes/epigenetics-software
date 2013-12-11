@@ -28,14 +28,10 @@ class Kolmogorov_Smirnov(object):
         m1 = float(m1)
         m2 = float(m2)
         # Check the peaks actually overlap within 4 sigmas...
-
         start = max(m1 - (4 * s1), m2 - (4 * s2))
         end = min(m1 + (4 * s1), m2 + (4 * s2))
-
         if start >= end:
-            # return (0.0, 0.0)
-            return 1.0
-
+            return 1.0    # if the peaks don't overlap, there is no chance of them being related.
         if m1 > m2:
             m1 = m1 - m2
             m2 = 0
@@ -43,28 +39,26 @@ class Kolmogorov_Smirnov(object):
             m2 = m2 - m1
             m1 = 0
 
-        # Calculate the point of max distance between CDFs
-
+        if s1 == s2:    # if sigmas are identical, the greatest difference will always be at the midpoint.
+            x = (m1 + m2) / 2.0
+            return fabs(phi((x - m1) / s1) - phi((x - m2) / s2))    # the p value at the max distance
+        # set up squares required for calculation
         a2 = s1 * s1
         a4 = a2 * a2
         b2 = s2 * s2
         b4 = b2 * b2
         c2 = m1 * m1
         d2 = m2 * m2
-        # term = (a4 * (-b2) * log(s2 / s1)) + (a2 * b4 * log(s2 / s1)) + (a2 * b2 * c2) - (2 * a2 * b2 * m1 * m2) + (a2 * b2 * d2)
         # either m1 or m2 will always be 0, can remove term, may speed up calculation
-        term = (a4 * (-b2) * log(s2 / s1)) + (a2 * b4 * log(s2 / s1)) + (a2 * b2 * c2) + (a2 * b2 * d2)
-
-        if s1 == s2:
-            x = (m1 + m2) / 2.0
-            return fabs(phi((x - m1) / s1) - phi((x - m2) / s2))
+        # Calculate the point of max distance between CDFs
+        # term = (a4 * (-b2) * log(s2 / s1)) + (a2 * b4 * log(s2 / s1)) + (a2 * b2 * c2) - (2 * a2 * b2 * m1 * m2) + (a2 * b2 * d2)  #original
+        term = (a4 * (-b2) * log(s2 / s1)) + (a2 * b4 * log(s2 / s1)) + (a2 * b2 * c2) + (a2 * b2 * d2)    # simplified
+        # there are two possible solutions for this problem - one will be larger than the other.
         x1 = (a2 * m2 + sqrt(term) - b2 * m1) / (a2 - b2)
         a1 = fabs(phi((x1 - m1) / s1) - phi((x1 - m2) / s2))
         x2 = (a2 * m2 - sqrt(term) - b2 * m1) / (a2 - b2)
         a2 = fabs(phi((x2 - m1) / s1) - phi((x2 - m2) / s2))
         # Return the max distance
-
-
         return max(a1, a2)
 
 
@@ -73,12 +67,4 @@ class Kolmogorov_Smirnov(object):
         Constructor
         '''
         pass
-
-
-# for i in range (0, 40, 5):
-#    for j in range (10, 100, 10):
-#
-#       print " ", j, i
-#        x, y = MyClass(1).ks_test(mean1, sigma1, mean2, sigma2)
-#        print "    ", x, y
 
