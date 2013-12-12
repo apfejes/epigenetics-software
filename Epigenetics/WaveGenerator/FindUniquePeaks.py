@@ -43,17 +43,17 @@ class WavePair():
         self.chromosome = chromosome
         self.i = i
         self.j = j
-        self.p = p
+        self.p = p    # p-value calculated from ks_test
         self.pos1 = pos1
         self.pos2 = pos2
         self.stddev1 = stddev1
         self.stddev2 = stddev2
         self.ht1 = height1
         self.ht2 = height2
-        self.k = ks_fdr
-        self.b = bin_num
-        self.fc = fold_change
-        self.hfdr = hnoise    # percent noise
+        self.k = ks_fdr    # FDR calculated from p-values from ks_test
+        self.b = bin_num    # associated bin number for determining ks_FDR
+        self.fc = fold_change    # fold change in peak height compared to control peak height
+        self.hfdr = hnoise    # FDR calculated from peak heights
 
     def get_ratio_max(self):
         '''use this for calculating the ratio of the two peaks.
@@ -74,22 +74,6 @@ class WavePair():
             str(self.stddev2) + "\t" + str(self.ht1) + "\t" + \
             str(self.ht2) + "\t" + str(self.p) + "\t" + \
             str(self.k) + "\t" + str(self.fc)
-
-    def set_k(self, value):
-        '''update ks_fdr value for pair'''
-        self.k = value
-
-    def set_b(self, value):
-        '''update bin number for pair'''
-        self.b = value
-
-    def set_fc(self, value):
-        '''update fold change for pair'''
-        self.fc = value
-
-    def set_hfdr(self, value):
-        '''update height FDR for pair'''
-        self.hfdr = value
 
     @staticmethod
     def type():
@@ -148,13 +132,13 @@ def run(mongo, output, db):
     id_r = [util.get_sample_id_from_name(c, db) for c in controls]
 
     # FETCH PEAKS
-    all_paired = []
-    sample_unpaired = []
-    control_unpaired = []
+    all_paired = []    # global list of paired wavepairs
+    sample_unpaired = []    # global list of unpaired sample wavepairs
+    control_unpaired = []    # global list of unpaired control wavepairs
     print "Reading waves from database and finding pairs..."
     for chromosome in chromosomes:    # for each chromosome
-        waves1 = []
-        waves2 = []
+        waves1 = []    # sample
+        waves2 = []    # control
         uniquesamp = []
         uniquecont = []
         chrom_all_paired = []
@@ -253,8 +237,7 @@ def run(mongo, output, db):
     # Now determine FDR for PEAK PAIRING, carry on with pairs that meet user cutoff.
     # user_ks_fdr = 0.05
 
-    # TODO: Hardcoded 0.25 as threshold for ks_test p-value
-    # Anthony chose based on histogram of p-values
+
     # Develop a more sophisticated FDR test (like what is commented out below)
 #     print "\nNow determining closest possible FDR to ", user_ks_fdr
 #     bins = int(len(all_paired) * 0.05)    # bin size is 5% of total number of bins
@@ -267,7 +250,7 @@ def run(mongo, output, db):
 #         # print "thresh[%i]: %f" % (i, thresh[i])
 #     for i in all_paired:
 #         counts[int(i.p / (1.0 / bins))] += 1    # increment count where index is p-value/sizeOfBins
-#         i.set_b(int(i.p / (1.0 / bins)))    # set bin number for pair
+#         i.b = (int(i.p / (1.0 / bins)))    # set bin number for pair
 #
 #     # have counts, now find line for noise ignoring first and last bin
 #     bot = 1
@@ -307,7 +290,7 @@ def run(mongo, output, db):
 #
 #     # update ks_FDR value for all peaks
 #     for ap in all_paired:
-#         ap.set_k(fdr[ap.b])    # set the ks_fdr to the FDR value for that bin
+#         ap.k = (fdr[ap.b])    # set the ks_fdr to the FDR value for that bin
 #         # unpair non-significant pairings
 #         if ap.k > user_ks_fdr:
 #             sw = WavePair(ap.chromosome, ap.i, -1, -1, ap.pos1, -1, ap.stddev1, -1, ap.ht1, 0)
@@ -320,6 +303,8 @@ def run(mongo, output, db):
 #     print "this is %s%% of the total number of peaks (pairs) analyzed (%s)" % (float(numpeaks) / len(all_paired) * 100, len(all_paired))
 #     print "requested FDR was: ", user_ks_fdr
 
+    # TODO: Hardcoded 0.25 as threshold for ks_test p-value
+    # Anthony chose based on histogram of p-values
         PVAL_THRESH = 0.25
         for ap in chrom_all_paired:
             # unpair non-significant pairings
@@ -332,8 +317,7 @@ def run(mongo, output, db):
                     uniquecont.append(ap.pos2)
                     cw = WavePair(ap.chromosome, -1, ap.j, -1, -1, ap.pos2, -1, ap.stddev2, 0, ap.ht2)
                     control_unpaired.append(cw)
-            else:
-                # append to global all_paired list.
+            else:    # append to global all_paired list.
                 all_paired.append(ap)
 
 
@@ -348,7 +332,7 @@ def run(mongo, output, db):
         # if pairs.k <= user_ks_fdr:
         if pairs.p <= PVAL_THRESH:
             ratio = float(pairs.ht1) / pairs.ht2
-            if ratio > (float(1) / 10) and ratio < 10:
+            if ratio > (float(1) / 10) and ratio < 10:    # 10 arbitrarily picked to remove outliers.
                 x.append(pairs.ht1)
                 y.append(pairs.ht2)
                 if DEBUG_PRINT:
@@ -445,13 +429,12 @@ def run(mongo, output, db):
 
 
     # Remove noise
-    # TODO: figure this out.
+    # TODO: Adjust FDR strategy to get "better" result (tall peaks having lower FDR?)
     print "\nNow calculating FDR for noise in peak heights. This may take some time..."
     # sort control peaks by height (decreasing)
     control_unpaired.sort(key = lambda x:-x.ht2)
     # go through, write how many peaks are found greater than or equal to that height
-    # cc is "control counts"
-    cc = []
+    cc = []    # cc is "control counts"
     for i in range(0, len(control_unpaired)):
         # if last peak
         if i == len(control_unpaired) - 1:
@@ -465,8 +448,7 @@ def run(mongo, output, db):
     # sort sample peaks by height (decreasing)
     sample_unpaired.sort(key = lambda x:-x.ht1)
     # go through, write how many peaks are found greater than or equal to that height
-    # sc is "sample counts"
-    sc = []
+    sc = []    # sc is "sample counts"
     for i in range(0, len(sample_unpaired)):
         # if last peak
         if i == len(sample_unpaired) - 1:
@@ -478,6 +460,7 @@ def run(mongo, output, db):
             sc.append([sample_unpaired[i].ht1, i + 1])
 
     # for every sample peak, determine number of peaks in sample >= that peak, and same for control, calculate %noise
+    # TODO: make this code more efficient (binary search?)
     for i in sample_unpaired:
         h = i.ht1
         cv = -1    # control value
@@ -494,12 +477,12 @@ def run(mongo, output, db):
                 break
         if sv == -1:
             sv = sc[len(sc) - 1][1]
-        i.set_hfdr(float(cv) / (float(sv + cv)))
+        i.hfdr = (float(cv) / (float(sv + cv)))
         # print "peak of height %s, cv is %s and sv is %s, so hfdr is %s" % (i.ht1, cv, sv, i.hfdr)
 
 
 
-    # TODO: PRINT UNIQUE PEAKS IN SAMPLE
+
     print_queue = multiprocessing.Queue()
     # launch thread to read and process the print queue
     print_thread = PrintThread.StringWriter(print_queue, output, "unique_sample_waves.txt", True, True)
