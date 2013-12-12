@@ -7,7 +7,6 @@ Created on 2013-04-17
 import os
 import sys
 import time
-import ast
 import argparse
 from itertools import izip
 
@@ -34,11 +33,11 @@ def importObjectsSampleData(mongo, csvbeta, csvmval):
     GSE = os.path.basename(csvbeta)
     GSE = GSE[0:GSE.find("_")]
     print "GSE in use: ", GSE
-    count = 0;
+    count = 0
     to_insert = []
 
     for b_line, m_line in izip(open(csvbeta, 'r'), open(csvmval, 'r')):    # open file
-        count += 1;
+        count += 1
         if first:
             if b_line != m_line:
                 print "files don't match!"
@@ -50,10 +49,7 @@ def importObjectsSampleData(mongo, csvbeta, csvmval):
             h = b_line.split(",")
             for i in range(1, len(h)):
                 GSM = h[i].replace('"', '').strip()
-                print "i = ", i
-                print "GSM in use: (%s) %s" % (h[i], GSM)
                 l = mongo.find_one("samples", {"GSE":GSE, "GSM":GSM}, {"_id":1})
-                print "l ", l["_id"]
                 headers[i - 1] = [str(l["_id"]), GSM]
             print "all headers, processed:", headers
             first = False
@@ -86,7 +82,6 @@ def importObjectsSampleData(mongo, csvbeta, csvmval):
                 print "%i rows processed - batch insert failed!" % count
             to_insert = []
 
-
     rows = mongo.InsertBatchToDB("methylation", to_insert)
     if rows == len(to_insert):
         print "final batch successfully inserted - %i rows processed" % count
@@ -94,14 +89,6 @@ def importObjectsSampleData(mongo, csvbeta, csvmval):
         print "final batch insert failed! - %i rows processed" % count
 
 
-#===============================================================================
-#         if count % 10000 == 0:
-#             print "%i lines processed" % count
-#             mongo.insert(collection, to_insert)
-#             to_insert = []
-#         count += 1
-#     if len(to_insert) > 0:
-#         mongo.insert(collection, to_insert)
 #     f.close()
 #===============================================================================
 
