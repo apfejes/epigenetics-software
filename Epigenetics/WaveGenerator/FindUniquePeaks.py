@@ -482,13 +482,33 @@ def run(mongo, output, db):
 
 
 
+    if DEBUG_PRINT:
+        print_queue = multiprocessing.Queue()
+        # launch thread to read and process the print queue
+        print_thread = PrintThread.StringWriter(print_queue, output, "unique_sample_waves.txt", True, True)
+
+        for i in sample_unpaired:
+            print_queue.put("%s\t%s\t%s\t%s\t%s" % (i.chromosome, i.pos1, i.ht1, i.stddev1, i.hfdr))
+
+        if print_thread is None or not print_thread.is_alive():
+            pass
+        else:
+            while print_queue.qsize() > 0:
+                print "waiting on print_queue to empty", print_queue.qsize()
+                time.sleep(1)
+            print_thread.END_PROCESSES = True
+            print_thread.f.close()
+
+    # TODO: This value determined by finding where FDR value first crosses 0.05.
+    HEIGHTCUTOFF = 20
 
     print_queue = multiprocessing.Queue()
     # launch thread to read and process the print queue
-    print_thread = PrintThread.StringWriter(print_queue, output, "unique_sample_waves.txt", True, True)
+    print_thread = PrintThread.StringWriter(print_queue, output, "unique_sample_waves_sigHeight.txt", True, True)
 
     for i in sample_unpaired:
-        print_queue.put("%s\t%s\t%s\t%s\t%s" % (i.chromosome, i.pos1, i.ht1, i.stddev1, i.hfdr))
+        if(i.ht1 > HEIGHTCUTOFF):
+            print_queue.put("%s\t%s\t%s\t%s\t%s" % (i.chromosome, i.pos1, i.ht1, i.stddev1, i.hfdr))
 
     if print_thread is None or not print_thread.is_alive():
         pass
