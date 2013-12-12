@@ -32,7 +32,15 @@ import StringUtils
 
 
 def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
-    # body of function goes here
+
+    # TODO: Hardcoded values to be adjusted
+    # NOTE: This has been partially solved in "/Epigenetics/WaveGenerator/Compare_wave_sets_nobg_2way.py"
+    NUMBINSHEIGHT = 70    # number of bins to distribute heights into. Based on max peak height of 7 (seen in ChIP-chip) to allow bin size of 0.1
+    HEIGHTSTEP = 0.1    # step size for height bins
+    MINBIN = 10    # bin index which holds the minimum possible height peaks (0 to 9 correspond to heights 0 to 0.9, do not have in ChIP-chip)
+    HEIGHTFDRSIZE = 5    # number of bins to step forward to calculate slope to determine height FDR
+    NUMBINSSIGMA = 300    # based on max sigma of 300
+
 
     chromosomes = {1:"I", 2:"II", 3:"III", 4:"IV", 5:"V", 6:"VI", 7:"VII", 8:"VIII", 9:"IX", 10:"X", 11:"XI", 12:"XII", 13:"XIII", 14:"XIV", 15:"XV", 16:"XVI"}
 
@@ -54,21 +62,21 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
             waves.append(wave)
     f.close()
 
-    if(autothresh):
-        if(heisig):
+    if autothresh:
+        if heisig:    # heisig True for thresh by height, False for thresh by sigma
             # print "\nNow determining background levels for height of peaks"
-            bins = 70    # based on max peak height of 7
+            bins = NUMBINSHEIGHT
             counts = [0] * bins
             thresh = [0] * bins
             for i in range(0, bins):
-                thresh[i] = (i + 1) * 0.1
+                thresh[i] = (i + 1) * HEIGHTSTEP
             for i in waves:
                 # check all heights to determine background levels
                 counts[int(i['height'] / 0.1)] += 1    # increment count where height1 is in bin of size 0.1
             # print "counts are: ", counts
             x = []
             y = []
-            for i in range(10, 15):    # (0 to 9 correspond to heights 0 to 0.9, do not have)
+            for i in range(MINBIN, MINBIN + HEIGHTFDRSIZE):
                 x.append(thresh[i])
                 y.append(counts[i])
             # print "x is ", x
@@ -82,15 +90,14 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
             print "height threshold between noise and signal is ", xint
             thresh = round(xint, 2)
         else:
-            # determine threshold for sigma
-            bins = 300    # based on max sigma of 300
+            # determine threshold for sigma by finding most common sigma value
+            bins = NUMBINSSIGMA
             counts = [0] * bins
             threshes = [0] * bins
             for i in range(0, bins):
                 threshes[i] = (i + 1)
             for i in waves:
-                # check all heights to determine background levels
-                counts[int(i['stddev'])] += 1    # increment count where height1 is in bin of size 0.1
+                counts[int(i['stddev'])] += 1
             # print "counts are: ", counts
             highest = 0
             ind = -1
@@ -136,10 +143,10 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
     print_thread = PrintThread.StringWriter(print_queue, output, StringUtils.rreplace(os.path.basename(bedfile), ".bed", "_" + str(thresh) + "_summary.txt", 1), True, True)
 
     print "Now finding peaks in each region..."
-    w = 0
-    b = 0
-    count = 0
-    height = 0
+    w = 0    # wave index
+    b = 0    # bin index
+    count = 0    # number of waves per bin
+    height = 0    # total height per bin
 
     while b < len(bed) and w < len(waves):
         if(waves[w]['chr'] == bed[b]['chr'] and (waves[w]['pos'] + 1 * waves[w]['stddev']) >= bed[b]['start'] and (waves[w]['pos'] - 1 * waves[w]['stddev']) <= bed[b]['end']):
@@ -198,23 +205,25 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
 
     # quick summary statistics
     print_queue.put("nwaves\tnbins\tavgBinSize")
-    unassigned = 0
-    un_height = 0
+    unassigned = 0    # number of unassigned waves
+    un_height = 0    # average height of unassigned waves
     for i in waves:
         if not i["used"]:
             unassigned += 1
             un_height += i["height"]
             # print i['height']
 
+    # Looking at distribution of wave heights of unassigned waves.
     # for each bin of height 0.5, determine % of waves not mapped
-    total = [0] * 13
-    unmap = [0] * 13
+    # NUMBINS = 13    # steps of 0.5, from 1.0 to 7.0 (ChIP-chip)
+    NUMBINS = NUMBINSHEIGHT * HEIGHTSTEP * 2 - 1    # range of heights, 2 bins per unit
+    total = [0] * NUMBINS
+    unmap = [0] * NUMBINS
     for i in waves:
-        total[int(i['height'] / 0.5) - 2] += 1    # TODO: this is almost certainly wrong!
+        total[int(i['height'] / 0.5) - 2] += 1
         if not i['used']:
-            unmap[int(i['height'] / 0.5) - 2] += 1    # TODO: most certainly wrong.
-    # TODO: Print these values in some meaningful way.
-    prop = [0.0] * 13
+            unmap[int(i['height'] / 0.5) - 2] += 1
+    prop = [0.0] * NUMBINS
     for i in range(0, len(prop)):
         if total[i] != 0:
             prop[i] = float(unmap[i]) / float(total[i])
@@ -239,7 +248,7 @@ def compare_BED_and_waves(bedfile, wavesfile, output, autothresh, heisig):
     sizes = [[] for x in range(0, maxperbin + 1)]
     f = open(output + StringUtils.rreplace(os.path.basename(bedfile), ".bed", "_" + str(thresh) + "_summary.txt", 1), 'r', 0)
 
-    ln = 0
+    ln = 0    # number of lines
     for line in f:
         ln += 1
         a = line.split("\t")
@@ -288,9 +297,6 @@ if __name__ == "__main__":
 
 
 
-    if len(sys.argv) <= 3:
-        print ("This program requires the name of the ChIP-chip bed file, ChIP-chip waves file, and output/path")
-        sys.exit()
     sh = raw_input("Would you like to use a wave height, or wave sigma threshold? [h]eight or [s]igma: ")
     if sh.lower() == "h":
         sh = True
