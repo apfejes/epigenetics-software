@@ -3,7 +3,7 @@ Created on 2013-12-09
 - This script will find peaks that are unique to the chosen sample.
 - First it pairs peaks, and using paired peaks, normalizes peak heights.
 - It then uses unique peaks in the control to determine the character of the noise.
-- Using this information, it removes noise from the unique sample peaks, and returns the unique peaks.
+- Using this information, it removes noise from the unique sample peaks, and returns the unique peaks in the sample.
 @author: sbrown
 '''
 
@@ -154,6 +154,9 @@ def run(mongo, output, db):
     for chromosome in chromosomes:    # for each chromosome
         waves1 = []
         waves2 = []
+        uniquesamp = []
+        uniquecont = []
+        chrom_all_paired = []
         print "chromosome %s" % chromosome
         for i in id_s:
             # FOR EACH WAVE IN SAMPLE
@@ -180,10 +183,7 @@ def run(mongo, output, db):
             best = None
             while jt >= 0 and (waves2[jt]['pos'] + 4 * waves2[jt]['stddev']) > (pos_i - 4 * sdv_i) :
                 # print "jt - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[jt]['pos'], waves2[jt]['stddev']
-                # stats.ks_test returns large number for similar distribution
                 pvalue = stats.ks_test(pos_i, sdv_i, waves2[jt]['pos'], waves2[jt]['stddev'])
-                if chromosome == "chr1" and pos_i == 951654 and False:
-                    print "sample peak %s (%s, %s) paired with %s (%s, %s) has p-value %s" % (pos_i, ht_i, sdv_i, waves2[jt]['pos'], waves2[jt]['height'], waves2[jt]['stddev'], pvalue)
                 if (pvalue != 1.0):
                     w = WavePair(chromosome, i, jt, pvalue, pos_i, waves2[jt]['pos'], sdv_i, waves2[jt]['stddev'], ht_i, waves2[jt]['height'])
                     if best is None:
@@ -196,8 +196,6 @@ def run(mongo, output, db):
             while j < max_j and (waves2[j]['pos'] - 4 * waves2[j]['stddev']) < (pos_i + 4 * sdv_i):
                 # print "j  - waves1[i]", waves1[i]['pos'], waves1[i]['stddev'], waves2[j]['pos'], waves2[j]['stddev']
                 pvalue = stats.ks_test(pos_i, sdv_i, waves2[j]['pos'], waves2[j]['stddev'])
-                if chromosome == "chr1" and pos_i == 951654 and False:
-                    print "sample peak %s (%s, %s) paired with %s (%s, %s) has p-value %s" % (pos_i, ht_i, sdv_i, waves2[j]['pos'], waves2[j]['height'], waves2[j]['stddev'], pvalue)
                 if (pvalue != 1.0):
                     w = WavePair(chromosome, i, j, pvalue, pos_i, waves2[j]['pos'], sdv_i, waves2[j]['stddev'], ht_i, waves2[j]['height'])
                     if best is None:
@@ -211,8 +209,9 @@ def run(mongo, output, db):
             if none_found:
                 w = WavePair(chromosome, i, -1, -1, pos_i, -1, sdv_i, -1, ht_i, 0)
                 sample_unpaired.append(w)
+                uniquesamp.append(pos_i)
             else:
-                all_paired.append(best)
+                chrom_all_paired.append(best)
             i += 1
 
         # FIND UNIQUE PEAKS IN CONTROL
@@ -246,6 +245,7 @@ def run(mongo, output, db):
             if none_found:
                 w = WavePair(chromosome, -1, j, -1, -1, pos_j, -1, sdv_j, 0, ht_j)
                 control_unpaired.append(w)
+                uniquecont.append(pos_j)
             j += 1
 
 
@@ -319,15 +319,21 @@ def run(mongo, output, db):
 #     print "this is %s%% of the total number of peaks (pairs) analyzed (%s)" % (float(numpeaks) / len(all_paired) * 100, len(all_paired))
 #     print "requested FDR was: ", user_ks_fdr
 
-    PVAL_THRESH = 0.25
-    for ap in all_paired:
-        # unpair non-significant pairings
-        if ap.p > PVAL_THRESH:
-            sw = WavePair(ap.chromosome, ap.i, -1, -1, ap.pos1, -1, ap.stddev1, -1, ap.ht1, 0)
-            sample_unpaired.append(sw)
-            cw = WavePair(ap.chromosome, -1, ap.j, -1, -1, ap.pos2, -1, ap.stddev2, 0, ap.ht2)
-            control_unpaired.append(cw)
-
+        PVAL_THRESH = 0.25
+        for ap in chrom_all_paired:
+            # unpair non-significant pairings
+            if ap.p > PVAL_THRESH:
+                if ap.pos1 not in uniquesamp:
+                    uniquesamp.append(ap.pos1)
+                    sw = WavePair(ap.chromosome, ap.i, -1, -1, ap.pos1, -1, ap.stddev1, -1, ap.ht1, 0)
+                    sample_unpaired.append(sw)
+                if ap.pos2 not in uniquecont:
+                    uniquecont.append(ap.pos2)
+                    cw = WavePair(ap.chromosome, -1, ap.j, -1, -1, ap.pos2, -1, ap.stddev2, 0, ap.ht2)
+                    control_unpaired.append(cw)
+            else:
+                # append to global all_paired list.
+                all_paired.append(ap)
 
 
     # CALCULATE NORMALIZATION ON WAVE PAIRS THAT MEET FDR
@@ -487,7 +493,7 @@ def run(mongo, output, db):
                 break
         if sv == -1:
             sv = sc[len(sc) - 1][1]
-        i.set_hfdr(float(cv) / float(sv))
+        i.set_hfdr(float(cv) / (float(sv + cv)))
         # print "peak of height %s, cv is %s and sv is %s, so hfdr is %s" % (i.ht1, cv, sv, i.hfdr)
 
 

@@ -2,6 +2,9 @@
 Created on 2013-03-27
 
 @author: afejes, sbrown
+
+This will allow .waves files to be uploaded into the database.
+
 '''
 
 import sys

@@ -2,6 +2,10 @@
 Created on 2013-11-12
 
 @author: sbrown
+
+This allows comparisons between peaks called with TheWaveGenerator (.waves) and bins called by rMAT (.bed files),
+providing stats on numbers of peaks falling in bins.
+
 '''
 
 import sys

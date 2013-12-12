@@ -2,6 +2,9 @@
 Created on Oct 18, 2013
 
 @author: sbrown
+
+This allows sample information to be uploaded into the database, designed for yeast ChIP-chip data, although it can be tailored to other sample types.
+
 '''
 
 import sys
@@ -48,6 +51,7 @@ def run(PARAM, metadata_file, tohide):
     f = open(metadata_file, 'r')
     firstrow = True
     collection_name = 'samples'
+    missing = 0
     for line in f:
         sample_update = {}
         if not firstrow:
@@ -84,12 +88,15 @@ def run(PARAM, metadata_file, tohide):
 
                 # update entries
                 mongo.update(collection_name, {"file_name":file_name}, {"$set": sample_update})
-                print "Finished updating metadata for ", file_name
+                print "\tFinished updating metadata for ", file_name
             else:
                 print "NOT FOUND: ", file_name
+                missing += 1
         else:
             firstrow = False
     print "Done all updates from metadata file ", metadata_file
+    if missing > 0:
+        print "%s files were unable to be updated as no matching file_name was found in the waves table." % missing
     mongo.close()
 
 

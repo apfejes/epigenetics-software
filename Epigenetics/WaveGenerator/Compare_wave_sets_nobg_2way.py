@@ -2,8 +2,12 @@
 Created on 2013-04-15
 
 @author: afejes, sbrown
-'''
 
+This will allow two samples to be pulled from the database, and have the waves compared. Ideally, after providing threshold values,
+it will return waves which are found in both sample, waves enriched in sample, and waves enriched in control. 
+Work needed to fine tune.
+
+'''
 
 import sys
 import os

@@ -2,6 +2,10 @@
 Created on 2013-11-26
 
 @author: sbrown
+
+Converts a .waves file to a .wig file for viewing in UCSC.
+Allows noise removal based on peak width (sigma).
+
 '''
 
 import sys
