@@ -494,7 +494,7 @@ def run(mongo, output, db):
                 break
         if sv == -1:
             sv = sc[len(sc) - 1][1]
-        i.set_hfdr(float(cv) / float(sv))
+        i.set_hfdr(float(cv) / (float(sv + cv)))
         # print "peak of height %s, cv is %s and sv is %s, so hfdr is %s" % (i.ht1, cv, sv, i.hfdr)
 
 
