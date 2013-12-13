@@ -49,6 +49,15 @@ class MongoConnector():
         collection = self.db[collection_name]
         return collection.drop_index(index_or_name)
 
+    def find_one(self, collection_name, findQuery, returnQuery = None):
+        '''sortField should be given as a dict, with the format {"field1":sortdirection}, 
+        where sortdirection is a -1 or 1, depending on the direction of the sort,
+        (descending, ascending, respectively)'''
+        collection = self.db[collection_name]
+        return collection.find_one(findQuery, returnQuery)
+
+
+
     def find(self, collection_name, findQuery, returnQuery = None, sortField = None):
         '''sortField should be given as a dict, with the format {"field1":sortdirection}, 
         where sortdirection is a -1 or 1, depending on the direction of the sort,

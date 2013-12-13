@@ -59,6 +59,6 @@ if __name__ == "__main__":
     collection_name = "samples"
     project_name = raw_input('Enter the name of the project to insert in the ' + collection_name + ' collection of the ' + p.get('default_database') + ' database: ')
     mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
-    importObjectsFromJSON(mongodb, args.jsonfile, project_name, p.get('default_database'), collection_name)
+    importObjectsFromJSON(mongodb, args.jsonfile, project_name, collection_name)
     mongodb.close()
     print('Done in %s seconds') % int((time.time() - starttime))
