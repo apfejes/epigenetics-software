@@ -267,7 +267,7 @@ def main(PARAM):
             mapprocessor = MapDecomposingThread.MapDecomposer(PARAM,
                                         wave_queue, print_queue, queue, x)
 
-            proc = multiprocessing.Process(target = mapprocessor.run, args = (x,))
+            proc = multiprocessing.Process(target = mapprocessor.run, args = [x, ])
             proc.daemon = True
             try:
                 proc.start()

@@ -123,7 +123,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 
-
+    files = os.listdir(args.BEDlikefiles)
 
     starttime = time.time()
     num_probes = 2635714
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     print "baseline average probe intensity is:", blaverage
     print "done."
     # op = StringUtils.rreplace(sys.argv[1], 'BED', 'NORMAL', 1)
-    for i, f in enumerate(args.BEDlikefiles):
+    for i, f in enumerate(files):
         filetime = time.time()
         of = StringUtils.rreplace(f, '.BEDlike', '.normalized.BEDlike', 1)
         bedprobes = [[0.0 for y in xrange(num_probes)] for x in xrange(0, 2)]

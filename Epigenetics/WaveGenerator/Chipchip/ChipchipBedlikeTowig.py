@@ -120,7 +120,7 @@ def FindBaseline(file_name, normalize = False):
             data[g].setv(v)
     # create wig file
     f_w_name = StringUtils.rreplace(file_name, '.BEDlike', '', 1)
-    f_w_name = StringUtils.rreplace(f_w_name, 'BED', 'WIG', 1)    # #should these two lines just replace .BEDlike with .WIG?
+    # f_w_name = StringUtils.rreplace(f_w_name, 'BED', 'WIG', 1)    # #should these two lines just replace .BEDlike with .WIG?
     trackname = os.path.basename(f_w_name)
 
     # print "Writing to %s" % (f_w_name)
@@ -132,7 +132,7 @@ def FindBaseline(file_name, normalize = False):
     last_bp = 0
     last_ht = 0
     wigfile = WigFileThread.WigFileWriter(None)
-    wigfile.start_wig_writer(os.path.dirname(f_w_name), os.path.basename(f_w_name), trackname)
+    wigfile.start_wig_writer(os.path.dirname(f_w_name) + "/../WIG", os.path.basename(f_w_name), trackname)
 
 
     # for x in range (0, 5020):

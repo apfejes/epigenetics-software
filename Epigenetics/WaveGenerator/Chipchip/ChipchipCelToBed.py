@@ -17,7 +17,7 @@ while ("WaveGenerator" in _root_dir):
 sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
 import StringUtils
 
-def ConvertToBedViaR(cel_file):
+def ConvertToBedViaR(cel_file, bpmapfile):
     '''function for t calling R to get Bed-like values'''
 
     # original script - minus redundant variables.
@@ -33,7 +33,6 @@ def ConvertToBedViaR(cel_file):
     # write.table(data, file = paste(expName,"_exp1_AllData.txt",sep=''), append = FALSE, row.names = FALSE, sep = "\t");
 
 
-    bpmapfile = "/home/sbrown/datafiles/Sc03b_MR_v04.bpmap"
     bedfile = StringUtils.rreplace(cel_file, 'CEL', 'BED', 2)
     bedfile = bedfile + "like"
 
@@ -58,7 +57,8 @@ def ConvertToBedViaR(cel_file):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("BEDlikefiles", help = "Name of the CEL file to process", type = str)
+    parser.add_argument("bpmap_file", help = "bpmap file used", type = str)
     args = parser.parse_args()
     starttime = time.time()
-    ConvertToBedViaR(args.BEDlikefiles)
+    ConvertToBedViaR(args.BEDlikefiles, args.bpmap_file)
     print('Completed %s seconds') % int((time.time() - starttime))
