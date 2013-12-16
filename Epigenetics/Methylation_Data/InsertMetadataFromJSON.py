@@ -20,7 +20,7 @@ import CommonUtils.Parameters as Parameters
 # from platform import system
 
 
-def importObjectsFromJSON(mongo, filename, proj, collection):
+def importObjectsFromJSON(mongo, filename, collection):
     while not os.path.isfile(filename):
         print "Unable to find file %s" % filename
         # wave_data_file = raw_input('wave file to load: ')
@@ -57,8 +57,8 @@ if __name__ == "__main__":
         p.set("default_database", args.dbname)
     starttime = time.time()
     collection_name = "samples"
-    project_name = raw_input('Enter the name of the project to insert in the ' + collection_name + ' collection of the ' + p.get('default_database') + ' database: ')
+    print 'Saving JSON file to the ' + collection_name + ' collection of the ' + p.get('default_database') + ' database: '
     mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
-    importObjectsFromJSON(mongodb, args.jsonfile, project_name, collection_name)
+    importObjectsFromJSON(mongodb, args.jsonfile, collection_name)
     mongodb.close()
     print('Done in %s seconds') % int((time.time() - starttime))
