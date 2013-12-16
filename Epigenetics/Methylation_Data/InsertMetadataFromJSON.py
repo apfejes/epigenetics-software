@@ -30,7 +30,7 @@ def importObjectsFromJSON(mongo, filename, proj, collection):
     to_insert = []
     for line in f:
         sample = ast.literal_eval(line)
-        sample['project'] = proj
+        sample['project'] = sample['GSE']
         sample['tissuetype'] = sample['tissue']
         sample.pop('tissue' , None)
         to_insert.append(sample)
