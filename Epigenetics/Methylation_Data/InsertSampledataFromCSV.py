@@ -49,7 +49,7 @@ def importObjectsSampleData(mongo, csvbeta, csvmval):
             h = b_line.split(",")
             for i in range(1, len(h)):
                 GSM = h[i].replace('"', '').strip()
-                l = mongo.find_one("samples", {"GSE":GSE, "GSM":GSM}, {"_id":1})
+                l = mongo.find_one("samples", {"GSE":GSE, "sampleid":GSM}, {"_id":1})
                 headers[i - 1] = [str(l["_id"]), GSM]
             print "all headers, processed:", headers
             first = False
