@@ -179,3 +179,24 @@ input[type="submit"]:hover{
 
 
 
+fieldset{
+    font-size:12px;
+}
+
+select {
+    font-size:12px;
+}
+
+label {
+    font-size:12px}
+}
+
+button {
+    padding: 0px;
+    border: 1px solid #006;
+}
+
+input {
+    font-size:11px;
+    padding: 0 0 0 0;
+}
