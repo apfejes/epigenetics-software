@@ -9,7 +9,7 @@ body
   a(href='http://kruncher.cmmt.ubc.ca:8880/dbaccess/') 
     #header
       h1 Epigenetics Database - Query
-    #suheader  
+    #subheader  
   #wrapper
     form(name="main", action='/dbaccess/query_form/', method='post')
       input(type="hidden", id="width", name="width", value = "")
@@ -50,6 +50,7 @@ body
                   option(value=mt, selected)=mt
                 - else 
                   option(value=mt)=mt
+
           label(for='groupby', id='groupby_label') Group By:
             select(name='groupby', id='groupby')
               option(value='')=''
