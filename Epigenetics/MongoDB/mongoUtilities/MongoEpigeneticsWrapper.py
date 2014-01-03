@@ -527,6 +527,20 @@ class MongoEpigeneticsWrapper():
         return None
 
 
+    def find_genes(self, chromosome, start, end):
+        '''given a region find all of the genes that overlap'''
+        r = self.mongo.findOne("ensgenes", {"chr":chromosome,"end":{"$gt":start},"start":{"$lt":end} })
+        return r
+        
+    def find_coords_by_gene (self, name):
+        '''given the name of a gene, get the coordinates'''
+        r = self.mongo.findOne("ensgenes", {"name":name}, {"chr":1,"start":1,"end":1,"_id":0})
+        if r == None:
+            return {"chr":"chr1","start":0, "end":1000}
+        else:
+            return r
+
+
 
 # TODO: Error function below needs testing
 
