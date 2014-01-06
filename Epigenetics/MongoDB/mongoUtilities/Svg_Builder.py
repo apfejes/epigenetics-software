@@ -39,7 +39,8 @@ class Svg_Builder():
             get_tss = False,
             get_cpg = False,
             show_points = False,
-            show_dist = False):
+            show_dist = False,
+            genes = None):
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an SVG string for webserver rendering
         '''
@@ -63,6 +64,9 @@ class Svg_Builder():
         # TODO: Insert error handling here, if methylation and no methylation data, drop out
         # TODO: Insert error handling here, if chipseq and no chipseq data, drop out
         # TODO: Insert error handling here, if both and no data, drop out
+
+        if genes:
+            self.drawing.draw_genes(genes)
 
 
         sampleindex = self.drawing.get_sample_index()

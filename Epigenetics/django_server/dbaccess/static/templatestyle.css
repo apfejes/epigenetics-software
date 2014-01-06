@@ -73,7 +73,6 @@ ul {
 
 #wrapper{
   width:99%;
-  /*background:url('/static/header.jpg')*/ repeat-y; /* WARNING: IF YOU CHANGE THE COLORS OF THE LAYOUT YOU HAVE TO CHANGE THIS IMAGE! */
   overflow:auto; /* USE FIREFOX GUYS! WE ONLY NEED THIS LINE BECAUSE INTERNET EXPLODER ISN'T READING CODE PROPERLY */
   margin-left:10px;
   margin-top:10px;

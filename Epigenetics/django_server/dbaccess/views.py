@@ -12,7 +12,6 @@ from pymongo.mongo_client import MongoClient
 import os, sys
 import ast
 
-
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(os.path.dirname(_cur_dir))
 sys.path.insert(0, _root_dir)
@@ -230,9 +229,11 @@ def view_query_form(request):
     database = parameters['organism'] + "_epigenetics"
     print("creating Mongo Wrapper on Database")
 
-    m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks, parameters['start'], parameters['end'])
+    m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks, parameters['chromosome'], parameters['start'], parameters['end'])
 
     svg = 'Please query the database to generate an image!'    # default string..  Should remove this.
+
+    genes = m.find_genes(parameters['chromosome'], parameters['start'], parameters['end'])
 
     sample_index = {}
     types_index = {}
@@ -256,7 +257,8 @@ def view_query_form(request):
                            show_points = parameters['datapoints'],
                            show_dist = parameters['show_dist'],
                            types_index = parameters['types_index'],
-                           sample_index = parameters['sample_index'])
+                           sample_index = parameters['sample_index'],
+                           genes = genes)
 
 
         elif peaks and not methylation:
@@ -274,7 +276,8 @@ def view_query_form(request):
                             get_tss = parameters['tss'],
                             get_cpg = parameters['cpg'],
                             types_index = parameters['types_index'],
-                            sample_index = parameters['sample_index'])
+                            sample_index = parameters['sample_index'],
+                            genes = genes)
 
         elif methylation and peaks:
             docs = m.query(parameters)
@@ -293,7 +296,8 @@ def view_query_form(request):
                             sample_index = parameters['sample_index'],
                             show_points = parameters['datapoints'],
                             show_dist = parameters['show_dist'],
-                            types_index = parameters['types_index'])
+                            types_index = parameters['types_index'],
+                            genes = genes)
 
     return render(request, 'query_form.jade', {'organism_list':organism_list,
                                                'methylation_list':methylation_list,
@@ -318,6 +322,7 @@ def view_query_form(request):
                                                'width':parameters['width'],
                                                'height':parameters['height'],
                                                'groupby':groupby_list,
-                                               'groupby_selected':parameters['groupby_selected']}
+                                               'groupby_selected':parameters['groupby_selected'],
+                                               'genes':genes}
                   )
 

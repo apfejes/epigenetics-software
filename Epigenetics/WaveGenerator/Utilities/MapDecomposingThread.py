@@ -29,6 +29,7 @@ class MapDecomposer(multiprocessing.Process):
         self._parent_pid = os.getpid()
         self._name = name
         self._popen = None
+        self.thread_id = None
         self._daemonic = True
         self.map_queue = map_queue
         self.sigma_height_table = [[0 for i in range(3 * max_sigma)] for j in range(max_sigma)]
@@ -301,8 +302,9 @@ class MapDecomposer(multiprocessing.Process):
         cProfile.runctx("self.run(args)", globals(), locals())
         self.print_queue.put("finished profiling")
 
-    def run(self, id):    # thought it was receiving two parameters
+    def run(self, thread_id):    # receives id, but isn't actually using it - do not remove.
         '''process the maps, while the thread is running.'''
+        self.thread_id = thread_id
         while True:
             try:
                 map_item = self.map_queue.get(True)    # grabs map from queue\
