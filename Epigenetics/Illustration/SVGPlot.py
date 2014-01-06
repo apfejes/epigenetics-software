@@ -354,7 +354,6 @@ class Plot(object):
                 g = Rect(insert = (start, self.height - self.BOTTOM_MARGIN + self.gene_offset + 4), size = (length, 2), fill = "grey")
                 t = (Text(text, insert = (start, self.height - self.BOTTOM_MARGIN + self.gene_offset + 9), fill = legend_color, font_size = smallfont))
                 self.elements.append(g)
-                self.elements.append(t)
 
                 print "transcript = ", transcript
                 print "transcripts item = ", gene["transcripts"]
@@ -365,8 +364,7 @@ class Plot(object):
                     e = Rect(insert = (e_start, self.height - self.BOTTOM_MARGIN + self.gene_offset), size = (e_len, 9), fill = "grey")
                     self.elements.append(e)
 
-
-
+                self.elements.append(t)
                 self.gene_offset += 12
                 if self.gene_offset > 250:
                     self.gene_offset = self.GENE_OFFSET
