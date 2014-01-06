@@ -4,7 +4,7 @@ Created on 2013-04-15
 @author: afejes, sbrown
 '''
 
-'''THIS IS OLD VERSION, USE Compare_wave_sets_nobg_2way.py'''
+# THIS IS OLD VERSION, USE Compare_wave_sets_nobg_2way.py
 
 
 import sys
@@ -161,8 +161,7 @@ def run(mongo, output, db):
     print controls
 
     chromosomes = util.get_chromosome_names()
-    # #TODO: FOLLOWING FOR DEBUGGING ONLY!
-    # chromosomes = ["chr1", "chr2"]
+    # chromosomes = ["chr1", "chr2"]    #debugging
 
     # id_s = map(util.get_sample_id_from_name, samples)
     # id_r = map(util.get_sample_id_from_name, controls)
