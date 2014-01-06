@@ -37,7 +37,7 @@ class ColorPalette():
 
         for i, j in enumerate(self.colors):
             self.color_wheel[1 + i] = j
-            print "colour_wheel %i - %s" % (1 + i, j)
+            # print "colour_wheel %i - %s" % (1 + i, j)
 
     def _increment_type_counter(self):
         '''self.counter keeps track of the next group colour to assign to new groups.'''
