@@ -10,7 +10,7 @@ from svgwrite.drawing import Drawing
 from svgwrite.path import Path
 from math import fabs
 import Color_Palette
-from PlotUtilities import add_cpg, add_tss, get_axis, bigfont, smallfont, legend_color
+from PlotUtilities import add_cpg, get_axis, bigfont, smallfont, legend_color
 import string    # IGNORE:W0402 - string is deprecated, but str does not have a printable set.
 
 class Plot(object):
@@ -238,7 +238,7 @@ class Plot(object):
             strings += (element.get_xml().decode('utf-8'))
         return strings
 
-    def add_legends(self, get_tss, get_cpg, annotations):
+    def add_legends(self, get_cpg, annotations):
         ''' Add annotations, title, axis, tic marks and labels '''
 
         Title = Text(self.title, insert = (bigfont + ((float(self.MARGIN) - bigfont) / 3),
@@ -254,9 +254,6 @@ class Plot(object):
         if self.message is None:
             self.add_xtics()
             # self.add_sample_labels(self.width - self.RIGHT_MARGIN + 20)
-            if get_tss:
-                for tss in add_tss(annotations, self.MARGIN, self.height, self.scale_x, self.start, self.BOTTOM_MARGIN):
-                    self.elements.insert(0, tss)
             if get_cpg:
                 for cpg in add_cpg(annotations, self.MARGIN, self.height, self.scale_x, self.start, self.end, self.BOTTOM_MARGIN):
                     self.elements.insert(0, cpg)

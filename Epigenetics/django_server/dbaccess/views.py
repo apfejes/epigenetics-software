@@ -104,7 +104,6 @@ def process_request(request):
     p['chromosome'] = q.get("chromosome", None)
     p['minheight'] = q.get("minheight", None)
     p['minsigma'] = q.get("minsigma", None)
-    p['tss'] = to_boolean(q.get("tss", False))
     p['cpg'] = to_boolean(q.get("cpg", False))
     p['show_dist'] = to_boolean(q.get("show_dist", False))
     p['datapoints'] = to_boolean(q.get("datapoints", True))
@@ -243,7 +242,7 @@ def view_query_form(request):
     if check(parameters):
         if methylation and not peaks:
             docs = m.query(parameters)
-            if parameters['tss'] or parameters['cpg']:
+            if parameters['cpg']:
                 m.getannotations(docs)
             svg, sample_index, types_index = m.svg_builder.svg(to_string = True,
                            title = "%s DNA methylation on %s (%i - %i)" %
@@ -252,7 +251,6 @@ def view_query_form(request):
                                parameters['start'], parameters['end']),
                            height = parameters['height'],
                            width = parameters['width'],
-                           get_tss = parameters['tss'],
                            get_cpg = parameters['cpg'],
                            show_points = parameters['datapoints'],
                            show_dist = parameters['show_dist'],
@@ -263,7 +261,7 @@ def view_query_form(request):
 
         elif peaks and not methylation:
             docs = m.query(parameters)
-            if parameters['tss'] or parameters['cpg']:
+            if parameters['cpg']:
                 m.getannotations(docs)
             # print "DEBUG: parameters: ", parameters
             svg, sample_index, types_index = m.svg_builder.svg(to_string = True,
@@ -273,7 +271,6 @@ def view_query_form(request):
                                parameters['start'], parameters['end']),
                             height = parameters['height'],
                             width = parameters['width'],
-                            get_tss = parameters['tss'],
                             get_cpg = parameters['cpg'],
                             types_index = parameters['types_index'],
                             sample_index = parameters['sample_index'],
@@ -281,7 +278,7 @@ def view_query_form(request):
 
         elif methylation and peaks:
             docs = m.query(parameters)
-            if parameters['tss'] or parameters['cpg']:
+            if parameters['cpg']:
                 m.getannotations(docs)
 
             svg, sample_index, types_index = m.svg_builder.svg(to_string = True,
@@ -291,7 +288,6 @@ def view_query_form(request):
                                parameters['start'], parameters['end']),
                             height = parameters['height'],
                             width = parameters['width'],
-                            get_tss = parameters['tss'],
                             get_cpg = parameters['cpg'],
                             sample_index = parameters['sample_index'],
                             show_points = parameters['datapoints'],
@@ -315,7 +311,6 @@ def view_query_form(request):
                                                'end':parameters['end'],
                                                'minheight':parameters['minheight'],
                                                'minsigma':parameters['minsigma'],
-                                               'tss':parameters['tss'],
                                                'cpg':parameters['cpg'],
                                                'datapoints': parameters['datapoints'],
                                                'show_dist':parameters['show_dist'],

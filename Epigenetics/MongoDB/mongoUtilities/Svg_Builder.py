@@ -36,7 +36,6 @@ class Svg_Builder():
             get_elements = False,
             height = 200.0,
             width = 60.0,
-            get_tss = False,
             get_cpg = False,
             show_points = False,
             show_dist = False,
@@ -80,7 +79,7 @@ class Svg_Builder():
 
 
         if (self.error_message == ''):
-            self.drawing.add_legends(get_tss, get_cpg, self.annotations)
+            self.drawing.add_legends(get_cpg, self.annotations)
         if to_string:
             print " Returning svg as a unicode string"
             z = self.drawing.to_string()

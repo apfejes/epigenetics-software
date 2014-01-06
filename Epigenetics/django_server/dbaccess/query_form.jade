@@ -98,12 +98,6 @@ body
       #option_elements
         if organism == 'human'
           #selection_element
-            label(for='tss') Tss:
-              if tss
-                input(id='tss', size = '8', type='checkbox', name="tss", checked)
-              else
-                input(id='tss', size = '8', type='checkbox', name="tss")
-          #selection_element
             label(for='cpg') CpG Islands:
               if cpg
                 input(id='cpg', size = '8', type='checkbox', name="cpg", checked)
@@ -322,10 +316,6 @@ script(type='text/javascript')
       if (e) {
         var minsigma = e.value;
       }
-      var e = document.getElementById("tss");
-      if (e) {
-        var tss = e.checked;
-      }
       var e = document.getElementById("cpg");
       if (e) {
         var cpg = e.checked;
@@ -353,9 +343,6 @@ script(type='text/javascript')
       }
       if (minsigma) {
         base += "&minsigma=" + minsigma
-      }
-      if (tss) {
-        base += "&tss=" + tss
       }
       if (cpg) {
         base += "&cpg=" + cpg
