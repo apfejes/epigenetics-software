@@ -138,7 +138,7 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
             end = num_probes
         b = robjects.r('betas(methylObj)[%i:%i,,drop=FALSE]' % (start, end))
         r = robjects.r('rownames(betas(methylObj)[%i:%i,,drop=FALSE])' % (start, end))
-        m = robjects.r('exprs(methylObj)[%i:%i,,drop=FALSE]' % (start, end))    # don't worry about levels. Data will always be floats, for this table
+        # m = robjects.r('exprs(methylObj)[%i:%i,,drop=FALSE]' % (start, end))    # don't worry about levels. Data will always be floats, for this table
         for x in range(1, num_samples + 1):    # one to number of samples  - the column number - iterate.
             items = [{} for _k in range(start, end + 1)]    # zero to batch_size-1
             for y in range(1, (end - start + 1)):    # the data
