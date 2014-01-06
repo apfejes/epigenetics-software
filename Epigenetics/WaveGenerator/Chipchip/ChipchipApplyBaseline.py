@@ -97,8 +97,8 @@ def FindAverageProbeIntensity(ps, signal = 0.2):
     cutoff = int(len(ps2) * (1 - signal))
     values = ps2[0:cutoff]
     tot = 0
-    for i in range(0, len(values)):
-        tot += values[i]
+    for j in range(0, len(values)):
+        tot += values[j]
     avg = tot / len(values)
     return avg
 
