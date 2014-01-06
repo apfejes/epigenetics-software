@@ -25,6 +25,7 @@ class Plot(object):
     BOTTOM_MARGIN = 120    # 120 pixels
     RIGHT_MARGIN = 240
     MARGIN = 30
+    GENE_OFFSET = 20
     palette = Color_Palette.ColorPalette()    # APF - reset on each iteration through the sorter.
 
 
@@ -51,6 +52,8 @@ class Plot(object):
         self.maxh = 0
         self.plot = None
 
+        self.gene_offset = self.GENE_OFFSET
+
 
     def set_properties(self, filename, title, start, end, width, height):
         '''Set the properties of the canvas on which you'll want to generate your image '''
@@ -66,8 +69,8 @@ class Plot(object):
         self.dimension_x = self.width - self.MARGIN - self.RIGHT_MARGIN
         self.scale_x = float(self.dimension_x) / (self.end - self.start)    # this is a scaling variable
 
-        canvas_size = (str(self.width) + "px" , str(self.height) + "px")    # create drawing
-        self.plot = Drawing(filename, size = canvas_size)
+        canvas_size = (str(self.width) + "px" , "100%")    # create drawing # Default is 100%,100% - don't override that, as this allows the svg to fit the data and expand as necessary
+        self.plot = Drawing(filename , size = canvas_size)
         background = Rect(insert = (0, 0), size = canvas_size, fill = "white")
         self.plot.add(background)
 
@@ -86,6 +89,9 @@ class Plot(object):
     def get_types_index(self):
         ''' Return the sample index so that it can be used in HTML'''
         return self.palette.get_type_colors()
+
+    def convert_xcoord_to_pos(self, xcoord):
+        return round(float(xcoord - self.start) * self.scale_x, 2) + self.MARGIN
 
 
     def make_gausian(self, pos, height, stddev, horizontal = True, y_median = 0, sigmas = 3):
@@ -323,4 +329,46 @@ class Plot(object):
             ticmarker = (Text(label, insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
             self.elements.append(ticline)
             self.elements.append(ticmarker)
+
+    def draw_genes(self, genes):
+        for gene in genes:
+            for transcript in gene['transcripts']:
+
+                start = self.convert_xcoord_to_pos(gene['start'])
+                length = self.convert_xcoord_to_pos(gene['end']) - start
+                if start < self.MARGIN:
+                    if start < 0:    # first, remove anything before zero.
+                        length += start
+                        start = 0
+                    length -= (self.MARGIN + start)    # then remove anything before the margin begins
+                    start = self.MARGIN
+                if start + length > (self.width - self.RIGHT_MARGIN):
+                    length = (self.width - self.RIGHT_MARGIN) - start
+                text = None
+                if gene['strand'] == 1:
+                    text = gene['name'] + " ->>>"
+                else:
+                    text = " <<<- " + gene['name']
+                # print "(self.width + self.RIGHT_MARGIN + self.MARGIN)", (self.width - self.RIGHT_MARGIN)
+                # print "gene -> text:%s chrend:%i chrstart:%i start:%i length:%i" % (gene['name'], gene['end'], gene['start'], start, length)
+                g = Rect(insert = (start, self.height - self.BOTTOM_MARGIN + self.gene_offset + 4), size = (length, 2), fill = "grey")
+                t = (Text(text, insert = (start, self.height - self.BOTTOM_MARGIN + self.gene_offset + 9), fill = legend_color, font_size = smallfont))
+                self.elements.append(g)
+                self.elements.append(t)
+
+                print "transcript = ", transcript
+                print "transcripts item = ", gene["transcripts"]
+                for exon in gene["transcripts"][transcript]["exons"]:
+                    e = gene["transcripts"][transcript]["exons"][exon]
+                    e_start = self.convert_xcoord_to_pos(e["start"])
+                    e_len = self.convert_xcoord_to_pos(e['end']) - e_start
+                    e = Rect(insert = (e_start, self.height - self.BOTTOM_MARGIN + self.gene_offset), size = (e_len, 9), fill = "grey")
+                    self.elements.append(e)
+
+
+
+                self.gene_offset += 12
+                if self.gene_offset > 250:
+                    self.gene_offset = self.GENE_OFFSET
+
 

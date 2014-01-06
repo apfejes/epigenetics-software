@@ -53,3 +53,11 @@ CDS Start
 CDS End
 
 
+Export:
+mongoexport --db human_epigenetics --collection annotations > ~/Data/Pavlab/annotations.json
+
+Import
+mongoimport --db human_epigenetics --collection annotations --file annotations.json
+
+set up remote server (trial site...):
+ ssh -l <name> -p 22000 -D 9999 <server>

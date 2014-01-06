@@ -29,7 +29,7 @@ from bson.objectid import ObjectId
 class MongoEpigeneticsWrapper():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
 
-    def __init__(self, database, methylation, peaks, start, end):
+    def __init__(self, database, methylation, peaks, chromosome, start, end):
         '''Performs the connection to the Mongo database.'''
         self.database = database
         self.p = Parameters.parameter()
@@ -38,6 +38,9 @@ class MongoEpigeneticsWrapper():
         self.peaks = peaks
         self.start = start
         self.end = end
+        if chromosome != None and (isinstance(chromosome, int) or chromosome[0:3] != 'chr'):
+            chromosome = 'chr' + str(chromosome)
+        self.chromosome = chromosome
 
         self.svg_builder = Svg_Builder.Svg_Builder(self.methylation, self.peaks, self.start, self.end)
         self.chromosome = None
@@ -57,15 +60,14 @@ class MongoEpigeneticsWrapper():
             self.error_message = 'Invalid start and end points.'
         else:
             self.error_message = ''    # contains error messages to pass to the server
-
+        self.chromosome = parameters['chromosome']
+        if isinstance(self.chromosome, int) or self.chromosome[0:3] != 'chr':
+            self.chromosome = 'chr' + str(self.chromosome)
         self.end = end
         self.start = start
 
         # Make sure chr variable is in the right format
-        chromosome = parameters['chromosome']
-        if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
-            chromosome = 'chr' + str(chromosome)
-        self.chromosome = chromosome
+
 
         # TODO: Make sure that if "both" is picked, that the two pieces of code work together, and don't overwrite each other.
         if self.methylation:
@@ -529,14 +531,17 @@ class MongoEpigeneticsWrapper():
 
     def find_genes(self, chromosome, start, end):
         '''given a region find all of the genes that overlap'''
-        r = self.mongo.findOne("ensgenes", {"chr":chromosome,"end":{"$gt":start},"start":{"$lt":end} })
-        return r
-        
+        query = {"chr":chromosome, "end":{"$gt":start}, "start":{"$lt":end} }
+        print "finding genes in region: ", query
+        cursor = self.mongo.find("ensgenes", query)
+        return CreateListFromCursor(cursor)
+
     def find_coords_by_gene (self, name):
         '''given the name of a gene, get the coordinates'''
-        r = self.mongo.findOne("ensgenes", {"name":name}, {"chr":1,"start":1,"end":1,"_id":0})
+
+        r = self.mongo.findOne("ensgenes", {"name":name}, {"chr":1, "start":1, "end":1, "_id":0})
         if r == None:
-            return {"chr":"chr1","start":0, "end":1000}
+            return {"chr":"chr1", "start":0, "end":1000}
         else:
             return r
 
