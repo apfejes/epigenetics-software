@@ -29,23 +29,15 @@ from bson.objectid import ObjectId
 class MongoEpigeneticsWrapper():
     '''A class to simplify plotting methylation and chipseq data from a mongo database'''
 
-    def __init__(self, database, methylation, peaks, chromosome, start, end):
+    def __init__(self, database, methylation, peaks):
         '''Performs the connection to the Mongo database.'''
         self.database = database
         self.p = Parameters.parameter()
         self.mongo = Mongo_Connector.MongoConnector(self.p.get('server'), self.p.get('port'), database)    # database changes based on interface value
         self.methylation = methylation
         self.peaks = peaks
-        self.start = start
-        self.end = end
-        if chromosome != None and (isinstance(chromosome, int) or chromosome[0:3] != 'chr'):
-            chromosome = 'chr' + str(chromosome)
-        self.chromosome = chromosome
-
-        self.svg_builder = Svg_Builder.Svg_Builder(self.methylation, self.peaks, self.start, self.end)
-        self.chromosome = None
-
-
+        self.error_message = None
+        self.svg_builder = None
 
 
     def query(self, parameters,
@@ -56,15 +48,16 @@ class MongoEpigeneticsWrapper():
 
         start = parameters['start']
         end = parameters['end']
+
+        self.svg_builder = Svg_Builder.Svg_Builder(self.methylation, self.peaks, start, end)
+
         if start == end or start > end or start < 0 or end < 0:
             self.error_message = 'Invalid start and end points.'
         else:
             self.error_message = ''    # contains error messages to pass to the server
-        self.chromosome = parameters['chromosome']
-        if isinstance(self.chromosome, int) or self.chromosome[0:3] != 'chr':
-            self.chromosome = 'chr' + str(self.chromosome)
-        self.end = end
-        self.start = start
+        chromosome = parameters['chromosome']
+        if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
+            chromosome = 'chr' + str(chromosome)
 
         # Make sure chr variable is in the right format
 
@@ -72,7 +65,7 @@ class MongoEpigeneticsWrapper():
         # TODO: Make sure that if "both" is picked, that the two pieces of code work together, and don't overwrite each other.
         if self.methylation:
             sample_ids = self.organize_samples_methylation(parameters['methylation_project'], sample_label, sample_group, parameters['groupby_selected'])
-            cursor = self.finddocs_annotations()    # get probe and annotation info for region queried
+            cursor = self.finddocs_annotations(chromosome, start, end)    # get probe and annotation info for region queried
             docs = CreateListFromCursor(cursor)
             probes = self.getprobes(docs)    # get list of probe ids
             self.collectbetas(sample_ids, probes)    # organize the beta values with sample info into a dictionary
@@ -80,7 +73,7 @@ class MongoEpigeneticsWrapper():
 
         if self.peaks:
             sample_ids = self.organize_samples_chipseq(parameters['chipseq_project'])
-            cursor = self.finddocs_waves(sample_ids, minh = parameters['minheight'], mins = parameters['minsigma'])    # get peak info for region queries
+            cursor = self.finddocs_waves(sample_ids, chromosome, start, end, minh = parameters['minheight'], mins = parameters['minsigma'])    # get peak info for region queries
             docs = CreateListFromCursor(cursor)
             self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
             if self.database == 'human_epigenetics':
@@ -169,7 +162,7 @@ class MongoEpigeneticsWrapper():
         return sample_ids
 
 
-    def finddocs_annotations (self):
+    def finddocs_annotations (self, chromosome, start, end):
 
         '''Finds documents corresponding to collection and type of query'''
 
@@ -177,12 +170,12 @@ class MongoEpigeneticsWrapper():
             return {}
         collection = 'annotations'
         query_parameters = {}    # This dictionary will store all the query parameters
-        query_parameters["chr"] = self.chromosome
+        query_parameters["chr"] = chromosome
         query_location = {}
-        if self.end >= 0:
-            query_location["$lte"] = self.end
-        if self.start >= 0:
-            query_location["$gte"] = self.start
+        if end >= 0:
+            query_location["$lte"] = end
+        if start >= 0:
+            query_location["$gte"] = start
         query_parameters["mapinfo"] = dict(query_location.items())
         # Decide which parameters to return
         return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hil_cpg_island_name':True,
@@ -194,7 +187,7 @@ class MongoEpigeneticsWrapper():
         return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
 
 
-    def finddocs_waves(self, sample_ids, minh = 0, mins = 0):
+    def finddocs_waves(self, sample_ids, chromosome, start, end, minh = 0, mins = 0):
 
         '''Finds documents corresponding to collection and type of query
         
@@ -212,14 +205,14 @@ class MongoEpigeneticsWrapper():
         for key in sample_ids:
             samples.append(ObjectId(key))
 
-        query_parameters['chr'] = self.chromosome
+        query_parameters['chr'] = chromosome
         if (len(samples) > 1):
             query_parameters["sample_id"] = {"$in":samples}
         else:
             query_parameters["sample_id"] = samples[0]
-        if self.start and self.end:
+        if start and end:
             extension = 500    # extend the region of query to catch peaks with tails in the region
-            query_parameters["pos"] = {"$lte":self.end + extension, "$gte":self.start - extension}
+            query_parameters["pos"] = {"$lte":end + extension, "$gte":start - extension}
 
         minh = float(minh)
         if (minh > 0):
@@ -419,16 +412,10 @@ class MongoEpigeneticsWrapper():
                 sample_peaks[pos].update({stype : (m, s)})
 
         self.svg_builder.sample_peaks = sample_peaks
-
-
-        # TODO: APF, must figure out why this is here.  Why not in the init?
-        if self.end is None:
-            self.end = maxpos
-            print "    New end position:", self.end
         return None
 
 
-    def getwaves(self, docs, sample_ids):
+    def getwaves(self, docs, sample_ids, start, end):
         '''Collects and bins chipseq data, and pushes it into the svg_generating object.'''
         count = 0
         tail = 1
@@ -446,13 +433,14 @@ class MongoEpigeneticsWrapper():
             pos, height, stddev, sample_id = doc['pos'], doc['height'], int(doc['stddev']), str(doc['sample_id'])
             # search for sample label name:
             doc_sample_group = sample_ids[sample_id]
-            if self.start <= pos <= self.end:
+            if start <= pos <= end:
                 waves.append((pos, height, stddev, doc_sample_group))
                 count += 1
             else:
-                if not self.end:
+                if not end:
                     dist_to_region = 0
-                else: dist_to_region = min(abs(pos - self.end), abs(self.start - pos))
+                else:
+                    dist_to_region = min(abs(pos - end), abs(start - pos))
                 dist_from_peak_to_tail = sqrt((-2) * stddev * stddev * log(tail / height))
                 if dist_from_peak_to_tail - dist_to_region >= 0:
                     waves.append((pos, height, stddev, doc_sample_group))
@@ -463,8 +451,8 @@ class MongoEpigeneticsWrapper():
 
         # TODO: APF, must check why this is here - seems a bad place for it to be.  Why not init?
         # potentially handling an empty case (whole chromosome?)
-        if self.end is None:
-            self.end = maxpos
+        if end is None:
+            end = maxpos
             print "    New end position:", self.end
 
         if count == 0:
@@ -480,34 +468,15 @@ class MongoEpigeneticsWrapper():
     def getannotations(self, docs):
         '''Organizes the annotation information into a dictionary'''
         annotations = {}
-        annotations['TSS'] = {}
         annotations['Islands'] = set([])
-        annotations['genes'] = set([])
         annotations['feature'] = set([])
 
         for doc in docs:
-            tss1 = str(doc['closest_tss'])
-            if tss1:
-                tss1 = list(set(tss1.split(';')))
-            geneclosest = str(doc["closest_tss_gene_name"])
-            if geneclosest:
-                geneclosest = list(set(geneclosest.split(';')))
-            genes = zip(tss1, geneclosest)
-
-            for tss, gene in genes:
-                tss = int(tss)
-                if tss >= self.start:
-                    if tss <= self.end:
-                        annotations['TSS'][tss] = gene
-                else:
-                    annotations['genes'].add((gene, tss))
-
             # Pull regulatory features' coordinate. Not plotting these yet.
             feature = str(doc['regulatory_feature_group'])
             feature_coord = str(doc['regulatory_feature_name'])
             if feature and feature_coord:
                 feature_coord.split(':')[1].split('-')
-
             if doc['hil_cpg_island_name']:
                 # cpg_class = doc['hil_cpg_class']
                 # Parse CpG islands info of format (chr#_class:start-end)
@@ -532,16 +501,17 @@ class MongoEpigeneticsWrapper():
     def find_genes(self, chromosome, start, end):
         '''given a region find all of the genes that overlap'''
         query = {"chr":chromosome, "end":{"$gt":start}, "start":{"$lt":end} }
-        print "finding genes in region: ", query
         cursor = self.mongo.find("ensgenes", query)
         return CreateListFromCursor(cursor)
 
     def find_coords_by_gene (self, name):
         '''given the name of a gene, get the coordinates'''
 
-        r = self.mongo.findOne("ensgenes", {"name":name}, {"chr":1, "start":1, "end":1, "_id":0})
+        print "finding region by gene name:", name
+
+        r = self.mongo.find_one("ensgenes", {"name":name}, {"chr":1, "start":1, "end":1, "_id":0})
         if r == None:
-            return {"chr":"chr1", "start":0, "end":1000}
+            return None
         else:
             return r
 

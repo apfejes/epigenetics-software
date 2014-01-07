@@ -11,6 +11,7 @@ from django.shortcuts import render
 from pymongo.mongo_client import MongoClient
 import os, sys
 import ast
+from viewtools import ZOOM_FACTORS, PANNING_PERCENTS
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(os.path.dirname(_cur_dir))
@@ -125,20 +126,9 @@ def process_request(request):
         end = start + 1
     elif end > start:
         end = int(end)
-
-    action_factor = q.get("action", None)    # don't save the "action factor" parameter.
-    if action_factor and (start >= 0) and (end >= 0):
-        if 'Right' in action_factor or 'Left' in action_factor:
-            start, end = panning(action_factor, int(start), int(end))
-        elif 'In' in action_factor or 'Out' in action_factor:
-            start, end = zoom(action_factor, int(start), int(end))
-
-    if end < start + 20:    # last chance to catch if you've zoomed in too far.
-        end = start + 20
-
     p['start'] = start
     p['end'] = end
-
+    p['action_factor'] = q.get("action", None)    # don't need to save the "action factor" parameter, but need to check if it's a gene.
     return p
 
 
@@ -228,9 +218,28 @@ def view_query_form(request):
     database = parameters['organism'] + "_epigenetics"
     print("creating Mongo Wrapper on Database")
 
-    m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks, parameters['chromosome'], parameters['start'], parameters['end'])
-
+    m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks)
     svg = 'Please query the database to generate an image!'    # default string..  Should remove this.
+
+    action_factor = parameters.pop('action_factor')    # don't want to leave it in parameters.
+    if action_factor in ZOOM_FACTORS or action_factor in PANNING_PERCENTS:
+        if action_factor and (parameters['start'] >= 0) and (parameters['end'] >= 0):
+            if 'Right' in action_factor or 'Left' in action_factor:
+                parameters['start'], parameters['end'] = panning(action_factor, int(parameters['start']), int(parameters['end']))
+            elif 'In' in action_factor or 'Out' in action_factor:
+                parameters['start'], parameters['end'] = zoom(action_factor, int(parameters['start']), int(parameters['end']))
+    else:
+        # process as a gene name
+        coords = m.find_coords_by_gene(action_factor)
+        print "coords = ", coords
+        if coords:
+            parameters['chromosome'] = coords['chr']
+            parameters['start'] = coords['start']
+            parameters['end'] = coords['end']
+
+    if parameters['end'] < parameters['start'] + 20:    # last chance to catch if you've zoomed in too far.
+        parameters['end'] = parameters['start'] + 20
+
 
     genes = m.find_genes(parameters['chromosome'], parameters['start'], parameters['end'])
 

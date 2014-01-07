@@ -80,21 +80,25 @@ body
           input(type='submit',value='Query!', class ="bigbutton")
       #zoompan
         #selection_element
-          input(type='button',value = '<<<', title="Pan left 60%", name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self');", class = "medbutton")
+          input(type='button',value = '<<<', title="Pan left 60%", name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self');", class="medbutton")
         #selection_element
-          input(type='button',value = '<<',title="Pan left 30%", name='LessLeft', onClick="window.open(newURL('LessLeft'),'_self');", class = "medbutton")
+          input(type='button',value = '<<',title="Pan left 30%", name='LessLeft', onClick="window.open(newURL('LessLeft'),'_self');", class="medbutton")
         #selection_element
-          input(type='button',value = '--', title="Zoom Out x3", name='ZoomOutMore', onClick="window.open(newURL('ZoomOutMore'),'_self');", class = "medbutton")
+          input(type='button',value = '--', title="Zoom Out x3", name='ZoomOutMore', onClick="window.open(newURL('ZoomOutMore'),'_self');", class="medbutton")
         #selection_element
-          input(type='button',value = '-',title='Zoom Out x1.5', name='ZoomOut', onClick="window.open(newURL('ZoomOut'),'_self');", class = "medbutton")
+          input(type='button',value = '-',title='Zoom Out x1.5', name='ZoomOut', onClick="window.open(newURL('ZoomOut'),'_self');", class="medbutton")
         #selection_element
-          input(type='button',value = '+',title='Zoom In x1.5', name='ZoomIn', onClick="window.open(newURL('ZoomIn'),'_self');", class = "medbutton")
+          input(type='button',value = '+',title='Zoom In x1.5', name='ZoomIn', onClick="window.open(newURL('ZoomIn'),'_self');", class="medbutton")
         #selection_element
-          input(type='button',value = '++',title='Zoom In x3', name='ZoomInMore', onClick="window.open(newURL('ZoomInMore'),'_self');", class = "medbutton")
+          input(type='button',value = '++',title='Zoom In x3', name='ZoomInMore', onClick="window.open(newURL('ZoomInMore'),'_self');", class="medbutton")
         #selection_element
-          input(type='button',value = '>>', title="Pan right 30%", name='LessRight', onClick="window.open(newURL('LessRight'),'_self');", class = "medbutton")
+          input(type='button',value = '>>', title="Pan right 30%", name='LessRight', onClick="window.open(newURL('LessRight'),'_self');", class="medbutton")
         #selection_element
-          input(type='button',value = '>>>', title="Pan right 60%", name='MoreRight', onClick="window.open(newURL('MoreRight'),'_self');", class = "medbutton")
+          input(type='button',value = '>>>', title="Pan right 60%", name='MoreRight', onClick="window.open(newURL('MoreRight'),'_self');", class="medbutton")
+        | or
+        #selection_element 
+          input(type='text', placeholder='gene name', title="jump to gene", name='genename', onkeydown="if (event.keyCode == 13) document.getElementById('gotogene').click();")
+          input(type='button', value='Go To Gene', title="jump to gene", id='gotogene', name='gotogene', onClick="window.open(newURL(genename.value),'_self');")
       #option_elements
         if organism == 'human'
           #selection_element

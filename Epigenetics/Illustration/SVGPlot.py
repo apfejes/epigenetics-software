@@ -330,7 +330,6 @@ class Plot(object):
     def draw_genes(self, genes):
         for gene in genes:
             for transcript in gene['transcripts']:
-
                 start = self.convert_xcoord_to_pos(gene['start'])
                 length = self.convert_xcoord_to_pos(gene['end']) - start
                 if start < self.MARGIN:
@@ -352,12 +351,12 @@ class Plot(object):
                 t = (Text(text, insert = (start, self.height - self.BOTTOM_MARGIN + self.gene_offset + 9), fill = legend_color, font_size = smallfont))
                 self.elements.append(g)
 
-                print "transcript = ", transcript
-                print "transcripts item = ", gene["transcripts"]
                 for exon in gene["transcripts"][transcript]["exons"]:
                     e = gene["transcripts"][transcript]["exons"][exon]
                     e_start = self.convert_xcoord_to_pos(e["start"])
                     e_len = self.convert_xcoord_to_pos(e['end']) - e_start
+                    if e_start > (self.width - self.RIGHT_MARGIN) or e_start + e_len < self.MARGIN:
+                        continue
                     e = Rect(insert = (e_start, self.height - self.BOTTOM_MARGIN + self.gene_offset), size = (e_len, 9), fill = "grey")
                     self.elements.append(e)
 

@@ -11,6 +11,11 @@ db.waves.find().forEach(function(data) {
 })
 
 
+** insert into sample_group: **
+db.sample_groups.insert({"project":"Aortic Stenosis_Priest Study_PBMCs", "default":"sample_group", "available":["sample_label","sample_group","age","sex","sentrix_id"]})
+
+
+
 **Upgrade Pyjade.**
 	sudo pip install pyjade --upgrade
 
