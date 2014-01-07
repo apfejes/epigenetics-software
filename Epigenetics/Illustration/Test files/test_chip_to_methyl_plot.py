@@ -28,7 +28,7 @@ if chip_first:
     # Collect waves data
     query_waves = m.query(collection = "waves", chromosome = chromosome, start = start, end = end)
     m.finddocs()
-    m.getwaves()
+    m.getwaves()    # TODO: will now fail.
     # Store elements of the svg peaks in a list called waves
     waves = m.svg(title = "Huntington gene", get_elements = True)
 
