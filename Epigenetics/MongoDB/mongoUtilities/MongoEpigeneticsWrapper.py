@@ -36,6 +36,7 @@ class MongoEpigeneticsWrapper():
         self.mongo = Mongo_Connector.MongoConnector(self.p.get('server'), self.p.get('port'), database)    # database changes based on interface value
         self.methylation = methylation
         self.peaks = peaks
+
         self.error_message = None
         self.svg_builder = None
 
@@ -48,19 +49,17 @@ class MongoEpigeneticsWrapper():
 
         start = parameters['start']
         end = parameters['end']
-
-        self.svg_builder = Svg_Builder.Svg_Builder(self.methylation, self.peaks, start, end)
-
         if start == end or start > end or start < 0 or end < 0:
             self.error_message = 'Invalid start and end points.'
         else:
             self.error_message = ''    # contains error messages to pass to the server
         chromosome = parameters['chromosome']
         if isinstance(chromosome, int) or chromosome[0:3] != 'chr':
-            chromosome = 'chr' + str(chromosome)
+            parameters['chromosome'] = 'chr' + str(chromosome)
 
         # Make sure chr variable is in the right format
 
+        self.svg_builder = Svg_Builder.Svg_Builder(self.methylation, self.peaks, start, end)
 
         # TODO: Make sure that if "both" is picked, that the two pieces of code work together, and don't overwrite each other.
         if self.methylation:
@@ -75,9 +74,9 @@ class MongoEpigeneticsWrapper():
             sample_ids = self.organize_samples_chipseq(parameters['chipseq_project'])
             cursor = self.finddocs_waves(sample_ids, chromosome, start, end, minh = parameters['minheight'], mins = parameters['minsigma'])    # get peak info for region queries
             docs = CreateListFromCursor(cursor)
-            self.getwaves(docs, sample_ids)    # organize peak info into a dictionary
+            self.getwaves(docs, sample_ids, start, end)    # organize peak info into a dictionary
             if self.database == 'human_epigenetics':
-                annotation_docs = self.finddocs_annotations()    # get the gene annotations info
+                annotation_docs = self.finddocs_annotations(chromosome, start, end)    # get the gene annotations info
             else:
                 annotation_docs = {}
         return annotation_docs
@@ -448,13 +447,6 @@ class MongoEpigeneticsWrapper():
             if pos > maxpos:
                 maxpos = pos
 
-
-        # TODO: APF, must check why this is here - seems a bad place for it to be.  Why not init?
-        # potentially handling an empty case (whole chromosome?)
-        if end is None:
-            end = maxpos
-            print "    New end position:", self.end
-
         if count == 0:
             message = "    WARNING: None of peaks found in the query lie in the region!"
             print message
@@ -506,9 +498,6 @@ class MongoEpigeneticsWrapper():
 
     def find_coords_by_gene (self, name):
         '''given the name of a gene, get the coordinates'''
-
-        print "finding region by gene name:", name
-
         r = self.mongo.find_one("ensgenes", {"name":name}, {"chr":1, "start":1, "end":1, "_id":0})
         if r == None:
             return None

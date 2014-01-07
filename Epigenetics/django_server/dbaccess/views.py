@@ -7,11 +7,9 @@ from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
 
-
 from pymongo.mongo_client import MongoClient
 import os, sys
 import ast
-from viewtools import ZOOM_FACTORS, PANNING_PERCENTS
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(os.path.dirname(_cur_dir))
@@ -20,13 +18,9 @@ sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "common_utilities")
 from MongoDB.mongoUtilities import MongoEpigeneticsWrapper
 from MongoDB.mongoUtilities.common_utilities import CreateListFromCursor
-
-
+from viewtools import ZOOM_FACTORS, PANNING_PERCENTS, panning, zoom, check
 
 mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
-
-
-from viewtools import panning, zoom, check
 collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip':'Both'}
 
 
@@ -123,7 +117,7 @@ def process_request(request):
 
     end = q.get("end", None)
     if end is None or end == '' or end == True:
-        end = start + 1
+        end = start + 10
     elif end > start:
         end = int(end)
     p['start'] = start
@@ -165,6 +159,7 @@ def view_query_form(request):
     groupby_list = {}
     for o in organism_list:
         proj_list = mongo[o + "_epigenetics"]['samples'].distinct("project")
+        proj_list = [u for u in proj_list if u is not None]
         proj_list.sort()
         op_list = [str(y) for y in proj_list]
         methylation_list[o] = op_list
@@ -183,13 +178,6 @@ def view_query_form(request):
                 a = x['available'][0].encode('utf-8')
             byproj[x['project'].encode('utf-8')] = {'default':x['default'].encode('utf-8'), 'available':a}
         groupby_list[o] = byproj
-
-
-
-
-
-    # print "chipseq_list ", chipseq_list
-    # print "chipseq:", parameters['chipseq']
 
     # variables:
     methylation, peaks = process_collection(parameters['collection'])
@@ -221,27 +209,22 @@ def view_query_form(request):
     m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks)
     svg = 'Please query the database to generate an image!'    # default string..  Should remove this.
 
-    action_factor = parameters.pop('action_factor')    # don't want to leave it in parameters.
-    if action_factor in ZOOM_FACTORS or action_factor in PANNING_PERCENTS:
-        if action_factor and (parameters['start'] >= 0) and (parameters['end'] >= 0):
-            if 'Right' in action_factor or 'Left' in action_factor:
-                parameters['start'], parameters['end'] = panning(action_factor, int(parameters['start']), int(parameters['end']))
-            elif 'In' in action_factor or 'Out' in action_factor:
-                parameters['start'], parameters['end'] = zoom(action_factor, int(parameters['start']), int(parameters['end']))
+    action_factor = parameters.pop("action_factor")    # don't want to leave it in parameters.
+    if action_factor in ZOOM_FACTORS:
+        parameters['start'], parameters['end'] = zoom(action_factor, int(parameters['start']), int(parameters['end']))
+    elif action_factor in PANNING_PERCENTS:
+        parameters['start'], parameters['end'] = panning(action_factor, int(parameters['start']), int(parameters['end']))
     else:
-        # process as a gene name
         coords = m.find_coords_by_gene(action_factor)
-        print "coords = ", coords
         if coords:
             parameters['chromosome'] = coords['chr']
             parameters['start'] = coords['start']
             parameters['end'] = coords['end']
 
-    if parameters['end'] < parameters['start'] + 20:    # last chance to catch if you've zoomed in too far.
-        parameters['end'] = parameters['start'] + 20
+    if parameters['end'] < parameters['start'] + 10:    # must check this here, because placing the start and end too close together will 'cause x tics to fail.
+        parameters['end'] = parameters['start'] + 10
 
-
-    genes = m.find_genes(parameters['chromosome'], parameters['start'], parameters['end'])
+    genes = m.find_genes(str(parameters['chromosome']), parameters['start'], parameters['end'])
 
     sample_index = {}
     types_index = {}
