@@ -352,12 +352,17 @@ class Plot(object):
                 t = (Text(text, insert = (start, self.height - self.BOTTOM_MARGIN + self.gene_offset + 9), fill = legend_color, font_size = smallfont))
                 self.elements.append(g)
 
-                print "transcript = ", transcript
-                print "transcripts item = ", gene["transcripts"]
                 for exon in gene["transcripts"][transcript]["exons"]:
                     e = gene["transcripts"][transcript]["exons"][exon]
                     e_start = self.convert_xcoord_to_pos(e["start"])
                     e_len = self.convert_xcoord_to_pos(e['end']) - e_start
+                    if e_start > (self.width - self.RIGHT_MARGIN) or (e_start + e_len) < self.MARGIN:
+                        continue
+                    if e_start < self.MARGIN:
+                        e_start = self.MARGIN
+                    if e_start + e_len > (self.width - self.RIGHT_MARGIN):
+                        e_len = (self.width - self.RIGHT_MARGIN) - e_start
+
                     e = Rect(insert = (e_start, self.height - self.BOTTOM_MARGIN + self.gene_offset), size = (e_len, 9), fill = "grey")
                     self.elements.append(e)
 
