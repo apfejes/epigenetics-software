@@ -35,6 +35,9 @@ def view_collections(request):
     collections = ""
     for item in db.collection_names():
         collections += item + ', '
+    print "collections = ", collections
+    print "path = ", os.path.abspath(os.path.dirname(__file__)) + os.sep + 'collections.jade'
+    print "request = ", request
     return render(request, 'collections.jade', {'collections':collections})
 
 def send_svg(request):

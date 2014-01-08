@@ -5,7 +5,8 @@ html
 
 body
   #header
-     h1 Epigenetics Database
+    block title
+      h1 Epigenetics Database
   #subheader
   #wrapper
     #navigation
@@ -29,32 +30,33 @@ body
         h2 Want something new?
         p.content If you want to know something about the data stored in the database, or have ideas about things we could learn about the data, please don't hesitate to say something! It's not hard to add new functions here. 
     #content
-      #padding-div 
-        h2 Welcome to the Epigenetics database.
-        p.content This database is currently being developed and is undergoing rapid change.   
-          | Please feel free to use the web site, but be prepared for momentary glitches.  If
-          | a bug seems to persist more than a few minutes, please send an email to Anthony Fejes 
-          | (afejes@cmmt.ubc.ca)
-        H3 Outstanding Work:
-        ul
-          li Move legend out of figure (Done!)
-          li select data sets independently (Done!)
-          li More data!
-          li better ability to select chip-seq and methylation together from different datasets
-          li Filtering
-        p.content if you have a suggestion, or would like one of the above to be moved up in priority, please say so!  The deveopment plan is flexible.
-
-        h3 Current Contributors to the project:
-        ul 
-          li Anthony Fejes
-        p.content if you'd like to participate in the project, please feel free to pull a copy and start playing with it!  The more the merrier! 
-       
-        h3 Past Contributors to the project
-        ul 
-          li Jake Yeung
-          li Sarah Perez
-          li Scott Brown
-        
+      block content
+        #padding-div 
+          h2 Welcome to the Epigenetics database.
+          p.content This database is currently being developed and is undergoing rapid change.   
+            | Please feel free to use the web site, but be prepared for momentary glitches.  If
+            | a bug seems to persist more than a few minutes, please send an email to Anthony Fejes 
+            | (afejes@cmmt.ubc.ca)
+          H3 Outstanding Work:
+          ul
+            li Move legend out of figure (Done!)
+            li select data sets independently (Done!)
+            li More data!
+            li better ability to select chip-seq and methylation together from different datasets
+            li Filtering
+          p.content if you have a suggestion, or would like one of the above to be moved up in priority, please say so!  The deveopment plan is flexible.
+  
+          h3 Current Contributors to the project:
+          ul 
+            li Anthony Fejes
+          p.content if you'd like to participate in the project, please feel free to pull a copy and start playing with it!  The more the merrier! 
+         
+          h3 Past Contributors to the project
+          ul 
+            li Jake Yeung
+            li Sarah Perez
+            li Scott Brown
+          
   #footersmall
     #padding-div
       a(href="https://github.com/apfejes/epigenetics-software") Epigenetics Software Project 
