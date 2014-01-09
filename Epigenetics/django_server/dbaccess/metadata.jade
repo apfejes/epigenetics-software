@@ -1,0 +1,91 @@
+extends base
+
+block title
+    h1 Epigenetics Database - View/Edit Meta Data
+
+block content
+  #padding-div 
+    h2 MetaData:
+    form(name="main", action='/dbaccess/metadata2/', method='post')
+      input(type="hidden", id="chipseq_avail", name="chipseq_avail", value=chipseq_list)
+      input(type="hidden", id="methylation_avail", name="methylation_avail", value=methylation_list)
+      if databases
+        select(name='organism', id='organism', onchange='update_data_by_org()')
+          - each db in databases
+            option(value=db)=db
+      br
+      - if collection_list
+        - var col = collection_list.items()
+        select(name='collection',id='collection', onchange='update_view()')
+          - for x,y in col
+            - if x == collection
+              option(value=x, selected)=y
+            - else
+              option(value=x)=y
+      br
+      - if collection_list
+        select(name='project', id='project')
+          - var mo = chipseq_list['human']
+          - each mt in mo
+            - if mt == methylation_project
+              option(value=mt, selected)=mt
+            - else 
+              option(value=mt)=mt
+      br
+      input(type='button',value = 'Next >', title="Next", name='Next', class ="bigbutton")
+    
+block script    
+  script(type='text/javascript')
+    function newURL(action){  
+      var base = '/dbaccess/query_form/';
+      var e = document.getElementById("organism");
+      var organism = e.options[e.selectedIndex].value;
+      var e = document.getElementById("collection");
+      var collection = e.options[e.selectedIndex].value;
+      var e = document.getElementById("methylation");
+      var methylation = getselected(e);
+      var e = document.getElementById("chipseq");
+      var chipseq = getselected(e);
+      
+      base += "&organism=" + organism
+      base += "&collection=" + collection
+      base += "&methylation=" + encodeURIComponent(methylation)
+      base += "&groupby=" + groupby
+      base += "&chipseq=" + encodeURIComponent(chipseq)
+      
+      return base
+    }
+    
+    function update_data_by_org() {
+      var o = document.getElementById("organism").value;
+      var z = document.getElementById("collection").value;
+      if (z == "methylation") {
+        var e = document.getElementById("project");
+        e.options.length=0;
+        var mo = JSON.parse(methylation_avail.value.replace(/'/g, '"'));
+        var meth_by_org = mo[o];
+        i = 0;
+        for (pro in meth_by_org) {
+          document.getElementById("project").options[i]=new Option(meth_by_org[pro], meth_by_org[pro], false, false);
+          i++;
+        }
+      }
+      if (z == "chipseq") {
+        var e = document.getElementById("project");
+        e.options.length=0;
+        var cso = JSON.parse(chipseq_avail.value.replace(/'/g, '"'));
+        var zzz = cso[o];
+        i = 0;
+        for (pro in zzz) {
+          document.getElementById("project").options[i]=new Option(zzz[pro], zzz[pro], false, false);
+          i++;
+        }
+      }
+    }
+    
+    
+    function update_view(){
+      var e = document.getElementById("collection");
+      document.getElementById("project").style.display='';
+      update_data_by_org();
+    }
