@@ -320,6 +320,6 @@ def view_metadata(request):
         cs_list = [z.encode('utf-8') for z in chip_list]
         chipseq_list[o] = cs_list
     return render(request, 'metadata.jade', {"databases":organism_list,
-                                             'collection_list':collection_list,
+                                             'collection_list':{'chipseq':'ChIP-Seq', 'methylation':'Methylation'},
                                              'methylation_list':methylation_list,
                                              'chipseq_list':chipseq_list})
