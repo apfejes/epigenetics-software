@@ -5,7 +5,7 @@ block title
 
 block content
   #padding-div 
-    h2 MetaData:
+    h2 MetaData: Select a project to edit.
     form(name="main", action='/dbaccess/metadata2/', method='post')
       input(type="hidden", id="chipseq_avail", name="chipseq_avail", value=chipseq_list)
       input(type="hidden", id="methylation_avail", name="methylation_avail", value=methylation_list)
@@ -32,7 +32,7 @@ block content
             - else 
               option(value=mt)=mt
       br
-      input(type='button',value = 'Next >', title="Next", name='Next', class ="bigbutton")
+      input(type='submit',value = 'Next', title="Next", name='Next', class ="bigbutton")
     
 block script    
   script(type='text/javascript')
