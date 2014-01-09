@@ -23,7 +23,7 @@ class Plot(object):
     DISTR_SHIFT = 0
     DISTR_STROKE = 0.75
     BOTTOM_MARGIN = 120    # 120 pixels
-    RIGHT_MARGIN = 240
+    RIGHT_MARGIN = 15
     MARGIN = 30
     GENE_OFFSET = 20
     palette = Color_Palette.ColorPalette()    # APF - reset on each iteration through the sorter.
