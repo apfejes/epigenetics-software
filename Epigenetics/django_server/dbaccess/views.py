@@ -35,9 +35,6 @@ def view_collections(request):
     collections = ""
     for item in db.collection_names():
         collections += item + ', '
-    print "collections = ", collections
-    print "path = ", os.path.abspath(os.path.dirname(__file__)) + os.sep + 'collections.jade'
-    print "request = ", request
     return render(request, 'collections.jade', {'collections':collections})
 
 def send_svg(request):
@@ -107,7 +104,7 @@ def process_request(request):
     p['datapoints'] = to_boolean(q.get("datapoints", True))
     p['sample_index'] = ast.literal_eval(str(q.get("sample_index", '{}')))
     p['types_index'] = ast.literal_eval(str(q.get("types_index", '{}')))
-    p['width'] = int(q.get("width", 1000)) - 100    # width of screen minus 100
+    p['width'] = int(q.get("width", 1000)) - 200    # width of screen minus 100
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
 
     start = q.get("start", 0)
@@ -149,23 +146,16 @@ def view_query_form(request):
     if parameters['minsigma'] is None:
         parameters['minsigma'] = 0
 
-    db_list = [str(x) for x in mongo.database_names()]
-    organism_list = []
-    for f in db_list:
-        if f.endswith("_epigenetics"):
-            organism_list.append(f.replace("_epigenetics", ""))
-
-
+    organism_list = [str(x).replace("_epigenetics", "") for x in mongo.database_names() if x.endswith("_epigenetics")]
 
     methylation_list = {}
     chipseq_list = {}
     groupby_list = {}
     for o in organism_list:
         proj_list = mongo[o + "_epigenetics"]['samples'].distinct("project")
-        proj_list = [u for u in proj_list if u is not None]
+        proj_list = [str(u) for u in proj_list if u is not None]
         proj_list.sort()
-        op_list = [str(y) for y in proj_list]
-        methylation_list[o] = op_list
+        methylation_list[o] = proj_list
         chip_list = mongo[o + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False}).distinct('sample_id')
         chip_list.sort()
         cs_list = [z.encode('utf-8') for z in chip_list]
@@ -316,3 +306,20 @@ def view_query_form(request):
                                                'genes':genes}
                   )
 
+def view_metadata(request):
+    organism_list = [str(x).replace("_epigenetics", "") for x in mongo.database_names() if x.endswith("_epigenetics") ]
+    methylation_list = {}
+    chipseq_list = {}
+    for o in organism_list:
+        proj_list = mongo[o + "_epigenetics"]['samples'].distinct("project")
+        proj_list = [str(u) for u in proj_list if u is not None]
+        proj_list.sort()
+        methylation_list[o] = proj_list
+        chip_list = mongo[o + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False}).distinct('sample_id')
+        chip_list.sort()
+        cs_list = [z.encode('utf-8') for z in chip_list]
+        chipseq_list[o] = cs_list
+    return render(request, 'metadata.jade', {"databases":organism_list,
+                                             'collection_list':collection_list,
+                                             'methylation_list':methylation_list,
+                                             'chipseq_list':chipseq_list})
