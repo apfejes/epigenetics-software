@@ -6,10 +6,12 @@ Created on 2013-05-07
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
+from django.http.response import HttpResponseRedirect
 
 from pymongo.mongo_client import MongoClient
 import os, sys
 import ast
+
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(os.path.dirname(_cur_dir))
@@ -70,7 +72,7 @@ def process_collection(col):
     print "  ---> Failed to recognize the type of graph requested: %s." % (col)
     return None
 
-def process_request(request):
+def process_query_request(request):
     q = None
     if request.method == 'GET':
         q = request.GET
@@ -131,7 +133,7 @@ def view_query_form(request):
     ''' Instructions for parsing the query_form, and getting the names of the 
         information required to re-populate the drop down boxes and menus '''
 
-    parameters = process_request(request)
+    parameters = process_query_request(request)
 
     # adjust screen size if necessary.
     if parameters['width'] < 600:    # note proces_request already modifies these values from the window size passed in.
@@ -323,3 +325,38 @@ def view_metadata(request):
                                              'collection_list':{'chipseq':'ChIP-Seq', 'methylation':'Methylation'},
                                              'methylation_list':methylation_list,
                                              'chipseq_list':chipseq_list})
+
+def view_metadata2(request):
+    q = None
+    if request.method == 'GET':
+        return HttpResponseRedirect('dbaccess/metadata/')
+        # should not be using Get to submit to this page.
+    elif request.method == 'POST':    # If the query has been submitted...
+        q = request.POST
+
+    organism = str(q.get("organism", None))
+    project = str(q.get("project", None))
+    collection = str(q.get("collection", None))
+
+    print "project = ", project
+
+    samples = None
+    if collection == 'chipseq':
+        samples = mongo[organism + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False, "sample_id":project})
+        samples = [s for s in samples]
+    elif collection == 'methylation':
+        samples = []
+        cursor = mongo[organism + "_epigenetics"]['samples'].find({'project':project})
+        for s in cursor:
+            for k in s:
+                s[str(k)] = str(s.pop(k))
+            samples.append(s)
+
+
+
+
+    # print 'samples = ', samples
+    return render(request, 'metadata2.jade', {"project":project,
+                                              "samples":samples,
+                                              "type":collection})
+

@@ -1,0 +1,116 @@
+extends base
+
+block title
+    h1 Epigenetics Database - View/Edit Meta Data
+
+block content
+  #padding-div 
+    h2 MetaData: Select a project to edit.
+    form(name="main", id="main", action='/dbaccess/metadata2/', method='post')
+      input(type="hidden", id="samples", name="samples", value=samples)
+      input(type="hidden", id="type", name="type", value=type)
+      | Editing !{type} sample - !{project}
+      br
+      if type == 'chipseq'
+        - var disabledfields = {"_id", "min_height", "number_waves", "map_type", "input_file", "default_database", "file_name", "round_leading_edge", "port", "triangle_median", "server", "fragment_length", "max_pet_length", "haswaves", "output_path", "triangle_min", "sample_id", "hide", "make_wig", "processor_threads"}
+        - each s in samples
+          - var sam = s.items()
+          table(id='tab')
+            - each k,v in sam
+                tr
+                  td
+                    | !{k}:
+                  td
+                    if k in disabledfields 
+                      input(type="text",name=k, value=v, disabled)
+                    else
+                      input(type="text",name=k, value=v)
+            br
+      if type == 'methylation'
+        if samples
+          select(name='sample', id='sample', onChange='populate_methylation_table()')
+            - each s,i in samples
+              - var sam = s.items()
+              if i == 0
+                option(value=s, selected)=s.sampleid
+              else
+                option(value=s)=s.sampleid
+          table(id='tab')
+        
+        br
+        
+        
+      input(type="button", value="Add a new key/value", onClick='addnewtag()')
+      input(type='submit', value = 'Save Edits', title="Save Edits", name='Save Edits', class ="bigbutton", disabled)
+      input(type="button", value="Back", onClick="window.history.back(-1)")
+
+block script    
+  script(type='text/javascript')
+    window.onload = function() {
+      if (type.value == 'methylation') {
+        populate_methylation_table();
+      }
+    }
+    
+    
+    function populate_methylation_table() {
+      var container = document.getElementById("tab");
+      container.innerHTML = "";
+      var e = document.getElementById("sample");
+      var sample_num = e.options[e.selectedIndex].index;
+      var samp = JSON.parse(samples.value.replace(/'/g, '"'))
+      var sam = samp[sample_num]
+      var rowcount = 0
+      for (s in sam) {
+        var row = container.insertRow(rowcount);
+        var cell1 = row.insertCell(0);
+        cell1.appendChild(document.createTextNode(s));
+        var cell2 = row.insertCell(1);
+        var input = document.createElement("input");
+        input.type = "text";
+        input.name = "member";
+        input.value = sam[s]
+        input.disabled = true;
+        cell2.appendChild(input);
+        rowcount +=1;
+     }
+    }
+    
+    
+    function addnewtag(){
+      var container = document.getElementById("main");
+      for (i=0; i<3; i++) {
+        container.removeChild(container.lastChild);
+      }
+      
+      var container = document.getElementById("tab");
+      var rowcount = container.rows.length;
+      var row = container.insertRow(rowcount);
+
+      var cell1 = row.insertCell(0);
+      cell1.appendChild(document.createTextNode("Member "));
+      var cell2 = row.insertCell(1);
+      var input = document.createElement("input");
+      input.type = "text";
+      input.name = "member";
+      cell2.appendChild(input);
+      
+      var container = document.getElementById("main");
+      var input = document.createElement("input");
+      input.type="button"
+      input.value="Add a new key/value"
+      input.onclick=function() {addnewtag();};
+      container.appendChild(input);
+      var input = document.createElement("input");
+      input.type='submit'
+      input.value = 'Save Edits'
+      input.title="Save Edits"
+      input.name='Save Edits'
+      input.class ="bigbutton"
+      container.appendChild(input);
+      var input = document.createElement("input");
+      input.type="button"
+      input.value="Back"
+      input.onclick=function() {window.history.back(-1);};
+      container.appendChild(input);
+    }
