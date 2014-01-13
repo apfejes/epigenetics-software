@@ -78,39 +78,21 @@ block script
     
     
     function addnewtag(){
-      var container = document.getElementById("main");
-      for (i=0; i<3; i++) {
-        container.removeChild(container.lastChild);
-      }
-      
       var container = document.getElementById("tab");
       var rowcount = container.rows.length;
       var row = container.insertRow(rowcount);
 
       var cell1 = row.insertCell(0);
-      cell1.appendChild(document.createTextNode("Member "));
+      var tag = document.createElement("input");
+      tag.type = "text";
+      tag.name = "label"  + rowcount;
+      cell1.appendChild(tag);
+      
       var cell2 = row.insertCell(1);
       var input = document.createElement("input");
       input.type = "text";
-      input.name = "member";
+      input.name = "value" + rowcount;
       cell2.appendChild(input);
       
       var container = document.getElementById("main");
-      var input = document.createElement("input");
-      input.type="button"
-      input.value="Add a new key/value"
-      input.onclick=function() {addnewtag();};
-      container.appendChild(input);
-      var input = document.createElement("input");
-      input.type='submit'
-      input.value = 'Save Edits'
-      input.title="Save Edits"
-      input.name='Save Edits'
-      input.class ="bigbutton"
-      container.appendChild(input);
-      var input = document.createElement("input");
-      input.type="button"
-      input.value="Back"
-      input.onclick=function() {window.history.back(-1);};
-      container.appendChild(input);
     }
