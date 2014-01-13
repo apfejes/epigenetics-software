@@ -23,7 +23,7 @@ class Plot(object):
     DISTR_SHIFT = 0
     DISTR_STROKE = 0.75
     BOTTOM_MARGIN = 120    # 120 pixels
-    RIGHT_MARGIN = 15
+    RIGHT_MARGIN = 30
     MARGIN = 30
     GENE_OFFSET = 20
     palette = Color_Palette.ColorPalette()    # APF - reset on each iteration through the sorter.
@@ -313,11 +313,11 @@ class Plot(object):
         spacing = (ytics[0] - ytics[1]) / 2
         for tic, label in zip(ytics, labels):
 
-            ticline = Rect(insert = (self.width - 242, tic), size = (5, 1), fill = legend_color)
+            ticline = Rect(insert = (self.width - self.RIGHT_MARGIN, tic), size = (5, 1), fill = legend_color)
             if tic - spacing > self.MARGIN:
-                ticline2 = Rect(insert = (self.width - 239, tic - spacing), size = (2, 1), fill = legend_color)
+                ticline2 = Rect(insert = (self.width - self.RIGHT_MARGIN, tic - spacing), size = (2, 1), fill = legend_color)
                 self.elements.append(ticline2)
-            tic_x = self.width - 245 + smallfont * 2
+            tic_x = self.width - self.RIGHT_MARGIN + smallfont
             tic_y = tic + 1
             if len(str(label)) == 1:
                 tic_x = tic_x + 3
