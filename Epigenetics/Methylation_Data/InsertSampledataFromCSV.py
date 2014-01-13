@@ -8,7 +8,6 @@ import os
 import sys
 import time
 import argparse
-from itertools import izip
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
