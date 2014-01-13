@@ -1,8 +1,10 @@
 '''
 Created on 2013-05-07
 
-@author: sperez
+@author: sperez, apfejes
 '''
+
+
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
@@ -11,6 +13,7 @@ from django.http.response import HttpResponseRedirect
 from pymongo.mongo_client import MongoClient
 import os, sys
 import ast
+from mongoengine import connect
 
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
@@ -25,7 +28,10 @@ from viewtools import ZOOM_FACTORS, PANNING_PERCENTS, panning, zoom, check
 mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
 collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip':'Both'}
 
+connect('epigenetics_security')
 
+# user = authenticate(username = username, password = password)
+# assert isinstance(user, mongoengine.django.auth.User)
 
 def home_view(request):
     ''' a view for the home page, if required. '''

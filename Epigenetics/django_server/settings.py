@@ -3,6 +3,8 @@ import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+AUTHENTICATION_BACKENDS = ('mongoengine.django.auth.MongoEngineBackend',)
+
 
 ADMINS = (
     # ('Sarah', 'sperez@cmmt.ubc.ca'),
@@ -10,7 +12,9 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-SESSION_ENGINE = 'mongo_sessions.session'
+# SESSION_ENGINE = 'mongo_sessions.session'
+SESSION_ENGINE = 'mongoengine.django.sessions'
+SESSION_SERIALIZER = 'mongoengine.django.sessions.BSONSerializer'
 
 MONGO_PORT = 27017
 MONGO_HOST = 'kruncher.cmmt.ubc.ca'
@@ -24,7 +28,7 @@ MONGO_SESSIONS_COLLECTION = 'mongo_sessions'
 # Leave these entries empty if using Pymongo and Mongodb
 DATABASES = {
     'default': {
-        'ENGINE': '',    # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.dummy',    # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': '',    # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
@@ -115,7 +119,7 @@ mimetypes.add_type("image/svg+xml", ".svg", True)
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
-    # 'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     # 'django.contrib.auth.middleware.AuthenticationMiddleware',
     # 'django.contrib.messages.middleware.MessageMiddleware',
@@ -138,9 +142,9 @@ TEMPLATE_DIRS = (
 
 # Disabled auth, session and admin in order to use Mongodb
 INSTALLED_APPS = (
-    # 'django.contrib.auth',
+    'django.contrib.auth',
     'django.contrib.contenttypes',
-    # 'django.contrib.sessions',
+    'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
