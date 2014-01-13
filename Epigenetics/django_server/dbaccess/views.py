@@ -329,7 +329,7 @@ def view_metadata(request):
 def view_metadata2(request):
     q = None
     if request.method == 'GET':
-        return HttpResponseRedirect('dbaccess/metadata/')
+        return HttpResponseRedirect('/dbaccess/metadata/')
         # should not be using Get to submit to this page.
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
@@ -337,9 +337,6 @@ def view_metadata2(request):
     organism = str(q.get("organism", None))
     project = str(q.get("project", None))
     collection = str(q.get("collection", None))
-
-    print "project = ", project
-
     samples = None
     if collection == 'chipseq':
         samples = mongo[organism + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False, "sample_id":project})
@@ -351,12 +348,50 @@ def view_metadata2(request):
             for k in s:
                 s[str(k)] = str(s.pop(k))
             samples.append(s)
-
-
-
-
-    # print 'samples = ', samples
-    return render(request, 'metadata2.jade', {"project":project,
+    return render(request, 'metadata2.jade', {"organism":organism,
+                                              "project":project,
                                               "samples":samples,
-                                              "type":collection})
+                                              "collection":collection})
 
+
+def view_metadata3(request):
+    q = None
+    if request.method == 'GET':
+        return HttpResponseRedirect('/dbaccess/metadata/')
+        # should not be using Get to submit to this page.
+    elif request.method == 'POST':    # If the query has been submitted...
+        q = request.POST
+    newfields = {}
+    for t in q:
+        if t.startswith("label"):
+            v = t.replace("label", "value")
+            newfields[str(q.get(t))] = str(q.get(v))
+            # print "%s -> %s " % (q.get(t), q.get(v))
+
+    organism = str(q.get("organism", None))
+    project = str(q.get("project", None))
+    collection = str(q.get("collection", None))
+    sample = str(q.get("sample", None))
+
+    print "collection = ", collection
+    print "sample = ", sample
+    print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\"},{$set:%s}") % (organism, project, newfields)
+
+    if collection == "chipseq":
+        print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\"},{$set:%s}") % (organism, project, newfields)
+        # samples = mongo[organism + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False, "sample_id":project})
+    elif collection == "methylation":
+        print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\", \"sample\":%s},{$set:%s}") % (organism, project, sample, newfields)
+
+    return render(request, 'metadata3.jade', {"type":collection})
+
+    # if collection == 'chipseq':
+    #    samples = mongo[organism + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False, "sample_id":project})
+    #    samples = [s for s in samples]
+    # elif collection == 'methylation':
+    #    samples = []
+    #    cursor = mongo[organism + "_epigenetics"]['samples'].find({'project':project})
+    #    for s in cursor:
+    #        for k in s:
+    #            s[str(k)] = str(s.pop(k))
+    #        samples.append(s)

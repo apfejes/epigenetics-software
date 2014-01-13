@@ -6,12 +6,14 @@ block title
 block content
   #padding-div 
     h2 MetaData: Select a project to edit.
-    form(name="main", id="main", action='/dbaccess/metadata2/', method='post')
+    form(name="main", id="main", action='/dbaccess/metadata3/', method='post')
       input(type="hidden", id="samples", name="samples", value=samples)
-      input(type="hidden", id="type", name="type", value=type)
-      | Editing !{type} sample - !{project}
+      input(type="hidden", id="collection", name="collection", value=collection)
+      input(type="hidden", id="project", name="project", value=project)   
+      input(type="hidden", id="organism", name="organism", value=organism)
+      | Editing !{collection} sample - !{project}
       br
-      if type == 'chipseq'
+      if collection == 'chipseq'
         - var disabledfields = {"_id", "min_height", "number_waves", "map_type", "input_file", "default_database", "file_name", "round_leading_edge", "port", "triangle_median", "server", "fragment_length", "max_pet_length", "haswaves", "output_path", "triangle_min", "sample_id", "hide", "make_wig", "processor_threads"}
         - each s in samples
           - var sam = s.items()
@@ -26,28 +28,27 @@ block content
                     else
                       input(type="text",name=k, value=v)
             br
-      if type == 'methylation'
+      if collection == 'methylation'
         if samples
           select(name='sample', id='sample', onChange='populate_methylation_table()')
             - each s,i in samples
-              - var sam = s.items()
               if i == 0
-                option(value=s, selected)=s.sampleid
+                option(value=s['sampleid'], selected)=s.sampleid
               else
-                option(value=s)=s.sampleid
+                option(value=s['sampleid'])=s.sampleid
+            option(value="all")="All Samples"
           table(id='tab')
-        
         br
         
         
       input(type="button", value="Add a new key/value", onClick='addnewtag()')
-      input(type='submit', value = 'Save Edits', title="Save Edits", name='Save Edits', class ="bigbutton", disabled)
+      input(type='submit', value = 'Save Edits', title="Save Edits", name='Save Edits', class ="bigbutton")
       input(type="button", value="Back", onClick="window.history.back(-1)")
 
 block script    
   script(type='text/javascript')
     window.onload = function() {
-      if (type.value == 'methylation') {
+      if (collection.value == 'methylation') {
         populate_methylation_table();
       }
     }
@@ -68,7 +69,7 @@ block script
         var cell2 = row.insertCell(1);
         var input = document.createElement("input");
         input.type = "text";
-        input.name = "member";
+        input.name = s;
         input.value = sam[s]
         input.disabled = true;
         cell2.appendChild(input);
