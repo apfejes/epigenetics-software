@@ -215,7 +215,7 @@ def view_query_form(request):
         parameters['start'], parameters['end'] = zoom(action_factor, int(parameters['start']), int(parameters['end']))
     elif action_factor in PANNING_PERCENTS:
         parameters['start'], parameters['end'] = panning(action_factor, int(parameters['start']), int(parameters['end']))
-    else:
+    elif action_factor:
         coords = m.find_coords_by_gene(action_factor)
         if coords:
             parameters['chromosome'] = coords['chr']
