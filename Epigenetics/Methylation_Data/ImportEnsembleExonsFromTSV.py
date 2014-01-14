@@ -103,6 +103,7 @@ def importObjectsSampleData(mongo, tsvgene):
                      "end":int(record[fields["Gene End (bp)"]]),
                      "strand":int(record[fields["Strand"]]),
                      "name":record[fields["Associated Gene Name"]],
+                     "namelc":record[fields["Associated Gene Name"]].lower(),
                      "transcript_count":int(record[fields["Transcript count"]]),
                      "description":record[fields["Description"]]}
                 if record[fields["Genomic coding start"]]:
