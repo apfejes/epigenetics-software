@@ -28,7 +28,7 @@ from viewtools import ZOOM_FACTORS, PANNING_PERCENTS, panning, zoom, check
 mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
 collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip':'Both'}
 
-connect('epigenetics_security')
+# connect('epigenetics_security')
 
 # user = authenticate(username = username, password = password)
 # assert isinstance(user, mongoengine.django.auth.User)
