@@ -122,7 +122,7 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
     cursor = mongo.find("samples", {"sampleid": {'$in': sample_names}, "project":proj_name}, {"_id":1}, None)
     SampleIDs = []
     for record in cursor:
-        SampleIDs.append(str(record["_id"]))
+        SampleIDs.append(record["_id"])
 
     batch_size = 5000
     batch = 0

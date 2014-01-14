@@ -375,7 +375,7 @@ class MongoEpigeneticsWrapper():
         # handle if probedata == {}
 
         for methyldata in probedata:
-            sample_id = str(methyldata['sampleid'])
+            sample_id = methyldata['sampleid']
             sample = sample_ids[sample_id][0]
             stype = sample_ids[sample_id][1]
 

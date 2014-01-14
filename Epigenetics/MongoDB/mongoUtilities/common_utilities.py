@@ -19,13 +19,13 @@ def CreateListFromCursor(cursor):
     return listitems
 
 def CreateListFromOIDs(cursor):
-    '''convert a cursor of objectIDs to a full list of items'''
+    '''convert a cursor of objectIDs to a full list of items - no longer applies str transformation'''
     gc.disable()
     listitems = []
     if cursor is None:
         return {}
     for record in cursor:
-        listitems.append(str(record['_id']))
+        listitems.append(record['_id'])
     gc.enable()
     return listitems
 
