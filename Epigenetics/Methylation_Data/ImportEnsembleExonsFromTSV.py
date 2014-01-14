@@ -169,7 +169,7 @@ def importObjectsSampleData(mongo, tsvgene):
     print "success! ", a
     print "creating indexes..."
     mongo.ensure_index("ensgenes", "gene")
-    mongo.ensure_index("ensgenes", "name")
+    mongo.ensure_index("ensgenes", "namelc")
     mongo.ensure_index("ensgenes", [("chr", pymongo.ASCENDING), ("start", pymongo.ASCENDING), ("end", pymongo.ASCENDING)])
     print "success! "
 
