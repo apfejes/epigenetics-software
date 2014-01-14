@@ -498,7 +498,7 @@ class MongoEpigeneticsWrapper():
 
     def find_coords_by_gene (self, name):
         '''given the name of a gene, get the coordinates'''
-        r = self.mongo.find_one("ensgenes", {"name":name}, {"chr":1, "start":1, "end":1, "_id":0})
+        r = self.mongo.find_one("ensgenes", {"namelc":name.lower()}, {"chr":1, "start":1, "end":1, "_id":0})
         if r == None:
             return None
         else:
