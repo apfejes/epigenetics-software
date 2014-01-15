@@ -132,7 +132,7 @@ class MongoEpigeneticsWrapper():
         sample_ids = {}
 
         for doc in samplesdocs:
-            sample_id = str(doc['_id'])
+            sample_id = doc['_id']
             doc_sample_group = doc[groupby_name]
             doc_sample_label = doc[sampleid_name]
             if doc_sample_group == sample_group or sample_group is None:
