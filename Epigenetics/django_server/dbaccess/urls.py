@@ -11,6 +11,10 @@ import views
 urlpatterns = patterns('',
 #   url(r'^home$',views.index,name='index'),
     url(r'^$', views.home_view, name = 'base'),
+
+    url(r'^loginpage/', views.loginpage, name = 'loginpage'),
+    url(r'^createuser/', views.createuser, name = 'createuser'),
+    url(r'^authenticate/', views.login_view, name = 'authenticate'),
     url(r'^query_form/', views.view_query_form, name = 'query_form'),
     url(r'^metadata/', views.view_metadata, name = 'metadata'),
     url(r'^metadata2/', views.view_metadata2, name = 'metadata2'),
