@@ -13,7 +13,9 @@ from django.http.response import HttpResponseRedirect
 from pymongo.mongo_client import MongoClient
 import os, sys
 import ast
-from mongoengine import connect
+from django.contrib.auth import login
+from mongoengine.queryset import DoesNotExist
+from django.contrib.auth.models import User
 
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
@@ -32,6 +34,42 @@ collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip'
 
 # user = authenticate(username = username, password = password)
 # assert isinstance(user, mongoengine.django.auth.User)
+
+def login_view(request):
+    try:
+        print "LOGIN --->  AUTHENTICATING: ", request.POST['username']
+        user = User.objects.all()
+        print  "LOGIN ---> TESTING User.objects.all() = ", user
+        user = User.objects.get(username = "apfejes")
+
+        print "LOGIN --->  AUTHENTICATING NEXT STEP: ", user
+
+        if user.check_password(request.POST['password']):
+            user.backend = 'mongoengine.django.auth.MongoEngineBackend'
+            login(request, user)
+            request.session.set_expiry(60 * 60 * 1)    # 1 hour timeout
+            return HttpResponse(user)
+        else:
+            return HttpResponse('login failed')
+    except DoesNotExist:
+        return HttpResponse('user does not exist')
+    except Exception as e:
+        print "exeption", e
+        return HttpResponse('Unexpected Exception')
+
+
+
+def loginpage(request):
+    ''' a view for the home page, if required. '''
+    return render(request, 'loginpage.jade')
+
+def createuser(request):
+    ''' a view for the home page, if required. '''
+    User.objects.create_user(request.POST['username'], request.POST['email'], request.POST['password'])
+    return HttpResponse('user has been created')
+
+
+
 
 def home_view(request):
     ''' a view for the home page, if required. '''
