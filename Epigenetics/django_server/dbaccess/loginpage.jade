@@ -1,0 +1,28 @@
+extends base
+
+block title
+    h1 Epigenetics Database - View/Edit Meta Data
+
+block content
+  #padding-div 
+    h2 MetaData: Select a project to edit.
+    form(name="main", action='/dbaccess/authenticate/', method='post')
+      | Username:
+      input(type='text', name="username")
+      br
+      | Password: 
+      input(type='password', name="password")
+      br
+      input(type='submit',value = 'login', title="Login", name='Login')
+    | or create a new user:
+    form(name="main", action='/dbaccess/createuser/', method='post')
+      | Username:
+      input(type='text', name="username")
+      br
+      | Password: 
+      input(type='password', name="password")
+      br
+      | Email address:
+      input(type='text', name="email")
+      br
+      input(type='submit',value = 'createuser', title="create a new user", name='Create User')
