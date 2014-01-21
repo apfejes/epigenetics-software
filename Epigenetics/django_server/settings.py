@@ -1,10 +1,12 @@
 # Django settings for mysite project.
 import os
+import mongoengine
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 AUTHENTICATION_BACKENDS = ('mongoengine.django.auth.MongoEngineBackend',)
-
+# AUTH_USER_MODEL = 'mongo_auth.MongoUser'
+MONGOENGINE_USER_DOCUMENT = 'mongoengine.django.auth.User'
 
 ADMINS = (
     # ('Sarah', 'sperez@cmmt.ubc.ca'),
@@ -28,8 +30,8 @@ MONGO_SESSIONS_COLLECTION = 'mongo_sessions'
 # Leave these entries empty if using Pymongo and Mongodb
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.dummy',    # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '',    # Or path to database file if using sqlite3.
+        'ENGINE': 'django_mongodb_engine',    # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'mydb',    # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -145,7 +147,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    # 'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
@@ -184,3 +186,5 @@ LOGGING = {
         },
     }
 }
+
+mongoengine.connect('epigenetics_security', host = MONGO_HOST, port = MONGO_PORT)
