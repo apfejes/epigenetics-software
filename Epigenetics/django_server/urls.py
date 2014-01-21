@@ -2,7 +2,6 @@
 
 from django.conf.urls import patterns, include, url
 
-from dbaccess import views
 
 # Uncomment the next two lines to enable the admin:
 
