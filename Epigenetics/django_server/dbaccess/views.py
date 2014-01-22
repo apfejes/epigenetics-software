@@ -37,21 +37,34 @@ collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip'
 
 def login_view(request):
     try:
-        print "LOGIN --->  AUTHENTICATING: ", request.POST['username']
-        user = User.objects.all()
-        print  "LOGIN ---> TESTING User.objects.all() = ", user
-        user = User.objects.get(username = "apfejes")
-
-        print "LOGIN --->  AUTHENTICATING NEXT STEP: ", user
-
-        if user.check_password(request.POST['password']):
+        username = request.POST['username']
+        user = User.objects.get(username = username)
+        print "LOGIN --->  GOT user OBJECT FOR : ", username
+        password = request.POST['password']
+        print "LOGIN --->  AUTHENTICATING: ", username
+        if user.check_password(password):
+            print "LOGIN --->  PASSWOD CHECKED AND IS CORRECT : ", username
             user.backend = 'mongoengine.django.auth.MongoEngineBackend'
-            login(request, user)
-            request.session.set_expiry(60 * 60 * 1)    # 1 hour timeout
-            return HttpResponse(user)
+            # user = authenticate(username = username, password = password)
+            print "LOGIN --->  AUTHENTICATE PROCEEDED FOR : ", username
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    request.session.set_expiry(60 * 60 * 1)    # 1 hour timeout
+
+                    # Redirect to a success page.
+
+                else:    # Return a 'disabled account' error message
+                    print "LOGIN --->  Account for user %s has been deactivated." % (username)
+                    return HttpResponse("Account for user %s has been deactivated." % (username))
+            else:    # Return an 'invalid login' error message.
+                print "LOGIN --->  Could not authenticate user name %s: " % (username)
+                return HttpResponse("Could not authenticate user name %s: " % (username))
         else:
-            return HttpResponse('login failed')
+            print "LOGIN --->  Incorrect password %s: " % (username)
+            return HttpResponse("Incorrect password %s: " % (username))
     except DoesNotExist:
+        print "LOGIN --->  (Error:DoesNotExist) Could not authenticate user name %s: " % (username)
         return HttpResponse('user does not exist')
     except Exception as e:
         print "exeption", e
