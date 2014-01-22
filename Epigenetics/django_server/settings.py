@@ -20,7 +20,6 @@ SESSION_SERIALIZER = 'mongoengine.django.sessions.BSONSerializer'
 
 MONGO_PORT = 27017
 MONGO_HOST = 'kruncher.cmmt.ubc.ca'
-MONGO_DB_NAME = 'test'
 MONGO_DB_USER = False
 MONGO_DB_PASSWORD = False
 MONGO_SESSIONS_COLLECTION = 'mongo_sessions'

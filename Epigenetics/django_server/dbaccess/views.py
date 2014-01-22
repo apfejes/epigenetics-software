@@ -39,21 +39,17 @@ def login_view(request):
     try:
         username = request.POST['username']
         user = User.objects.get(username = username)
-        print "LOGIN --->  GOT user OBJECT FOR : ", username
         password = request.POST['password']
-        print "LOGIN --->  AUTHENTICATING: ", username
         if user.check_password(password):
-            print "LOGIN --->  PASSWOD CHECKED AND IS CORRECT : ", username
             user.backend = 'mongoengine.django.auth.MongoEngineBackend'
-            # user = authenticate(username = username, password = password)
-            print "LOGIN --->  AUTHENTICATE PROCEEDED FOR : ", username
             if user is not None:
                 if user.is_active:
                     login(request, user)
                     request.session.set_expiry(60 * 60 * 1)    # 1 hour timeout
-
-                    # Redirect to a success page.
-
+                    if next in request.POST:
+                        return HttpResponseRedirect(request.POST['next'])
+                    else:
+                        return render(request, 'base.jade', {"message":"Login successful"})
                 else:    # Return a 'disabled account' error message
                     print "LOGIN --->  Account for user %s has been deactivated." % (username)
                     return HttpResponse("Account for user %s has been deactivated." % (username))
@@ -68,7 +64,7 @@ def login_view(request):
         return HttpResponse('user does not exist')
     except Exception as e:
         print "exeption", e
-        return HttpResponse('Unexpected Exception')
+        return HttpResponse('Unexpected Exception (%s)' % (e))
 
 
 
@@ -189,6 +185,9 @@ def process_query_request(request):
 def view_query_form(request):
     ''' Instructions for parsing the query_form, and getting the names of the 
         information required to re-populate the drop down boxes and menus '''
+
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect('/login/?next=%s' % request.path)
 
     parameters = process_query_request(request)
 

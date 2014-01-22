@@ -82,6 +82,9 @@ a.white {
   text-decoration:none;
 }
 
+#white { 
+  color: #ffffff;
+}
 
 #wrapper{
   width:99%;

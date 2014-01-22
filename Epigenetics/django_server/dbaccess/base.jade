@@ -9,7 +9,11 @@ body
       block title
         h1 Epigenetics Database
   #subheader
-    a(href='/dbaccess/loginpage', class='white') log in&nbsp;
+    if user
+      #white 
+        |logged in as !{user}&nbsp;
+    else
+      a(href='/dbaccess/loginpage', class='white') log in&nbsp;
   #wrapper
     #navigation
       #padding-div
@@ -26,6 +30,9 @@ body
     #content
       block content
         #padding-div 
+          if message
+            h2 !{message}
+            hr
           h2 Welcome to the Epigenetics database.
           p.content This database is currently being developed and is undergoing rapid change.   
             | Please feel free to use the web site, but be prepared for momentary glitches.  If
