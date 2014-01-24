@@ -187,7 +187,7 @@ def view_query_form(request):
         information required to re-populate the drop down boxes and menus '''
 
     if not request.user.is_authenticated():
-        return HttpResponseRedirect('/dbaccess/login/?next=%s' % request.path)
+        return HttpResponseRedirect('/dbaccess/loginpage/?next=%s' % request.path)
 
     parameters = process_query_request(request)
 
