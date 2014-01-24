@@ -185,7 +185,7 @@ def process_query_request(request):
 def view_query_form(request):
     ''' Instructions for parsing the query_form, and getting the names of the 
         information required to re-populate the drop down boxes and menus '''
-    print "request.session:", request.session
+    print "request.session:", request.session.meta
     user = request.session['user']
     if not user.is_authenticated():
         return HttpResponseRedirect('/dbaccess/loginpage/?next=%s' % request.path)
