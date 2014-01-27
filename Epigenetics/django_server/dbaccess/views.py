@@ -13,7 +13,7 @@ from django.http.response import HttpResponseRedirect
 from pymongo.mongo_client import MongoClient
 import os, sys
 import ast
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate, logout
 from mongoengine.queryset import DoesNotExist
 from django.contrib.auth.models import User
 
@@ -40,8 +40,8 @@ def login_view(request):
         username = request.POST['username']
         user = User.objects.get(username = username)
         password = request.POST['password']
+        user.backend = 'mongoengine.django.auth.MongoEngineBackend'
         if user.check_password(password):
-            user.backend = 'mongoengine.django.auth.MongoEngineBackend'
             if user is not None:
                 if user.is_active:
                     login(request, user)
@@ -65,6 +65,10 @@ def login_view(request):
     except Exception as e:
         print "exeption", e
         return HttpResponse('Unexpected Exception (%s)' % (e))
+
+def logout_view(request):
+    logout(request)
+    return render(request, 'base.jade', {"message":"Log out successful"})
 
 
 
@@ -185,8 +189,9 @@ def process_query_request(request):
 def view_query_form(request):
     ''' Instructions for parsing the query_form, and getting the names of the 
         information required to re-populate the drop down boxes and menus '''
-    print "request.session:", request.session.meta
-    user = request.session['user']
+    user = request.POST['user']
+    print "user = ", user
+    user.backend = 'mongoengine.django.auth.MongoEngineBackend'
     if not user.is_authenticated():
         return HttpResponseRedirect('/dbaccess/loginpage/?next=%s' % request.path)
 

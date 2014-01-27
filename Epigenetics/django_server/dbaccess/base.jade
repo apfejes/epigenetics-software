@@ -10,10 +10,17 @@ body
         h1 Epigenetics Database
   #subheader
     if user
-      #white 
-        |logged in as !{user}&nbsp;
+      #white
+        input(type="hidden", id="user", name="user", value=user)
+        if not user.id
+          a(href='/dbaccess/loginpage', class='white') log in&nbsp; 
+        else
+          | logged in as !{user}&nbsp;|
+          a(href='/dbaccess/logout', class='white') log out&nbsp;
     else
       a(href='/dbaccess/loginpage', class='white') log in&nbsp;
+      |
+      a(href='/dbaccess/logout', class='white') log out&nbsp;
   #wrapper
     #navigation
       #padding-div
@@ -38,17 +45,16 @@ body
             | Please feel free to use the web site, but be prepared for momentary glitches.  If
             | a bug seems to persist more than a few minutes, please send an email to Anthony Fejes 
             | (afejes@cmmt.ubc.ca)
-          
           p.content Please check out 
             a(href="https://github.com/apfejes/epigenetics-software/issues?state=open") the open issue list 
             | for the project.  If you would like to suggest new features, that is a great place to do so! 
           
-          p.content if you have a suggestion, or would like one of the above to be moved up in priority, please say so!  The deveopment plan is flexible.
+          p.content If you have a suggestion, or would like one of the above to be moved up in priority, please say so!  The development plan is flexible.
   
           h3 Current Contributors to the project:
           ul 
             li Anthony Fejes
-          p.content if you'd like to participate in the project, please feel free to pull a copy and start playing with it!  The more the merrier! 
+          p.content If you'd like to participate in the project, please feel free to pull a copy and start playing with it!  The more the merrier! 
          
           h3 Past Contributors to the project
           ul 

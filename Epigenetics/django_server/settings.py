@@ -16,7 +16,8 @@ MANAGERS = ADMINS
 
 # SESSION_ENGINE = 'mongo_sessions.session'
 SESSION_ENGINE = 'mongoengine.django.sessions'
-SESSION_SERIALIZER = 'mongoengine.django.sessions.BSONSerializer'
+# SESSION_SERIALIZER = 'mongoengine.django.sessions.BSONSerializer'
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 MONGO_PORT = 27017
 MONGO_HOST = 'kruncher.cmmt.ubc.ca'
@@ -24,7 +25,9 @@ MONGO_DB_USER = False
 MONGO_DB_PASSWORD = False
 MONGO_SESSIONS_COLLECTION = 'mongo_sessions'
 
-
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+)
 
 # Leave these entries empty if using Pymongo and Mongodb
 DATABASES = {
