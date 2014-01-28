@@ -5,8 +5,6 @@ import mongoengine
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 AUTHENTICATION_BACKENDS = ('mongoengine.django.auth.MongoEngineBackend',)
-# AUTH_USER_MODEL = 'mongo_auth.MongoUser'
-MONGOENGINE_USER_DOCUMENT = 'mongoengine.django.auth.User'
 
 ADMINS = (
     # ('Sarah', 'sperez@cmmt.ubc.ca'),
@@ -14,33 +12,42 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-# SESSION_ENGINE = 'mongo_sessions.session'
 SESSION_ENGINE = 'mongoengine.django.sessions'
-# SESSION_SERIALIZER = 'mongoengine.django.sessions.BSONSerializer'
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+SESSION_SERIALIZER = 'mongoengine.django.sessions.BSONSerializer'
+
 
 MONGO_PORT = 27017
 MONGO_HOST = 'kruncher.cmmt.ubc.ca'
 MONGO_DB_USER = False
 MONGO_DB_PASSWORD = False
+MONGO_SECURITY_DB = 'epigenetics_security'
 MONGO_SESSIONS_COLLECTION = 'mongo_sessions'
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
 )
 
+# DEBUGGING WITH SQLITE3
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': '/home/afejes/sqllite_testting_django.txt',
+#                 }
+#              }
+
 # Leave these entries empty if using Pymongo and Mongodb
 DATABASES = {
-    'default': {
-        'ENGINE': 'django_mongodb_engine',    # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'mydb',    # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',    # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-	'PORT': '',    # Set to empty string for default.
-    }
-}
+     'default': {
+         # 'ENGINE': 'django.db.backends.dummy',    # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+         'ENGINE': 'django_mongodb_engine',    # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+         'NAME': 'mydb',    # Or path to database file if using sqlite3.
+         # The following settings are not used with sqlite3:
+         'USER': '',
+         'PASSWORD': '',
+         'HOST': '',    # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+ 	'PORT': '',    # Set to empty string for default.
+     }
+ }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -128,8 +135,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
-     'django.contrib.auth.middleware.AuthenticationMiddleware',
-     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -159,6 +166,7 @@ INSTALLED_APPS = (
      'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
      'django.contrib.admindocs',
+     'mongoengine.django.mongo_auth'
     # 'polls',
 
 )
@@ -192,4 +200,4 @@ LOGGING = {
     }
 }
 
-mongoengine.connect('epigenetics_security', host = MONGO_HOST, port = MONGO_PORT)
+mongoengine.connect(MONGO_SECURITY_DB, host = MONGO_HOST, port = MONGO_PORT)

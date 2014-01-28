@@ -5,11 +5,20 @@ html
 
   
 body
-    
-  a(href='http://kruncher.cmmt.ubc.ca:8880/dbaccess/') 
-    #header
+  #header
+    a(href='http://kruncher.cmmt.ubc.ca:8880/dbaccess/') 
       h1 Epigenetics Database - Query
-    #subheader  
+  #subheader
+      if user
+        #white
+          if not user.id
+            a(href='/dbaccess/loginpage', class='white') log in &nbsp;
+            | (AnonymousUser) 
+          else
+            | logged in as !{user} |
+            a(href='/dbaccess/logout', class='white') log out&nbsp;
+      else
+        a(href='/dbaccess/loginpage', class='white') log in&nbsp;  
   #wrapper
     form(name="main", action='/dbaccess/query_form/', method='post')
       input(type="hidden", id="width", name="width", value = "")

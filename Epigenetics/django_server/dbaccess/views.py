@@ -18,7 +18,6 @@ from django.contrib.auth import login, authenticate, logout
 from mongoengine.queryset import DoesNotExist
 from django.contrib.auth.models import User
 
-
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(os.path.dirname(_cur_dir))
 sys.path.insert(0, _root_dir)
@@ -31,12 +30,24 @@ from viewtools import ZOOM_FACTORS, PANNING_PERCENTS, panning, zoom, check
 mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
 collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip':'Both'}
 
+sys.path.insert(0, _root_dir + os.sep + "django_server")
+from django_server.settings import MONGO_HOST
+from django_server.settings import MONGO_PORT
+from django_server.settings import MONGO_SECURITY_DB
+
+
+import mongoengine
+mongoengine.connect(MONGO_SECURITY_DB, host = MONGO_HOST, port = MONGO_PORT)
+
+
 def login_view(request):
     try:
         username = request.POST['username']
         user = User.objects.get(username = username)
         password = request.POST['password']
-        user.backend = 'mongoengine.django.auth.MongoEngineBackend'
+        # user.backend = 'mongoengine.django.auth.MongoEngineBackend'
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+
         if user.check_password(password):
             if user is not None:
                 if user.is_active:
@@ -184,6 +195,7 @@ def process_query_request(request):
 def view_query_form(request):
     ''' Instructions for parsing the query_form, and getting the names of the 
         information required to re-populate the drop down boxes and menus '''
+
 
     parameters = process_query_request(request)
 
