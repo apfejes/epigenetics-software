@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from django.http.response import HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 
 from pymongo.mongo_client import MongoClient
 import os, sys
@@ -30,11 +31,6 @@ from viewtools import ZOOM_FACTORS, PANNING_PERCENTS, panning, zoom, check
 mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
 collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip':'Both'}
 
-# connect('epigenetics_security')
-
-# user = authenticate(username = username, password = password)
-# assert isinstance(user, mongoengine.django.auth.User)
-
 def login_view(request):
     try:
         username = request.POST['username']
@@ -44,6 +40,7 @@ def login_view(request):
         if user.check_password(password):
             if user is not None:
                 if user.is_active:
+                    authenticate(user = user, password = password)
                     login(request, user)
                     request.session.set_expiry(60 * 60 * 1)    # 1 hour timeout
                     if next in request.POST:
@@ -70,19 +67,17 @@ def logout_view(request):
     logout(request)
     return render(request, 'base.jade', {"message":"Log out successful"})
 
-
-
 def loginpage(request):
     ''' a view for the home page, if required. '''
-    return render(request, 'loginpage.jade')
+    if 'next' in request.POST:
+        return render(request, 'loginpage.jade', {"next":request.POST['next']})
+    else :
+        return render(request, 'loginpage.jade')
 
 def createuser(request):
     ''' a view for the home page, if required. '''
     User.objects.create_user(request.POST['username'], request.POST['email'], request.POST['password'])
     return HttpResponse('user has been created')
-
-
-
 
 def home_view(request):
     ''' a view for the home page, if required. '''
@@ -185,15 +180,10 @@ def process_query_request(request):
     return p
 
 
-
+@login_required
 def view_query_form(request):
     ''' Instructions for parsing the query_form, and getting the names of the 
         information required to re-populate the drop down boxes and menus '''
-    user = request.POST['user']
-    print "user = ", user
-    user.backend = 'mongoengine.django.auth.MongoEngineBackend'
-    if not user.is_authenticated():
-        return HttpResponseRedirect('/dbaccess/loginpage/?next=%s' % request.path)
 
     parameters = process_query_request(request)
 
