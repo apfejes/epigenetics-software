@@ -14,7 +14,6 @@ body
         input(type="hidden", id="user", name="user", value=user)
         if not user.id
           a(href='/dbaccess/loginpage', class='white') log in &nbsp;
-          | (AnonymousUser logged in) 
         else
           | logged in as !{user}&nbsp;|
           a(href='/dbaccess/logout', class='white') log out&nbsp;

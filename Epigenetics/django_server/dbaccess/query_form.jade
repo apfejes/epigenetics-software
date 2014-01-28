@@ -13,7 +13,6 @@ body
         #white
           if not user.id
             a(href='/dbaccess/loginpage', class='white') log in &nbsp;
-            | (AnonymousUser) 
           else
             | logged in as !{user} |
             a(href='/dbaccess/logout', class='white') log out&nbsp;

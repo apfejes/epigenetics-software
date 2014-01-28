@@ -374,6 +374,7 @@ def view_query_form(request):
                                                'genes':genes}
                   )
 
+@login_required
 def view_metadata(request):
     organism_list = [str(x).replace("_epigenetics", "") for x in mongo.database_names() if x.endswith("_epigenetics") ]
     methylation_list = {}
@@ -391,7 +392,7 @@ def view_metadata(request):
                                              'collection_list':{'chipseq':'ChIP-Seq', 'methylation':'Methylation'},
                                              'methylation_list':methylation_list,
                                              'chipseq_list':chipseq_list})
-
+@login_required
 def view_metadata2(request):
     q = None
     if request.method == 'GET':
@@ -419,7 +420,7 @@ def view_metadata2(request):
                                               "samples":samples,
                                               "collection":collection})
 
-
+@login_required
 def view_metadata3(request):
     q = None
     if request.method == 'GET':
