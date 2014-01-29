@@ -18,8 +18,8 @@ from CommonUtils import Parameters
 import Mongo_Connector
 
 
-
-def export_samples_as_table(self, connector, project_name, filters):
+@staticmethod
+def export_samples_as_table(connector, project_name, filters):
     '''
     This routine gets you the _ids of all projects with a given set of criteria (filter), and then returns a list representing every probe position in the array for each one.
     
