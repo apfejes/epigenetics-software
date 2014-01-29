@@ -9,14 +9,14 @@ from MongoDB.mongoUtilities import Mongo_Connector
 import time
 
 
-def export_samples_as_table(self, connector, project_name, filter):
+def export_samples_as_table(self, connector, project_name, filters):
     '''
     This routine gets you the _ids of all projects with a given set of criteria (filter), and then returns a list representing every probe position in the array for each one.
     
     '''
-    filter['project'] = project_name
+    filters['project'] = project_name
     # first find the samples of interest:
-    cursor = connector.find("samples", filter, {"_id":1, "sampleid":1}, sortField = "sampleid")
+    cursor = connector.find("samples", filters, {"_id":1, "sampleid":1}, sortField = "sampleid")
     ids = []
     names = {}
     for x in cursor:
@@ -48,6 +48,6 @@ if __name__ == "__main__":
         p.set("default_database", args.dbname)
     mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     starttime = time.time()
-    export_samples_as_table(mongodb, args.rfile)
+    export_samples_as_table(mongodb, args.project_name, {})
     mongodb.close()
     print('Done in %s seconds') % int((time.time() - starttime))
