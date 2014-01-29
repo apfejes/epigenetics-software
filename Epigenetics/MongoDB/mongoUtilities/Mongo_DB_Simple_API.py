@@ -3,6 +3,10 @@ Created on Jan 29, 2014
 
 @author: apfejes
 '''
+import argparse
+from CommonUtils import Parameters
+from MongoDB.mongoUtilities import Mongo_Connector
+import time
 
 
 def export_samples_as_table(self, connector, project_name, filter):
@@ -33,3 +37,17 @@ def export_samples_as_table(self, connector, project_name, filter):
         print "row = ", row
 
     # wht's missing is the formatting and the sorting'
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name", help = "Name of Project to Export", type = str)
+    args = parser.parse_args()
+    p = Parameters.parameter(args.dbconfig)
+    if args.dbname:
+        p.set("default_database", args.dbname)
+    mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
+    starttime = time.time()
+    export_samples_as_table(mongodb, args.rfile)
+    mongodb.close()
+    print('Done in %s seconds') % int((time.time() - starttime))
