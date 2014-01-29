@@ -52,6 +52,9 @@ def export_samples_as_table(self, connector, project_name, filters):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name", help = "Name of Project to Export", type = str)
+    parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
+    parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
+
     args = parser.parse_args()
     p = Parameters.parameter(args.dbconfig)
     if args.dbname:
