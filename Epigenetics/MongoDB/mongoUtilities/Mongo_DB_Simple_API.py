@@ -4,9 +4,19 @@ Created on Jan 29, 2014
 @author: apfejes
 '''
 import argparse
-from CommonUtils import Parameters
-from MongoDB.mongoUtilities import Mongo_Connector
 import time
+import os
+import sys
+
+_cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
+_root_dir = os.path.dirname(_cur_dir)
+while ("MongoDB" in _root_dir):
+    _root_dir = os.path.dirname(_root_dir)
+sys.path.insert(0, _root_dir)
+sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
+from CommonUtils import Parameters
+import Mongo_Connector
+
 
 
 def export_samples_as_table(self, connector, project_name, filters):
