@@ -18,7 +18,6 @@ from CommonUtils import Parameters
 import Mongo_Connector
 
 
-@staticmethod
 def export_samples_as_table(connector, project_name, filters):
     '''
     This routine gets you the _ids of all projects with a given set of criteria (filter), and then returns a list representing every probe position in the array for each one.
@@ -26,7 +25,7 @@ def export_samples_as_table(connector, project_name, filters):
     '''
     filters['project'] = project_name
     # first find the samples of interest:
-    cursor = connector.find("samples", filters, {"_id":1, "sampleid":1}, sortField = "sampleid")
+    cursor = connector.find("samples", filters, {"_id":1, "sampleid":1}, sortField = ["sampleid"])
     ids = []
     names = {}
     for x in cursor:
