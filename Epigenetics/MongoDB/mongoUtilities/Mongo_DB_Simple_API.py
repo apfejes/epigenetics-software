@@ -36,14 +36,14 @@ def export_samples_as_table(connector, project_name, filters, filename):
     # find all probe names
     target_cursor = connector.distinct("annotations", "targetid")
 
-    file = gzip.open(filename, "wb", 9)
+    f = gzip.open(filename, "wb", 9)
 
 
     # get the results for each probe for each sample
     print "names:", names
     count = 0
     header = "probe\t", "\t".join(n for n in names)
-    file.write(header)
+    f.write(header)
     for i in target_cursor:
         # print "i = ", i
         count += 1
@@ -58,11 +58,11 @@ def export_samples_as_table(connector, project_name, filters, filename):
             else:
                 strlist.append("NA")
         v = '\t'.join(i, strlist)
-        file.write(v)
+        f.write(v)
         # print "%s = %s" % (i, v)
         if count % 10000 == 0:
             print "Row %i" % count    # for debugging
-    file.close()
+    f.close()
     # wht's missing and the sorting'
 
 
