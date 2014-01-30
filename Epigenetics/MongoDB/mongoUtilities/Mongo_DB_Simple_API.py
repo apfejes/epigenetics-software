@@ -40,10 +40,11 @@ def export_samples_as_table(connector, project_name, filters, filename):
 
 
     # get the results for each probe for each sample
-    print "names:", names
+    # print "names:", names
     count = 0
-    header = "probe\t", "\t".join(n for n in names)
-    f.write(header)
+    header = "\t".join([names[n] for n in names])
+    f.write("probe\t" + header)
+    f.write("\n")
     for i in target_cursor:
         # print "i = ", i
         count += 1
@@ -57,8 +58,10 @@ def export_samples_as_table(connector, project_name, filters, filename):
                 strlist.append("%.8f" % row[n])
             else:
                 strlist.append("NA")
-        v = '\t'.join(i, strlist)
+        f.write("%s\t" % i)
+        v = '\t'.join(strlist)
         f.write(v)
+        f.write("\n")
         # print "%s = %s" % (i, v)
         if count % 10000 == 0:
             print "Row %i" % count    # for debugging
