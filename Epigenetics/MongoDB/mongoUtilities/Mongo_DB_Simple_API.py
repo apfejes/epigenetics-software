@@ -25,7 +25,7 @@ def export_samples_as_table(connector, project_name, filters):
     '''
     filters['project'] = project_name
     # first find the samples of interest:
-    cursor = connector.find("samples", filters, {"_id":1, "sampleid":1}, sortField = ["sampleid"])
+    cursor = connector.find("samples", filters, {"_id":1, "sampleid":1})
     ids = []
     names = {}
     for x in cursor:
@@ -36,7 +36,6 @@ def export_samples_as_table(connector, project_name, filters):
     target_cursor = connector.distinct("annotations", "target")
 
     # get the results for each probe for each sample
-
     print "names:", names
     for i in target_cursor:
         row = {}
