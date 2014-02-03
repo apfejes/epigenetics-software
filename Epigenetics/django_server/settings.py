@@ -4,10 +4,12 @@ import mongoengine
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-AUTHENTICATION_BACKENDS = ('mongoengine.django.auth.MongoEngineBackend',)
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',
+                           'mongoengine.django.auth.MongoEngineBackend',)
 
 ADMINS = (
-    # ('Sarah', 'sperez@cmmt.ubc.ca'),
+
+     ('apfejes', 'afejes@cmmt.ubc.ca'),
 )
 
 MANAGERS = ADMINS
@@ -40,11 +42,11 @@ DATABASES = {
      'default': {
          # 'ENGINE': 'django.db.backends.dummy',    # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
          'ENGINE': 'django_mongodb_engine',    # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-         'NAME': 'mydb',    # Or path to database file if using sqlite3.
+         'NAME': 'epigenetics_security',    # Or path to database file if using sqlite3.
          # The following settings are not used with sqlite3:
          'USER': '',
          'PASSWORD': '',
-         'HOST': '',    # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+         'HOST': MONGO_HOST ,    # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
  	'PORT': '',    # Set to empty string for default.
      }
  }
