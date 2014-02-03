@@ -4,14 +4,15 @@ body {
   margin-right:2px;
   margin-left: 2px;
   margin-bottom:2px;
+  font-family: "Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+  font-size: 12px;
   
 }
-
 h1 {
-  font-family:Times;
   font-size: 40px;
   color: #999966;
   margin-top:0px;
+
 }
 
 h2 { 
@@ -29,7 +30,6 @@ p.content {
 
 #footersmall{
    float:none
-   font-family: Verdana;
    font-size: 10px;
    margin-left:2px;
    margin-right:2px;
@@ -38,7 +38,6 @@ p.content {
    }
    
 main {
-   font-family: Verdana;
    font-size: 14px;
    color: #000000;
    }
@@ -55,8 +54,7 @@ a {
 b { color: #0000CC }
 
 ul {
-  font-family: 'arial';
-  font-size:14px;
+  
 }
 
 #header {
@@ -116,7 +114,6 @@ a.white {
 
 #padding-div {
   margin: 10px 10px 10px 10px;
-  font-family: Verdana;
 }
 
 #option_elements {
@@ -146,9 +143,13 @@ a.white {
 }
 
 paginate{
-  font-family:Arial,Helvetica,sans-serif;
   padding:3px;
   margin:3px;
+}
+
+tr td {
+ margin: 0px; 0px; 0px; 0px;
+ padding:0px 3px 0px 0px;
 }
 
 .bigbutton{cursor: pointer; 

@@ -37,14 +37,21 @@ from django_server.settings import MONGO_SECURITY_DB
 
 
 import mongoengine
+print "connecting to: %s %s %s" % (MONGO_SECURITY_DB, MONGO_HOST, MONGO_PORT)
+
 mongoengine.connect(MONGO_SECURITY_DB, host = MONGO_HOST, port = MONGO_PORT)
 
 
 def login_view(request):
+
     try:
         username = request.POST['username']
-        user = User.objects.get(username = username)
         password = request.POST['password']
+        print "username: %s password: %s" % (username, password)
+        test = User.objects.get_by_natural_key(username)
+        print "test= ", test
+        user = User.objects.get(username = username)
+
         # user.backend = 'mongoengine.django.auth.MongoEngineBackend'
         user.backend = 'django.contrib.auth.backends.ModelBackend'
 
