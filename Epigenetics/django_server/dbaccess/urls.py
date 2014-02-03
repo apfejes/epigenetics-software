@@ -8,9 +8,6 @@ from django.contrib import admin
 admin.autodiscover()
 import views
 
-
-
-
 urlpatterns = patterns('',
 #   url(r'^home$',views.index,name='index'),
     url(r'^$', views.home_view, name = 'base'),
