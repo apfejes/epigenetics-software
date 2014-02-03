@@ -1,8 +1,11 @@
 ''' This is a django config file, which controls traffic on the web server,
 connecting functions in the view file with specific URLs '''
 
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
 # from django.views.generic import TemplateView
+from django.contrib import admin
+
+admin.autodiscover()
 import views
 
 
@@ -11,7 +14,7 @@ import views
 urlpatterns = patterns('',
 #   url(r'^home$',views.index,name='index'),
     url(r'^$', views.home_view, name = 'base'),
-
+    url(r'^admin/', include(admin.site.urls)),
     url(r'^loginpage/', views.loginpage, name = 'loginpage'),
     url(r'^createuser/', views.createuser, name = 'createuser'),
     url(r'^authenticate/', views.login_view, name = 'authenticate'),
