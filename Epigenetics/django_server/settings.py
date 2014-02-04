@@ -5,7 +5,8 @@ import mongoengine
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',
-                           'mongoengine.django.auth.MongoEngineBackend',)
+                           # 'mongoengine.django.auth.MongoEngineBackend',
+                           )
 
 ADMINS = (
 
@@ -24,6 +25,7 @@ MONGO_DB_USER = False
 MONGO_DB_PASSWORD = False
 MONGO_SECURITY_DB = 'epigenetics_security'
 MONGO_SESSIONS_COLLECTION = 'mongo_sessions'
+# MONGOENGINE_USER_DOCUMENT = 'mongoengine.django.auth.User'
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -168,7 +170,7 @@ INSTALLED_APPS = (
      'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
      'django.contrib.admindocs',
-     'mongoengine.django.mongo_auth'
+     # 'mongoengine.django.mongo_auth'
     # 'polls',
 
 )

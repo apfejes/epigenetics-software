@@ -5,18 +5,16 @@ Created on 2013-05-07
 '''
 
 
-from django.http import HttpResponse
-from django.utils.safestring import mark_safe
-from django.shortcuts import render
-from django.http.response import HttpResponseRedirect
-from django.contrib.auth.decorators import login_required
+import ast, os, sys
 
-from pymongo.mongo_client import MongoClient
-import os, sys
-import ast
 from django.contrib.auth import login, authenticate, logout
-from mongoengine.queryset import DoesNotExist
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.http.response import HttpResponseRedirect, HttpResponse
+from django.shortcuts import render
+from django.utils.safestring import mark_safe
+from mongoengine.queryset import DoesNotExist
+from pymongo.mongo_client import MongoClient
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(os.path.dirname(_cur_dir))
@@ -48,13 +46,9 @@ def login_view(request):
         username = request.POST['username']
         password = request.POST['password']
         print "username: %s password: %s" % (username, password)
-        test = User.objects.get_by_natural_key(username)
-        print "test= ", test
         user = User.objects.get(username = username)
-
         # user.backend = 'mongoengine.django.auth.MongoEngineBackend'
         user.backend = 'django.contrib.auth.backends.ModelBackend'
-
         if user.check_password(password):
             if user is not None:
                 if user.is_active:
