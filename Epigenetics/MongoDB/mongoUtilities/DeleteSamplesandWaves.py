@@ -22,7 +22,6 @@ import Mongo_Connector
 import common_utilities as cu
 sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
-print "sys.path= ", sys.path
 from CommonUtils import Parameters
 
 
