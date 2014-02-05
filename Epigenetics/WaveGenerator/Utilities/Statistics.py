@@ -17,10 +17,10 @@ class Kolmogorov_Smirnov(object):
     '''This is a test to compare two empirical distributions to see if they are from the same original function.'''
 
     @staticmethod
-    def ks_test(m1,    # m1
-                s1,    # s1
-                m2,    # m2
-                s2):    # s2
+    def ks_test(m1,    # mean of first sample
+                s1,    # standard deviation of first sample
+                m2,    # mean of second sample
+                s2):    # standard deviation of second sample
 
         '''run the ks test, returns a value that can be interpreted'''
         s1 = float(s1)
