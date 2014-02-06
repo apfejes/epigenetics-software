@@ -39,6 +39,7 @@ class Svg_Builder():
             get_cpg = False,
             show_points = False,
             show_dist = False,
+            show_genes = True,    # whether to show the genes on the bottom of the illustration.
             genes = None):
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an SVG string for webserver rendering
@@ -64,7 +65,7 @@ class Svg_Builder():
         # TODO: Insert error handling here, if chipseq and no chipseq data, drop out
         # TODO: Insert error handling here, if both and no data, drop out
 
-        if genes:
+        if genes and show_genes:
             self.drawing.draw_genes(genes)
 
 

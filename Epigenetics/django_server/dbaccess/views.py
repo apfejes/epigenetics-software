@@ -162,6 +162,7 @@ def process_query_request(request):
     p['minsigma'] = q.get("minsigma", None)
     p['cpg'] = to_boolean(q.get("cpg", False))
     p['show_dist'] = to_boolean(q.get("show_dist", False))
+    p['show_genes'] = to_boolean(q.get("show_genes", True))
     p['datapoints'] = to_boolean(q.get("datapoints", True))
     p['sample_index'] = ast.literal_eval(str(q.get("sample_index", '{}')))
     p['types_index'] = ast.literal_eval(str(q.get("types_index", '{}')))
@@ -287,7 +288,9 @@ def view_query_form(request):
     if parameters['end'] < parameters['start'] + 10:    # must check this here, because placing the start and end too close together will 'cause x tics to fail.
         parameters['end'] = parameters['start'] + 10
 
-    genes = m.find_genes(str(parameters['chromosome']), parameters['start'], parameters['end'])
+    genes = []
+    if parameters['show_genes']:
+        genes = m.find_genes(str(parameters['chromosome']), parameters['start'], parameters['end'])
 
     sample_index = {}
     types_index = {}
@@ -309,6 +312,7 @@ def view_query_form(request):
                            get_cpg = parameters['cpg'],
                            show_points = parameters['datapoints'],
                            show_dist = parameters['show_dist'],
+                           show_genes = parameters['show_genes'],
                            types_index = parameters['types_index'],
                            sample_index = parameters['sample_index'],
                            genes = genes)
@@ -347,6 +351,7 @@ def view_query_form(request):
                             sample_index = parameters['sample_index'],
                             show_points = parameters['datapoints'],
                             show_dist = parameters['show_dist'],
+                            show_genes = parameters['show_genes'],
                             types_index = parameters['types_index'],
                             genes = genes)
 
@@ -369,6 +374,7 @@ def view_query_form(request):
                                                'cpg':parameters['cpg'],
                                                'datapoints': parameters['datapoints'],
                                                'show_dist':parameters['show_dist'],
+                                               'show_genes':parameters['show_genes'],
                                                'width':parameters['width'],
                                                'height':parameters['height'],
                                                'groupby':groupby_list,

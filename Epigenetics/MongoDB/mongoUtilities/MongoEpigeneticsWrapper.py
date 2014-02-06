@@ -504,6 +504,13 @@ class MongoEpigeneticsWrapper():
         else:
             return r
 
+    def find_coords_by_probeid (self, name):
+        '''given the name of a probe get the coordinates'''
+        r = self.mongo.find_one("annotations", {"targetid":name.lower()}, {"chr":1, "mapinfo":1, "_id":0})
+        if r == None:
+            return None
+        else:
+            return r
 
 
 # TODO: Error function below needs testing

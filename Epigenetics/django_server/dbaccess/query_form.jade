@@ -160,6 +160,13 @@ body
                 input(id='show_dist', size = '8', type='checkbox', name="show_dist", checked)
               else
                 input(id='show_dist', size = '8', type='checkbox', name="show_dist")
+                
+          #selection_element
+            label(for='show_genes') Show Genes:
+              if show_genes
+                input(id='show_genes', size = '8', type='checkbox', name="show_genes", checked)
+              else
+                input(id='show_genes', size = '8', type='checkbox', name="show_genes")
     #left
        |!{plot}
     #right
