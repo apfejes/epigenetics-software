@@ -45,29 +45,23 @@ def login_view(request):
     try:
         username = request.POST['username']
         password = request.POST['password']
-        print "username: %s password: %s" % (username, password)
         user = User.objects.get(username = username)
         # user.backend = 'mongoengine.django.auth.MongoEngineBackend'
         user.backend = 'django.contrib.auth.backends.ModelBackend'
+        authenticate(user = user, password = password)
         if user.check_password(password):
-            if user is not None:
-                if user.is_active:
-                    authenticate(user = user, password = password)
-                    login(request, user)
-                    request.session.set_expiry(60 * 60 * 1)    # 1 hour timeout
-                    if next in request.POST:
-                        return HttpResponseRedirect(request.POST['next'])
-                    else:
-                        return render(request, 'base.jade', {"message":"Login successful"})
-                else:    # Return a 'disabled account' error message
-                    print "LOGIN --->  Account for user %s has been deactivated." % (username)
-                    return HttpResponse("Account for user %s has been deactivated." % (username))
-            else:    # Return an 'invalid login' error message.
-                print "LOGIN --->  Could not authenticate user name %s: " % (username)
-                return HttpResponse("Could not authenticate user name %s: " % (username))
-        else:
             print "LOGIN --->  Incorrect password %s: " % (username)
             return HttpResponse("Incorrect password %s: " % (username))
+        if user.is_active:
+            login(request, user)
+            request.session.set_expiry(60 * 60 * 1)    # 1 hour timeout
+            if next in request.POST:
+                return HttpResponseRedirect(request.POST['next'])
+            else:
+                return render(request, 'base.jade', {"message":"Login successful"})
+        else:    # Return a 'disabled account' error message
+            print "LOGIN --->  Account for user %s has been deactivated." % (username)
+            return HttpResponse("Account for user %s has been deactivated." % (username))
     except DoesNotExist:
         print "LOGIN --->  (Error:DoesNotExist) Could not authenticate user name %s: " % (username)
         return HttpResponse('user does not exist')
