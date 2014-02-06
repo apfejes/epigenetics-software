@@ -31,7 +31,7 @@ import CommonUtils.Parameters as Parameters
 sys.path.insert(0, _root_dir + os.sep + "MongoDB" + os.sep + "mongoUtilities")
 import Mongo_Connector, common_utilities
 import PrintThread
-from Statistics import Kolmogorov_Smirnov as stats
+from CommonUtils.Statistics import Kolmogorov_Smirnov as stats
 # sys.path.insert(0, _root_dir + os.sep + "Illustration")
 # import Histogram as histogram
 # import ScatterPlot as scatterplot

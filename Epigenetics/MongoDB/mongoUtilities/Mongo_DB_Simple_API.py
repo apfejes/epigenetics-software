@@ -8,6 +8,7 @@ import time
 import os
 import sys
 import gzip
+import numpy
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(_cur_dir)
@@ -17,6 +18,79 @@ sys.path.insert(0, _root_dir)
 sys.path.insert(0, _root_dir + os.sep + "CommonUtils")
 from CommonUtils import Parameters
 import Mongo_Connector
+from Statistics import Kolmogorov_Smirnov
+
+
+def process_samples_in_order(connector, project_name, filters, groupby, limit):
+    '''
+    This routine gets you the _ids of all projects with a given set of criteria (filter), and then returns a list representing every probe position in the array for each one.    
+    '''
+    filters['project'] = project_name
+    # first find the samples of interest:00000000000000000000000000000000000000000000000000000000000000
+
+    if not groupby:
+        print "no Groupby field was provided.  This query can not be run."
+
+    q_returns = {"_id":1, "sampleid":1}
+    q_returns[groupby] = 1
+    cursor = connector.find("samples", filters, q_returns)
+    ids = []
+    sample_names = {}
+    groups = []
+    group_by_sid = {}
+    for x in cursor:
+        ids.append(x['_id'])
+        sample_names[x['_id']] = x['sampleid']
+        group_by_sid[x['_id']] = x[groupby]
+        if x[groupby] not in groups:
+            groups.append(x[groupby])
+
+
+    target_cursor = connector.distinct("annotations", "targetid")    # find all probe sample_names
+    # get the results for each probe for each sample
+    count = 0
+    '''write out headers '''
+
+    ''' process probe-by-probe'''
+
+    for i in target_cursor:
+        # print "i = ", i
+        count += 1
+        if count > limit:
+            return
+        row = {}
+        data = {}
+        std = {}
+        mean = {}
+        data_cursor = connector.find("methylation", {"probeid":i, "sampleid": {"$in": ids}}, {"sampleid":1, "beta":1})
+
+        for c in data_cursor:
+            sid = c['sampleid']
+
+            row[sid] = c['beta']
+            # process groups distr. properties.
+            g = group_by_sid[sid]
+            if g not in data:
+                data[g] = []
+            data[g].append(c['beta'])
+        print "Probe %s", i
+        for g in groups:
+            # calculate s and m
+            std[g] = numpy.std(data[g])
+            mean[g] = numpy.mean(data[g])
+            print "   %s | %f %f" % (g, std[g], mean[g])
+        '''do pairwise comparison'''
+
+        for x in range(len(groups)):
+            for y in range(x, len(groups)):
+                pvalue = Kolmogorov_Smirnov.ks_test(mean[x], std[x], mean[y], std[y])
+                print "   group %s vs %s --> pval = %f" % (groups[x], groups[y], pvalue)
+        # print "%s = %s" % (i, v)
+        if count % 10000 == 0:
+            print "Row %i" % count    # for debugging
+    # wht's missing and the sorting'
+
+
 
 
 def export_samples_as_table(connector, project_name, filters, filename):
@@ -66,13 +140,13 @@ def export_samples_as_table(connector, project_name, filters, filename):
         if count % 10000 == 0:
             print "Row %i" % count    # for debugging
     f.close()
-    # wht's missing and the sorting'
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name", help = "Name of Project to Export", type = str)
     parser.add_argument("filename", help = "Full path and name of file to create, where the methylation export data will be placed", type = str, default = None)
+    parser.add_argument("-limit", help = "An optional integer limit to the number of probes to process", type = int, default = None)
     parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
     parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
     args = parser.parse_args()
