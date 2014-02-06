@@ -49,9 +49,9 @@ def login_view(request):
         # user.backend = 'mongoengine.django.auth.MongoEngineBackend'
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         authenticate(user = user, password = password)
-        if user.check_password(password):
+        if not user.check_password(password):
             print "LOGIN --->  Incorrect password %s: " % (username)
-            return HttpResponse("Incorrect password %s: " % (username))
+            return render(request, 'base.jade', {"message":"Incorrect password provided for user %s" % (username)})
         if user.is_active:
             login(request, user)
             request.session.set_expiry(60 * 60 * 1)    # 1 hour timeout
@@ -61,13 +61,14 @@ def login_view(request):
                 return render(request, 'base.jade', {"message":"Login successful"})
         else:    # Return a 'disabled account' error message
             print "LOGIN --->  Account for user %s has been deactivated." % (username)
-            return HttpResponse("Account for user %s has been deactivated." % (username))
+            return render(request, 'base.jade', {"message":"Account for user %s has been deactivated." % (username)})
     except DoesNotExist:
         print "LOGIN --->  (Error:DoesNotExist) Could not authenticate user name %s: " % (username)
-        return HttpResponse('user does not exist')
+        return render(request, 'base.jade', {"message":"User %s does not exist." % (username)})
     except Exception as e:
         print "exeption", e
-        return HttpResponse('Unexpected Exception (%s)' % (e))
+        return render(request, 'base.jade', {"message":"Unable to login.  Exception: %s" % (e)})
+
 
 def logout_view(request):
     logout(request)
@@ -275,7 +276,13 @@ def view_query_form(request):
             parameters['start'] = coords['start']
             parameters['end'] = coords['end']
         else:
-            return HttpResponse('Could not find Gene: ' + action_factor)
+            annotation = m.find_coords_by_probeid(action_factor)
+            if annotation:
+                parameters['chromosome'] = annotation['chr']
+                parameters['start'] = annotation['mapinfo'] - 10
+                parameters['end'] = annotation['mapinfo'] + 10
+            else:
+                return HttpResponse('Could not find Gene: ' + action_factor)
 
     if parameters['end'] < parameters['start'] + 10:    # must check this here, because placing the start and end too close together will 'cause x tics to fail.
         parameters['end'] = parameters['start'] + 10
