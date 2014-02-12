@@ -5,7 +5,7 @@ Created on 2013-05-07
 '''
 
 
-import ast, os, sys
+import os, sys
 
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
@@ -367,8 +367,6 @@ def view_query_form(request):
     return render(request, 'query_form.jade', {'organism_list':organism_list,
                                                'methylation_list':methylation_list,
                                                'collection_list':collection_list,
-                                               # 'sample_index':sample_index,
-                                               # 'types_index':types_index,
                                                'chipseq_list':chipseq_list,
                                                'chipseq_project':parameters['chipseq_project'],
                                                'plot':mark_safe(svg),
@@ -413,11 +411,11 @@ def view_metadata(request):
 def view_metadata2(request):
     q = None
     if request.method == 'GET':
-        return HttpResponseRedirect('/dbaccess/metadata/')
-        # should not be using Get to submit to this page.
+        q = request.GET
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
 
+    print "q =", q
     organism = str(q.get("organism", None))
     project = str(q.get("project", None))
     collection = str(q.get("collection", None))
