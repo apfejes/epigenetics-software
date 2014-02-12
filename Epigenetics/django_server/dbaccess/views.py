@@ -13,8 +13,10 @@ from django.contrib.auth.models import User
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
+
 from mongoengine.queryset import DoesNotExist
 from pymongo.mongo_client import MongoClient
+import mongoengine
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))    # where the current file is
 _root_dir = os.path.dirname(os.path.dirname(_cur_dir))
@@ -25,19 +27,17 @@ from MongoDB.mongoUtilities import MongoEpigeneticsWrapper
 from MongoDB.mongoUtilities.common_utilities import CreateListFromCursor
 from viewtools import ZOOM_FACTORS, PANNING_PERCENTS, panning, zoom, check
 
-mongo = MongoClient('kruncher.cmmt.ubc.ca', 27017)
-collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip':'Both'}
-
 sys.path.insert(0, _root_dir + os.sep + "django_server")
 from django_server.settings import MONGO_HOST
 from django_server.settings import MONGO_PORT
 from django_server.settings import MONGO_SECURITY_DB
 
 
-import mongoengine
 print "connecting to: %s %s %s" % (MONGO_SECURITY_DB, MONGO_HOST, MONGO_PORT)
+mongo = MongoClient(MONGO_HOST, MONGO_PORT)    # general connection and library.
+mongoengine.connect(MONGO_SECURITY_DB, host = MONGO_HOST, port = MONGO_PORT)    # security
 
-mongoengine.connect(MONGO_SECURITY_DB, host = MONGO_HOST, port = MONGO_PORT)
+collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip':'Both'}
 
 
 def login_view(request):
