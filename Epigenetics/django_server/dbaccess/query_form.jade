@@ -22,10 +22,10 @@ body
     form(name="main", action='/dbaccess/query_form/', method='post')
       input(type="hidden", id="width", name="width", value = "")
       input(type="hidden", id="height", name="height", value = "")
-      input(type="hidden", id="sample_index", name="sample_index", value = sample_index)
-      input(type="hidden", id="types_index", name="types_index", value = types_index)
       input(type="hidden", id="methylation_avail", name="methylation_avail", value=methylation_list)
       input(type="hidden", id="chipseq_avail", name="chipseq_avail", value=chipseq_list)
+      input(type="hidden", id="sample_index", name="sample_index", value = sample_index)
+      input(type="hidden", id="types_index", name="types_index", value = types_index)
       input(type="hidden", id="organism_inuse", name="organism_inuse", value=organism)
       input(type="hidden", id="methylation_selected", name="methylation_selected", value=methylation_project)
       input(type="hidden", id="chipseq_selected", name="chipseq_selected", value=chipseq_project)
@@ -65,6 +65,8 @@ body
                       option(value=cs, selected)=cs
                     - else
                       option(value=cs)=cs
+              td
+                <button type="button" onclick='edit_metadata()'>Edit Metadata</button>
             tr
               td
                 label(for='collection', id='collection_label') Collection:
@@ -87,7 +89,7 @@ body
 
               
           
-        div(align="center")
+        div(align="left")
           label(for='chromosome') Chromosome:
             if chromosome
               input(id='chromosome',size = '6', type='text', name='chromosome', value = chromosome)
@@ -411,6 +413,46 @@ script(type='text/javascript')
       a.click();
       
     }
+    
+    function edit_metadata() {
+      var base = "/dbaccess/metadata2/";
+      var e = document.getElementById("organism");
+      var organism = e.options[e.selectedIndex].value;
+      var e = document.getElementById("collection");
+      var collection = e.options[e.selectedIndex].value;
+
+      base += "?organism=" + organism
+      base += "&collection=" + collection
+      
+      if (collection == 'methylation') {
+        var e = document.getElementById("methylation");
+        var methylation = getselected(e)
+        if (methylation.length > 1) {
+          alert ("Cannot edit more than one data set at once")
+          return
+        } else {
+          base += "&project=" + encodeURIComponent(methylation)
+        }
+      }
+      if (collection == 'chipseq') {
+        var e = document.getElementById("chipseq");
+        var chipseq = getselected(e)
+        if (chipseq.length > 1) {
+          alert ("Cannot edit more than one data set at once")
+          return
+        } else {
+          base += "&project=" + encodeURIComponent(chipseq)
+        }
+      }
+      if (collection == 'methchip') {
+        alert ("Cannot jump to edit metadata when both methylation and chipseq are selected")
+        return
+      }
+      window.open(base)
+    }
+    
+    
+    
     
        
     update_view();
