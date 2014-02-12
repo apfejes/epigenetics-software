@@ -164,8 +164,13 @@ def process_query_request(request):
     p['show_dist'] = to_boolean(q.get("show_dist", False))
     p['show_genes'] = to_boolean(q.get("show_genes", True))
     p['datapoints'] = to_boolean(q.get("datapoints", True))
-    p['sample_index'] = ast.literal_eval(str(q.get("sample_index", '{}')))
-    p['types_index'] = ast.literal_eval(str(q.get("types_index", '{}')))
+    try:
+        p['sample_index'] = request.session['sample_index']
+        p['types_index'] = request.session['types_index']
+    except KeyError:
+        p['types_index'] = None
+        p['sample_index'] = None
+    # p['types_index'] = ast.literal_eval(str(q.get("types_index", '{}')))
     p['width'] = int(q.get("width", 1000)) - 200    # width of screen minus 100
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
 
@@ -355,11 +360,15 @@ def view_query_form(request):
                             types_index = parameters['types_index'],
                             genes = genes)
 
+    request.session['types_index'] = types_index
+    request.session['sample_index'] = sample_index
+
+
     return render(request, 'query_form.jade', {'organism_list':organism_list,
                                                'methylation_list':methylation_list,
                                                'collection_list':collection_list,
-                                               'sample_index':sample_index,
-                                               'types_index':types_index,
+                                               # 'sample_index':sample_index,
+                                               # 'types_index':types_index,
                                                'chipseq_list':chipseq_list,
                                                'chipseq_project':parameters['chipseq_project'],
                                                'plot':mark_safe(svg),
