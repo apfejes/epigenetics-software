@@ -204,11 +204,10 @@ label {
 }
 
 button {
-    padding: 0px;
     border: 1px solid #006;
 }
 
 input {
     font-size:11px;
-    padding: 0 0 0 0;
+    /* padding: 0 0 0 0;*/
 }
