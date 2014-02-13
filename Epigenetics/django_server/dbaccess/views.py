@@ -420,19 +420,28 @@ def view_metadata2(request):
     project = str(q.get("project", None))
     collection = str(q.get("collection", None))
     samples = None
+    groups = None
     if collection == 'chipseq':
         samples = mongo[organism + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False, "sample_id":project})
         samples = [s for s in samples]
     elif collection == 'methylation':
         samples = []
+        groups = []
         cursor = mongo[organism + "_epigenetics"]['samples'].find({'project':project})
         for s in cursor:
             for k in s:
                 s[str(k)] = str(s.pop(k))
             samples.append(s)
+        cursor = mongo[organism + "_epigenetics"]['sample_groups'].find({'project':project})
+        for s in cursor:
+            t = s['available']
+            for k in t:
+                groups.append(str(k))
+
     return render(request, 'metadata2.jade', {"organism":organism,
                                               "project":project,
                                               "samples":samples,
+                                              "groups":groups,
                                               "collection":collection})
 
 @login_required

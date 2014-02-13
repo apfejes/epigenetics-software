@@ -431,6 +431,9 @@ script(type='text/javascript')
         if (methylation.length > 1) {
           alert ("Cannot edit more than one data set at once")
           return
+        } else if (methylation.length <1) {
+          alert ("No data set selected - please select one before proceeding")
+          return 
         } else {
           base += "&project=" + encodeURIComponent(methylation)
         }
@@ -440,6 +443,9 @@ script(type='text/javascript')
         var chipseq = getselected(e)
         if (chipseq.length > 1) {
           alert ("Cannot edit more than one data set at once")
+          return
+        } else if (chipseq.length <1) {
+          alert ("No data set selected - please select one before proceeding")
           return
         } else {
           base += "&project=" + encodeURIComponent(chipseq)

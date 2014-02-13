@@ -11,6 +11,7 @@ block content
       input(type="hidden", id="collection", name="collection", value=collection)
       input(type="hidden", id="project", name="project", value=project)   
       input(type="hidden", id="organism", name="organism", value=organism)
+      input(type="hidden", id="groups", name="groups", value=groups)
       | Editing !{collection} sample - !{project}
       br
       if collection == 'chipseq'
@@ -61,7 +62,17 @@ block script
       var sample_num = e.options[e.selectedIndex].index;
       var samp = JSON.parse(samples.value.replace(/'/g, '"'))
       var sam = samp[sample_num]
-      var rowcount = 0
+      var row = container.insertRow(0);
+      var rowcount = 1
+      var cell = row.insertCell(0);
+      cell.appendChild(document.createTextNode("Field"));
+      cell = row.insertCell(1);
+      cell.appendChild(document.createTextNode("Value"));
+      cell = row.insertCell(2);
+      cell.appendChild(document.createTextNode("Group By"));
+      
+      
+      
       for (s in sam) {
         var row = container.insertRow(rowcount);
         var cell1 = row.insertCell(0);
@@ -73,6 +84,15 @@ block script
         input.value = sam[s]
         input.disabled = true;
         cell2.appendChild(input);
+        var cell3 = row.insertCell(2);
+        var x = document.createElement('input');
+        x.type = "checkbox";
+
+        x.name = s + "_checkbox";
+        if (groups.value.indexOf(s) > -1) {
+          x.checked = "true";
+        }
+        cell3.appendChild(x);
         rowcount +=1;
      }
     }
