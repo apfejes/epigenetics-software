@@ -453,12 +453,7 @@ def view_metadata3(request):
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
     newfields = {}
-    for t in q:
-        if t.startswith("label"):
-            v = t.replace("label", "value")
-            newfields[str(q.get(t))] = str(q.get(v))
-            # print "%s -> %s " % (q.get(t), q.get(v))
-
+    # groups = str(q.get("groups", None))
     organism = str(q.get("organism", None))
     project = str(q.get("project", None))
     collection = str(q.get("collection", None))
@@ -466,6 +461,25 @@ def view_metadata3(request):
 
     print "collection = ", collection
     print "sample = ", sample
+
+    updated_groups = []
+    for t in q:
+        print "t = ", t
+        if t.startswith("label"):
+            v = t.replace("label", "value")
+            newfields[str(q.get(t))] = str(q.get(v))
+            # print "%s -> %s " % (q.get(t), q.get(v))
+        if t.startswith("checkbox_"):
+            v = t.replace("checkbox_", "")
+            updated_groups.append(v)
+
+    print "updated group by list = ", updated_groups
+    print "saving..."
+    value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"available":updated_groups}})
+    print value
+    print "saved"
+
+
     print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\"},{$set:%s}") % (organism, project, newfields)
 
     if collection == "chipseq":

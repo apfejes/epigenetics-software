@@ -43,8 +43,8 @@ block content
         
         
       input(type="button", value="Add a new key/value", onClick='addnewtag()')
-      input(type='submit', value = 'Save Edits', title="Save Edits", name='Save Edits', class ="bigbutton")
       input(type="button", value="Back", onClick="window.history.back(-1)")
+      input(type='submit', value = 'Save Edits', title="Save Edits", name='Save Edits', class ="bigbutton")
 
 block script    
   script(type='text/javascript')
@@ -87,8 +87,7 @@ block script
         var cell3 = row.insertCell(2);
         var x = document.createElement('input');
         x.type = "checkbox";
-
-        x.name = s + "_checkbox";
+        x.name = "checkbox_" + s;
         if (groups.value.indexOf(s) > -1) {
           x.checked = "true";
         }
