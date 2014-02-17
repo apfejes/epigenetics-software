@@ -1,0 +1,132 @@
+extends base
+
+block title
+    h1 Epigenetics Database - View/Edit Meta Data
+
+block content
+  #padding-div 
+    input(type="hidden", id="groups", name="groups", value=groups)
+    input(type="hidden", id="groupby_set", name="groupby_set", value=groupby)
+    input(type="hidden", id="project", name="project", value=project)
+    input(type="hidden", id="organism", name="organism", value=organism)    
+    h2 Compound Keys
+    table
+      tr 
+        td(colspan=5)
+          | Current Rows
+      tr
+        td 
+          | Name
+        td 
+          | Key 1
+        td
+          | key 2
+        td 
+          | key 3
+        td
+          
+      - if groupby
+        - for x in groupby
+          - var t =  x.items
+          - for name,z in t
+            tr
+              - var g = x.get(name)
+              td
+                !{name}
+              - each w in g
+                td 
+                  !{w}
+              td
+                input(type="button", name="Delete Group-by", value="Delete Group-by")
+      tr
+        td(colspan=5)
+          hr
+          
+
+      tr
+        td(colspan=5)
+          | Add a New Key:
+      tr
+        td 
+          | Name
+        td 
+          | Key 1
+        td
+          | key 2
+        td 
+          | key 3
+        td
+          | 
+      tr
+        td
+          input(type="text", name="new_name", id="new_name", placeholder="key name")
+        td
+          select(name='key1', id='key1', onChange='populate_key2()')
+            option(value="None")="None"
+            - each s in groups
+              option(value=s)=s
+        td
+          select(name='key2', id='key2', onChange='populate_key3()')
+            option(value="None")="None"
+        td
+          select(name='key3', id='key3')
+            option(value="None")="None"
+        td
+          input(type="button", name="Add Group-by", value="Add Group-by", onclick="window.open(add_compound_key(),'_self')")
+          
+          
+block script    
+  script(type='text/javascript')
+    function populate_key2(){
+      var e = document.getElementById("key1");
+      var key1 = e.options[e.selectedIndex].value;
+      if (key1 == "None") {
+        document.getElementById("key2").options[i]=new Option("None", "None", false, false);
+      }
+      var g = JSON.parse(groups.value.replace(/'/g, '"'));
+      
+      document.getElementById("key2").options[0]=new Option("None", "None", false, false);
+      i = 1;
+      for (pro in g) {
+        if (g[pro] != key1) {
+          document.getElementById("key2").options[i]=new Option(g[pro], g[pro], false, false);
+          i++;
+        }
+      
+      }
+    }
+    
+    function populate_key3(){
+      var e = document.getElementById("key1");
+      var key1 = e.options[e.selectedIndex].value;
+      var e = document.getElementById("key2");
+      var key2 = e.options[e.selectedIndex].value;
+      var g = JSON.parse(groups.value.replace(/'/g, '"'));
+      document.getElementById("key2").options[0]=new Option("None", "None", false, false);
+      i = 1;
+      for (pro in g) {
+        if (g[pro] != key1 && g[pro] != key2) {
+          document.getElementById("key3").options[i]=new Option(g[pro], g[pro], false, false);
+          i++;
+        }
+      }
+    }
+    
+    function add_compound_key() {
+      var base = '/dbaccess/compound/';
+      var e = document.getElementById("key1");
+      var key1 = e.options[e.selectedIndex].value;
+      var e = document.getElementById("key2");
+      var key2 = e.options[e.selectedIndex].value;
+      var e = document.getElementById("key3");
+      var key3 = e.options[e.selectedIndex].value;
+      base += "?project=" + project.value;
+      base += "&organism=" + organism.value;
+      base += "&name=" + new_name.value;
+      base += "&key1=" + key1;
+      base += "&key2=" + key2;
+      base += "&key3=" + key3;
+      return base
+    }
+      
+
