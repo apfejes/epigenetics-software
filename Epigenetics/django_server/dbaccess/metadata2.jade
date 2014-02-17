@@ -6,14 +6,18 @@ block title
 block content
   #padding-div 
     h2 MetaData: Select a project to edit.
+    input(type="button", value="Manage Compound Group by", onClick="window.location.assign('/dbaccess/compound/?organism=' + organism.value + '&project=' + project.value )")
+    hr
+    br
     form(name="main", id="main", action='/dbaccess/metadata3/', method='post')
       input(type="hidden", id="samples", name="samples", value=samples)
       input(type="hidden", id="collection", name="collection", value=collection)
       input(type="hidden", id="project", name="project", value=project)   
       input(type="hidden", id="organism", name="organism", value=organism)
       input(type="hidden", id="groups", name="groups", value=groups)
-      | Editing !{collection} sample - !{project}
-      br
+      
+      | Editing !{collection} sample - !{project} - 
+      
       if collection == 'chipseq'
         - var disabledfields = {"_id", "min_height", "number_waves", "map_type", "input_file", "default_database", "file_name", "round_leading_edge", "port", "triangle_median", "server", "fragment_length", "max_pet_length", "haswaves", "output_path", "triangle_min", "sample_id", "hide", "make_wig", "processor_threads"}
         - each s in samples
@@ -53,8 +57,7 @@ block script
         populate_methylation_table();
       }
     }
-    
-    
+
     function populate_methylation_table() {
       var container = document.getElementById("tab");
       container.innerHTML = "";
@@ -70,9 +73,7 @@ block script
       cell.appendChild(document.createTextNode("Value"));
       cell = row.insertCell(2);
       cell.appendChild(document.createTextNode("Group By"));
-      
-      
-      
+
       for (s in sam) {
         var row = container.insertRow(rowcount);
         var cell1 = row.insertCell(0);

@@ -36,26 +36,7 @@ block content
     
 block script    
   script(type='text/javascript')
-    function newURL(action){  
-      var base = '/dbaccess/query_form/';
-      var e = document.getElementById("organism");
-      var organism = e.options[e.selectedIndex].value;
-      var e = document.getElementById("collection");
-      var collection = e.options[e.selectedIndex].value;
-      var e = document.getElementById("methylation");
-      var methylation = getselected(e);
-      var e = document.getElementById("chipseq");
-      var chipseq = getselected(e);
-      
-      base += "&organism=" + organism
-      base += "&collection=" + collection
-      base += "&methylation=" + encodeURIComponent(methylation)
-      base += "&groupby=" + groupby
-      base += "&chipseq=" + encodeURIComponent(chipseq)
-      
-      return base
-    }
-    
+       
     function update_data_by_org() {
       var o = document.getElementById("organism").value;
       var z = document.getElementById("collection").value;
