@@ -500,3 +500,41 @@ def view_metadata3(request):
     #        for k in s:
     #            s[str(k)] = str(s.pop(k))
     #        samples.append(s)
+
+
+@login_required
+def compound(request):
+    q = None
+    if request.method == 'GET':
+        q = request.GET
+    elif request.method == 'POST':    # If the query has been submitted...
+        q = request.POST
+    project = str(q.get("project", None))
+    organism = str(q.get("organism", None))
+    print " organism = ", organism
+    print " project = ", project
+
+    if "key1" in q and "key2" in q and "key3" in q:
+        key1 = str(q.get("key1"))
+        key2 = str(q.get("key2"))
+        key3 = str(q.get("key3"))
+        name = str(q.get("name"))
+        print "name", name
+
+        value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"compound." + name: [key1, key2, key3]}})
+        print value
+    cursor = mongo[organism + "_epigenetics"]['sample_groups'].find({'project':project})
+    groups = []
+    groupby = []
+
+    for s in cursor:
+        t = s['available']
+        for k in t:
+            groups.append(str(k))
+        if "compound" in s:
+            print "s['compound']", s['compound']
+            groupby.append(s['compound'])
+    return render(request, 'compound.jade', {"project":project,
+                                             "organism":organism,
+                                             "groups":groups,
+                                             "groupby":groupby})
