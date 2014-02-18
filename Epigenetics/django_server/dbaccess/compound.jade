@@ -16,28 +16,28 @@ block content
           | Current Rows
       tr
         td 
-          | Name
+          b Name
         td 
-          | Key 1
+          b Key 1
         td
-          | key 2
+          b key 2
         td 
-          | key 3
+          b key 3
         td
           
       - if groupby
         - for x in groupby
           - var t =  x.items
-          - for name,z in t
+          - for n,z in t
             tr
-              - var g = x.get(name)
+              - var g = x.get(n)
               td
-                !{name}
+                !{n}
               - each w in g
                 td 
                   !{w}
               td
-                input(type="button", name="Delete Group-by", value="Delete Group-by")
+                input(type="button", name="Delete Group-by", value="Delete Group-by", , onclick="window.open(delete_compound_key('#{n}'),'_self')")
       tr
         td(colspan=5)
           hr
@@ -48,13 +48,13 @@ block content
           | Add a New Key:
       tr
         td 
-          | Name
+          b Name
         td 
-          | Key 1
+          b Key 1
         td
-          | key 2
+          b key 2
         td 
-          | key 3
+          b key 3
         td
           | 
       tr
@@ -128,5 +128,12 @@ block script
       base += "&key3=" + key3;
       return base
     }
-      
+     
+    function delete_compound_key(v) {
+      var base = '/dbaccess/compound/';
+      base += "?organism=" + organism.value;
+      base += "&project=" + project.value;
+      base += "&delete=" + v;
+      return base;
+    } 
 

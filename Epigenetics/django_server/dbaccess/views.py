@@ -514,13 +514,17 @@ def compound(request):
     print " organism = ", organism
     print " project = ", project
 
-    if "key1" in q and "key2" in q and "key3" in q:
+    if "delete" in q:
+        name = str(q.get("delete"))
+        print "deleting gropuby:", name
+        value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$unset":{"compound." + name: ""}})
+        print value
+    elif "key1" in q and "key2" in q and "key3" in q:
         key1 = str(q.get("key1"))
         key2 = str(q.get("key2"))
         key3 = str(q.get("key3"))
         name = str(q.get("name"))
-        print "name", name
-
+        print "Adding new groupby:", name
         value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"compound." + name: [key1, key2, key3]}})
         print value
     cursor = mongo[organism + "_epigenetics"]['sample_groups'].find({'project':project})
