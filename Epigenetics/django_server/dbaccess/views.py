@@ -233,10 +233,19 @@ def view_query_form(request):
         byproj = {}
         for x in gb:
             a = x['available']
-            if len(a) > 1:
+            if len(a) > 0:
                 a = [b.encode('utf-8') for b in x['available']]
-            else:
-                a = x['available'][0].encode('utf-8')
+            c = []
+            if 'compound' in x:
+                c = x['compound'].keys()
+                if len(c) > 0:
+                    c = [b.encode('utf-8') for b in c]
+            print "c= ", c
+            print "a= ", a
+            a.extend(c)
+            if len(a) == 1:
+                a = a[0].encode('utf-8')
+            print "a sub f= ", a
             byproj[x['project'].encode('utf-8')] = {'default':x['default'].encode('utf-8'), 'available':a}
         groupby_list[o] = byproj
 
@@ -522,11 +531,16 @@ def compound(request):
     elif "key1" in q and "key2" in q and "key3" in q:
         key1 = str(q.get("key1"))
         key2 = str(q.get("key2"))
-        key3 = str(q.get("key3"))
-        name = str(q.get("name"))
-        print "Adding new groupby:", name
-        value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"compound." + name: [key1, key2, key3]}})
-        print value
+        if key1 != "None" and key2 != "None":
+            key3 = str(q.get("key3"))
+            name = str(q.get("name"))
+            print "Adding new groupby:", name
+            if key3 == "None":
+                value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"compound." + name: [key1, key2]}})
+                print value
+            else:
+                value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"compound." + name: [key1, key2, key3]}})
+                print value
     cursor = mongo[organism + "_epigenetics"]['sample_groups'].find({'project':project})
     groups = []
     groupby = []

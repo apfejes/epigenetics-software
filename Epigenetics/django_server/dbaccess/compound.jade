@@ -33,9 +33,12 @@ block content
               - var g = x.get(n)
               td
                 !{n}
+              - var count = 0
               - each w in g
                 td 
                   !{w}
+              - if g.length < 3
+                td 
               td
                 input(type="button", name="Delete Group-by", value="Delete Group-by", , onclick="window.open(delete_compound_key('#{n}'),'_self')")
       tr
