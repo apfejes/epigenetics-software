@@ -25,8 +25,8 @@ body
       input(type="hidden", id="height", name="height", value = "")
       input(type="hidden", id="methylation_avail", name="methylation_avail", value=methylation_list)
       input(type="hidden", id="chipseq_avail", name="chipseq_avail", value=chipseq_list)
-      input(type="hidden", id="sample_index", name="sample_index", value = sample_index)
-      input(type="hidden", id="types_index", name="types_index", value = types_index)
+      input(type="hidden", id="sample_index", name="sample_index", value = request.session['sample_index'])
+      input(type="hidden", id="types_index", name="types_index", value = request.session['types_index'])
       input(type="hidden", id="organism_inuse", name="organism_inuse", value=organism)
       input(type="hidden", id="methylation_selected", name="methylation_selected", value=methylation_project)
       input(type="hidden", id="chipseq_selected", name="chipseq_selected", value=chipseq_project)
@@ -176,11 +176,11 @@ body
       input(type="button", onclick='download_svg()', value='Download SVG')
 
       h3 Group Index
-        
-      - if types_index.items
-        - var samples = types_index.keys()
+      - var ti = request.session['types_index']
+      - if ti.items
+        - var samples = ti.keys()
         - each s in samples
-            font(color=types_index.get(s))
+            font(color=ti.get(s))
               !{s}
             br    
       - else 
@@ -395,8 +395,9 @@ script(type='text/javascript')
       }
       base += "&width=" + window.innerWidth
       base += "&height=" + window.innerHeight
-      base += "&types_index=" + encodeURIComponent(document.forms.main.types_index.value)
-      base += "&sample_index=" + encodeURIComponent(document.forms.main.sample_index.value)
+      /* base += "&types_index=" + encodeURIComponent(document.forms.main.types_index.value)
+        base += "&sample_index=" + encodeURIComponent(document.forms.main.sample_index.value) 
+      */
       
       return base
     }
