@@ -29,6 +29,7 @@ MONGO_SESSIONS_COLLECTION = 'mongo_sessions'
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.request',
 )
 
 # DEBUGGING WITH SQLITE3
