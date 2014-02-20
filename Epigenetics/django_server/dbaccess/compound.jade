@@ -123,6 +123,14 @@ block script
       var key2 = e.options[e.selectedIndex].value;
       var e = document.getElementById("key3");
       var key3 = e.options[e.selectedIndex].value;
+      if (key1 == "None" || key2 == "None") {
+        alert("Can not create compound keys with less than one key field.");
+        return
+      }
+      if (new_name.value == "") {
+        alert("A name must be provided for new compound keys");
+        return
+      }
       base += "?project=" + project.value;
       base += "&organism=" + organism.value;
       base += "&name=" + new_name.value;
