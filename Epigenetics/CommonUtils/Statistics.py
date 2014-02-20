@@ -9,9 +9,50 @@ where x is the position of the max distance between two CDFs
 '''
 from math import sqrt, log, erf, fabs
 
+q_test_cutoff = {3: {"Q90": 0.941, "Q95": 0.97, "Q99": 0.994},
+                 4: {"Q90": 0.765, "Q95": 0.829, "Q99": 0.926},
+                 5: {"Q90": 0.642, "Q95": 0.71, "Q99": 0.821},
+                 6: {"Q90": 0.56, "Q95": 0.625, "Q99": 0.74},
+                 7: {"Q90": 0.507, "Q95": 0.568, "Q99": 0.68},
+                 8: {"Q90": 0.468, "Q95": 0.526, "Q99": 0.634},
+                 9: {"Q90": 0.437, "Q95": 0.493, "Q99": 0.598},
+                 10: {"Q90": 0.412, "Q95": 0.466, "Q99": 0.568}}
+
+
 def phi(x):
     '''phi function'''
     return (1.0 + erf(x / sqrt(2.0))) / 2.0
+
+
+
+
+def lower_Qtest(numbers, Qvalue):
+
+    numbers.sort()
+    l = len(numbers)
+    if l < 3:
+        return False, None
+    test1 = (numbers[1] - numbers[0]) / (numbers[l - 1] - numbers[0])
+    if l > 10:
+        l = 10
+    if test1 > q_test_cutoff[l][Qvalue]:
+        return True, numbers[1:]    # it is an outlier
+    return False, None
+
+def upper_Qtest(numbers, Qvalue):
+    numbers.sort()
+    l = len(numbers)
+    if l < 3:
+        return False, None
+    test2 = (numbers[l - 1] - numbers[l - 2]) / (numbers[l - 1] - numbers[0])
+    if l > 10:
+        l = 10
+    if test2 > q_test_cutoff[l][Qvalue]:
+        return True, numbers[:-1]
+    return False, None
+
+
+
 
 class Kolmogorov_Smirnov(object):
     '''This is a test to compare two empirical distributions to see if they are from the same original function.'''
