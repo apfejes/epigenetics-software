@@ -306,6 +306,12 @@ class MongoEpigeneticsWrapper():
         if sample_label:
             query_parameters["sample_label"] = sample_label
 
+        print "sample_group=", sample_group
+
+        if sample_group == "tissuetype":
+            query_parameters["tissuetype"] = {"$exists":True}
+
+
         sortby, sortorder = 'sample_group', 1
         print "finding samples based on query :"
         print "---> Query Parameters: %s" % query_parameters

@@ -270,8 +270,10 @@ def view_query_form(request):
         parameters['chipseq_project'] = None
 
     if methylation:
-        if (len(parameters['methylation_project']) == 0) or (len(parameters['methylation_project']) > 1 or "All" in parameters['methylation_project']) :
+        if (len(parameters['methylation_project']) == 0):
             parameters['groupby_selected'] = 'project'
+        elif len(parameters['methylation_project']) > 1:
+            print "parameters['groupby_selected'] = ", parameters['groupby_selected']
         elif parameters['methylation_project'][0] not in groupby_list[parameters['organism']]:
             parameters['groupby_selected'] = 'project'
         elif (parameters['groupby_selected'] is None and len(parameters['methylation_project']) == 1) :

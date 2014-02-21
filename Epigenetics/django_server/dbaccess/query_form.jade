@@ -223,10 +223,17 @@ script(type='text/javascript')
         var e = document.getElementById("groupby");
         e.options.length=0;
       
-        i = 0;
+        
         if (methylation.length > 1) {
-          document.getElementById("groupby").options[i]=new Option('project', 'project', true, true);
+          if (groupby_selected == "project") {
+            document.getElementById("groupby").options[0]=new Option('project', 'project', true, true);
+            document.getElementById("groupby").options[1]=new Option('tissuetype', 'tissuetype', false, false);
+          } else {
+            document.getElementById("groupby").options[0]=new Option('tissuetype', 'tissuetype', true, true);
+            document.getElementById("groupby").options[1]=new Option('project', 'project', false, false);
+          }
         } else {
+          i = 0;
           var gb_sel = groupby_selected.value
           var gb_all = JSON.parse(groupby_avail.value.replace(/'/g, '"'));
           var gb_av = gb_all[organism_inuse.value][methylation]['available']
@@ -275,10 +282,17 @@ script(type='text/javascript')
         }
         var e = document.getElementById("groupby");
         e.options.length=0;
-        i = 0;
+        
         if (meth_sel.length > 1) {
-          document.getElementById("groupby").options[i]=new Option('project', 'project', true, true);
+          if (groupby_selected == "project") {
+            document.getElementById("groupby").options[0]=new Option('project', 'project', true, true);
+            document.getElementById("groupby").options[1]=new Option('tissuetype', 'tissuetype', false, false);
+          } else {
+            document.getElementById("groupby").options[0]=new Option('tissuetype', 'tissuetype', true, true);
+            document.getElementById("groupby").options[1]=new Option('project', 'project', false, false);
+          }
         } else {
+          i = 0;
           var gb_sel = groupby_selected.value
           var gb_all = JSON.parse(groupby_avail.value.replace(/'/g, '"'));
           var gb_av = gb_all[organism_inuse.value][meth_sel]['available']
