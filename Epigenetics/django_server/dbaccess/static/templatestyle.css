@@ -174,7 +174,7 @@ input[type="submit"]:hover{
 }
 
 #right {
-	font-size: 0.7em;
+	font-size: 0.9em;
 	float: right;
 	display: inline; /* for IE */
 	width: 100px;
@@ -189,7 +189,12 @@ input[type="submit"]:hover{
 	margin: 0;
 }
 
-
+#check_small {
+  margin: 0px; 0px; 0px; 0px;
+  padding:0px 3px 0px 0px;
+  vertical-align: bottom;
+  
+}
 
 fieldset{
     font-size:12px;

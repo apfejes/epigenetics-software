@@ -122,8 +122,6 @@ class Plot(object):
             Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
                     fill = "black", font_size = bigfont * 2)
             self.elements.append(Message)
-        first = True    # tail = 1
-
         heights = []    # create path objects for each peak
         if not waves:
             return
@@ -135,13 +133,8 @@ class Plot(object):
         print "scale_y: ", self.scale_y
         for (pos, height, stddev, sample_id) in waves:
             d = self.make_gausian(pos, height, stddev)
-            if first:
-                # print "palette.sample_color: ", self.palette.samples_color
-                first = False
-                if sample_id not in self.palette.types_color:
-                    print "resetting sample colours - %s not found in palette.sample_color" % (sample_id)
-                    self.palette.set_colors_dict({}, {})
-            types_color = self.palette.colour_assignment_group(sample_id)
+
+            types_color, _new = self.palette.colour_assignment_group(sample_id)
             self.elements.append(Path(stroke = types_color, stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
                            fill = types_color, fill_opacity = 0.5, d = d,
@@ -150,11 +143,10 @@ class Plot(object):
         # fix to truncate curves at border (to hide them)
         self.elements.append(Rect(insert = (-1, 0), size = (self.MARGIN + 1, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
         self.elements.append(Rect(insert = (self.width - 239, 0), size = (self.RIGHT_MARGIN, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
+        self.palette.purge_unused()
 
-
-    def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks):
+    def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks, show_groups):
         '''convert this information into elements of the svg image'''
-        all_y = []
         self.scale_y = 1
 
         if message:
@@ -163,53 +155,47 @@ class Plot(object):
             self.elements.append(Message)
 
         for position in pos_betas_dict.keys():
-            for y, _sample, _sample_type in pos_betas_dict[position]:
-                all_y.append(y)
-        first = True
-        for position in pos_betas_dict.keys():
             x = round(float(position - self.start) * self.scale_x, 2) + self.MARGIN
+
+
 
             if show_points:
                 for beta, sample_id, sample_type in pos_betas_dict[position]:
                     sample_id = str(sample_id)
                     sample_type = str(sample_type)
                     y = round((1 - beta) * self.dimension_y, 2) + self.MARGIN
-                    # print "sample Grouping = %s" % (self.sample_grouping)
-                    key = "%s-%s" % (sample_type, sample_id)
-                    if first:
-                        # print "palette.sample_color: ", self.palette.samples_color
-                        first = False
-                        if key not in self.palette.samples_color:
-                            print "resetting sample colours - %s not found in palette.sample_color" % (key)
-                            self.palette.set_colors_dict({}, {})
-                    type_color, sample_color = self.palette.colour_assignment(sample_type, sample_id)
-                    point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color,
+                    type_color, sample_color, new = self.palette.colour_assignment(sample_type, sample_id)
+                    if new:
+                        show_groups.append(sample_type)
+                    if not show_groups or sample_type in show_groups:
+                        point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color,
                                    onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s-%s\'" % (sample_type, sample_id))
-                    self.elements.append(point)
+                        self.elements.append(point)
 
             if show_peaks:
                 for sample_type in sample_peaks[position]:
-                    if self.gausian_colour.has_key(sample_type):
-                        type_color = self.gausian_colour[sample_type]
-                    else:
-                        type_color = self.palette.colour_assignment_group(sample_type)
-                        self.gausian_colour[sample_type] = type_color
-                    m, s = sample_peaks[position][sample_type]
-                    m = round((1 - m) * self.dimension_y, 2) + self.MARGIN
-                    s = round(s * self.dimension_y, 3)
+                    if not show_groups or sample_type in show_groups:
+                        if self.gausian_colour.has_key(sample_type):
+                            type_color = self.gausian_colour[sample_type]
+                        else:
+                            type_color, new = self.palette.colour_assignment_group(sample_type)
+                            self.gausian_colour[sample_type] = type_color
+                        m, s = sample_peaks[position][sample_type]
+                        m = round((1 - m) * self.dimension_y, 2) + self.MARGIN
+                        s = round(s * self.dimension_y, 3)
 
-                    if s != 0.0:
-                        d = self.make_gausian(position, self.METHYLATION_DISTR_HT, s, False, m)
-                        gaussian = (Path(stroke = type_color,
-                                         stroke_width = self.DISTR_STROKE,
-                                         stroke_linecap = 'round',
-                                         stroke_opacity = 0.8,
-                                         fill = type_color,
-                                         fill_opacity = 0.1,
-                                       d = d))
+                        if s != 0.0:
+                            d = self.make_gausian(position, self.METHYLATION_DISTR_HT, s, False, m)
+                            gaussian = (Path(stroke = type_color,
+                                             stroke_width = self.DISTR_STROKE,
+                                             stroke_linecap = 'round',
+                                             stroke_opacity = 0.8,
+                                             fill = type_color,
+                                             fill_opacity = 0.1,
+                                           d = d))
 
-                        self.elements.insert(1, gaussian)
-
+                            self.elements.insert(1, gaussian)
+        self.palette.purge_unused()
 
     def save(self):
         ''' push loaded elements to the the plot, clear out the elements. '''

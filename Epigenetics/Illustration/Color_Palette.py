@@ -14,6 +14,7 @@ class ColorPalette():
         self.types_color = {}
         self.samples_color = {}
         self.colors = {}
+        self.keys_inuse = []
 
         # Hold dictionaries of colours for use in generating svgs
 #         self.colors['blue'] = ['blue', 'cornflowerblue', 'darkblue', 'deepskyblue', 'darkturquoise',
@@ -53,29 +54,46 @@ class ColorPalette():
             self.counter[sample_type] = 0
         return None
 
+    def key_inuse(self, key):
+        if key not in self.keys_inuse:
+            self.keys_inuse.append(key)
+        return
+
+    def purge_unused(self):
+        for key in self.types_color.keys():
+            if key not in self.keys_inuse:
+                self.types_color.pop(key)
+        for key in self.samples_color.keys():
+            if key not in self.keys_inuse:
+                self.samples_color.pop(key)
+        self.keys_inuse = []
+        return
+
     def colour_assignment(self, sample_type, sample_name):
         '''assign colours for individual samples.  If the group doesn't already have a colour, assign that too.'''
 
         key = "%s-%s" % (sample_type, sample_name)
         # work out if the type has a color palette
-        type_colour = self.colour_assignment_group(sample_type)
-
+        type_colour, new = self.colour_assignment_group(sample_type)
+        self.key_inuse(key)
         if key not in self.samples_color:
             self.samples_color[key] = self.colors[self.types_color[sample_type]][self.counter[sample_type]]
             self._increment_sample_counter(sample_type)
         sample_colour = self.samples_color[key]
 
-        return type_colour, sample_colour
+        return type_colour, sample_colour, new
 
     def colour_assignment_group(self, sample_type):
         '''assign a colour to a group - used by groups in methylation, and used for Waves, which are all the same colour'''
-
+        new = False
+        self.key_inuse(sample_type)
         if sample_type not in self.types_color:
             self._increment_type_counter()
             self.types_color[sample_type] = self.color_wheel[self.type_count]
             self.counter[sample_type] = 0
+            new = True
         type_colour = self.types_color.get(sample_type)
-        return type_colour
+        return type_colour, new
 
     def get_colours(self, sample_type, sample_id):
         '''Simple method for retrieving colours we should already have in the palette.'''

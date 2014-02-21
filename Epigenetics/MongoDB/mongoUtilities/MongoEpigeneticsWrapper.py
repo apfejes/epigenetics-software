@@ -131,13 +131,26 @@ class MongoEpigeneticsWrapper():
 
         sample_ids = {}
 
-        for doc in samplesdocs:
-            sample_id = doc['_id']
-            doc_sample_group = doc[groupby_name]
-            doc_sample_label = doc[sampleid_name]
-            if doc_sample_group == sample_group or sample_group is None:
-                if doc_sample_label == sample_label or sample_label is None:
-                    sample_ids[sample_id] = (str(doc_sample_label), str(doc_sample_group))
+
+        if groupby_name in samplesdocs[0]:
+            for doc in samplesdocs:
+                sample_id = doc['_id']
+                doc_sample_label = doc[sampleid_name]
+                if groupby_name in doc:
+                    doc_sample_group = doc[groupby_name]
+                    if doc_sample_group == sample_group or sample_group is None:
+                        if doc_sample_label == sample_label or sample_label is None:
+                            sample_ids[sample_id] = (str(doc_sample_label), str(doc_sample_group))
+        else:
+            v = self.mongo.find_one("sample_groups", {"project":project}, {"_id":0, "compound":1})
+            fields = v["compound"][groupby_name]
+            for doc in samplesdocs:
+                sample_id = doc['_id']
+                doc_sample_group = []
+                doc_sample_label = doc[sampleid_name]
+                for field in fields:
+                    doc_sample_group.append(doc[field].encode('utf-8'))
+                sample_ids[sample_id] = (str(";".join(doc_sample_label)), str(doc_sample_group))
         return sample_ids
 
 
@@ -277,9 +290,9 @@ class MongoEpigeneticsWrapper():
             return {}
         collection = 'samples'
         query_parameters = {}    # This dictionary will store all the query parameters
-        return_chr = {'_id': True, 'sampleid':True, 'project':True}
-        if sample_group != 'project':
-            return_chr[sample_group] = True
+        # return_chr = {'_id': True, 'sampleid':True, 'project':True}
+        # if sample_group != 'project':
+        #    return_chr[sample_group] = True
 
 
         query_parameters['haswaves'] = {'$exists':False}
@@ -296,9 +309,9 @@ class MongoEpigeneticsWrapper():
         sortby, sortorder = 'sample_group', 1
         print "finding samples based on query :"
         print "---> Query Parameters: %s" % query_parameters
-        print "---> return conditions: %s" % return_chr
+        # print "---> return conditions: %s" % return_chr
 
-        return self.runquery(collection, query_parameters, return_chr, sortby, sortorder)
+        return self.runquery(collection, query_parameters, None, sortby, sortorder)
 
 
     def finddocs_methylation(self, sample_ids = None, probe_id = None):

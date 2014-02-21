@@ -1,3 +1,4 @@
+doctype html
 html
   head
   link(rel='stylesheet', href='/static/templatestyle.css', type='text/css' )
@@ -20,7 +21,7 @@ body
       else
         a(href='/dbaccess/loginpage', class='white') log in&nbsp;  
   #wrapper
-    form(name="main", action='/dbaccess/query_form/', method='post')
+    form(name="main", id="main", action='/dbaccess/query_form/', method='post')
       input(type="hidden", id="width", name="width", value = "")
       input(type="hidden", id="height", name="height", value = "")
       input(type="hidden", id="methylation_avail", name="methylation_avail", value=methylation_list)
@@ -106,7 +107,7 @@ body
               input(id='end', size = '8', type='text', value=end, name='end')
             else
               input(id='end', size = '8', type='text', value='', name='end')
-          input(type='submit',value='Query!', class ="bigbutton")
+          input(type='submit',value='Query / Refresh')
       #zoompan
         #selection_element
           input(type='button',value = '<<<', title="Pan left 60%", name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self');", class = "medbutton")
@@ -177,12 +178,21 @@ body
 
       h3 Group Index
       - var ti = request.session['types_index']
+      - var sg = request.session['show_groups']
       - if ti.items
-        - var samples = ti.keys()
-        - each s in samples
-            font(color=ti.get(s))
-              !{s}
-            br    
+        table
+          - var samples = ti.keys()
+          - each s in samples
+            tr 
+              td
+                font(color=ti.get(s))
+                  !{s}
+              td 
+                if collection = 'methylation' or collection = "methchip"
+                  if s in sg 
+                    input(class="check_small", type='checkbox', form="main", name="filter_" + s, checked)
+                  else
+                    input(class="check_small", type='checkbox', form="main", name="filter_" + s)    
       - else 
         | No Data Found   
 
@@ -369,6 +379,15 @@ script(type='text/javascript')
         var show_dist = e.checked;
       }
       
+      var e = document.getElementsByClassName("check_small");
+      var filters = new Array();
+      for(var i=0; i< e.length; i++) {
+        if (e[i].checked) { 
+          filters.push(e[i].name.replace("filter_", ""));
+        }
+      }
+
+      
       base += "?chromosome=" + chromosome.value
       base += "&start=" + start.value
       base += "&end=" + end.value
@@ -395,9 +414,7 @@ script(type='text/javascript')
       }
       base += "&width=" + window.innerWidth
       base += "&height=" + window.innerHeight
-      /* base += "&types_index=" + encodeURIComponent(document.forms.main.types_index.value)
-        base += "&sample_index=" + encodeURIComponent(document.forms.main.sample_index.value) 
-      */
+      base += "&filters=" + filters
       
       return base
     }

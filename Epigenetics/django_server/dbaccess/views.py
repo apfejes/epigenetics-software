@@ -133,14 +133,17 @@ def process_collection(col):
 
 def process_query_request(request):
     q = None
+    p = {}    # parameters obtained
     if request.method == 'GET':
         q = request.GET
+        p['show_groups'] = [x.encode('utf-8') for x in q.get("filters").split(",")]
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
+        p['show_groups'] = []
+        for key in q:    # process fields with variable names
+            if key.startswith("filter_"):
+                p['show_groups'].append(key.replace("filter_", "").encode('utf-8'))
 
-    p = {}    # parameters obtained
-
-    # print "q =", q
 
     p['organism'] = str(q.get("organism", "human"))
     p['collection'] = q.get("collection", "methylation")
@@ -170,7 +173,6 @@ def process_query_request(request):
     except KeyError:
         p['types_index'] = None
         p['sample_index'] = None
-    # p['types_index'] = ast.literal_eval(str(q.get("types_index", '{}')))
     p['width'] = int(q.get("width", 1000)) - 200    # width of screen minus 100
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
 
@@ -190,6 +192,9 @@ def process_query_request(request):
     p['start'] = start
     p['end'] = end
     p['action_factor'] = q.get("action", None)    # don't need to save the "action factor" parameter, but need to check if it's a gene.
+
+
+
     return p
 
 
@@ -240,12 +245,9 @@ def view_query_form(request):
                 c = x['compound'].keys()
                 if len(c) > 0:
                     c = [b.encode('utf-8') for b in c]
-            print "c= ", c
-            print "a= ", a
             a.extend(c)
             if len(a) == 1:
                 a = a[0].encode('utf-8')
-            print "a sub f= ", a
             byproj[x['project'].encode('utf-8')] = {'default':x['default'].encode('utf-8'), 'available':a}
         groupby_list[o] = byproj
 
@@ -294,8 +296,8 @@ def view_query_form(request):
             annotation = m.find_coords_by_probeid(action_factor)
             if annotation:
                 parameters['chromosome'] = annotation['chr']
-                parameters['start'] = annotation['mapinfo'] - 10
-                parameters['end'] = annotation['mapinfo'] + 10
+                parameters['start'] = annotation['mapinfo'] - 100
+                parameters['end'] = annotation['mapinfo'] + 100
             else:
                 return HttpResponse('Could not find Gene: ' + action_factor)
 
@@ -309,10 +311,13 @@ def view_query_form(request):
     sample_index = {}
     types_index = {}
 
+
+
     print("Querying...")
 
     if check(parameters):
         if methylation and not peaks:
+            print "show groups = ", parameters['show_groups']
             docs = m.query(parameters)
             if parameters['cpg']:
                 m.getannotations(docs)
@@ -329,6 +334,7 @@ def view_query_form(request):
                            show_genes = parameters['show_genes'],
                            types_index = parameters['types_index'],
                            sample_index = parameters['sample_index'],
+                           show_groups = parameters['show_groups'],
                            genes = genes)
 
 
@@ -353,7 +359,6 @@ def view_query_form(request):
             docs = m.query(parameters)
             if parameters['cpg']:
                 m.getannotations(docs)
-
             svg, sample_index, types_index = m.svg_builder.svg(to_string = True,
                             title = "%s DNA methylation and ChIP-Seq peaks on %s (%i - %i)" %
                             (str.capitalize(parameters['organism']),
@@ -367,8 +372,13 @@ def view_query_form(request):
                             show_dist = parameters['show_dist'],
                             show_genes = parameters['show_genes'],
                             types_index = parameters['types_index'],
+                            show_groups = parameters['show_groups'],
                             genes = genes)
 
+    for key in reversed(parameters['show_groups']):    # must traverse backwards, otherwise removing keys causes elements to be skipped.
+        if key not in types_index:
+            parameters['show_groups'].remove(key)
+    request.session['show_groups'] = parameters['show_groups']
     request.session['types_index'] = types_index
     request.session['sample_index'] = sample_index
 
