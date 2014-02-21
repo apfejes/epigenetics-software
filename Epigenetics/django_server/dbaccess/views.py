@@ -143,7 +143,6 @@ def process_query_request(request):
     if request.method == 'GET':
         q = request.GET
         f = q.get("filters", [])
-        print "f = ", f
         if "," in f:
             f = f.split(",")
         if len(f) > 0:
@@ -154,13 +153,8 @@ def process_query_request(request):
         q = request.POST
         p['show_groups'] = []
         for key in q:    # process fields with variable names
-            print "key = ", key
             if key.startswith("filter_"):
                 p['show_groups'].append(key.replace("filter_", "").encode('utf-8'))
-
-    print "request.method = ", request.method
-    print "showing groups for refresh = ", p['show_groups']
-
     p['organism'] = str(q.get("organism", "human"))
     p['collection'] = q.get("collection", "methylation")
     p['chipseq_project'] = []
