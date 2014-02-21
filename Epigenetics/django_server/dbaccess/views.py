@@ -55,10 +55,16 @@ def login_view(request):
         if user.is_active:
             login(request, user)
             request.session.set_expiry(60 * 60 * 1)    # 1 hour timeout
-            if next in request.POST:
-                return HttpResponseRedirect(request.POST['next'])
+            if request.method == 'POST':
+                if next in request.POST:
+                    return HttpResponseRedirect(request.POST['next'])
+                else:
+                    return render(request, 'base.jade', {"message":"Login successful"})
             else:
-                return render(request, 'base.jade', {"message":"Login successful"})
+                if next in request.GET:
+                    return HttpResponseRedirect(request.GET['next'])
+                else:
+                    return render(request, 'base.jade', {"message":"Login successful"})
         else:    # Return a 'disabled account' error message
             print "LOGIN --->  Account for user %s has been deactivated." % (username)
             return render(request, 'base.jade', {"message":"Account for user %s has been deactivated." % (username)})
@@ -136,14 +142,24 @@ def process_query_request(request):
     p = {}    # parameters obtained
     if request.method == 'GET':
         q = request.GET
-        p['show_groups'] = [x.encode('utf-8') for x in q.get("filters").split(",")]
+        f = q.get("filters", [])
+        print "f = ", f
+        if "," in f:
+            f = f.split(",")
+        if len(f) > 0:
+            p['show_groups'] = [x.encode('utf-8') for x in f]
+        else:
+            p['show_groups'] = []
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
         p['show_groups'] = []
         for key in q:    # process fields with variable names
+            print "key = ", key
             if key.startswith("filter_"):
                 p['show_groups'].append(key.replace("filter_", "").encode('utf-8'))
 
+    print "request.method = ", request.method
+    print "showing groups for refresh = ", p['show_groups']
 
     p['organism'] = str(q.get("organism", "human"))
     p['collection'] = q.get("collection", "methylation")
@@ -317,7 +333,6 @@ def view_query_form(request):
 
     if check(parameters):
         if methylation and not peaks:
-            print "show groups = ", parameters['show_groups']
             docs = m.query(parameters)
             if parameters['cpg']:
                 m.getannotations(docs)
@@ -378,7 +393,8 @@ def view_query_form(request):
     for key in reversed(parameters['show_groups']):    # must traverse backwards, otherwise removing keys causes elements to be skipped.
         if key not in types_index:
             parameters['show_groups'].remove(key)
-    request.session['show_groups'] = parameters['show_groups']
+
+    request.session['show_groups'] = sorted(parameters['show_groups'])
     request.session['types_index'] = types_index
     request.session['sample_index'] = sample_index
 
