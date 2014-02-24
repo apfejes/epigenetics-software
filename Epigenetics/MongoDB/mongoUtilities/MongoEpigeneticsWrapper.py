@@ -150,7 +150,8 @@ class MongoEpigeneticsWrapper():
                 doc_sample_label = doc[sampleid_name]
                 for field in fields:
                     doc_sample_group.append(doc[field].encode('utf-8'))
-                sample_ids[sample_id] = (str(";".join(doc_sample_label)), str(doc_sample_group))
+                compoundkey = "-".join(doc_sample_group)
+                sample_ids[sample_id] = (str(";".join(doc_sample_label)), compoundkey)
         return sample_ids
 
 
