@@ -292,7 +292,7 @@ def view_query_form(request):
     # print("creating Mongo Wrapper on Database")
 
     m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks)
-    svg = 'Please query the database to generate an image!'    # default string..  Should remove this.
+    svg = '<br><br><br><br><center><h2>Please select parameters above to query the database and generate an image!</h2></center>'    # default string..  Should remove this.
 
     action_factor = parameters.pop("action_factor")    # don't want to leave it in parameters.
     if action_factor in ZOOM_FACTORS:
@@ -489,7 +489,6 @@ def view_metadata3(request):
     newfields = {}
     updated_groups = []
     for t in q:
-        print "t = ", t
         if t.startswith("label"):
             v = t.replace("label", "value")
             newfields[str(q.get(t))] = str(q.get(v))
