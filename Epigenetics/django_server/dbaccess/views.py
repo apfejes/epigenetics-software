@@ -59,11 +59,13 @@ def login_view(request):
                 if next in request.POST:
                     return HttpResponseRedirect(request.POST['next'])
                 else:
+                    print "next not found in request.POST", request.POST
                     return render(request, 'base.jade', {"message":"Login successful"})
             else:
                 if next in request.GET:
                     return HttpResponseRedirect(request.GET['next'])
                 else:
+                    print "next not found in request.Get", request.GET
                     return render(request, 'base.jade', {"message":"Login successful"})
         else:    # Return a 'disabled account' error message
             print "LOGIN --->  Account for user %s has been deactivated." % (username)
@@ -83,7 +85,7 @@ def logout_view(request):
 def loginpage(request):
     ''' a view for the home page, if required. '''
     if 'next' in request.POST:
-        return render(request, 'loginpage.jade', {"next":request.POST['next']})
+        return render(request, 'loginpage.jade')
     else :
         return render(request, 'loginpage.jade')
 
@@ -284,11 +286,11 @@ def view_query_form(request):
             parameters['groupby_selected'] = groupby_list[parameters['organism']][parameters['methylation_project'][0]]['default']
         else:
             parameters['groupby_selected'] = parameters['groupby_selected'].encode('utf-8')
-        print "Groupby Selected is now :", parameters['groupby_selected']
+        # print "Groupby Selected is now :", parameters['groupby_selected']
 
 
     database = parameters['organism'] + "_epigenetics"
-    print("creating Mongo Wrapper on Database")
+    # print("creating Mongo Wrapper on Database")
 
     m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks)
     svg = 'Please query the database to generate an image!'    # default string..  Should remove this.
@@ -325,7 +327,7 @@ def view_query_form(request):
 
 
 
-    print("Querying...")
+    # print("Querying...")
 
     if check(parameters):
         if methylation and not peaks:
@@ -446,7 +448,7 @@ def view_metadata2(request):
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
 
-    print "q =", q
+    # print "q =", q
     organism = str(q.get("organism", None))
     project = str(q.get("project", None))
     collection = str(q.get("collection", None))
@@ -490,8 +492,8 @@ def view_metadata3(request):
     collection = str(q.get("collection", None))
     sample = str(q.get("sample", None))
 
-    print "collection = ", collection
-    print "sample = ", sample
+    # print "collection = ", collection
+    # print "sample = ", sample
 
     updated_groups = []
     for t in q:
@@ -504,20 +506,20 @@ def view_metadata3(request):
             v = t.replace("checkbox_", "")
             updated_groups.append(v)
 
-    print "updated group by list = ", updated_groups
-    print "saving..."
+    # print "updated group by list = ", updated_groups
+    # print "saving..."
     value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"available":updated_groups}})
     print value
-    print "saved"
+    # print "saved"
 
 
-    print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\"},{$set:%s}") % (organism, project, newfields)
+    # print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\"},{$set:%s}") % (organism, project, newfields)
 
-    if collection == "chipseq":
-        print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\"},{$set:%s}") % (organism, project, newfields)
+    # if collection == "chipseq":
+    #    print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\"},{$set:%s}") % (organism, project, newfields)
         # samples = mongo[organism + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False, "sample_id":project})
-    elif collection == "methylation":
-        print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\", \"sample\":%s},{$set:%s}") % (organism, project, sample, newfields)
+    # elif collection == "methylation":
+    #    print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\", \"sample\":%s},{$set:%s}") % (organism, project, sample, newfields)
 
     return render(request, 'metadata3.jade', {"type":collection})
 
@@ -542,12 +544,12 @@ def compound(request):
         q = request.POST
     project = str(q.get("project", None))
     organism = str(q.get("organism", None))
-    print " organism = ", organism
-    print " project = ", project
+    # print " organism = ", organism
+    # print " project = ", project
 
     if "delete" in q:
         name = str(q.get("delete"))
-        print "deleting gropuby:", name
+        # print "deleting gropuby:", name
         value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$unset":{"compound." + name: ""}})
         print value
     elif "key1" in q and "key2" in q and "key3" in q:
@@ -556,7 +558,7 @@ def compound(request):
         if key1 != "None" and key2 != "None":
             key3 = str(q.get("key3"))
             name = str(q.get("name"))
-            print "Adding new groupby:", name
+            # print "Adding new groupby:", name
             if key3 == "None":
                 value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"compound." + name: [key1, key2]}})
                 print value
@@ -572,7 +574,7 @@ def compound(request):
         for k in t:
             groups.append(str(k))
         if "compound" in s:
-            print "s['compound']", s['compound']
+            # print "s['compound']", s['compound']
             groupby.append(s['compound'])
     return render(request, 'compound.jade', {"project":project,
                                              "organism":organism,
