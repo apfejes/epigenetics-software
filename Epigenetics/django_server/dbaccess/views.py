@@ -264,7 +264,6 @@ def view_query_form(request):
             byproj[x['project'].encode('utf-8')] = {'default':x['default'].encode('utf-8'), 'available':a}
         groupby_list[o] = byproj
 
-    # variables:
     methylation, peaks = process_collection(parameters['collection'])
 
     if not methylation:
@@ -287,7 +286,6 @@ def view_query_form(request):
             parameters['groupby_selected'] = groupby_list[parameters['organism']][parameters['methylation_project'][0]]['default']
         else:
             parameters['groupby_selected'] = parameters['groupby_selected'].encode('utf-8')
-        # print "Groupby Selected is now :", parameters['groupby_selected']
 
 
     database = parameters['organism'] + "_epigenetics"
@@ -325,10 +323,6 @@ def view_query_form(request):
 
     sample_index = {}
     types_index = {}
-
-
-
-    # print("Querying...")
 
     if check(parameters):
         if methylation and not peaks:
@@ -481,59 +475,32 @@ def view_metadata2(request):
 @login_required
 def view_metadata3(request):
     q = None
-    if request.method == 'GET':
+
+    if request.method == 'GET':    # should not be using Get to submit to this page.
         return HttpResponseRedirect('/dbaccess/metadata/')
-        # should not be using Get to submit to this page.
+
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
-    newfields = {}
-    # groups = str(q.get("groups", None))
+
     organism = str(q.get("organism", None))
     project = str(q.get("project", None))
     collection = str(q.get("collection", None))
-    sample = str(q.get("sample", None))
 
-    # print "collection = ", collection
-    # print "sample = ", sample
-
+    newfields = {}
     updated_groups = []
     for t in q:
         print "t = ", t
         if t.startswith("label"):
             v = t.replace("label", "value")
             newfields[str(q.get(t))] = str(q.get(v))
-            # print "%s -> %s " % (q.get(t), q.get(v))
         if t.startswith("checkbox_"):
             v = t.replace("checkbox_", "")
             updated_groups.append(v)
 
-    # print "updated group by list = ", updated_groups
-    # print "saving..."
-    value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"available":updated_groups}})
-    print value
-    # print "saved"
-
-
-    # print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\"},{$set:%s}") % (organism, project, newfields)
-
-    # if collection == "chipseq":
-    #    print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\"},{$set:%s}") % (organism, project, newfields)
-        # samples = mongo[organism + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False, "sample_id":project})
-    # elif collection == "methylation":
-    #    print ("mongo[%s_epigenetics]['samples'].update({\"project\":\"%s\", \"sample\":%s},{$set:%s}") % (organism, project, sample, newfields)
+    mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"available":updated_groups}})
 
     return render(request, 'metadata3.jade', {"type":collection})
 
-    # if collection == 'chipseq':
-    #    samples = mongo[organism + "_epigenetics"]['samples'].find({'haswaves': True, 'hide': False, "sample_id":project})
-    #    samples = [s for s in samples]
-    # elif collection == 'methylation':
-    #    samples = []
-    #    cursor = mongo[organism + "_epigenetics"]['samples'].find({'project':project})
-    #    for s in cursor:
-    #        for k in s:
-    #            s[str(k)] = str(s.pop(k))
-    #        samples.append(s)
 
 
 @login_required
@@ -543,14 +510,12 @@ def compound(request):
         q = request.GET
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
+
     project = str(q.get("project", None))
     organism = str(q.get("organism", None))
-    # print " organism = ", organism
-    # print " project = ", project
 
     if "delete" in q:
         name = str(q.get("delete"))
-        # print "deleting gropuby:", name
         value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$unset":{"compound." + name: ""}})
         print value
     elif "key1" in q and "key2" in q and "key3" in q:
@@ -559,7 +524,6 @@ def compound(request):
         if key1 != "None" and key2 != "None":
             key3 = str(q.get("key3"))
             name = str(q.get("name"))
-            # print "Adding new groupby:", name
             if key3 == "None":
                 value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"compound." + name: [key1, key2]}})
                 print value
@@ -567,6 +531,7 @@ def compound(request):
                 value = mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"compound." + name: [key1, key2, key3]}})
                 print value
     cursor = mongo[organism + "_epigenetics"]['sample_groups'].find({'project':project})
+
     groups = []
     groupby = []
 
@@ -575,8 +540,8 @@ def compound(request):
         for k in t:
             groups.append(str(k))
         if "compound" in s:
-            # print "s['compound']", s['compound']
             groupby.append(s['compound'])
+
     return render(request, 'compound.jade', {"project":project,
                                              "organism":organism,
                                              "groups":groups,
