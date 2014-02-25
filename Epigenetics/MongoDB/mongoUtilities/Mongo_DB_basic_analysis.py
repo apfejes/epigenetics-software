@@ -61,6 +61,16 @@ def process_samples_in_order(connector,    # mongo connector
     lower_outliers = 0
     dual_outliers = 0
     probes_passing = 0
+
+    sb = []
+    sb.append("probe")
+    for g in groups:
+        sb.append("%s-mean" % g)
+    for g in groups:
+        sb.append("%s-stdev" % g)
+    sb.append("pvalue")
+    print "\t".join(sb)
+
     for i in target_cursor:    # proces probe by probe
         # print "i = ", i
         count += 1
@@ -82,7 +92,7 @@ def process_samples_in_order(connector,    # mongo connector
                 data[g] = []
             data[g].append(c['beta'])
         if data == {}:
-            print "No values found for probe ", i
+            # print "No values found for probe ", i
             continue
 
         for g in groups:
@@ -90,7 +100,7 @@ def process_samples_in_order(connector,    # mongo connector
             t1, v1 = lower_Qtest(data[g], "Q99")
             t2, v2 = upper_Qtest(data[g], "Q99")
             if t2 and t1:    # can't trim both.
-                print "lower and upper outliers found: (probe %s) - not filtered" % (i)
+                # print "lower and upper outliers found: (probe %s) - not filtered" % (i)
                 dual_outliers += 1
             elif t1:
                 data[g] = v1
@@ -116,10 +126,10 @@ def process_samples_in_order(connector,    # mongo connector
                 pvalue = Kolmogorov_Smirnov.ks_test(mean[groups[x]], std[groups[x]], mean[groups[y]], std[groups[y]])
                 if pvalue >= threshold:
                     probes_passing += 1
-                    print "Probe %s", i
-                    print "   means %s | %f %f" % (g, mean[groups[x]], mean[groups[y]])
-                    print "   stdv. %s | %f %f" % (g, std[groups[x]], std[groups[y]])
-                    print "   group %s vs %s --> pval = %f" % (groups[x], groups[y], pvalue)
+                    print "%s\t%f\t%f\t%f\t%f\t%f\t%s & %s" % (i, mean[groups[x]], mean[groups[y]], std[groups[x]], std[groups[y]], pvalue, groups[x], groups[y])
+                    # print "   means %s | %f %f" % (g, mean[groups[x]], mean[groups[y]])
+                    # print "   stdv. %s | %f %f" % (g, std[groups[x]], std[groups[y]])
+                    # print "   group %s vs %s --> pval = %f" % (groups[x], groups[y], pvalue)
         # print "%s = %s" % (i, v)
         if count % 10000 == 0:
             print "Row %i" % count    # for debugging
