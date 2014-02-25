@@ -56,13 +56,13 @@ def login_view(request):
             login(request, user)
             request.session.set_expiry(60 * 60 * 1)    # 1 hour timeout
             if request.method == 'POST':
-                if next in request.POST:
+                if 'next' in request.POST:
                     return HttpResponseRedirect(request.POST['next'])
                 else:
                     print "next not found in request.POST", request.POST
                     return render(request, 'base.jade', {"message":"Login successful"})
             else:
-                if next in request.GET:
+                if 'next' in request.GET:
                     return HttpResponseRedirect(request.GET['next'])
                 else:
                     print "next not found in request.Get", request.GET
@@ -84,10 +84,11 @@ def logout_view(request):
 
 def loginpage(request):
     ''' a view for the home page, if required. '''
-    if 'next' in request.POST:
-        return render(request, 'loginpage.jade')
-    else :
-        return render(request, 'loginpage.jade')
+    if request.method == "GET":
+        if 'next' in request.GET:
+            print "request.GET['next']= ", request.GET['next']
+            return render(request, 'loginpage.jade', {"next":request.GET['next']})
+    return render(request, 'loginpage.jade')
 
 def createuser(request):
     ''' a view for the home page, if required. '''
