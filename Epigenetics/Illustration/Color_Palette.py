@@ -28,12 +28,26 @@ class ColorPalette():
 #         self.colors['purple'] = ['darkslategrey', 'orchid', 'magenta', 'purple', 'blueviolet', 'darkviolet',
 #                            'pink', 'mediumslateblue', 'lightpink', 'deeppink', 'indigo', 'lavenderblush',
 #                            'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
-        self.colors['#FF00FF'] = ['#ffccff', '#ffb9ff', '#ffa7ff', '#ff94ff', '#ff82ff', '#ff6fff', '#ff5dff', '#ff4aff', '#ff38ff', '#ff25ff', '#ff13ff', '#ff00ff']    # magenta
-        self.colors['#FF0000'] = ['#ffcccc', '#ffb9b9', '#ffa7a7', '#ff9494', '#ff8282', '#ff6f6f', '#ff5d5d', '#ff4a4a', '#ff3838', '#ff2525', '#ff1313', '#ff0000']    # red
-        self.colors['#00FF00'] = ['#00cc00', '#0FCF0F', '#1DD21D', '#2CD52C', '#3BD83B', '#4ADB4A', '#58DD58', '#67E067', '#76E376', '#85E685', '#93E993', '#A2ECA2']    # green
-        self.colors['#0000ff'] = ['#ccccff', '#b9b9ff', '#a7a7ff', '#9494ff', '#8282ff', '#6f6fff', '#5d5dff', '#4a4aff', '#3838ff', '#2525ff', '#1313ff', '#0000ff']    # blue
-        self.colors['#00ffff'] = ['#ccffff', '#b9ffff', '#a7ffff', '#94ffff', '#82ffff', '#6fffff', '#5dffff', '#4affff', '#38ffff', '#25ffff', '#13ffff', '#00ffff']    # light blue
-        self.colors['#CCCC00'] = ['#cccc00', '#BFC000', '#B1B400', '#A4A700', '#969B00', '#898F00', '#7B8300', '#6E7700', '#606B00', '#535E00', '#455200', '#384600']    # yellows
+
+
+        # self.colors['#FF00FF'] = ['#ffccff', '#ffb9ff', '#ffa7ff', '#ff94ff', '#ff82ff', '#ff6fff', '#ff5dff', '#ff4aff', '#ff38ff', '#ff25ff', '#ff13ff', '#ff00ff']    # magenta
+        # self.colors['#FF0000'] = ['#ffcccc', '#ffb9b9', '#ffa7a7', '#ff9494', '#ff8282', '#ff6f6f', '#ff5d5d', '#ff4a4a', '#ff3838', '#ff2525', '#ff1313', '#ff0000']    # red
+        # self.colors['#00FF00'] = ['#00cc00', '#0FCF0F', '#1DD21D', '#2CD52C', '#3BD83B', '#4ADB4A', '#58DD58', '#67E067', '#76E376', '#85E685', '#93E993', '#A2ECA2']    # green
+        # self.colors['#0000ff'] = ['#ccccff', '#b9b9ff', '#a7a7ff', '#9494ff', '#8282ff', '#6f6fff', '#5d5dff', '#4a4aff', '#3838ff', '#2525ff', '#1313ff', '#0000ff']    # blue
+        # self.colors['#00ffff'] = ['#ccffff', '#b9ffff', '#a7ffff', '#94ffff', '#82ffff', '#6fffff', '#5dffff', '#4affff', '#38ffff', '#25ffff', '#13ffff', '#00ffff']    # light blue
+        # self.colors['#CCCC00'] = ['#cccc00', '#BFC000', '#B1B400', '#A4A700', '#969B00', '#898F00', '#7B8300', '#6E7700', '#606B00', '#535E00', '#455200', '#384600']    # yellows-> greens
+        self.colors['red'] = ['#290000', '#3d0000', '#520000', '#660000', '#730000', '#a30000', '#b80000', '#cc0000', '#e00000', '#ff0a0a', '#ff3333' ]
+        self.colors['blue'] = [ '#00007a', '#00008f', '#0000a3', '#0000b8', '#0000cc', '#0000e0', '#0000f5', '#0000ff', '#1f1fff', '#3333ff', '#4747ff']
+        self.colors['green'] = ['#002900', '#003d00', '#005200', '#006600', '#008000', '#008f00', '#00a300', '#00b800', '#00cc00', '#00e000', '#33ff33']
+        self.colors['purple'] = ['#290029', '#3d003d', '#520052', '#660066', '#800080', '#8f008f', '#a300a3', '#b800b8', '#cc00cc', '#e000e0', '#ff0aff']
+        # yellow
+        self.colors['#b8b800'] = ['#3d3d00', '#525200', '#666600', '#7a7a00', '#8f8f00', '#cccc00']
+        self.colors['grey'] = ['#292929', '#333333', '#3d3d3d', '#474747', '#525252', '#5c5c5c', '#666666', '#707070', '#7a7a7a', '#808080', '#8f8f8f']
+        self.colors['cyan'] = ['#005252', '#006666', '#007a7a', '#008f8f', '#00a3a3', '#00b8b8', '#00cccc', '#00e0e0', '#00f5f5', '#70ffff', '#40bfbf']
+        self.colors['orange'] = ['#3d2800', '#523500', '#664200', '#7a5000', '#8f5d00', '#a36a00', '#b87700', '#cc8500', '#e09200', '#f59f00', '#ffa500']
+        # self.colors[''] = ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#']
+
+
         self.color_wheel = {}
 
         for i, j in enumerate(self.colors):
