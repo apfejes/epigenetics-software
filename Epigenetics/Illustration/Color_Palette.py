@@ -106,6 +106,8 @@ class ColorPalette():
             self.types_color[sample_type] = self.color_wheel[self.type_count]
             self.counter[sample_type] = 0
             new = True
+        if sample_type not in self.counter:    # check, just in case colours were passed, but the sample counter has been reset.
+            self.counter[sample_type] = 0
         type_colour = self.types_color.get(sample_type)
         return type_colour, new
 
