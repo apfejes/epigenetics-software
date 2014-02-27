@@ -335,7 +335,7 @@ class MongoEpigeneticsWrapper():
             query_parameters["sampleid"] = sample_ids
         if probe_id:
             query_parameters["probeid"] = probe_id
-        return_chr = {'sampleid': True, 'beta':True, 'probeid':True}
+        return_chr = {'sampleid': True, 'beta':True, 'probeid':True, '_id':0}
 
         return self.runquery(collection, query_parameters, return_chr)
 
@@ -391,22 +391,18 @@ class MongoEpigeneticsWrapper():
 
         probedata = self.finddocs_methylation(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()})
 
-        # TODO:  handle if probedata == {}
-
         for methyldata in probedata:
-            sample_id = methyldata['sampleid']
-            sample = sample_ids[sample_id][0]
-            stype = sample_ids[sample_id][1]
-
             beta = methyldata['beta']
             if math.isnan(beta):
                 continue
+            count += 1
             pos = probes[methyldata['probeid']]
+            sample_id = methyldata['sampleid']
+            sample, stype = sample_ids[sample_id]
             if pos in pos_betas_dict:
                 pos_betas_dict[pos].append((beta, sample, stype))
             else:
                 pos_betas_dict[pos] = [(beta, sample, stype)]
-            count += 1
             if pos in sample_peaks:
                 if stype in sample_peaks[pos]:
                     sample_peaks[pos][stype].append(beta)
@@ -417,7 +413,10 @@ class MongoEpigeneticsWrapper():
             if pos > maxpos:
                 maxpos = pos
 
-        print '\n    %s probes\' beta values were extracted.' % count
+        if count == 0:
+            return None
+
+        print '\n    %s beta values were extracted.' % count
         print "    %i CpGs locations were found" % len(pos_betas_dict)
 
         self.svg_builder.pos_betas_dict = pos_betas_dict
