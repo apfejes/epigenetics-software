@@ -143,10 +143,8 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
             items = [{} for _k in range(start, end + 1)]    # zero to batch_size-1
             for y in range(1, (end - start + 1)):    # the data
                 items[y - 1]['sampleid'] = SampleIDs[x - 1]
-                # items[y - 1]['array_type'] = "humanmethylation450_beadchip"
                 items[y - 1]["beta"] = b.rx(y, x)[0]    # betas.rx(y, 1)[0]
                 items[y - 1]['probeid'] = r.rx(y)[0]    # rows.rx(y)[0]
-                # items[y - 1]["mval"] = m.rx(y, x)[0]
             records_added_to_db += mongo.InsertBatchToDB(collection_name, items)
         batch += 1
         time2 = time.time()
