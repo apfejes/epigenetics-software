@@ -335,8 +335,7 @@ class MongoEpigeneticsWrapper():
             query_parameters["sampleid"] = sample_ids
         if probe_id:
             query_parameters["probeid"] = probe_id
-        return_chr = {'mval':True, 'sampleid': True, 'beta':True,
-                      'probeid':True}
+        return_chr = {'sampleid': True, 'beta':True, 'probeid':True}
 
         return self.runquery(collection, query_parameters, return_chr)
 
@@ -392,7 +391,7 @@ class MongoEpigeneticsWrapper():
 
         probedata = self.finddocs_methylation(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()})
 
-        # handle if probedata == {}
+        # TODO:  handle if probedata == {}
 
         for methyldata in probedata:
             sample_id = methyldata['sampleid']
@@ -402,7 +401,6 @@ class MongoEpigeneticsWrapper():
             beta = methyldata['beta']
             if math.isnan(beta):
                 continue
-            # mval = methyldata['mval'] #unused currently
             pos = probes[methyldata['probeid']]
             if pos in pos_betas_dict:
                 pos_betas_dict[pos].append((beta, sample, stype))
