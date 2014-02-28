@@ -24,7 +24,7 @@ class Svg_Builder():
         self.drawing = None
         self.methylation = methylation
         self.peaks = peaks
-        self.probes_by_inv = None
+        self.probes_by_pos = None
 
 
 
@@ -61,7 +61,7 @@ class Svg_Builder():
 
         if self.methylation:
             self.drawing.build_methylation(self.error_message, self.pos_betas_dict, self.sample_peaks, 
-                                           show_points, show_dist, show_groups)
+                                           show_points, show_dist, show_groups, self.probes_by_pos)
             self.drawing.add_ytics_methylation()
 
         # TODO: Insert error handling here, if methylation and no methylation data, drop out
