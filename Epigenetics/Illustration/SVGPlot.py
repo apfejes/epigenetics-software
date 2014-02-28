@@ -138,7 +138,8 @@ class Plot(object):
             self.elements.append(Path(stroke = types_color, stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
                            fill = types_color, fill_opacity = 0.5, d = d,
-                        onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" % (''.join(s for s in sample_id if s in string.printable))))
+                        onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" %
+                                    (''.join(s for s in sample_id if s in string.printable))))
 
         # fix to truncate curves at border (to hide them)
         self.elements.append(Rect(insert = (-1, 0), size = (self.MARGIN + 1, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
@@ -169,7 +170,8 @@ class Plot(object):
                         show_groups.append(sample_type)
                     if not show_groups or sample_type in show_groups:
                         point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color,
-                                   onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s-%s\n%s\'" % (sample_type, sample_id, probes_by_pos[position]))
+                                   onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s-%s\n%s\'" %
+                                    (sample_type, sample_id, probes_by_pos[position]))
                         self.elements.append(point)
 
             if show_peaks:
