@@ -26,21 +26,51 @@ def process_samples_in_order(connector,    # mongo connector
                              groupby,    # field to group by
                              limit,    # optional limit to number of probes to process.
                              threshold,    # optional override to threshold at which probes are kept.
+                             noSNPcpg,      #optional override to remove cpgs with snps in them
+                             noSNPprobe      #optional override to remove probes with snps in them
                              ):
     '''
     This routine gets you the _ids of all projects with a given set of criteria (filter), and then returns a list representing every probe position in the array for each one.    
     '''
     filters['project'] = project_name
+    filters[groupby] = {'$exists':True}
     # first find the samples of interest:
 
     if not groupby:
         print "no Groupby field was provided.  This query can not be run."
-
-
     print "Finding samples in project %s" % project_name
     q_returns = {"_id":1, "sampleid":1}
     q_returns[groupby] = 1
-    cursor = connector.find("samples", filters, q_returns)
+    count = connector.find("samples", filters, q_returns).count()
+    print "samples matching criteria specified: ", count
+
+    cursor = None
+    compound = None
+
+    if count < 1:
+        print "looking for compound keys named ", groupby
+        q_returns = {"compound." + groupby: 1}
+        filters = {"project":project_name, "compound." + groupby:{'$exists':True}}
+        s = connector.find("sample_groups", filters, q_returns).count()
+        print "compound keys matching criteria specified: ", s
+        if s < 1:
+            print "Terminating - Can not process project %s with group by %s" % (project_name, groupby)
+            sys.exit()
+        filters = {"project":project_name}    # reset filters
+        q_returns = {"compound." + groupby: 1, "_id":0}
+        keys = connector.find_one("sample_groups", filters, q_returns)
+        keys = keys["compound"][groupby]
+        print "keys to be used: %s" % keys
+        q_returns = {"_id":1, "sampleid":1}
+        compound = []
+        for x in keys:
+            compound.append(str(x))
+            q_returns[x] = 1
+        cursor = connector.find("samples", filters, q_returns)
+    else:
+        cursor = connector.find("samples", filters, q_returns)
+
+
     ids = []
     sample_names = {}
     groups = []
@@ -48,13 +78,27 @@ def process_samples_in_order(connector,    # mongo connector
     for x in cursor:
         ids.append(x['_id'])
         sample_names[x['_id']] = x['sampleid']
-        group_by_sid[x['_id']] = x[groupby]
-        if x[groupby] not in groups:
-            groups.append(x[groupby])
+        if compound:
+            key = []
+            for k in compound:
+                key.append(str(x[k]))
+            key = "-".join(key)
+            group_by_sid[x['_id']] = key
+            if key not in groups:
+                groups.append(key)
+        else:
+            group_by_sid[x['_id']] = x[groupby]
+            if x[groupby] not in groups:
+                groups.append(x[groupby])
 
-
+    search_criteria={}
+    if noSNPcpg:
+       search_criteria["n_snpcpg"] = 0
+    if noSNPprobe:
+       search_criteria["n_snpprobe"] = 0
+      
     print "accessing annotations for cursor on probe names."
-    target_cursor = connector.distinct("annotations", "targetid")    # find all probe sample_names
+    target_cursor = connector.find("annotations", search_criteria, {"targetid":1, "_id":0}).distinct("targetid")    # find all probe sample_names
     # get the results for each probe for each sample
     count = 0
     upper_outliers = 0
@@ -62,14 +106,18 @@ def process_samples_in_order(connector,    # mongo connector
     dual_outliers = 0
     probes_passing = 0
 
-    sb = []
-    sb.append("probe")
-    for g in groups:
-        sb.append("%s-mean" % g)
-    for g in groups:
-        sb.append("%s-stdev" % g)
-    sb.append("pvalue")
-    print "\t".join(sb)
+    # this does not match what's actually being output.
+    # sb = []
+    # sb.append("probe")
+    # for g in groups:
+    #    sb.append("%s-mean" % g)
+    # for g in groups:
+    #    sb.append("%s-stdev" % g)
+    # sb.append("pvalue")
+    # print "\t".join(sb)
+
+    print ("probe\tmean 1\tmean 2\tstdev 1\tstdev 2\tpvalue\tgroup 1\tgroup 2")
+
 
     for i in target_cursor:    # proces probe by probe
         # print "i = ", i
@@ -81,6 +129,10 @@ def process_samples_in_order(connector,    # mongo connector
         std = {}
         mean = {}
         data_cursor = connector.find("methylation", {"probeid":i, "sampleid": {"$in": ids}}, {"sampleid":1, "beta":1})
+        annotations_rec = connector.find_one("annotations", {"name":i}, {"n_snpcpg":1, "_id":0, "n_snpprobe":1})
+        nsnpcpg = annotations_rec["n_snpcpg"]
+        nsnpprobe = annotations_rec["n_snpprobe"]
+
 
         for c in data_cursor:
             sid = c['sampleid']
@@ -123,14 +175,11 @@ def process_samples_in_order(connector,    # mongo connector
 
         for x in range(len(groups)):    # do pairwise comparison
             for y in range(x + 1, len(groups)):
-                pvalue = Kolmogorov_Smirnov.ks_test(mean[groups[x]], std[groups[x]], mean[groups[y]], std[groups[y]])
-                if pvalue >= threshold:
-                    probes_passing += 1
-                    print "%s\t%f\t%f\t%f\t%f\t%f\t%s & %s" % (i, mean[groups[x]], mean[groups[y]], std[groups[x]], std[groups[y]], pvalue, groups[x], groups[y])
-                    # print "   means %s | %f %f" % (g, mean[groups[x]], mean[groups[y]])
-                    # print "   stdv. %s | %f %f" % (g, std[groups[x]], std[groups[y]])
-                    # print "   group %s vs %s --> pval = %f" % (groups[x], groups[y], pvalue)
-        # print "%s = %s" % (i, v)
+                if not std[groups[x]] == 0 and not std[groups[y]] == 0:
+                    pvalue = Kolmogorov_Smirnov.ks_test(mean[groups[x]], std[groups[x]], mean[groups[y]], std[groups[y]])
+                    if pvalue >= threshold:
+                        probes_passing += 1
+                        print "%s\t%f\t%f\t%f\t%f\t%f\t%i\t%i\t%s\t%s" % (i, mean[groups[x]], mean[groups[y]], std[groups[x]], std[groups[y]], pvalue, nsnpcpg, nsnpprobe, groups[x], groups[y])
         if count % 10000 == 0:
             print "Row %i" % count    # for debugging
     # wht's missing and the sorting'
@@ -153,6 +202,11 @@ if __name__ == "__main__":
     parser.add_argument("-threshold", help = "An float value below which ks test results will be discarded [default = 0.95]", type = float, default = 0.95)
     parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
     parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
+    parser.add_argument('--nosnpcpg',dest='noSNPcpg',action='store_true')
+    parser.add_argument('--nosnpprobe',dest='noSNPprobe',action='store_true')
+    parser.set_defaults(noSNPcpg = False)
+    parser.set_defaults(noSNPprobe = False)
+
 
     args = parser.parse_args()
     p = Parameters.parameter(args.dbconfig)
@@ -160,6 +214,6 @@ if __name__ == "__main__":
         p.set("default_database", args.dbname)
     mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     starttime = time.time()
-    process_samples_in_order(mongodb, args.project_name, {}, args.groupby, args.limit_rows, args.threshold)
+    process_samples_in_order(mongodb, args.project_name, {}, args.groupby, args.limit_rows, args.threshold, args.noSNPcpg, args.noSNPprobe)
     mongodb.close()
     print('Done in %s seconds') % int((time.time() - starttime))
