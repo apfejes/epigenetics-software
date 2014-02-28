@@ -24,6 +24,7 @@ class Svg_Builder():
         self.drawing = None
         self.methylation = methylation
         self.peaks = peaks
+        self.probes_by_inv = None
 
 
 
@@ -59,7 +60,8 @@ class Svg_Builder():
                 self.drawing.add_ytics_chipseq()
 
         if self.methylation:
-            self.drawing.build_methylation(self.error_message, self.pos_betas_dict, self.sample_peaks, show_points, show_dist, show_groups)
+            self.drawing.build_methylation(self.error_message, self.pos_betas_dict, self.sample_peaks, 
+                                           show_points, show_dist, show_groups, self.probes_by_inv)
             self.drawing.add_ytics_methylation()
 
         # TODO: Insert error handling here, if methylation and no methylation data, drop out
