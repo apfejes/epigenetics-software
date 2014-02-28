@@ -10,7 +10,7 @@ from svgwrite.drawing import Drawing
 from svgwrite.path import Path
 from math import fabs
 import Color_Palette
-from PlotUtilities import add_cpg, get_axis, bigfont, smallfont, legend_color
+from PlotUtilities import add_cpg, get_axis, bigfont, medfont, smallfont, legend_color
 import string    # IGNORE:W0402 - string is deprecated, but str does not have a printable set.
 
 class Plot(object):
@@ -75,7 +75,7 @@ class Plot(object):
         self.plot.add(background)
 
         magic_box = Text(" ", id = "sample_name", insert = ((self.MARGIN + 20), (self.MARGIN + 20)),
-                    fill = "black", font_size = bigfont)
+                    fill = "black", font_size = medfont)
         self.elements.append(magic_box)
 
     def set_sample_index(self, types, samples):
