@@ -368,12 +368,17 @@ class MongoEpigeneticsWrapper():
     def getprobes(self, docs):
         '''Organises the probe locations/ids into a dictionary'''
         probes = {}
+        probes_inv = {}
         if docs is None:
             self.svg_builder.error_message = 'No data here'
             return {}
+        
         for doc in docs:
             if self.methylation:
                 probes[str(doc['targetid'])] = doc['mapinfo']
+                if doc['mapinfo'] not in probes_inv:
+                    probes_inv[doc['mapinfo']] = str(doc['targetid'])
+        self.svg_builder.probes_by_pos = probes_inv
         return probes
 
     def collectbetas(self, sample_ids, probes):
