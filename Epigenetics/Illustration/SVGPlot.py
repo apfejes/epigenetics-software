@@ -170,8 +170,8 @@ class Plot(object):
                         show_groups.append(sample_type)
                     if not show_groups or sample_type in show_groups:
                         point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color,
-                                   onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s-%s\n%s\'" %
-                                    (sample_type, sample_id, probes_by_pos[position]))
+                                   onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s %s-%s \'" %
+                                    (probes_by_pos[position], sample_type, sample_id))
                         self.elements.append(point)
 
             if show_peaks:
