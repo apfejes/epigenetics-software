@@ -74,7 +74,7 @@ def login_view(request):
         print "LOGIN --->  (Error:DoesNotExist) Could not authenticate user name %s: " % (username)
         return render(request, 'base.jade', {"message":"User %s does not exist." % (username)})
     except Exception as e:
-        print "exeption", e
+        print "exception", e
         return render(request, 'base.jade', {"message":"Unable to login.  Exception: %s" % (e)})
 
 
