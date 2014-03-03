@@ -26,8 +26,8 @@ def process_samples_in_order(connector,    # mongo connector
                              groupby,    # field to group by
                              limit,    # optional limit to number of probes to process.
                              threshold,    # optional override to threshold at which probes are kept.
-                             noSNPcpg,      #optional override to remove cpgs with snps in them
-                             noSNPprobe      #optional override to remove probes with snps in them
+                             noSNPcpg,    # optional override to remove cpgs with snps in them
+                             noSNPprobe    # optional override to remove probes with snps in them
                              ):
     '''
     This routine gets you the _ids of all projects with a given set of criteria (filter), and then returns a list representing every probe position in the array for each one.    
@@ -91,12 +91,12 @@ def process_samples_in_order(connector,    # mongo connector
             if x[groupby] not in groups:
                 groups.append(x[groupby])
 
-    search_criteria={}
+    search_criteria = {}
     if noSNPcpg:
        search_criteria["n_snpcpg"] = 0
     if noSNPprobe:
        search_criteria["n_snpprobe"] = 0
-      
+
     print "accessing annotations for cursor on probe names."
     target_cursor = connector.find("annotations", search_criteria, {"targetid":1, "_id":0}).distinct("targetid")    # find all probe sample_names
     # get the results for each probe for each sample
@@ -202,8 +202,8 @@ if __name__ == "__main__":
     parser.add_argument("-threshold", help = "An float value below which ks test results will be discarded [default = 0.95]", type = float, default = 0.95)
     parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
     parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
-    parser.add_argument('--nosnpcpg',dest='noSNPcpg',action='store_true')
-    parser.add_argument('--nosnpprobe',dest='noSNPprobe',action='store_true')
+    parser.add_argument('--nosnpcpg', dest = 'noSNPcpg', action = 'store_true')
+    parser.add_argument('--nosnpprobe', dest = 'noSNPprobe', action = 'store_true')
     parser.set_defaults(noSNPcpg = False)
     parser.set_defaults(noSNPprobe = False)
 
