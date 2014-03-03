@@ -9,6 +9,7 @@ from numpy import log, mean, std
 from math import sqrt
 import math
 import Svg_Builder
+import time
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
@@ -321,7 +322,7 @@ class MongoEpigeneticsWrapper():
         return self.runquery(collection, query_parameters, None, sortby, sortorder)
 
 
-    def finddocs_methylation(self, sample_ids = None, probe_id = None):
+    def finddocs_methylation(self, sample_ids = None, probe_id = None, batch_size = None):
 
         '''Finds documents corresponding to collection and type of query'''
 
@@ -337,9 +338,9 @@ class MongoEpigeneticsWrapper():
             query_parameters["probeid"] = probe_id
         return_chr = {'sampleid': True, 'beta':True, 'probeid':True, '_id':0}
 
-        return self.runquery(collection, query_parameters, return_chr)
+        return self.runquery(collection, query_parameters, return_chr, batch_size = batch_size)
 
-    def runquery(self, collection, query_parameters, return_chr, sortby = None, sortorder = None):
+    def runquery(self, collection, query_parameters, return_chr, sortby = None, sortorder = None, batch_size = None):
         '''run a query to return records.'''
         print "\n Conducting query. "
         # print "   From the database %s and collection %s" % (self.database, collection)
@@ -349,6 +350,8 @@ class MongoEpigeneticsWrapper():
                 docs = self.mongo.find(collection, query_parameters, return_chr).sort(sortby, sortorder)
             else:
                 docs = self.mongo.find(collection, query_parameters, return_chr)
+        elif batch_size:
+            docs = self.mongo.find(collection, query_parameters, return_chr)
         else:
             docs = self.mongo.find(collection, query_parameters, return_chr)
 
@@ -394,8 +397,11 @@ class MongoEpigeneticsWrapper():
             self.svg_builder.pos_betas_dict = {}
             return None
 
-        probedata = self.finddocs_methylation(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()})
+        probedata = self.finddocs_methylation(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, batch_size = 5000)
 
+
+        t0 = time.time()
+        print "\n Start Timing Core Loop."
         for methyldata in probedata:
             beta = methyldata['beta']
             if math.isnan(beta):
@@ -420,6 +426,11 @@ class MongoEpigeneticsWrapper():
 
         if count == 0:
             return None
+
+
+        tz = time.time() - t0
+        print "    --> time taken - %f seconds" % (tz)
+        print "    --> per record = %f ms" % ((tz / count) * 1000)
 
         print '\n    %s beta values were extracted.' % count
         print "    %i CpGs locations were found" % len(pos_betas_dict)
