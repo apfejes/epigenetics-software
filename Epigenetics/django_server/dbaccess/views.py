@@ -261,6 +261,7 @@ def view_query_form(request):
             a.extend(c)
             if len(a) == 1:
                 a = a[0].encode('utf-8')
+            print "x = %s" % x
             byproj[x['project'].encode('utf-8')] = {'default':x['default'].encode('utf-8'), 'available':a}
         groupby_list[o] = byproj
 
@@ -498,6 +499,9 @@ def view_metadata3(request):
 
     mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"available":updated_groups}}, upsert = True)
 
+    one = mongo[organism + "_epigenetics"]['sample_groups'].find({"project":project, "default":{ "$exists": True}}).count()
+    if one < 1:
+        mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"default":updated_groups[0]}})
     return render(request, 'metadata3.jade', {"type":collection})
 
 
