@@ -375,7 +375,7 @@ class MongoEpigeneticsWrapper():
         if docs is None:
             self.svg_builder.error_message = 'No data here'
             return {}
-        
+
         for doc in docs:
             if self.methylation:
                 probes[str(doc['targetid'])] = doc['mapinfo']
@@ -397,7 +397,7 @@ class MongoEpigeneticsWrapper():
             self.svg_builder.pos_betas_dict = {}
             return None
 
-        probedata = self.finddocs_methylation(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, batch_size = 5000)
+        probedata = self.finddocs_methylation(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, batch_size = 20000)
 
 
         t0 = time.time()
