@@ -496,7 +496,7 @@ def view_metadata3(request):
             v = t.replace("checkbox_", "")
             updated_groups.append(v)
 
-    mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"available":updated_groups}})
+    mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"available":updated_groups}}, upsert = True)
 
     return render(request, 'metadata3.jade', {"type":collection})
 
