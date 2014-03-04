@@ -199,7 +199,7 @@ class Plot(object):
                             self.elements.insert(1, gaussian)
                 # fix to truncate curves at border (to hide them)
                 self.elements.append(Rect(insert = (0, 0), size = (self.width, self.MARGIN), stroke_width = 0, fill = "#ffffff", fill_opacity = 1))
-                self.elements.append(Rect(insert = (0, self.height - self.BOTTOM_MARGIN), size = (self.width, self.dimension_x - self.height), stroke_width = 2.0, fill = "#ffffff", fill_opacity = 1))
+                self.elements.append(Rect(insert = (0, self.height - self.BOTTOM_MARGIN), size = (self.width, self.dimension_x - self.height), stroke_width = 0, fill = "#ffffff", fill_opacity = 1))
         self.palette.purge_unused()
 
     def save(self):
