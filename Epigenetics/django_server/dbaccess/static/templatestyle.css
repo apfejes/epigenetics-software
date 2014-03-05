@@ -177,7 +177,7 @@ input[type="submit"]:hover{
 	font-size: 0.9em;
 	float: right;
 	display: inline; /* for IE */
-	width: 100px;
+	width: 150px;
 	margin: 0 10px;
 }
 

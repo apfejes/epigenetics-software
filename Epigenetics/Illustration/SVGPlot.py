@@ -146,7 +146,7 @@ class Plot(object):
         self.elements.append(Rect(insert = (self.width - 239, 0), size = (self.RIGHT_MARGIN, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
         self.palette.purge_unused()
 
-    def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks, show_groups, probes_by_pos):
+    def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks, show_groups, probes_by_pos, probe_details):
         '''convert this information into elements of the svg image'''
         self.scale_y = 1
 
@@ -158,7 +158,7 @@ class Plot(object):
         for position in pos_betas_dict.keys():
             x = round(float(position - self.start) * self.scale_x, 2) + self.MARGIN
 
-
+            probeid = probes_by_pos[position]
 
             if show_points:
                 for beta, sample_id, sample_type in pos_betas_dict[position]:
@@ -171,7 +171,7 @@ class Plot(object):
                     if not show_groups or sample_type in show_groups:
                         point = Circle(center = (x, y), r = self.METHYLATION_DOT_RADIUS, fill = sample_color,
                                    onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s %s-%s \'" %
-                                    (probes_by_pos[position], sample_type, sample_id))
+                                    (probeid, sample_type, sample_id))
                         self.elements.append(point)
 
             if show_peaks:
@@ -197,9 +197,22 @@ class Plot(object):
                                            d = d))
 
                             self.elements.insert(1, gaussian)
-                # fix to truncate curves at border (to hide them)
-                self.elements.append(Rect(insert = (0, 0), size = (self.width, self.MARGIN), stroke_width = 0, fill = "#ffffff", fill_opacity = 1))
-                self.elements.append(Rect(insert = (0, self.height - self.BOTTOM_MARGIN), size = (self.width, self.dimension_x - self.height), stroke_width = 0, fill = "#ffffff", fill_opacity = 1))
+
+
+
+            # fix to truncate curves at border (to hide them)
+        self.elements.append(Rect(insert = (0, 0), size = (self.width, self.MARGIN), stroke_width = 0, fill = "#ffffff", fill_opacity = 1))
+        self.elements.append(Rect(insert = (0, self.height - self.BOTTOM_MARGIN), size = (self.width, self.dimension_x - self.height), stroke_width = 0, fill = "#ffffff", fill_opacity = 1))
+
+        for position in pos_betas_dict.keys():
+            probeid = probes_by_pos[position]
+            x = round(float(position - self.start) * self.scale_x, 2) + self.MARGIN
+            if probe_details[probeid]['n_snpcpg'] > 0:    # must process this after the rect, which would cover them otherwise
+                point = Circle(center = (x, self.MARGIN + self.dimension_y + 5), r = 3.0, fill = 'red')
+                self.elements.append(point)
+            elif probe_details[probeid]['n_snpprobe'] > 0:
+                point = Circle(center = (x, self.MARGIN + self.dimension_y + 5), r = 3.0, fill = 'blue')
+                self.elements.append(point)
         self.palette.purge_unused()
 
     def save(self):

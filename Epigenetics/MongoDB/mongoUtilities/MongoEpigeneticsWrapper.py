@@ -68,6 +68,7 @@ class MongoEpigeneticsWrapper():
             cursor = self.finddocs_annotations(chromosome, start, end)    # get probe and annotation info for region queried
             docs = CreateListFromCursor(cursor)
             probes = self.getprobes(docs)    # get list of probe ids
+
             self.collectbetas(sample_ids, probes)    # organize the beta values with sample info into a dictionary
             annotation_docs = docs
 
@@ -194,7 +195,8 @@ class MongoEpigeneticsWrapper():
         # Decide which parameters to return
         return_chr = {'targetid': True, 'mapinfo':True, 'closest_tss':True, 'hil_cpg_island_name':True,
                       'closest_tss_1': True, 'ucsc_refgene_name':True, 'closest_tss_gene_name':True,
-                      'regulatory_feature_group':True, 'regulatory_feature_name':True}
+                      'regulatory_feature_group':True, 'regulatory_feature_name':True, 'n_snpcpg': True,
+                      'n_snpprobe':True}
         # Decide how to sort the returned entries (make sure there is an index on the chosen sorting parameter)
         sortby, sortorder = 'mapinfo', 1
 
@@ -369,9 +371,10 @@ class MongoEpigeneticsWrapper():
         return docs
 
     def getprobes(self, docs):
-        '''Organises the probe locations/ids into a dictionary'''
+        '''Organises the probe locations/ids into a dictionary, saves prove info for svg_builder.'''
         probes = {}
         probes_inv = {}
+        probe_details = {}
         if docs is None:
             self.svg_builder.error_message = 'No data here'
             return {}
@@ -381,7 +384,13 @@ class MongoEpigeneticsWrapper():
                 probes[str(doc['targetid'])] = doc['mapinfo']
                 if doc['mapinfo'] not in probes_inv:
                     probes_inv[doc['mapinfo']] = str(doc['targetid'])
+                det = {}
+                det["n_snpcpg"] = doc["n_snpcpg"]
+                det["n_snpprobe"] = doc["n_snpprobe"]
+                probe_details[str(doc['targetid'])] = det
+
         self.svg_builder.probes_by_pos = probes_inv
+        self.svg_builder.probe_details = probe_details
         return probes
 
     def collectbetas(self, sample_ids, probes):

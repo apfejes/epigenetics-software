@@ -186,7 +186,7 @@ def process_query_request(request):
     except KeyError:
         p['types_index'] = None
         p['sample_index'] = None
-    p['width'] = int(q.get("width", 1000)) - 200    # width of screen minus 100
+    p['width'] = int(q.get("width", 1000)) - 250    # width of screen minus 100
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
 
     start = q.get("start", 0)
