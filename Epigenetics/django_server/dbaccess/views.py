@@ -261,7 +261,6 @@ def view_query_form(request):
             a.extend(c)
             if len(a) == 1:
                 a = a[0].encode('utf-8')
-            print "x = %s" % x
             byproj[x['project'].encode('utf-8')] = {'default':x['default'].encode('utf-8'), 'available':a}
         groupby_list[o] = byproj
 
