@@ -128,21 +128,21 @@ def process_samples_in_order(connector,    # mongo connector
         data = {}
         std = {}
         mean = {}
-        data_cursor = connector.find("methylation", {"probeid":i, "sampleid": {"$in": ids}}, {"sampleid":1, "beta":1})
+        data_cursor = connector.find("methylation", {"pid":i, "sid": {"$in": ids}}, {"sid":1, "b":1})
         annotations_rec = connector.find_one("annotations", {"name":i}, {"n_snpcpg":1, "_id":0, "n_snpprobe":1})
         nsnpcpg = annotations_rec["n_snpcpg"]
         nsnpprobe = annotations_rec["n_snpprobe"]
 
 
         for c in data_cursor:
-            sid = c['sampleid']
+            sid = c['sid']
 
-            row[sid] = c['beta']
+            row[sid] = c['b']
             # process groups distr. properties.
             g = group_by_sid[sid]
             if g not in data:
                 data[g] = []
-            data[g].append(c['beta'])
+            data[g].append(c['b'])
         if data == {}:
             # print "No values found for probe ", i
             continue

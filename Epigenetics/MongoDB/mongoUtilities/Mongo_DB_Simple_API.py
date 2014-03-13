@@ -62,17 +62,17 @@ def process_samples_in_order(connector, project_name, filters, groupby, limit):
         data = {}
         std = {}
         mean = {}
-        data_cursor = connector.find("methylation", {"probeid":i, "sampleid": {"$in": ids}}, {"sampleid":1, "beta":1})
+        data_cursor = connector.find("methylation", {"pid":i, "sid": {"$in": ids}}, {"sid":1, "b":1})
 
         for c in data_cursor:
-            sid = c['sampleid']
+            sid = c['sid']
 
-            row[sid] = c['beta']
+            row[sid] = c['b']
             # process groups distr. properties.
             g = group_by_sid[sid]
             if g not in data:
                 data[g] = []
-            data[g].append(c['beta'])
+            data[g].append(c['b'])
         print "Probe %s", i
         for g in groups:
             # calculate s and m
@@ -124,9 +124,9 @@ def export_samples_as_table(connector, project_name, filters, filename):
         count += 1
         row = {}
         strlist = []
-        data_cursor = connector.find("methylation", {"probeid":i, "sampleid": {"$in": ids}}, {"sampleid":1, "beta":1})
+        data_cursor = connector.find("methylation", {"pid":i, "sid": {"$in": ids}}, {"sid":1, "b":1})
         for c in data_cursor:
-            row[c['sampleid']] = c['beta']
+            row[c['sid']] = c['b']
         for n in names:
             if n in row:
                 strlist.append("%.8f" % row[n])

@@ -53,9 +53,9 @@ def importObjectsSampleData(mongo, csvbeta):
         for i in range(0, len(headers)):
             if b[i] != "NA":
                 sample = {}
-                sample["probeid"] = probe_name    # "probeid" : "cg00000029",
-                sample["sampleid"] = headers[i][0]
-                sample["beta"] = float(b[i])
+                sample["pid"] = probe_name    # "probeid" : "cg00000029",
+                sample["sid"] = headers[i][0]
+                sample["b"] = float(b[i])
                 # print "sample = ", sample
                 to_insert.append(sample)
         if len(to_insert) >= 50000:

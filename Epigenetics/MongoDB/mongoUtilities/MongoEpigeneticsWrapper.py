@@ -333,10 +333,10 @@ class MongoEpigeneticsWrapper():
 
         # Adding the different parameters of the query depending on the collection chosen
         if sample_ids:
-            query_parameters["sampleid"] = sample_ids
+            query_parameters["sid"] = sample_ids
         if probe_id:
-            query_parameters["probeid"] = probe_id
-        return_chr = {'sampleid': True, 'beta':True, 'probeid':True, '_id':0}
+            query_parameters["pid"] = probe_id
+        return_chr = {'sid': True, 'b':True, 'pid':True, '_id':0}
 
         return self.runquery(collection, query_parameters, return_chr, batch_size = batch_size)
 

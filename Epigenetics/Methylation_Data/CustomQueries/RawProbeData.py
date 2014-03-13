@@ -44,12 +44,12 @@ if __name__ == '__main__':
     print "found %s samples" % len(samples_to_use)
     # print "sample to use: %s" % samples_to_use
     print "Finding Probes..."
-    curs = mongo.find("methylation", {"sampleid": {"$in":samples_to_use}, "probeid": args.probe}, {"_id":False, "beta":True})
+    curs = mongo.find("methylation", {"sid": {"$in":samples_to_use}, "pid": args.probe}, {"_id":False, "b":True})
     print "open file for output: %s" % (file_name)
     i = 0
     for record in curs:
         i += 1
-        f.write("%s\n" % record['beta'])
+        f.write("%s\n" % record['b'])
         # print "%s" % record['beta']
     print "%i values found and written to file.  File closing..." % i
     f.close()
