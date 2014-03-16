@@ -410,12 +410,12 @@ class MongoEpigeneticsWrapper():
         t0 = time.time()
         print "\n Start Timing Core Loop."
         for methyldata in probedata:
-            beta = methyldata['beta']
+            beta = methyldata['b']
             if math.isnan(beta):
                 continue
             count += 1
-            pos = probes[methyldata['probeid']]
-            sample_id = methyldata['sampleid']
+            pos = probes[methyldata['pid']]
+            sample_id = methyldata['sid']
             sample, stype = sample_ids[sample_id]
             if pos in pos_betas_dict:
                 pos_betas_dict[pos].append((beta, sample, stype))
