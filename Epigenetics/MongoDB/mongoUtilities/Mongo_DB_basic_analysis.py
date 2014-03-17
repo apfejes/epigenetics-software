@@ -93,9 +93,9 @@ def process_samples_in_order(connector,    # mongo connector
 
     search_criteria = {}
     if noSNPcpg:
-       search_criteria["n_snpcpg"] = 0
+        search_criteria["n_snpcpg"] = 0
     if noSNPprobe:
-       search_criteria["n_snpprobe"] = 0
+        search_criteria["n_snpprobe"] = 0
 
     print "accessing annotations for cursor on probe names."
     target_cursor = connector.find("annotations", search_criteria, {"targetid":1, "_id":0}).distinct("targetid")    # find all probe sample_names
