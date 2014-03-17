@@ -62,7 +62,6 @@ class MongoEpigeneticsWrapper():
 
         self.svg_builder = Svg_Builder.Svg_Builder(self.methylation, self.peaks, start, end)
 
-        # TODO: Make sure that if "both" is picked, that the two pieces of code work together, and don't overwrite each other.
         if self.methylation:
             sample_ids = self.organize_samples_methylation(parameters['methylation_project'], sample_label, sample_group, parameters['groupby_selected'])
             cursor = self.finddocs_annotations(chromosome, start, end)    # get probe and annotation info for region queried
@@ -402,7 +401,7 @@ class MongoEpigeneticsWrapper():
         if probes == {}:
             self.svg_builder.sample_peaks = {}
             self.svg_builder.pos_betas_dict = {}
-            return None
+            return
 
         probedata = self.finddocs_methylation(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, batch_size = 20000)
 
@@ -431,9 +430,7 @@ class MongoEpigeneticsWrapper():
             if pos > maxpos:
                 maxpos = pos
 
-        if count == 0:
-            return None
-
+        self.svg_builder.pos_betas_dict = pos_betas_dict
 
         tz = time.time() - t0
         print "    --> time taken - %f seconds" % (tz)
@@ -442,16 +439,14 @@ class MongoEpigeneticsWrapper():
         print '\n    %s beta values were extracted.' % count
         print "    %i CpGs locations were found" % len(pos_betas_dict)
 
-        self.svg_builder.pos_betas_dict = pos_betas_dict
-
         for pos, type_dict in sample_peaks.iteritems():
             for stype, betas in type_dict.iteritems():
                 m = mean(betas)
                 s = std(betas)
                 sample_peaks[pos].update({stype : (m, s)})
-
         self.svg_builder.sample_peaks = sample_peaks
-        return None
+
+        return
 
 
     def getwaves(self, docs, sample_ids, start, end):
@@ -552,14 +547,5 @@ class MongoEpigeneticsWrapper():
         else:
             return r
 
-
-# TODO: Error function below needs testing
-
-    @staticmethod
-    def errorlog(errormessage):
-        '''returns error error_message to server'''
-        # self.errorcount += 1
-        print errormessage
-        return errormessage
 
 
