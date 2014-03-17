@@ -65,10 +65,6 @@ class Svg_Builder():
                                            show_points, show_dist, show_groups, self.probes_by_pos, self.probe_details)
             self.drawing.add_ytics_methylation()
 
-        # TODO: Insert error handling here, if methylation and no methylation data, drop out
-        # TODO: Insert error handling here, if chipseq and no chipseq data, drop out
-        # TODO: Insert error handling here, if both and no data, drop out
-
         if genes and show_genes:
             self.drawing.draw_genes(genes)
 
