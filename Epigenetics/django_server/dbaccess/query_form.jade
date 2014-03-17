@@ -175,8 +175,9 @@ body
        |!{plot}
     #right
       input(type="button", onclick='download_svg()', value='Download SVG')
-
       h3 Group Index
+      hr
+      
       - var ti = request.session['types_index']
       - var sg = request.session['show_groups']
       - if ti.items
@@ -195,9 +196,10 @@ body
                     input(class="check_small", type='checkbox', form="main", name="filter_" + s)    
       - else 
         | No Data Found   
-      h4 Index
-      | blue circle = SNP in Probe
-      | red circle = SNP in CpG
+      h3 Index
+      hr
+      p blue circle -> SNP in Probe
+      p red circle -> SNP in CpG
       
 
     

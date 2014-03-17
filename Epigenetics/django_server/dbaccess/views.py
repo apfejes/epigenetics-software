@@ -275,7 +275,8 @@ def view_query_form(request):
         if (len(parameters['methylation_project']) == 0):
             parameters['groupby_selected'] = 'project'
         elif len(parameters['methylation_project']) > 1:
-            print "parameters['groupby_selected'] = ", parameters['groupby_selected']
+            pass
+            # print "parameters['groupby_selected'] = ", parameters['groupby_selected']
         elif parameters['methylation_project'][0] not in groupby_list[parameters['organism']]:
             parameters['groupby_selected'] = 'project'
         elif (parameters['groupby_selected'] is None and len(parameters['methylation_project']) == 1) :
