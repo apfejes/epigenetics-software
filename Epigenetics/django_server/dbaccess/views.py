@@ -315,6 +315,10 @@ def view_query_form(request):
             else:
                 return HttpResponse('Could not find Gene: ' + action_factor)
 
+    if parameters['chromosome'] == "":
+        print "no chromosome specified - setting to chr1"
+        parameters['chromosome'] = "chr1"
+
     if parameters['end'] < parameters['start'] + 10:    # must check this here, because placing the start and end too close together will 'cause x tics to fail.
         parameters['end'] = parameters['start'] + 10
 
