@@ -21,7 +21,7 @@ import CommonUtils.Types as ty
 import CommonUtils.Parameters as Parameters
 # from platform import system
 
-
+DEBUG = True
 
 
 def ReadRObject(mongo, rdatafile, proj_name, collection_name):
@@ -112,17 +112,25 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
         for f in range(0, num_samples):
             samples[f]["sampleid"] = samples[f][sample_field]
 
+    for i in range(0, len(samples)):
+        samples[i]['sampleid'] = samples[i]['sampleid'].replace(".", "")
+
+
     sample_names = []
     for i in range(0, len(samples)):
         sample_names.append(samples[i]['sampleid'])
 
-    mongo.InsertBatchToDB("samples", samples)    # UNCOMMENT TO SAVE TO DB.
+
+    if not DEBUG:
+        mongo.InsertBatchToDB("samples", samples)    # UNCOMMENT TO SAVE TO DB.
 
     # get sampleIDs
-    cursor = mongo.find("samples", {"sampleid": {'$in': sample_names}, "project":proj_name}, {"_id":1}, None)
-    SampleIDs = []
-    for record in cursor:
-        SampleIDs.append(record["_id"])
+    # cursor = mongo.find("samples", {"sampleid": {'$in': sample_names}, "project":proj_name}, {"_id":1}, None)
+    # SampleIDs = []
+    # for record in cursor:
+    #    SampleIDs.append(record["_id"])
+
+    # print "sampleids:", SampleIDs
 
     batch_size = 5000
     batch = 0
@@ -139,13 +147,17 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
         b = robjects.r('betas(methylObj)[%i:%i,,drop=FALSE]' % (start, end))
         r = robjects.r('rownames(betas(methylObj)[%i:%i,,drop=FALSE])' % (start, end))
         # m = robjects.r('exprs(methylObj)[%i:%i,,drop=FALSE]' % (start, end))    # don't worry about levels. Data will always be floats, for this table
-        for x in range(1, num_samples + 1):    # one to number of samples  - the column number - iterate.
-            items = [{} for _k in range(start, end + 1)]    # zero to batch_size-1
-            for y in range(1, (end - start + 1)):    # the data
-                items[y - 1]['sid'] = SampleIDs[x - 1]
-                items[y - 1]["b"] = b.rx(y, x)[0]    # betas.rx(y, 1)[0]
-                items[y - 1]['pid'] = r.rx(y)[0]    # rows.rx(y)[0]
-            records_added_to_db += mongo.InsertBatchToDB(collection_name, items)
+        items = []
+        for y in xrange(1, len(r) + 1):    # iterate over rows the data
+            probe_data = {}
+            probe_data['pid'] = r.rx(y)[0]
+            probe_data['b'] = {}
+            probe_data['project'] = proj_name
+            for x in range(1, num_samples + 1):    # one to number of samples  - the column number - iterate.
+                probe_data['b'].update({sample_names[x - 1]:b.rx(y, x)[0]})
+            items.append(probe_data)
+            # print "new record = ", probe_data
+        records_added_to_db += mongo.InsertBatchToDB(collection_name, items)
         batch += 1
         time2 = time.time()
         print "Batch %i completed at %f seconds" % (batch, time2 - time1)
@@ -164,7 +176,7 @@ if __name__ == "__main__":
         p.set("default_database", args.dbname)
     mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     starttime = time.time()
-    collection = "methylation"
+    collection = "methylation3"
     project_name = raw_input('Enter the name of the project to insert in the ' + collection + ' collection of the ' + p.get('default_database') + ' database: ')
     ReadRObject(mongodb, args.rfile, project_name, collection)
     mongodb.close()
