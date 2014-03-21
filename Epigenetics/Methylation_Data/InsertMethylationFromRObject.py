@@ -21,10 +21,7 @@ import CommonUtils.Types as ty
 import CommonUtils.Parameters as Parameters
 # from platform import system
 
-DEBUG = True
-
-
-def ReadRObject(mongo, rdatafile, proj_name, collection_name):
+def ReadRObject(mongo, rdatafile, proj_name, collection_name, reuse_samples):
     '''
     Takes a methylumi object and writes beta, expression and phenoData to .txt
     
@@ -110,19 +107,18 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
             samples[f]["sampleid"] = sample_row_names[f]
     elif sid_field != -1:
         for f in range(0, num_samples):
-            samples[f]["sampleid"] = samples[f][sample_field]
+            samples[f]["sampleid"] = str(samples[f][sample_field])
 
     for i in range(0, len(samples)):
-        samples[i]['sampleid'] = samples[i]['sampleid'].replace(".", "")
+        samples[i]['sampleid'] = samples[i]['sampleid']    # .replace(".", "")
 
 
     sample_names = []
     for i in range(0, len(samples)):
-        sample_names.append(samples[i]['sampleid'])
+        sample_names.append(str(samples[i]['sampleid']))
 
-
-    if not DEBUG:
-        mongo.InsertBatchToDB("samples", samples)    # UNCOMMENT TO SAVE TO DB.
+    if not reuse_samples:
+        mongo.InsertBatchToDB("samples", samples)
 
     # get sampleIDs
     # cursor = mongo.find("samples", {"sampleid": {'$in': sample_names}, "project":proj_name}, {"_id":1}, None)
@@ -155,8 +151,9 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name):
             probe_data['project'] = proj_name
             for x in range(1, num_samples + 1):    # one to number of samples  - the column number - iterate.
                 probe_data['b'].update({sample_names[x - 1]:b.rx(y, x)[0]})
-            items.append(probe_data)
             # print "new record = ", probe_data
+            items.append(probe_data)
+
         records_added_to_db += mongo.InsertBatchToDB(collection_name, items)
         batch += 1
         time2 = time.time()
@@ -170,6 +167,8 @@ if __name__ == "__main__":
     parser.add_argument("rfile", help = "R data file to import", type = str)
     parser.add_argument("-dbconfig", help = "An optional file to specify the database location - default is database.conf in MongoDB directory", type = str, default = None)
     parser.add_argument("-dbname", help = "name of the Database in the Mongo implementation to use - default is provided in the database.conf file specified", type = str, default = None)
+    parser.add_argument("-reuse_samples", help = "When set, this flag prevents new sample data from being inserted, and methylation data will be connected to existing samples in the db.", action = 'store_true')
+
     args = parser.parse_args()
     p = Parameters.parameter(args.dbconfig)
     if args.dbname:
@@ -178,6 +177,6 @@ if __name__ == "__main__":
     starttime = time.time()
     collection = "methylation3"
     project_name = raw_input('Enter the name of the project to insert in the ' + collection + ' collection of the ' + p.get('default_database') + ' database: ')
-    ReadRObject(mongodb, args.rfile, project_name, collection)
+    ReadRObject(mongodb, args.rfile, project_name, collection, args.reuse_samples)
     mongodb.close()
     print('Done in %s seconds') % int((time.time() - starttime))
