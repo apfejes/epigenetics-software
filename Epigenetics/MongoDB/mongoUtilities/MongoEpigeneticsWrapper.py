@@ -320,7 +320,7 @@ class MongoEpigeneticsWrapper():
 
         if self.error_message != '' :    # If there are existing error messages, don't perform these operations.
             return {}
-        collection = 'methylation3'
+        collection = 'methylation'
         query_parameters = {}    # This dictionary will store all the query parameters
 
         # Adding the different parameters of the query depending on the collection chosen
@@ -428,11 +428,15 @@ class MongoEpigeneticsWrapper():
         self.svg_builder.pos_betas_dict = pos_betas_dict
 
         tz = time.time() - t0
+        print "    --> samples found: %i" % len(sample_ids)
+        print "    --> cpgs found: %i" % count
+        print "    --> beta values found: %i" % (len(sample_ids) * count)
+
         if count > 0:
-            print "    --> time taken - %f seconds" % (tz)
-            print "    --> per record = %f ms" % ((tz / count) * 1000)
-            print '\n    %s beta values were extracted.' % count
-            print "    %i CpGs locations were found" % len(pos_betas_dict)
+            print "\n    --> time taken - %f seconds" % (tz)
+            print "    --> per cpg = %f ms" % ((tz / count) * 1000)
+
+
 
         for pos, type_dict in sample_peaks.iteritems():
             for stype, betas in type_dict.iteritems():
