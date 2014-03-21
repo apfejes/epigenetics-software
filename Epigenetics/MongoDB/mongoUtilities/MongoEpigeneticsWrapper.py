@@ -68,7 +68,7 @@ class MongoEpigeneticsWrapper():
             docs = CreateListFromCursor(cursor)
             probes = self.getprobes(docs)    # get list of probe ids
 
-            self.collectbetas(sample_ids, probes)    # organize the beta values with sample info into a dictionary
+            self.collectbetas(parameters['methylation_project'], sample_ids, probes)    # organize the beta values with sample info into a dictionary
             annotation_docs = docs
 
         if self.peaks:
@@ -111,8 +111,6 @@ class MongoEpigeneticsWrapper():
         
         Sets the default group_by property of each dataset. 
         '''
-
-        sampleid_name = 'sampleid'    # previously name_samplabel
         # print "project name = %s" % project
         project = [str(p) for p in project]
         if len(project) == 1:
@@ -131,28 +129,23 @@ class MongoEpigeneticsWrapper():
             return {}
 
         sample_ids = {}
-
-
         if groupby_name in samplesdocs[0]:
             for doc in samplesdocs:
-                sample_id = doc['_id']
-                doc_sample_label = doc[sampleid_name]
+                sample_id = str(doc['sampleid'])
                 if groupby_name in doc:
                     doc_sample_group = doc[groupby_name]
                     if doc_sample_group == sample_group or sample_group is None:
-                        if doc_sample_label == sample_label or sample_label is None:
-                            sample_ids[sample_id] = (str(doc_sample_label), str(doc_sample_group))
+                        sample_ids[sample_id] = str(doc_sample_group)
         else:
             v = self.mongo.find_one("sample_groups", {"project":project}, {"_id":0, "compound":1})
             fields = v["compound"][groupby_name]
             for doc in samplesdocs:
-                sample_id = doc['_id']
+                sample_id = str(doc['sampleid'])
                 doc_sample_group = []
-                doc_sample_label = doc[sampleid_name]
                 for field in fields:
                     doc_sample_group.append(str(doc[field]))
                 compoundkey = "-".join(doc_sample_group)
-                sample_ids[sample_id] = (str(doc_sample_label), compoundkey)
+                sample_ids[sample_id] = compoundkey
         return sample_ids
 
 
@@ -321,21 +314,25 @@ class MongoEpigeneticsWrapper():
         return self.runquery(collection, query_parameters, None, sortby, sortorder)
 
 
-    def finddocs_methylation(self, sample_ids = None, probe_id = None, batch_size = None):
+    def finddocs_methylation(self, project = None, sample_ids = None, probe_id = None, batch_size = None):
 
         '''Finds documents corresponding to collection and type of query'''
 
         if self.error_message != '' :    # If there are existing error messages, don't perform these operations.
             return {}
-        collection = 'methylation'
+        collection = 'methylation3'
         query_parameters = {}    # This dictionary will store all the query parameters
 
         # Adding the different parameters of the query depending on the collection chosen
+        if not project:
+            return None
+        else:
+            query_parameters["project"] = project
         if sample_ids:
             query_parameters["sid"] = sample_ids
         if probe_id:
             query_parameters["pid"] = probe_id
-        return_chr = {'sid': True, 'b':True, 'pid':True, '_id':0}
+        return_chr = {'pid':True, 'b':True, '_id':0}
 
         return self.runquery(collection, query_parameters, return_chr, batch_size = batch_size)
 
@@ -390,7 +387,7 @@ class MongoEpigeneticsWrapper():
         self.svg_builder.probe_details = probe_details
         return probes
 
-    def collectbetas(self, sample_ids, probes):
+    def collectbetas(self, projects, sample_ids, probes):
         '''Collects and bins methylation data, and pushes it into the svg_generating object.'''
         # Bin the beta values and collect their position
         pos_betas_dict = {}    # contains CpGs
@@ -403,41 +400,39 @@ class MongoEpigeneticsWrapper():
             self.svg_builder.pos_betas_dict = {}
             return
 
-        probedata = self.finddocs_methylation(sample_ids = {"$in":sample_ids.keys()}, probe_id = {'$in':probes.keys()}, batch_size = 20000)
-
+        probedata = self.finddocs_methylation(project = {"$in":projects}, probe_id = {'$in':probes.keys()}, batch_size = 20000)
 
         t0 = time.time()
         print "\n Start Timing Core Loop."
         for methyldata in probedata:
-            beta = methyldata['b']
-            if math.isnan(beta):
-                continue
             count += 1
             pos = probes[methyldata['pid']]
-            sample_id = methyldata['sid']
-            sample, stype = sample_ids[sample_id]
-            if pos in pos_betas_dict:
-                pos_betas_dict[pos].append((beta, sample, stype))
-            else:
-                pos_betas_dict[pos] = [(beta, sample, stype)]
-            if pos in sample_peaks:
-                if stype in sample_peaks[pos]:
-                    sample_peaks[pos][stype].append(beta)
+            for sample, stype in sample_ids.iteritems():
+                beta = methyldata['b'][sample]
+                if math.isnan(beta):
+                    continue
+                if pos in pos_betas_dict:
+                    pos_betas_dict[pos].append((beta, sample, stype))
                 else:
-                    sample_peaks[pos][stype] = [beta]
-            else:
-                sample_peaks[pos] = {stype:[beta]}
-            if pos > maxpos:
-                maxpos = pos
+                    pos_betas_dict[pos] = [(beta, sample, stype)]
+                if pos in sample_peaks:
+                    if stype in sample_peaks[pos]:
+                        sample_peaks[pos][stype].append(beta)
+                    else:
+                        sample_peaks[pos][stype] = [beta]
+                else:
+                    sample_peaks[pos] = {stype:[beta]}
+                if pos > maxpos:
+                    maxpos = pos
 
         self.svg_builder.pos_betas_dict = pos_betas_dict
 
         tz = time.time() - t0
-        print "    --> time taken - %f seconds" % (tz)
-        print "    --> per record = %f ms" % ((tz / count) * 1000)
-
-        print '\n    %s beta values were extracted.' % count
-        print "    %i CpGs locations were found" % len(pos_betas_dict)
+        if count > 0:
+            print "    --> time taken - %f seconds" % (tz)
+            print "    --> per record = %f ms" % ((tz / count) * 1000)
+            print '\n    %s beta values were extracted.' % count
+            print "    %i CpGs locations were found" % len(pos_betas_dict)
 
         for pos, type_dict in sample_peaks.iteritems():
             for stype, betas in type_dict.iteritems():
