@@ -110,7 +110,8 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name, reuse_samples):
             samples[f]["sampleid"] = str(samples[f][sample_field])
 
     for i in range(0, len(samples)):
-        samples[i]['sampleid'] = samples[i]['sampleid']    # .replace(".", "")
+        if samples[i]['sampleid'].find(".") != -1:
+            samples[i]['sampleid'] = samples[i]['sampleid'].replace(".", "_")
 
 
     sample_names = []
@@ -175,7 +176,7 @@ if __name__ == "__main__":
         p.set("default_database", args.dbname)
     mongodb = Mongo_Connector.MongoConnector(p.get('server'), p.get('port'), p.get('default_database'))
     starttime = time.time()
-    collection = "methylation3"
+    collection = "methylation"
     project_name = raw_input('Enter the name of the project to insert in the ' + collection + ' collection of the ' + p.get('default_database') + ' database: ')
     ReadRObject(mongodb, args.rfile, project_name, collection, args.reuse_samples)
     mongodb.close()
