@@ -118,7 +118,6 @@ class MongoEpigeneticsWrapper():
 
         if groupby_name != 'project':    # if "All",then special case, don't use project in the query!
             samplesdocs = self.finddocs_samples_methylation(sample_group = groupby_name, project = project)
-        # print "sampledocs %s" % (samplesdocs)
         else:
             samplesdocs = self.finddocs_samples_methylation(project = project,
                                 sample_label = sample_label,
@@ -128,15 +127,22 @@ class MongoEpigeneticsWrapper():
             self.error_message = 'No samples found'
             return {}
 
-        sample_ids = {}
+
+
         if groupby_name in samplesdocs[0]:
+            by_project = {}
             for doc in samplesdocs:
                 sample_id = str(doc['sampleid'])
+                pr = doc['project']
+                if pr not in by_project:
+                    by_project[pr] = {}
                 if groupby_name in doc:
                     doc_sample_group = doc[groupby_name]
                     if doc_sample_group == sample_group or sample_group is None:
-                        sample_ids[sample_id] = str(doc_sample_group)
+                        by_project[pr][sample_id] = str(doc_sample_group)
+            return by_project
         else:
+            sample_ids = {}
             v = self.mongo.find_one("sample_groups", {"project":project}, {"_id":0, "compound":1})
             fields = v["compound"][groupby_name]
             for doc in samplesdocs:
@@ -146,7 +152,7 @@ class MongoEpigeneticsWrapper():
                     doc_sample_group.append(str(doc[field]))
                 compoundkey = "-".join(doc_sample_group)
                 sample_ids[sample_id] = compoundkey
-        return sample_ids
+            return sample_ids
 
 
     def organize_samples_chipseq(self, chip):
@@ -332,7 +338,7 @@ class MongoEpigeneticsWrapper():
             query_parameters["sid"] = sample_ids
         if probe_id:
             query_parameters["pid"] = probe_id
-        return_chr = {'pid':True, 'b':True, '_id':0}
+        return_chr = {'project':True, 'pid':True, 'b':True, '_id':0}
 
         return self.runquery(collection, query_parameters, return_chr, batch_size = batch_size)
 
@@ -407,28 +413,34 @@ class MongoEpigeneticsWrapper():
         for methyldata in probedata:
             count += 1
             pos = probes[methyldata['pid']]
-            for sample, stype in sample_ids.iteritems():
-                beta = methyldata['b'][sample]
-                if math.isnan(beta):
-                    continue
-                if pos in pos_betas_dict:
-                    pos_betas_dict[pos].append((beta, sample, stype))
-                else:
-                    pos_betas_dict[pos] = [(beta, sample, stype)]
-                if pos in sample_peaks:
-                    if stype in sample_peaks[pos]:
-                        sample_peaks[pos][stype].append(beta)
+            proj = methyldata['project']
+            if proj in sample_ids:
+                for sample, stype in sample_ids[proj].iteritems():
+                    beta = methyldata['b'][sample]
+                    if math.isnan(beta):
+                        continue
+                    if pos in pos_betas_dict:
+                        pos_betas_dict[pos].append((beta, sample, stype))
                     else:
-                        sample_peaks[pos][stype] = [beta]
-                else:
-                    sample_peaks[pos] = {stype:[beta]}
-                if pos > maxpos:
-                    maxpos = pos
+                        pos_betas_dict[pos] = [(beta, sample, stype)]
+                    if pos in sample_peaks:
+                        if stype in sample_peaks[pos]:
+                            sample_peaks[pos][stype].append(beta)
+                        else:
+                            sample_peaks[pos][stype] = [beta]
+                    else:
+                        sample_peaks[pos] = {stype:[beta]}
+                    if pos > maxpos:
+                        maxpos = pos
 
         self.svg_builder.pos_betas_dict = pos_betas_dict
 
         tz = time.time() - t0
-        print "    --> samples found: %i" % len(sample_ids)
+        print "    --> projects found: %i" % len(sample_ids)
+        sample_count = 0
+        for p in sample_ids:
+            sample_count += len(sample_ids[p])
+        print "    --> samples found: %i" % sample_count
         print "    --> cpgs found: %i" % count
         print "    --> beta values found: %i" % (len(sample_ids) * count)
 
