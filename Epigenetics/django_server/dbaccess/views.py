@@ -146,12 +146,18 @@ def process_query_request(request):
     if request.method == 'GET':
         q = request.GET
         f = q.get("filters", [])
+
+        print " f = ", f
+
         if "," in f:
+            print "splitting"
             f = f.split(",")
-        if len(f) > 0:
             p['show_groups'] = [x.encode('utf-8') for x in f]
         else:
             p['show_groups'] = []
+            if f:
+                p['show_groups'].append(f)
+
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
         p['show_groups'] = []
