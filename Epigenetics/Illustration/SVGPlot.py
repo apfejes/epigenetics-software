@@ -10,6 +10,7 @@ from svgwrite.drawing import Drawing
 from svgwrite.path import Path
 from math import fabs
 import Color_Palette
+import time
 from PlotUtilities import add_cpg, get_axis, bigfont, medfont, smallfont, legend_color
 import string    # IGNORE:W0402 - string is deprecated, but str does not have a printable set.
 
@@ -229,11 +230,15 @@ class Plot(object):
 
     def to_string(self):
         ''' convert the loaded elements to strings and return the list of elements'''
+        t0 = time.time()
+        temp = []
+        temp.append(self.plot.tostring().replace("</svg>", ""))
         for element in self.elements:
-            self.plot.add(element)
-        z = self.plot.tostring()
-        self.plot = None
-        return z
+            temp.append(element.tostring())
+        temp.append("</svg>")
+        print " Conversion of SVG to string took %f seconds" % (time.time() - t0)
+        return ''.join(t for t in temp)
+
 
     def get_elements(self):
         ''' call sample labels and delete loaded elements. '''

@@ -442,7 +442,7 @@ class MongoEpigeneticsWrapper():
             sample_count += len(sample_ids[p])
         print "    --> samples found: %i" % sample_count
         print "    --> cpgs found: %i" % count
-        print "    --> beta values found: %i" % (len(sample_ids) * count)
+        print "    --> beta values found: %i" % (sample_count * count)
 
         if count > 0:
             print "\n    --> time taken - %f seconds" % (tz)
