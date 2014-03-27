@@ -35,29 +35,25 @@ def importObjectsSampleData(mongo, csvbeta):
     for b_line in f:
         count += 1
         if first:
-            h = b_line.split(",")
-            for i in range(1, len(h)):
-                GSM = h[i].replace('"', '').strip()
-                l = mongo.find_one("samples", {"GSE":GSE, "sampleid":GSM}, {"_id":1})
-                headers[i - 1] = [l["_id"], GSM]
+            r = b_line.split(",")
+            headers = [h.replace('"', '').strip() for h in r[1:]]
             print "all headers, processed:", headers
             first = False
             continue
         # print "processing records: ", b_line
         b = b_line.split(",")
         b = [bv.replace('"', '').strip() for bv in b]
-        probe_name = b[0]
+        probe_data = {}
+        probe_data['pid'] = b[0]    # probe_name
+        probe_data['project'] = GSE
+        probe_data['b'] = {}
         b = b[1:]
-
-
         for i in range(0, len(headers)):
             if b[i] != "NA":
-                sample = {}
-                sample["pid"] = probe_name    # "probeid" : "cg00000029",
-                sample["sid"] = headers[i][0]
-                sample["b"] = float(b[i])
-                # print "sample = ", sample
-                to_insert.append(sample)
+                probe_data['b'].update({headers[i]:float(b[i])})
+        to_insert.append(probe_data)
+
+
         if len(to_insert) >= 50000:
             rows = mongo.InsertBatchToDB("methylation", to_insert)
             if rows == len(to_insert):
