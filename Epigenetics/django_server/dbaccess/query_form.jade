@@ -130,7 +130,7 @@ body
           input(type="text", placeholder="gene name or probe id", title="jump to gene", name="genename", onkeypress="if (event.keyCode == 13) return false;")
           input(type="button", value="Go To Gene", title="jump to gene", id="gotogene", name="gotogene", onClick="window.open(newURL(genename.value),'_self');")
       #option_elements
-        if organism == 'human'
+        if organism == 'human' or organism == 'humanGEO'
           #selection_element
             label(for='cpg') CpG Islands:
               if cpg
