@@ -471,8 +471,6 @@ def view_metadata2(request):
             for k in s:
                 s[str(k)] = str(s.pop(k)).replace("'", "")
             samples.append(s)
-
-        print "samples = ", samples
         cursor = mongo[organism + "_epigenetics"]['sample_groups'].find({'project':project})
         for s in cursor:
             t = s['available']
