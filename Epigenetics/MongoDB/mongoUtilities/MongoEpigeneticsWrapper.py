@@ -416,22 +416,25 @@ class MongoEpigeneticsWrapper():
             proj = methyldata['project']
             if proj in sample_ids:
                 for sample, stype in sample_ids[proj].iteritems():
-                    beta = methyldata['b'][sample]
-                    if math.isnan(beta):
-                        continue
-                    if pos in pos_betas_dict:
-                        pos_betas_dict[pos].append((beta, sample, stype))
-                    else:
-                        pos_betas_dict[pos] = [(beta, sample, stype)]
-                    if pos in sample_peaks:
-                        if stype in sample_peaks[pos]:
-                            sample_peaks[pos][stype].append(beta)
+                    try:
+                        beta = methyldata['b'][sample]
+                        if math.isnan(beta):
+                            continue
+                        if pos in pos_betas_dict:
+                            pos_betas_dict[pos].append((beta, sample, stype))
                         else:
-                            sample_peaks[pos][stype] = [beta]
-                    else:
-                        sample_peaks[pos] = {stype:[beta]}
-                    if pos > maxpos:
-                        maxpos = pos
+                            pos_betas_dict[pos] = [(beta, sample, stype)]
+                        if pos in sample_peaks:
+                            if stype in sample_peaks[pos]:
+                                sample_peaks[pos][stype].append(beta)
+                            else:
+                                sample_peaks[pos][stype] = [beta]
+                        else:
+                            sample_peaks[pos] = {stype:[beta]}
+                        if pos > maxpos:
+                            maxpos = pos
+                    except KeyError:
+                        continue
 
         self.svg_builder.pos_betas_dict = pos_betas_dict
 
