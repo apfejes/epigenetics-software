@@ -1,5 +1,10 @@
+html {
+  height:100%;
+}
+
 body {
   width:100%;
+  height:100%;
   margin-top:5px;
   margin-right:2px;
   margin-left: 2px;
@@ -90,6 +95,7 @@ a.white {
   margin-left:2px;
   margin-top:10px;
   margin-right:0px;
+  height:100%;
 }
 
 #navigation {
@@ -175,18 +181,18 @@ input[type="submit"]:hover{
 
 #right {
 	font-size: 0.9em;
+	display: inline-block;
 	float: right;
-	display: inline; /* for IE */
 	width: 150px;
 	margin: 0 10px;
 }
 
 #left {
 	float: left;
-	display: inline; /* for IE */
-	width: 80%;
-	padding: 0 25px;
+	display: inline-block;
+	padding: 0 0px 0 0;
 	margin: 0;
+	height:100%;
 }
 
 #check_small {
