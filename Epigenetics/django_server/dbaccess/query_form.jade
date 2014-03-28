@@ -175,7 +175,7 @@ body
        |!{plot}
     #right
       input(type="button", onclick='download_svg()', value='Download SVG')
-      h3 Group Index
+      h3 Index
       hr
       
       - var ti = request.session['types_index']
@@ -196,10 +196,10 @@ body
                     input(class="check_small", type='checkbox', form="main", name="filter_" + s)    
       - else 
         | No Data Found   
-      h3 Index
+      h3 Legend
       hr
-      p blue circle -> SNP in Probe
-      p red circle -> SNP in CpG
+      p blue line -> SNP in Probe
+      p red line -> SNP in CpG
       
 
     

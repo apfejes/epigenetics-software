@@ -210,12 +210,12 @@ class Plot(object):
             probeid = probes_by_pos[position]
             x = round(float(position - self.start) * self.scale_x, 2) + self.MARGIN
             if probe_details[probeid]['n_snpcpg'] > 0:    # must process this after the rect, which would cover them otherwise
-                point = Circle(center = (x, self.MARGIN + self.dimension_y + 5), r = 3.0, fill = 'red',
+                point = Rect(insert = (x - 1.0, self.MARGIN + self.dimension_y), size = (2.0, 8.0), stroke_width = 0, fill = 'red',
                                onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'SNP in cpg: %s\'" %
                                     (probeid))
                 self.elements.append(point)
             elif probe_details[probeid]['n_snpprobe'] > 0:
-                point = Circle(center = (x, self.MARGIN + self.dimension_y + 5), r = 3.0, fill = 'blue',
+                point = Rect(insert = (x - 1.0, self.MARGIN + self.dimension_y), size = (2.0, 8.0), stroke_width = 0, fill = 'blue',
                                onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'SNP in probe %s\'" %
                                     (probeid))
                 self.elements.append(point)
