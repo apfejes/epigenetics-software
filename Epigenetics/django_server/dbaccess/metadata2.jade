@@ -136,7 +136,6 @@ block script
       for (var s in samp) {
         line = []
         for (var h in headers) {
-          alert(headers[h])
           line.push(samp[s][headers[h]])
         }
         text.push(line.join("\t"))
