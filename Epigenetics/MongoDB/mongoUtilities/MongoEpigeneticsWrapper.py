@@ -142,17 +142,20 @@ class MongoEpigeneticsWrapper():
                         by_project[pr][sample_id] = str(doc_sample_group)
             return by_project
         else:
-            sample_ids = {}
+            by_project = {}
             v = self.mongo.find_one("sample_groups", {"project":project}, {"_id":0, "compound":1})
             fields = v["compound"][groupby_name]
             for doc in samplesdocs:
                 sample_id = str(doc['sampleid'])
+                pr = str(doc['project'])
+                if pr not in by_project:
+                    by_project[pr] = {}
                 doc_sample_group = []
                 for field in fields:
                     doc_sample_group.append(str(doc[field]))
                 compoundkey = "-".join(doc_sample_group)
-                sample_ids[sample_id] = compoundkey
-            return sample_ids
+                by_project[pr][sample_id] = compoundkey
+            return by_project
 
 
     def organize_samples_chipseq(self, chip):
