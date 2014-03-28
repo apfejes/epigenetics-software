@@ -5,8 +5,9 @@ block title
 
 block content
   #padding-div 
-    h2 MetaData: Select a project to edit.
+    h2 MetaData: Manage meta data and "group-by" fields.
     input(type="button", value="Manage Compound Group by", onClick="window.location.assign('/dbaccess/compound/?organism=' + organism.value + '&project=' + project.value )")
+    input(type="button", value="Export Project Metadata", onClick="export_metadata()")
     hr
     br
     form(name="main", id="main", action='/dbaccess/metadata3/', method='post')
@@ -116,4 +117,35 @@ block script
       cell2.appendChild(input);
       
       var container = document.getElementById("main");
+    }
+    
+    function export_metadata() {
+    
+      window.URL = window.URL || window.webkitURL;
+      var a = document.createElement('a');
+      var n = document.getElementById("project")
+      name = n.value;
+      var e = document.getElementById("samples");
+      var samp = JSON.parse(samples.value.replace(/'/g, '"'))
+      var headers = new Array
+      for (var h in samp[0]) {
+        headers.push(h)
+      }
+      text = []
+      text.push(headers.join("\t"))
+      for (var s in samp) {
+        line = []
+        for (var h in headers) {
+          alert(headers[h])
+          line.push(samp[s][headers[h]])
+        }
+        text.push(line.join("\t"))
+      }
+      text = text.join("\n") 
+      
+      var blob = new Blob([text], {'type':'text\/plain'});
+      a.href = window.URL.createObjectURL(blob);
+      a.download = name+'_json.txt';
+      a.click();
+      
     }
