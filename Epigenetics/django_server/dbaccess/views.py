@@ -186,6 +186,7 @@ def process_query_request(request):
     p['show_dist'] = to_boolean(q.get("show_dist", False))
     p['show_genes'] = to_boolean(q.get("show_genes", True))
     p['datapoints'] = to_boolean(q.get("datapoints", True))
+
     try:
         p['sample_index'] = request.session['sample_index']
         p['types_index'] = request.session['types_index']
@@ -212,6 +213,7 @@ def process_query_request(request):
     p['end'] = end
     p['action_factor'] = q.get("action", None)    # don't need to save the "action factor" parameter, but need to check if it's a gene.
 
+    p['genename'] = q.get("genename", None)
 
 
     return p
@@ -306,8 +308,8 @@ def view_query_form(request):
         parameters['start'], parameters['end'] = zoom(action_factor, int(parameters['start']), int(parameters['end']))
     elif action_factor in PANNING_PERCENTS:
         parameters['start'], parameters['end'] = panning(action_factor, int(parameters['start']), int(parameters['end']))
-    elif action_factor:
-        coords = m.find_coords_by_gene(action_factor)
+    elif parameters['genename']:    # check to see if a gene/probe name has been entered
+        coords = m.find_coords_by_gene(parameters['genename'])
         if coords:
             parameters['chromosome'] = coords['chr']
             parameters['start'] = coords['start']
