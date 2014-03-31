@@ -21,93 +21,7 @@ body
       else
         a(href='/dbaccess/loginpage', class='white') log in&nbsp;  
   #wrapper
-    form(name="main", id="main", action='/dbaccess/query_form/', method='post')
-      input(type="hidden", id="width", name="width", value = "")
-      input(type="hidden", id="height", name="height", value = "")
-      input(type="hidden", id="methylation_avail", name="methylation_avail", value=methylation_list)
-      input(type="hidden", id="chipseq_avail", name="chipseq_avail", value=chipseq_list)
-      input(type="hidden", id="sample_index", name="sample_index", value = request.session['sample_index'])
-      input(type="hidden", id="types_index", name="types_index", value = request.session['types_index'])
-      input(type="hidden", id="organism_inuse", name="organism_inuse", value=organism)
-      input(type="hidden", id="methylation_selected", name="methylation_selected", value=methylation_project)
-      input(type="hidden", id="chipseq_selected", name="chipseq_selected", value=chipseq_project)
-      input(type="hidden", id="groupby_selected", name="groupby_selected", value=groupby_selected)
-      input(type="hidden", id="groupby_avail", name="groupby_avail", value=groupby)
-      input(type="hidden", id="sv", name="sv", value=plot, disabled="disabled")
-      fieldset
-        div(align="left")
-          table
-            tr
-              td 
-                label(for='organism') Organism:
-              td 
-                select(name='organism', id='organism', onchange='update_data_by_org()')
-                  - each org in organism_list
-                    - if org == organism
-                      option(value=org, selected)=org
-                    - else 
-                     option(value=org)=org
-              td
-                label(for='methylation', id='methylation_label') Methylation Set:
-              td(rowspan="4")
-                select(name='methylation', id='methylation', multiple="multiple", onchange="update_groupby()")
-                  - var mo = methylation_list[organism]
-                  - each mt in mo
-                    - if mt == methylation_project
-                      option(value=mt, selected)=mt
-                    - else 
-                      option(value=mt)=mt
-              td
-                label(for='chipseq', id='chipseq_label') Chip-Seq:
-              td(rowspan="4")
-                select(name='chipseq', id='chipseq', multiple)
-                  - var cso = chipseq_list[organism]
-                  - each cs in cso
-                    - if cs == chipseq_project
-                      option(value=cs, selected)=cs
-                    - else
-                      option(value=cs)=cs
-              td
-                <button type="button" onclick='edit_metadata()'>Edit Metadata</button>
-            tr
-              td
-                label(for='collection', id='collection_label') Collection:
-              td
-                - if collection_list
-                  - var col = collection_list.items()
-                  select(name='collection',id='collection', onchange='update_view()')
-                    - for x,y in col
-                      - if x == collection
-                        option(value=x, selected)=y
-                      - else
-                        option(value=x)=y
-              td
-            tr
-              td
-                label(for='groupby', id='groupby_label') Group By:
-              td(colspan="2")
-                select(name='groupby', id='groupby')
-                  option(value='')=''
-
-              
-          
-        div(align="left")
-          label(for='chromosome') Chromosome:
-            if chromosome
-              input(id='chromosome',size = '6', type='text', name='chromosome', value = chromosome)
-            else
-              input(id='chromosome',size = '6', type='text', value='',placeholder='1,2,...X,Y', name='chromosome')
-          label(for='start') Start:
-            if start
-              input(id='start',size = '8', type='text', value=start,name='start')
-            else 
-              input(id='start',size = '8', type='text', value='',name='start')
-          label(for='end') End:
-            if end
-              input(id='end', size = '8', type='text', value=end, name='end')
-            else
-              input(id='end', size = '8', type='text', value='', name='end')
-          input(type='submit',value='Query / Refresh')
+    
       #zoompan
         #selection_element
           input(type='button',value = '<<<', title="Pan left 60%", name='MoreLeft', onClick="window.open(newURL('MoreLeft'),'_self');", class = "medbutton")
@@ -129,55 +43,155 @@ body
         #selection_element
           input(type="text", placeholder="gene name or probe id", title="jump to gene", name="genename", onkeypress="if (event.keyCode == 13) return false;")
           input(type="button", value="Go To Gene", title="jump to gene", id="gotogene", name="gotogene", onClick="window.open(newURL(genename.value),'_self');")
-      #option_elements
-        if organism == 'human' or organism == 'humanGEO'
-          #selection_element
-            label(for='cpg') CpG Islands:
+      
+    #left
+       |!{plot}
+    #right
+      div(align="center")
+        input(type="button", onclick='download_svg()', value='Download SVG')
+      br
+      form(name="main", id="main", action='/dbaccess/query_form/', method='post')
+        
+        input(type="hidden", id="width", name="width", value = "")
+        input(type="hidden", id="height", name="height", value = "")
+        input(type="hidden", id="methylation_avail", name="methylation_avail", value=methylation_list)
+        input(type="hidden", id="chipseq_avail", name="chipseq_avail", value=chipseq_list)
+        input(type="hidden", id="sample_index", name="sample_index", value = request.session['sample_index'])
+        input(type="hidden", id="types_index", name="types_index", value = request.session['types_index'])
+        input(type="hidden", id="organism_inuse", name="organism_inuse", value=organism)
+        input(type="hidden", id="methylation_selected", name="methylation_selected", value=methylation_project)
+        input(type="hidden", id="chipseq_selected", name="chipseq_selected", value=chipseq_project)
+        input(type="hidden", id="groupby_selected", name="groupby_selected", value=groupby_selected)
+        input(type="hidden", id="groupby_avail", name="groupby_avail", value=groupby)
+        input(type="hidden", id="sv", name="sv", value=plot, disabled="disabled")
+        fieldset
+          div(align="center")
+            input(type='submit',value='Query / Refresh')
+          h3 Navigation
+          hr
+          table
+            tr
+              td
+                label(for='organism') Organism:
+              td
+                select(name='organism', id='organism', onchange='update_data_by_org()', style='max-width:95px;')
+                  - each org in organism_list
+                    - if org == organism
+                      option(value=org, selected)=org
+                    - else 
+                      option(value=org)=org
+            tr
+              td
+                label(for='collection', id='collection_label') Collection:
+              td
+                - if collection_list
+                  - var col = collection_list.items()
+                  select(name='collection',id='collection', onchange='update_view()', style='max-width:95px;')
+                    - for x,y in col
+                      - if x == collection
+                        option(value=x, selected)=y
+                      - else
+                        option(value=x)=y
+            tr(class='groupby_group')
+              td(class='groupby_group')
+                label(for='groupby', class='groupby_group') Group By:
+              td(class='groupby_group')
+                select(name='groupby', id='groupby', class='groupby_group', style='max-width:95px;')
+                  option(value='')=''
+          label(for='methylation', class='methylation_group') Methylation Set:
+          br(class='methylation_group')
+          select(name='methylation', id='methylation', class='methylation_group', multiple="multiple", style='max-width:170px; margin-left:10px; margin-right: 0', onchange="update_groupby()")
+            - var mo = methylation_list[organism]
+            - each mt in mo
+              - if mt == methylation_project
+                option(value=mt, selected)=mt
+              - else 
+                option(value=mt)=mt
+          br(class='chipseq_group')
+          label(for='chipseq', class='chipseq_group') Chip-Seq:
+          br(class='chipseq_group')
+          select(name='chipseq', id='chipseq', class='chipseq_group', style='max-width:175px;  margin-left:10px; margin-right: 0;', multiple)
+            - var cso = chipseq_list[organism]
+            - each cs in cso
+              - if cs == chipseq_project
+                option(value=cs, selected)=cs
+              - else
+                option(value=cs)=cs
+          br(class='methylation_group')
+          input(type='button', class='methylation_group', type="button", onclick='edit_metadata()', style='margin-left:10px;', value="Edit Metadata")
+          table
+            tr
+              td
+                label(for='chromosome') Chr:
+              td
+                if chromosome
+                  input(id='chromosome',size = '6', type='text', name='chromosome', value = chromosome)
+                else
+                  input(id='chromosome',size = '6', type='text', value='',placeholder='1,2,...X,Y', name='chromosome')
+            tr
+              td
+                label(for='start') Start:
+              td
+                if start
+                  input(id='start',size = '8', type='text', value=start,name='start')
+                else 
+                  input(id='start',size = '8', type='text', value='',name='start')
+            tr
+              td
+                label(for='end') End:
+              td
+                if end
+                  input(id='end', size = '8', type='text', value=end, name='end')
+                else
+                  input(id='end', size = '8', type='text', value='', name='end')
+          h3 Options
+          hr
+          if organism == 'human' or organism == 'humanGEO'
+            p(class="tight")
+              label(for='cpg') CpG Islands:
               if cpg
                 input(id='cpg', size = '8', type='checkbox', name="cpg", checked)
               else
                 input(id='cpg', size = '8', type='checkbox', name="cpg")
-        if collection = 'chipseq' or collection = 'methchip'
-          label(for='minheight') Minimum peak height:
-            if minheight
-              input(id='minheight',size = '4', type='text', name='minheight', value = minheight)
-            else
-              input(id='minheight',size = '4', type='text', value='0', name='minheight')
-          label(for='minsigma') Minimum peak sigma:
-            if minsigma
-              input(id='minsigma',size = '4', type='text', name='minsigma', value = minsigma)
-            else
-              input(id='minsigma',size = '4', type='text', value='0', name='minsigma')
-        else
-          input(type="hidden", id="minheight", name="minheight", value = '0')
-          input(type="hidden", id="minsigma", name="minsigma", value = '0')
-        if collection = 'methylation' or collection = "methchip"
-          #selection_element
-            label(for='datapoints') Show data points:
+          if collection = 'chipseq' or collection = 'methchip'
+            p(class="tight")
+              label(for='minheight') Minimum peak height:
+              if minheight
+                input(id='minheight',size = '4', type='text', name='minheight', value = minheight)
+              else
+                input(id='minheight',size = '4', type='text', value='0', name='minheight')
+            p(class="tight")
+              label(for='minsigma') Minimum peak sigma:
+              if minsigma
+                input(id='minsigma',size = '4', type='text', name='minsigma', value = minsigma)
+              else
+                input(id='minsigma',size = '4', type='text', value='0', name='minsigma')
+          else
+            input(type="hidden", id="minheight", name="minheight", value = '0')
+            input(type="hidden", id="minsigma", name="minsigma", value = '0')
+          if collection = 'methylation' or collection = "methchip"
+            p(class="tight")
+              label(for='datapoints') Show data points:
               if datapoints
                 input(id='datapoints', size = '8', type='checkbox', name="datapoints", checked)
               else
                 input(id='datapoints', size = '8', type='checkbox', name="datapoints")
-          #selection_element
-            label(for='show_dist') Show sample type distribution:
+            p(class="tight")
+              label(for='show_dist') Show sample type distribution:
               if show_dist
                 input(id='show_dist', size = '8', type='checkbox', name="show_dist", checked)
               else
                 input(id='show_dist', size = '8', type='checkbox', name="show_dist")
-                
-          #selection_element
-            label(for='show_genes') Show Genes:
+            p(class="tight")
+              label(for='show_genes') Show Genes:
               if show_genes
                 input(id='show_genes', size = '8', type='checkbox', name="show_genes", checked)
               else
                 input(id='show_genes', size = '8', type='checkbox', name="show_genes")
-    #left
-       |!{plot}
-    #right
-      input(type="button", onclick='download_svg()', value='Download SVG')
+        
+      
       h3 Index
       hr
-      
       - var ti = request.session['types_index']
       - var sg = request.session['show_groups']
       - if ti.items
@@ -198,8 +212,8 @@ body
         | No Data Found   
       h3 Legend
       hr
-      p blue line -> SNP in Probe
-      p red line -> SNP in CpG
+      p(class="tight") blue line -> SNP in Probe
+      p(class="tight") red line -> SNP in CpG
       
 
     
@@ -336,30 +350,49 @@ script(type='text/javascript')
 
     function update_view(){
       var e = document.getElementById("collection");
-
+      var f = '';
       if (e.value == "methchip") {
-        document.getElementById("methylation").style.display='';
-        document.getElementById("chipseq").style.display='';
-        document.getElementById("methylation_label").style.display='';
-        document.getElementById("chipseq_label").style.display='';
-        document.getElementById("groupby").style.display='';
-        document.getElementById("groupby_label").style.display='';
+        f = document.getElementsByClassName("methylation_group");
+        for (var i = 0; i < f.length; i++) {
+          f[i].style.display='';
+        }
+        f = document.getElementsByClassName("chipseq_group");
+        for (var i = 0; i < f.length; i++) {
+          f[i].style.display='';
+        }
+        f = document.getElementsByClassName("groupby_group");
+        for (var i = 0; i < f.length; i++) {
+          f[i].style.display='';
+        }
       }
       if (e.value == "methylation") {
-        document.getElementById("methylation").style.display='';
-        document.getElementById("methylation_label").style.display='';
-        document.getElementById("groupby").style.display='';
-        document.getElementById("groupby_label").style.display='';
-        document.getElementById("chipseq").style.display='none';
-        document.getElementById("chipseq_label").style.display='none';
+        f = document.getElementsByClassName("methylation_group");
+        for (var i = 0; i < f.length; i++) {
+          f[i].style.display='';
+        }
+        f = document.getElementsByClassName("chipseq_group");
+        for (var i = 0; i < f.length; i++) {
+          f[i].style.display='none';
+        }
+        f = document.getElementsByClassName("groupby_group");
+        for (var i = 0; i < f.length; i++) {
+          f[i].style.display='';
+        }
+
       }
       if (e.value == "chipseq") {
-        document.getElementById("methylation").style.display='none';
-        document.getElementById("methylation_label").style.display='none';
-        document.getElementById("groupby").style.display='none';
-        document.getElementById("groupby_label").style.display='none';
-        document.getElementById("chipseq").style.display='';
-        document.getElementById("chipseq_label").style.display='';
+        f = document.getElementsByClassName("groupby_group");
+        for (var i = 0; i < f.length; i++) {
+          f[i].style.display='none';
+        }
+        f = document.getElementsByClassName("methylation_group");
+        for (var i = 0; i < f.length; i++) {
+          f[i].style.display='none';
+        }
+        f = document.getElementsByClassName("chipseq_group");
+        for (var i = 0; i < f.length; i++) {
+          f[i].style.display='';
+        }
       }
     update_data_by_org();
     }

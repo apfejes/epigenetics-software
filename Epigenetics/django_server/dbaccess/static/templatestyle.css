@@ -26,6 +26,7 @@ h2 {
 }
 h3 { 
   font-size: 14px; 
+  margin: 3px 0 2px 0;
 }
 
 p.content {
@@ -95,7 +96,6 @@ a.white {
   margin-left:2px;
   margin-top:10px;
   margin-right:0px;
-  height:100%;
 }
 
 #navigation {
@@ -140,6 +140,10 @@ a.white {
   display:inline-block;
 }
 
+#center {
+  text-align:center;
+}
+
 #footer { 
   margin-top:10px;
   margin-left:2px;
@@ -174,20 +178,29 @@ tr td {
 }
 
 input[type="submit"]:hover{
-    border:1px inset #999;
+    /*border:1px inset #999;*/
     color:#000000;
     /*font-weight:bold;*/
 }
 
+input[type="checkbox"]{
+    margin: 0 0 0 0;
+}
+
 #right {
-	font-size: 0.9em;
+	font-size: 0.8em;
 	display: inline-block;
 	float: right;
-	width: 150px;
+	width: 200px;
 	margin: 0 10px;
 }
 
-#left {
+.tight {
+    font-size: 1em;
+	margin:0 0 0.2em 0;
+}
+
+#left { 
 	float: left;
 	display: inline-block;
 	padding: 0 0px 0 0;
@@ -203,15 +216,11 @@ input[type="submit"]:hover{
 }
 
 fieldset{
-    font-size:12px;
+    font-size:10px;
 }
 
 select {
     font-size:12px;
-}
-
-label {
-    font-size:12px}
 }
 
 button {
@@ -221,5 +230,10 @@ button {
 input {
     font-size:11px;
     /* padding: 0 0 0 0;*/
+}
+
+
+hr {
+  margin: 0 0 0 0;
 }
 
