@@ -332,7 +332,6 @@ def view_query_form(request):
         parameters['end'] = parameters['start'] + 10
 
     genes = []
-    print "show genes = ", parameters['show_genes']
     if parameters['show_genes']:
         genes = m.find_genes(str(parameters['chromosome']), parameters['start'], parameters['end'])
 
