@@ -146,9 +146,6 @@ def process_query_request(request):
     if request.method == 'GET':
         q = request.GET
         f = q.get("filters", [])
-
-        print " f = ", f
-
         if "," in f:
             print "splitting"
             f = f.split(",")
@@ -164,6 +161,7 @@ def process_query_request(request):
         for key in q:    # process fields with variable names
             if key.startswith("filter_"):
                 p['show_groups'].append(key.replace("filter_", "").encode('utf-8'))
+
     p['organism'] = str(q.get("organism", "human"))
     p['collection'] = q.get("collection", "methylation")
     p['chipseq_project'] = []
@@ -184,9 +182,8 @@ def process_query_request(request):
     p['minsigma'] = q.get("minsigma", None)
     p['cpg'] = to_boolean(q.get("cpg", False))
     p['show_dist'] = to_boolean(q.get("show_dist", False))
-    p['show_genes'] = to_boolean(q.get("show_genes", True))
-    p['datapoints'] = to_boolean(q.get("datapoints", True))
-
+    p['show_genes'] = to_boolean(q.get("show_genes", False))
+    p['datapoints'] = to_boolean(q.get("datapoints", False))
     try:
         p['sample_index'] = request.session['sample_index']
         p['types_index'] = request.session['types_index']
@@ -214,6 +211,10 @@ def process_query_request(request):
     p['action_factor'] = q.get("action", None)    # don't need to save the "action factor" parameter, but need to check if it's a gene.
 
     p['genename'] = q.get("genename", None)
+
+    if not q.get("organism", None):    # set some defaults:
+        p['show_genes'] = True
+        p['datapoints'] = True
 
 
     return p
@@ -315,13 +316,13 @@ def view_query_form(request):
             parameters['start'] = coords['start']
             parameters['end'] = coords['end']
         else:
-            annotation = m.find_coords_by_probeid(action_factor)
+            annotation = m.find_coords_by_probeid(parameters['genename'])
             if annotation:
                 parameters['chromosome'] = annotation['chr']
                 parameters['start'] = annotation['mapinfo'] - 100
                 parameters['end'] = annotation['mapinfo'] + 100
             else:
-                return HttpResponse('Could not find Gene: ' + action_factor)
+                return HttpResponse('Could not find Gene: ' + parameters['genename'])
 
     if parameters['chromosome'] == "":
         print "no chromosome specified - setting to chr1"
@@ -331,6 +332,7 @@ def view_query_form(request):
         parameters['end'] = parameters['start'] + 10
 
     genes = []
+    print "show genes = ", parameters['show_genes']
     if parameters['show_genes']:
         genes = m.find_genes(str(parameters['chromosome']), parameters['start'], parameters['end'])
 

@@ -144,7 +144,7 @@ body
               td 
                 label(for="gene") Jump to:
               td
-                input(type="text", placeholder="gene name or probe id", title="jump to gene", name="genename")
+                input(type="text", size = '18', placeholder="gene name or probe id", title="jump to gene", name="genename")
             
             
           h3 Options
@@ -193,26 +193,26 @@ body
                 input(id='show_genes', size = '8', type='checkbox', name="show_genes")
         
       
-      h3 Index
-      hr
-      - var ti = request.session['types_index']
-      - var sg = request.session['show_groups']
-      - if ti.items
-        table
-          - var samples = ti.keys()
-          - each s in samples
-            tr 
-              td
-                font(color=ti.get(s))
-                  !{s}
-              td 
-                if collection = 'methylation' or collection = "methchip"
-                  if s in sg 
-                    input(class="check_small", type='checkbox', form="main", name="filter_" + s, checked)
-                  else
-                    input(class="check_small", type='checkbox', form="main", name="filter_" + s)    
-      - else 
-        | No Data Found   
+          h3 Index
+          hr
+          - var ti = request.session['types_index']
+          - var sg = request.session['show_groups']
+          - if ti.items
+            table
+              - var samples = ti.keys()
+              - each s in samples
+                tr 
+                  td
+                    font(color=ti.get(s))
+                      !{s}
+                  td 
+                    if collection = 'methylation' or collection = "methchip"
+                      if s in sg 
+                        input(class="check_small", type='checkbox', form="main", name="filter_" + s, checked)
+                      else
+                        input(class="check_small", type='checkbox', form="main", name="filter_" + s)    
+          - else     
+            | No Data Found   
       h3 Legend
       hr
       p(class="tight") blue line -> SNP in Probe
