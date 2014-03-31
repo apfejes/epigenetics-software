@@ -434,6 +434,11 @@ script(type='text/javascript')
       if (e) {
         var show_dist = e.checked;
       }
+      var e = document.getElementById("show_genes");
+      if (e) {
+        var show_genes = e.checked;
+      }
+
       
       var e = document.getElementsByClassName("check_small");
       var filters = new Array();
@@ -467,6 +472,9 @@ script(type='text/javascript')
       }
       if (show_dist) {
         base += "&show_dist=" + show_dist
+      }
+      if (show_genes) {
+        base += "&show_genes=" + show_genes
       }
       base += "&width=" + window.innerWidth
       base += "&height=" + window.innerHeight
