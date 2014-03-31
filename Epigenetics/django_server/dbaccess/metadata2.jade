@@ -6,6 +6,16 @@ block title
 block content
   #padding-div 
     h2 MetaData: Manage meta data and "group-by" fields.
+    ul
+      li(style="margin-bottom:8px;") This form allows you to set the properties of a project for the browser window.
+      li(style="margin-bottom:8px;") "Compound group by" allows you to group by multiple properties simultaneously,
+        | for a single project.  For instance, you can subdivide your data into 
+        | sets based on fields such as "healthy/disease" and "control/treatment" 
+        | at the same time, giving you all four permutations available. 
+      li(style="margin-bottom:8px;") Exporting meta data will create a TSV file for the entire project
+      li(style="margin-bottom:8px;") The values below are shown for a single sample in the project, however, 
+        | selecting "group by" for a field will add it to the "group by" drop down 
+        | box in the browser windows for all samples in the dataset.
     input(type="button", value="Manage Compound Group by", onClick="window.location.assign('/dbaccess/compound/?organism=' + organism.value + '&project=' + project.value )")
     input(type="button", value="Export Project Metadata", onClick="export_metadata()")
     hr
