@@ -153,12 +153,10 @@ class Plot(object):
         self.scale_y = 1
 
         ht = 0
-        print "bigger_dists:", bigger_dists
         if bigger_dists:
             ht = self.METHYLATION_DISTR_HT_BIG
         else:
             ht = self.METHYLATION_DISTR_HT_MED
-        print "setting methylation distribution to ", ht
 
         if message:
             Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),

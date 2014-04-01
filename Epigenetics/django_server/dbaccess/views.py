@@ -185,7 +185,6 @@ def process_query_request(request):
     p['show_genes'] = to_boolean(q.get("show_genes", False))
     p['datapoints'] = to_boolean(q.get("datapoints", False))
     p['bigger_dists'] = to_boolean(q.get("bigdist", False))
-    print "p['bigger_dists'] =", p['bigger_dists']
     try:
         p['sample_index'] = request.session['sample_index']
         p['types_index'] = request.session['types_index']
