@@ -20,7 +20,8 @@ class Plot(object):
     '''
 
     METHYLATION_DOT_RADIUS = 2
-    METHYLATION_DISTR_HT = 12.0
+    METHYLATION_DISTR_HT_MED = 12.0
+    METHYLATION_DISTR_HT_BIG = 24.0
     DISTR_SHIFT = 0
     DISTR_STROKE = 0.75
     BOTTOM_MARGIN = 120    # 120 pixels
@@ -147,9 +148,17 @@ class Plot(object):
         self.elements.append(Rect(insert = (self.width - 239, 0), size = (self.RIGHT_MARGIN, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
         self.palette.purge_unused()
 
-    def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks, show_groups, probes_by_pos, probe_details):
+    def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks, show_groups, probes_by_pos, probe_details, bigger_dists):
         '''convert this information into elements of the svg image'''
         self.scale_y = 1
+
+        ht = 0
+        print "bigger_dists:", bigger_dists
+        if bigger_dists:
+            ht = self.METHYLATION_DISTR_HT_BIG
+        else:
+            ht = self.METHYLATION_DISTR_HT_MED
+        print "setting methylation distribution to ", ht
 
         if message:
             Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
@@ -187,8 +196,10 @@ class Plot(object):
                         m = round((1 - m) * self.dimension_y, 2) + self.MARGIN
                         s = round(s * self.dimension_y, 3)
 
+
+
                         if s != 0.0:
-                            d = self.make_gausian(position, self.METHYLATION_DISTR_HT, s, False, m)
+                            d = self.make_gausian(position, ht, s, False, m)
                             gaussian = (Path(stroke = type_color,
                                              stroke_width = self.DISTR_STROKE,
                                              stroke_linecap = 'round',

@@ -43,6 +43,7 @@ class Svg_Builder():
             show_dist = False,
             show_genes = True,    # whether to show the genes on the bottom of the illustration.
             show_groups = None,    # If you want to show only a subset of available groups, give the list here.
+            bigger_dists = False,
             genes = None):
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an SVG string for webserver rendering
@@ -62,7 +63,7 @@ class Svg_Builder():
 
         if self.methylation:
             self.drawing.build_methylation(self.error_message, self.pos_betas_dict, self.sample_peaks,
-                                           show_points, show_dist, show_groups, self.probes_by_pos, self.probe_details)
+                                           show_points, show_dist, show_groups, self.probes_by_pos, self.probe_details, bigger_dists)
             self.drawing.add_ytics_methylation()
 
         if genes and show_genes:

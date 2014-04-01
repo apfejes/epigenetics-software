@@ -191,6 +191,12 @@ body
                 input(id='show_genes', size = '8', type='checkbox', name="show_genes", checked)
               else
                 input(id='show_genes', size = '8', type='checkbox', name="show_genes")
+            p(class="tight")
+              label(for='bigdist') Bigger Distributions:
+              if bigdist
+                input(id='bigdist', size = '8', type='checkbox', name="bigdist", checked)
+              else
+                input(id='bigdist', size = '8', type='checkbox', name="bigdist")
         
       
           h3 Index
@@ -438,7 +444,11 @@ script(type='text/javascript')
       if (e) {
         var show_genes = e.checked;
       }
-
+      var e = document.getElementById("bigdist");
+      if (e) {
+        var bigdist = e.checked;
+      }
+      alert(bigdist)
       
       var e = document.getElementsByClassName("check_small");
       var filters = new Array();
@@ -475,6 +485,9 @@ script(type='text/javascript')
       }
       if (show_genes) {
         base += "&show_genes=" + show_genes
+      }
+      if (bigdist) {
+        base += "&bigdist=" + bigdist
       }
       base += "&width=" + window.innerWidth
       base += "&height=" + window.innerHeight

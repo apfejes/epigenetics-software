@@ -184,6 +184,8 @@ def process_query_request(request):
     p['show_dist'] = to_boolean(q.get("show_dist", False))
     p['show_genes'] = to_boolean(q.get("show_genes", False))
     p['datapoints'] = to_boolean(q.get("datapoints", False))
+    p['bigger_dists'] = to_boolean(q.get("bigdist", False))
+    print "p['bigger_dists'] =", p['bigger_dists']
     try:
         p['sample_index'] = request.session['sample_index']
         p['types_index'] = request.session['types_index']
@@ -357,6 +359,7 @@ def view_query_form(request):
                            types_index = parameters['types_index'],
                            sample_index = parameters['sample_index'],
                            show_groups = parameters['show_groups'],
+                           bigger_dists = parameters['bigger_dists'],
                            genes = genes)
 
 
@@ -395,6 +398,7 @@ def view_query_form(request):
                             show_genes = parameters['show_genes'],
                             types_index = parameters['types_index'],
                             show_groups = parameters['show_groups'],
+                            bigger_dists = parameters['bigger_dists'],
                             genes = genes)
 
     for key in reversed(parameters['show_groups']):    # must traverse backwards, otherwise removing keys causes elements to be skipped.
@@ -428,6 +432,7 @@ def view_query_form(request):
                                                'height':parameters['height'],
                                                'groupby':groupby_list,
                                                'groupby_selected':parameters['groupby_selected'],
+                                               'bigdist':parameters['bigger_dists'],
                                                'genes':genes}
                   )
 
