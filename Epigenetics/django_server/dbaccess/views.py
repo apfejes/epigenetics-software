@@ -302,7 +302,7 @@ def view_query_form(request):
     # print("creating Mongo Wrapper on Database")
 
     m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks)
-    svg = '<br><br><br><br><center><h2>Please select parameters above to query the database and generate an image!</h2></center>'
+    svg = '<br><br><br><br><center><h2>Please select parameters from the options on the right to query the database and generate an image!</h2></center>'
 
     action_factor = parameters.pop("action_factor")    # don't want to leave it in parameters.
     if action_factor in ZOOM_FACTORS:
