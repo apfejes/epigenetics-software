@@ -32,6 +32,8 @@ def lower_Qtest(numbers, Qvalue):
     l = len(numbers)
     if l < 3:
         return False, None
+    if numbers[l - 1] - numbers[0] == 0:
+        return False, None
     test1 = (numbers[1] - numbers[0]) / (numbers[l - 1] - numbers[0])
     if l > 10:
         l = 10
@@ -43,6 +45,8 @@ def upper_Qtest(numbers, Qvalue):
     numbers.sort()
     l = len(numbers)
     if l < 3:
+        return False, None
+    if numbers[l - 1] - numbers[0] == 0:
         return False, None
     test2 = (numbers[l - 1] - numbers[l - 2]) / (numbers[l - 1] - numbers[0])
     if l > 10:
