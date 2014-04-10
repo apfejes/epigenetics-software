@@ -64,7 +64,7 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name, reuse_samples):
     columns = []
     for i, j in enumerate(col_names):
         if (j.find(".")):
-            j = j.replace(".", "_")
+            j = j.replace(".", "-")
         j = j.strip().lower()
         columns.append(j)
 
@@ -110,8 +110,10 @@ def ReadRObject(mongo, rdatafile, proj_name, collection_name, reuse_samples):
             samples[f]["sampleid"] = str(samples[f][sample_field])
 
     for i in range(0, len(samples)):
-        if samples[i]['sampleid'].find(".") != -1:
-            samples[i]['sampleid'] = samples[i]['sampleid'].replace(".", "_")
+        if isinstance(samples[i]['sampleid'], (int, long)):
+            samples[i]['sampleid'] = str(samples[i]['sampleid'])
+        elif samples[i]['sampleid'].find(".") != -1:
+            samples[i]['sampleid'] = samples[i]['sampleid'].replace(".", "-")
 
 
     sample_names = []
