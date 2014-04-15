@@ -41,22 +41,24 @@ collection_list = {'chipseq':'ChIP-Seq', 'methylation':'Methylation', 'methchip'
 
 
 def login_view(request):
+    '''This function processes the results from the login screen.  It uses the django authentication
+    functions to process the login/password, and verify it against the database.'''
 
     try:
-        username = request.POST['username']
+        username = request.POST['username']    # from dialog boxes
         password = request.POST['password']
-        user = User.objects.get(username = username)
+        user = User.objects.get(username = username)    # create a user object
         # user.backend = 'mongoengine.django.auth.MongoEngineBackend'
-        user.backend = 'django.contrib.auth.backends.ModelBackend'
-        authenticate(user = user, password = password)
+        user.backend = 'django.contrib.auth.backends.ModelBackend'    # this backend interacts with the database to interpret passwords
+        authenticate(user = user, password = password)    # this command verifies that the password is correct
         if not user.check_password(password):
             print "LOGIN --->  Incorrect password %s: " % (username)
             return render(request, 'base.jade', {"message":"Incorrect password provided for user %s" % (username)})
-        if user.is_active:
-            login(request, user)
+        if user.is_active:    # users must be active to proceed
+            login(request, user)    # create the login workings.
             request.session.set_expiry(60 * 60 * 1)    # 1 hour timeout
             if request.method == 'POST':
-                if 'next' in request.POST:
+                if 'next' in request.POST:    # this passes in the URL where to go to after a successful login
                     return HttpResponseRedirect(request.POST['next'])
                 else:
                     print "next not found in request.POST", request.POST
@@ -68,12 +70,12 @@ def login_view(request):
                     print "next not found in request.Get", request.GET
                     return render(request, 'base.jade', {"message":"Login successful"})
         else:    # Return a 'disabled account' error message
-            print "LOGIN --->  Account for user %s has been deactivated." % (username)
+            print "LOGIN --->  Account for user %s has been deactivated." % (username)    # account exists, but has been locked.
             return render(request, 'base.jade', {"message":"Account for user %s has been deactivated." % (username)})
-    except DoesNotExist:
+    except DoesNotExist:    # no user.
         print "LOGIN --->  (Error:DoesNotExist) Could not authenticate user name %s: " % (username)
         return render(request, 'base.jade', {"message":"User %s does not exist." % (username)})
-    except Exception as e:
+    except Exception as e:    # any other error
         print "exception", e
         return render(request, 'base.jade', {"message":"Unable to login.  Exception: %s" % (e)})
 
@@ -107,7 +109,7 @@ def view_collections(request):
         collections += item + ', '
     return render(request, 'collections.jade', {'collections':collections})
 
-def send_svg(request):
+def send_svg(request):    # deprecated
     ''' a page used for testing to display a piece of svg code.'''
     from .Annotations import showgene
     return HttpResponse(showgene.svgcode())
@@ -224,8 +226,8 @@ def process_query_request(request):
 @login_required
 def view_query_form(request):
     ''' Instructions for parsing the query_form, and getting the names of the 
-        information required to re-populate the drop down boxes and menus '''
-
+        information required to re-populate the drop down boxes and menus 
+        Tag @login_required indicates that the security should be verified before proceeding.'''
 
     parameters = process_query_request(request)
 
@@ -242,6 +244,7 @@ def view_query_form(request):
     if parameters['minsigma'] is None:
         parameters['minsigma'] = 0
 
+    # each database must be named XXXX_epigenetics, where XXXX is the name of the organism.
     organism_list = [str(x).replace("_epigenetics", "") for x in mongo.database_names() if x.endswith("_epigenetics")]
 
     methylation_list = {}
@@ -274,7 +277,7 @@ def view_query_form(request):
             byproj[x['project'].encode('utf-8')] = {'default':x['default'].encode('utf-8'), 'available':a}
         groupby_list[o] = byproj
 
-    methylation, peaks = process_collection(parameters['collection'])
+    methylation, peaks = process_collection(parameters['collection'])    # check whether to include methylation or chip-seq or both.
 
     if not methylation:
         parameters['methylation_project'] = None
@@ -297,7 +300,6 @@ def view_query_form(request):
             parameters['groupby_selected'] = groupby_list[parameters['organism']][parameters['methylation_project'][0]]['default']
         else:
             parameters['groupby_selected'] = parameters['groupby_selected'].encode('utf-8')
-
 
     database = parameters['organism'] + "_epigenetics"
     # print("creating Mongo Wrapper on Database")
@@ -333,14 +335,14 @@ def view_query_form(request):
         parameters['end'] = parameters['start'] + 10
 
     genes = []
-    if parameters['show_genes']:
+    if parameters['show_genes']:    # this gets the information for showing genes on the SVG illustration.
         genes = m.find_genes(str(parameters['chromosome']), parameters['start'], parameters['end'])
 
     sample_index = {}
     types_index = {}
 
     if check(parameters):
-        if methylation and not peaks:
+        if methylation and not peaks:    # if only showing methylation
             docs = m.query(parameters)
             if parameters['cpg']:
                 m.getannotations(docs)
@@ -362,7 +364,7 @@ def view_query_form(request):
                            genes = genes)
 
 
-        elif peaks and not methylation:
+        elif peaks and not methylation:    # if only showing chipseq
             docs = m.query(parameters)
             if parameters['cpg']:
                 m.getannotations(docs)
@@ -379,7 +381,7 @@ def view_query_form(request):
                             sample_index = parameters['sample_index'],
                             genes = genes)
 
-        elif methylation and peaks:
+        elif methylation and peaks:    # if showing both
             docs = m.query(parameters)
             if parameters['cpg']:
                 m.getannotations(docs)
@@ -404,12 +406,12 @@ def view_query_form(request):
         if key not in types_index:
             parameters['show_groups'].remove(key)
 
-    request.session['show_groups'] = sorted(parameters['show_groups'])
+    request.session['show_groups'] = sorted(parameters['show_groups'])    # session information is cookies.
     request.session['types_index'] = types_index
     request.session['sample_index'] = sample_index
 
 
-    return render(request, 'query_form.jade', {'organism_list':organism_list,
+    return render(request, 'query_form.jade', {'organism_list':organism_list,    # create the web page
                                                'methylation_list':methylation_list,
                                                'collection_list':collection_list,
                                                'chipseq_list':chipseq_list,
@@ -437,6 +439,7 @@ def view_query_form(request):
 
 @login_required
 def view_metadata(request):
+    '''create a web page that allows you to pick a collection to modify.'''
     organism_list = [str(x).replace("_epigenetics", "") for x in mongo.database_names() if x.endswith("_epigenetics") ]
     methylation_list = {}
     chipseq_list = {}
@@ -455,6 +458,7 @@ def view_metadata(request):
                                              'chipseq_list':chipseq_list})
 @login_required
 def view_metadata2(request):
+    '''edit the meta data for a given project'''
     q = None
     if request.method == 'GET':
         q = request.GET
@@ -525,6 +529,8 @@ def view_metadata3(request):
 
 @login_required
 def compound(request):
+    ''''Generates the page for creating compound "group by" keys.'''
+
     q = None
     if request.method == 'GET':
         q = request.GET

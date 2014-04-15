@@ -1,1 +1,0 @@
-'''Annotations module for django server'''
