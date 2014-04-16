@@ -1,4 +1,8 @@
 '''
+
+This unit of code funtions to generate the SVG image that is used by the browser,
+incorporating methylation and/or chip-seq.
+
 Created on 2013-06-10
 
 @author: sperez, sbrown, afejes
@@ -144,8 +148,8 @@ class Plot(object):
                                     (''.join(s for s in sample_id if s in string.printable))))
 
         # fix to truncate curves at border (to hide them)
-        self.elements.append(Rect(insert = (-1, 0), size = (self.MARGIN + 1, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
-        self.elements.append(Rect(insert = (self.width - 239, 0), size = (self.RIGHT_MARGIN, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
+        self.elements.append(Rect(insert = (0, self.BOTTOM_MARGIN), size = (self.MARGIN + 1, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
+        self.elements.append(Rect(insert = (self.width - self.RIGHT_MARGIN, 0), size = (self.RIGHT_MARGIN, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
         self.palette.purge_unused()
 
     def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks, show_groups, probes_by_pos, probe_details, bigger_dists):
