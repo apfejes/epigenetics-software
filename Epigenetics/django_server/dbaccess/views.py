@@ -109,18 +109,12 @@ def view_collections(request):
         collections += item + ', '
     return render(request, 'collections.jade', {'collections':collections})
 
-def send_svg(request):    # deprecated
-    ''' a page used for testing to display a piece of svg code.'''
-    from .Annotations import showgene
-    return HttpResponse(showgene.svgcode())
-
 def to_boolean(value):
     '''test is value is true or false'''
     if value == 'on' or value == 'true' or value == True :
         return True
     else:
         return False
-
 
 def process_collection(col):
     '''handle collection variable'''
