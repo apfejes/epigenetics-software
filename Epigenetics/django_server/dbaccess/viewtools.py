@@ -23,9 +23,9 @@ def zoom(zoom_symbol, start, end):
     # Adjusts start and end value for new query
     # ex: zoomfactor = 0.1, start = 200, end = 300
     span = (end - start)    # span of 100bp
-    if span < MINIMUM_RESOLUTION:
-        return (start, end)
     zoom_factor = ZOOM_FACTORS[zoom_symbol]
+    if span < MINIMUM_RESOLUTION and zoom_factor < 1:
+        return (start, start + MINIMUM_RESOLUTION)
     new_span = span * zoom_factor    # span is now 10bp
     new_start = start + span / 2 - new_span / 2    # start is now 245
     new_end = end - span / 2 + new_span / 2    # end is now 255bp
