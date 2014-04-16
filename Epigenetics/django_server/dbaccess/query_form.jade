@@ -96,7 +96,7 @@ body
                   option(value='')=''
           label(for='methylation', class='methylation_group') Methylation Set:
           br(class='methylation_group')
-          select(name='methylation', id='methylation', class='methylation_group', multiple="multiple", style='max-width:170px; margin-left:10px; margin-right: 0', onchange="update_groupby()")
+          select(name='methylation', id='methylation', class='methylation_group', multiple="multiple", style='max-width:225px; margin-left:10px; margin-right: 0', onchange="update_groupby()")
             - var mo = methylation_list[organism]
             - each mt in mo
               - if mt == methylation_project
@@ -106,7 +106,7 @@ body
           br(class='chipseq_group')
           label(for='chipseq', class='chipseq_group') Chip-Seq:
           br(class='chipseq_group')
-          select(name='chipseq', id='chipseq', class='chipseq_group', style='max-width:175px;  margin-left:10px; margin-right: 0;', multiple)
+          select(name='chipseq', id='chipseq', class='chipseq_group', style='max-width:225px;  margin-left:10px; margin-right: 0;', multiple)
             - var cso = chipseq_list[organism]
             - each cs in cso
               - if cs == chipseq_project
