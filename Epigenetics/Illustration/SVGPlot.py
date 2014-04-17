@@ -126,24 +126,22 @@ class Plot(object):
 
 
     def filter_waves(self, waves):
-
-        print "len(waves) = ", len(waves)
         i = 0
         while i < len(waves) - 1:
-            if i > 0:
+            if i > 0:    # check if wave is smaller than the last and should be removed
                 a_pos, a_ht, a_sd = waves[i - 1]
                 b_pos, b_ht, _b_sd = waves[i]
                 if b_ht < a_ht and b_pos < a_pos + 3 * a_sd:
                     waves.pop(i)
                     continue
-            if i < len(waves) - 2:
+            if i < len(waves) - 2:    # check if wave is smaller than the next and should be removed
                 a_pos, a_ht, _a_sd = waves[i]
                 b_pos, b_ht, b_sd = waves[i + 1]
                 if a_ht < b_ht and a_pos < b_pos - 3 * b_sd:
                     waves.pop(i)
                     continue
             i += 1
-                # check if wave is larger than the last and should be removed
+
         return waves
 
 
@@ -193,11 +191,9 @@ class Plot(object):
                 d += " " + str(X[i] - round((X[i] - X[i - 1]) / 4, 2)) + "," + str(Y[i])    # control point 2
                 d += " " + str(X[i]) + "," + str(Y[i])    # actual coordinate
         last = len(X) - 1
-        if (X[last] + (S[last]) < self.dimension_x):
-            d += " " + str(X[last] + (S[last])) + "," + str(Y[last])    # control point 1
-            d += " " + str(X[last] + (S[last])) + "," + self.y_bottom    # control point 2
-            d += " " + str(X[last] + (2 * S[last])) + "," + self.y_bottom    # actual coordinate
-            print "last point added"
+        d += " " + str(X[last] + (S[last])) + "," + str(Y[last])    # control point 1
+        d += " " + str(X[last] + (S[last])) + "," + self.y_bottom    # control point 2
+        d += " " + str(X[last] + (2 * S[last])) + "," + self.y_bottom    # actual coordinate
 
         return d
 
