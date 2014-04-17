@@ -225,7 +225,7 @@ class Plot(object):
                 w = samples[sampleid]
                 d = self.make_trace(w)
                 types_color, _new = self.palette.colour_assignment_group(sampleid)
-                self.elements.append(Path(stroke = types_color, stroke_width = 1,
+                self.elements.append(Path(stroke = types_color, stroke_width = 2,
                        stroke_linecap = 'round', stroke_opacity = 0.8, d = d, fill = 'none',
                        onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" %
                                     (''.join(s for s in sampleid if s in string.printable))))
