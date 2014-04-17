@@ -176,6 +176,7 @@ def process_query_request(request):
     p['chromosome'] = q.get("chromosome", None)
     p['minheight'] = q.get("minheight", None)
     p['minsigma'] = q.get("minsigma", None)
+    p['trace'] = to_boolean(q.get("trace", False))
     p['cpg'] = to_boolean(q.get("cpg", False))
     p['show_dist'] = to_boolean(q.get("show_dist", False))
     p['show_genes'] = to_boolean(q.get("show_genes", False))
@@ -374,6 +375,7 @@ def view_query_form(request):
                             get_cpg = parameters['cpg'],
                             types_index = parameters['types_index'],
                             sample_index = parameters['sample_index'],
+                            trace = parameters['trace'],
                             genes = genes)
 
         elif methylation and peaks:    # if showing both
@@ -395,6 +397,7 @@ def view_query_form(request):
                             types_index = parameters['types_index'],
                             show_groups = parameters['show_groups'],
                             bigger_dists = parameters['bigger_dists'],
+                            trace = parameters['trace'],
                             genes = genes)
 
     for key in reversed(parameters['show_groups']):    # must traverse backwards, otherwise removing keys causes elements to be skipped.
@@ -429,6 +432,7 @@ def view_query_form(request):
                                                'groupby':groupby_list,
                                                'groupby_selected':parameters['groupby_selected'],
                                                'bigdist':parameters['bigger_dists'],
+                                               'trace':parameters['trace'],
                                                'genes':genes}
                   )
 

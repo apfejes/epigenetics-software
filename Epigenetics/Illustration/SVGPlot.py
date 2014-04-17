@@ -53,6 +53,7 @@ class Plot(object):
         self.dimension_y = 0    # this is the size of the y field
         self.dimension_x = 0
         self.scale_x = 0
+        self.y_bottom = 0
 
         self.scale_y = 0
         self.maxh = 0
@@ -74,6 +75,8 @@ class Plot(object):
         self.dimension_y = self.height - self.MARGIN - self.BOTTOM_MARGIN    # this is the size of the y field
         self.dimension_x = self.width - self.MARGIN - self.RIGHT_MARGIN
         self.scale_x = float(self.dimension_x) / (self.end - self.start)    # this is a scaling variable
+        self.y_bottom = str(round(self.dimension_y + self.MARGIN, 2))
+
 
         canvas_size = (str(self.width) + "px" , "100%")    # create drawing # Default is 100%,100% - don't override that, as this allows the svg to fit the data and expand as necessary
         self.plot = Drawing(filename , size = canvas_size)
@@ -122,7 +125,83 @@ class Plot(object):
         return d
 
 
-    def build_chipseq(self, message, waves):
+    def filter_waves(self, waves):
+
+        print "len(waves) = ", len(waves)
+        i = 0
+        while i < len(waves) - 1:
+            if i > 0:
+                a_pos, a_ht, a_sd = waves[i - 1]
+                b_pos, b_ht, _b_sd = waves[i]
+                if b_ht < a_ht and b_pos < a_pos + 3 * a_sd:
+                    waves.pop(i)
+                    continue
+            if i < len(waves) - 2:
+                a_pos, a_ht, _a_sd = waves[i]
+                b_pos, b_ht, b_sd = waves[i + 1]
+                if a_ht < b_ht and a_pos < b_pos - 3 * b_sd:
+                    waves.pop(i)
+                    continue
+            i += 1
+                # check if wave is larger than the last and should be removed
+        return waves
+
+
+
+
+    def make_trace(self, waves):    # pos, height, stddev, horizontal = True, y_median = 0, sigmas = 3):
+        ''' path points will be at (-3stddev,0), (0,height), (3stddev,0)
+            Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
+         '''
+
+        waves = sorted(waves)
+
+        waves = self.filter_waves(waves)
+
+
+        X = [round((pos - self.start) * self.scale_x, 2) + self.MARGIN for (pos, _height, _stddev) in waves]
+            # Scale Y and inverse the coordinates
+        Y = [round(height * self.scale_y, 2) for (_pos, height, _stddev)  in waves]
+        Y = [(self.height - self.BOTTOM_MARGIN - y2) for y2 in Y]
+        S = [round(stddev * self.scale_x, 2) for (_pos, _height, stddev) in waves]
+
+
+
+        if (X[0] > S[0]):
+            d = "M " + str(X[0] - (2 * S[0])) + "," + self.y_bottom + " C"    # point 1
+            d += " " + str(X[0] - (S[0])) + "," + self.y_bottom    # control point 1
+            d += " " + str(X[0] - (S[0])) + "," + str(Y[0])    # control point 2
+            d += " " + str(X[0]) + "," + str(Y[0])    # actual coordinate
+        else:
+            d = "M " + str(X[0]) + "," + str(Y[0]) + " C"    # point 1
+        for i in range(1, len(X)):
+            if ((3 * S[i]) + (3 * S[i - 1])) < (X[i] - X[i - 1]):
+                d += " " + str(X[i - 1] + S[i - 1]) + "," + str(Y[i - 1])    # control point 1
+                d += " " + str(X[i - 1] + 2 * S[i - 1]) + "," + self.y_bottom    # control point 2
+                d += " " + str(X[i - 1] + 3 * S[i - 1]) + "," + self.y_bottom    # actual coordinate
+
+                d += " " + str(X[i] - S[i]) + "," + self.y_bottom    # control point 2
+                d += " " + str(X[i] - 2 * S[i]) + "," + self.y_bottom    # control point 1
+                d += " " + str(X[i] - 3 * S[i]) + "," + self.y_bottom    # actual coordinate
+
+                d += " " + str(X[i] - (S[i])) + "," + self.y_bottom    # control point 1
+                d += " " + str(X[i] - (S[i])) + "," + str(Y[i])    # control point 2
+                d += " " + str(X[i]) + "," + str(Y[i])    # actual coordinate
+
+            else:
+                d += " " + str(X[i - 1] + round((X[i] - X[i - 1]) / 4, 2)) + "," + str(Y[i - 1])    # control point 1
+                d += " " + str(X[i] - round((X[i] - X[i - 1]) / 4, 2)) + "," + str(Y[i])    # control point 2
+                d += " " + str(X[i]) + "," + str(Y[i])    # actual coordinate
+        last = len(X) - 1
+        if (X[last] + (S[last]) < self.dimension_x):
+            d += " " + str(X[last] + (S[last])) + "," + str(Y[last])    # control point 1
+            d += " " + str(X[last] + (S[last])) + "," + self.y_bottom    # control point 2
+            d += " " + str(X[last] + (2 * S[last])) + "," + self.y_bottom    # actual coordinate
+            print "last point added"
+
+        return d
+
+    def build_chipseq(self, message, waves, trace):
         '''convert loaded data into svg images'''
         if message:
             Message = Text('[ ' + message + ' ]', insert = (float(self.width) / 3.0, float(self.height) / 2.0),
@@ -136,12 +215,30 @@ class Plot(object):
             heights.append(height)
         self.maxh = max(heights)
         self.scale_y = self.dimension_y / self.maxh
-        print "scale_y: ", self.scale_y
-        for (pos, height, stddev, sample_id) in waves:
-            d = self.make_gausian(pos, height, stddev)
 
-            types_color, _new = self.palette.colour_assignment_group(sample_id)
-            self.elements.append(Path(stroke = types_color, stroke_width = 0.1,
+        samples = {}
+        if trace:
+            for (pos, height, stddev, sample_id) in waves:
+
+                if sample_id in samples:
+                    samples[sample_id].append((pos, height, stddev))
+                else:
+                    samples[sample_id] = []
+                    samples[sample_id].append((pos, height, stddev))
+            for sampleid in samples:
+                w = samples[sampleid]
+                d = self.make_trace(w)
+                types_color, _new = self.palette.colour_assignment_group(sampleid)
+                self.elements.append(Path(stroke = types_color, stroke_width = 1,
+                       stroke_linecap = 'round', stroke_opacity = 0.8, d = d, fill = 'none',
+                       onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" %
+                                    (''.join(s for s in sampleid if s in string.printable))))
+        else:
+
+            for (pos, height, stddev, sample_id) in waves:
+                d = self.make_gausian(pos, height, stddev)
+                types_color, _new = self.palette.colour_assignment_group(sample_id)
+                self.elements.append(Path(stroke = types_color, stroke_width = 0.1,
                            stroke_linecap = 'round', stroke_opacity = 0.8,
                            fill = types_color, fill_opacity = 0.5, d = d,
                         onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" %

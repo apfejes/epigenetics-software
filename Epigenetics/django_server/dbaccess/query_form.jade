@@ -169,6 +169,12 @@ body
                 input(id='minsigma',size = '4', type='text', name='minsigma', value = minsigma)
               else
                 input(id='minsigma',size = '4', type='text', value='0', name='minsigma')
+            p(class="tight")
+              label(for='trace') Trace view:
+              if trace
+                input(id='trace', size = '8', type='checkbox', name="trace", checked)
+              else
+                input(id='trace', size = '8', type='checkbox', name="trace")
           else
             input(type="hidden", id="minheight", name="minheight", value = '0')
             input(type="hidden", id="minsigma", name="minsigma", value = '0')
@@ -428,6 +434,11 @@ script(type='text/javascript')
       if (e) {
         var minsigma = e.value;
       }
+      var e = document.getElementById("trace");
+      if (e) {
+        var trace = e.checked;
+      }
+      
       var e = document.getElementById("cpg");
       if (e) {
         var cpg = e.checked;
@@ -472,6 +483,9 @@ script(type='text/javascript')
       }
       if (minsigma) {
         base += "&minsigma=" + minsigma
+      }
+       if (trace) {
+        base += "&trace=" + trace
       }
       if (cpg) {
         base += "&cpg=" + cpg
