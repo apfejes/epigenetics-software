@@ -187,7 +187,7 @@ def process_query_request(request):
     except KeyError:
         p['types_index'] = None
         p['sample_index'] = None
-    p['width'] = int(q.get("width", 1000)) - 300    # width of screen minus 100
+    p['width'] = int(q.get("width", 900)) - 300    # width of screen minus 100
     p['height'] = int(q.get("height", 600)) - 300    # height of screen minus 300
 
     start = q.get("start", 0)
@@ -299,7 +299,8 @@ def view_query_form(request):
     # print("creating Mongo Wrapper on Database")
 
     m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper(database, methylation, peaks)
-    svg = '<br><br><br><br><center><h2>Please select parameters from the options on the right to query the database and generate an image!</h2></center>'
+    svg = '<br><br><br><br><h2 style="margin-left:100px; text-align:center;">Please select parameters from the options on the right<br> to query the database and generate an image!</h2>'
+
 
     action_factor = parameters.pop("action_factor")    # don't want to leave it in parameters.
     if action_factor in ZOOM_FACTORS:
