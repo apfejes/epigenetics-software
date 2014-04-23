@@ -357,6 +357,7 @@ def view_query_form(request):
                            sample_index = parameters['sample_index'],
                            show_groups = parameters['show_groups'],
                            bigger_dists = parameters['bigger_dists'],
+                           trace = parameters['trace'],
                            genes = genes)
 
 

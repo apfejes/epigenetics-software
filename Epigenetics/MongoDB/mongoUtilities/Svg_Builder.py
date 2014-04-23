@@ -44,6 +44,7 @@ class Svg_Builder():
             show_genes = True,    # whether to show the genes on the bottom of the illustration.
             show_groups = None,    # If you want to show only a subset of available groups, give the list here.
             bigger_dists = False,
+            trace = False,
             genes = None):
         ''' Plots the data using different SVG modules in Epigenetics/Illustrations
             Saves the plot as an SVG string for webserver rendering
@@ -57,13 +58,14 @@ class Svg_Builder():
 
         # #NOTE: Peaks must go before methylation, otherwise white boxes cover methylation labels.
         if self.peaks:    # information about waves is already pushed by MEW.
-            self.drawing.build_chipseq(self.error_message, self.waves)
+            self.drawing.build_chipseq(self.error_message, self.waves, trace)
             if self.waves:
                 self.drawing.add_ytics_chipseq()
 
         if self.methylation:
             self.drawing.build_methylation(self.error_message, self.pos_betas_dict, self.sample_peaks,
-                                           show_points, show_dist, show_groups, self.probes_by_pos, self.probe_details, bigger_dists)
+                                           show_points, show_dist, show_groups, self.probes_by_pos,
+                                           self.probe_details, bigger_dists, trace)
             self.drawing.add_ytics_methylation()
 
         if genes and show_genes:

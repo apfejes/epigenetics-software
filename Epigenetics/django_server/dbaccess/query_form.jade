@@ -169,12 +169,6 @@ body
                 input(id='minsigma',size = '4', type='text', name='minsigma', value = minsigma)
               else
                 input(id='minsigma',size = '4', type='text', value='0', name='minsigma')
-            p(class="tight")
-              label(for='trace') Trace view:
-              if trace
-                input(id='trace', size = '8', type='checkbox', name="trace", checked)
-              else
-                input(id='trace', size = '8', type='checkbox', name="trace")
           else
             input(type="hidden", id="minheight", name="minheight", value = '0')
             input(type="hidden", id="minsigma", name="minsigma", value = '0')
@@ -203,7 +197,12 @@ body
                 input(id='bigdist', size = '8', type='checkbox', name="bigdist", checked)
               else
                 input(id='bigdist', size = '8', type='checkbox', name="bigdist")
-        
+          p(class="tight")
+            label(for='trace') Trace view:
+            if trace
+              input(id='trace', size = '8', type='checkbox', name="trace", checked)
+            else
+              input(id='trace', size = '8', type='checkbox', name="trace")
       
           h3 Index
           hr

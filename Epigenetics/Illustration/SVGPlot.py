@@ -83,9 +83,6 @@ class Plot(object):
         background = Rect(insert = (0, 0), size = canvas_size, fill = "white")
         self.plot.add(background)
 
-        magic_box = Text(" ", id = "sample_name", insert = ((self.MARGIN + 20), (self.MARGIN + 20)),
-                    fill = "black", font_size = medfont)
-        self.elements.append(magic_box)
 
     def set_sample_index(self, types, samples):
         '''overwrite the sample_index to preserve colours from previous set.'''
@@ -147,7 +144,7 @@ class Plot(object):
 
 
 
-    def make_trace(self, waves):    # pos, height, stddev, horizontal = True, y_median = 0, sigmas = 3):
+    def make_trace_chipseq(self, waves):    # pos, height, stddev, horizontal = True, y_median = 0, sigmas = 3):
         ''' path points will be at (-3stddev,0), (0,height), (3stddev,0)
             Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
          '''
@@ -197,6 +194,26 @@ class Plot(object):
 
         return d
 
+
+    def make_trace_meth(self, data):    # pos, height, stddev, horizontal = True, y_median = 0, sigmas = 3):
+        ''' path points will be at (-3stddev,0), (0,height), (3stddev,0)
+            Control points at (-1stddev,0), (-1stddev,height), (1stddev,height), (1stddev,0)
+         '''
+
+        data = sorted(data)
+        X = [round((pos - self.start) * self.scale_x, 2) + self.MARGIN for (pos, _mean) in data]
+            # Scale Y and inverse the coordinates
+        Y = [mean for (_pos, mean) in data]
+
+
+        d = "M " + str(X[0]) + "," + str(Y[0]) + " C"    # point 1
+        for i in range(1, len(X)):
+            d += " " + str(X[i - 1] + round((X[i] - X[i - 1]) / 4, 2)) + "," + str(Y[i - 1])    # control point 1
+            d += " " + str(X[i] - round((X[i] - X[i - 1]) / 4, 2)) + "," + str(Y[i])    # control point 2
+            d += " " + str(X[i]) + "," + str(Y[i])    # actual coordinate
+        return d
+
+
     def build_chipseq(self, message, waves, trace):
         '''convert loaded data into svg images'''
         if message:
@@ -215,7 +232,6 @@ class Plot(object):
         samples = {}
         if trace:
             for (pos, height, stddev, sample_id) in waves:
-
                 if sample_id in samples:
                     samples[sample_id].append((pos, height, stddev))
                 else:
@@ -223,7 +239,7 @@ class Plot(object):
                     samples[sample_id].append((pos, height, stddev))
             for sampleid in samples:
                 w = samples[sampleid]
-                d = self.make_trace(w)
+                d = self.make_trace_chipseq(w)
                 types_color, _new = self.palette.colour_assignment_group(sampleid)
                 self.elements.append(Path(stroke = types_color, stroke_width = 2,
                        stroke_linecap = 'round', stroke_opacity = 0.8, d = d, fill = 'none',
@@ -245,7 +261,7 @@ class Plot(object):
         self.elements.append(Rect(insert = (self.width - self.RIGHT_MARGIN, 0), size = (self.RIGHT_MARGIN, self.height - self.MARGIN), stroke = types_color, stroke_width = 0.0, fill = "#ffffff", fill_opacity = 1))
         self.palette.purge_unused()
 
-    def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks, show_groups, probes_by_pos, probe_details, bigger_dists):
+    def build_methylation(self, message, pos_betas_dict, sample_peaks, show_points, show_peaks, show_groups, probes_by_pos, probe_details, bigger_dists, trace):
         '''convert this information into elements of the svg image'''
         self.scale_y = 1
 
@@ -260,6 +276,7 @@ class Plot(object):
                     fill = "black", font_size = bigfont * 2)
             self.elements.append(Message)
 
+        samples = {}
         for position in pos_betas_dict.keys():
             x = round(float(position - self.start) * self.scale_x, 2) + self.MARGIN
 
@@ -279,7 +296,8 @@ class Plot(object):
                                     (probeid, sample_type, sample_id))
                         self.elements.append(point)
 
-            if show_peaks:
+
+            if show_peaks or trace:
                 for sample_type in sample_peaks[position]:
                     if not show_groups or sample_type in show_groups:
                         if self.gausian_colour.has_key(sample_type):
@@ -290,21 +308,40 @@ class Plot(object):
                         m, s = sample_peaks[position][sample_type]
                         m = round((1 - m) * self.dimension_y, 2) + self.MARGIN
                         s = round(s * self.dimension_y, 3)
+                        if trace:
+                            if sample_type in samples:
+                                samples[sample_type].append((position, m))
+                            else:
+                                samples[sample_type] = []
+                                samples[sample_type].append((position, m))
 
-
-
-                        if s != 0.0:
+                        if show_peaks and s != 0.0:
                             d = self.make_gausian(position, ht, s, False, m)
                             gaussian = (Path(stroke = type_color,
-                                             stroke_width = self.DISTR_STROKE,
-                                             stroke_linecap = 'round',
-                                             stroke_opacity = 0.8,
-                                             fill = type_color,
-                                             fill_opacity = 0.1,
-                                           d = d))
+                                         stroke_width = self.DISTR_STROKE,
+                                         stroke_linecap = 'round',
+                                         stroke_opacity = 0.8,
+                                         fill = type_color,
+                                         fill_opacity = 0.1,
+                                         d = d))
 
                             self.elements.insert(1, gaussian)
-
+        if trace:
+            for sample_type in samples:
+                if self.gausian_colour.has_key(sample_type):
+                    type_color = self.gausian_colour[sample_type]
+                else:
+                    type_color, new = self.palette.colour_assignment_group(sample_type)
+                    self.gausian_colour[sample_type] = type_color
+                d = self.make_trace_meth(samples[sample_type])
+                t = (Path(stroke = type_color,
+                                stroke_width = 2,
+                                stroke_linecap = 'round',
+                                stroke_opacity = 0.8,
+                                fill = "none",
+                                onmouseover = "evt.target.ownerDocument.getElementById('sample_name').firstChild.data = \'%s\'" % (sample_type) ,
+                                d = d))
+                self.elements.insert(1, t)
 
 
             # fix to truncate curves at border (to hide them)
@@ -336,6 +373,10 @@ class Plot(object):
 
     def to_string(self):
         ''' convert the loaded elements to strings and return the list of elements'''
+        magic_box = Text(" ", id = "sample_name", insert = ((self.MARGIN + 20), (self.MARGIN + 20)),
+                    fill = "black", font_size = medfont)
+        self.elements.append(magic_box)
+
         t0 = time.time()
         temp = []
         temp.append(self.plot.tostring().replace("</svg>", ""))
