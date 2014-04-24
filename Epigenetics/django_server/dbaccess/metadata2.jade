@@ -18,14 +18,17 @@ block content
         | box in the browser windows for all samples in the dataset.
     input(type="button", value="Manage Compound Group by", onClick="window.location.assign('/dbaccess/compound/?organism=' + organism.value + '&project=' + project.value )")
     input(type="button", value="Export Project Metadata", onClick="export_metadata()")
-    hr
     br
+    &nbsp;
+    hr
+
     form(name="main", id="main", action='/dbaccess/metadata3/', method='post')
       input(type="hidden", id="samples", name="samples", value=samples)
       input(type="hidden", id="collection", name="collection", value=collection)
       input(type="hidden", id="project", name="project", value=project)   
       input(type="hidden", id="organism", name="organism", value=organism)
       input(type="hidden", id="groups", name="groups", value=groups)
+      input(type="hidden", id="sampleoid", name="sampleoid", value="None")
       
       | Editing !{collection} sample - !{project} - 
       
@@ -33,18 +36,20 @@ block content
         - var disabledfields = {"_id", "min_height", "number_waves", "map_type", "input_file", "default_database", "file_name", "round_leading_edge", "port", "triangle_median", "server", "fragment_length", "max_pet_length", "haswaves", "output_path", "triangle_min", "sample_id", "hide", "make_wig", "processor_threads"}
         - each s in samples
           - var sam = s.items()
-          table(id='tab')
-            - each k,v in sam
-                tr
-                  td
-                    | !{k}:
-                  td
-                    if k in disabledfields 
-                      input(type="text",name=k, value=v, disabled)
-                    else
-                      input(type="text",name=k, value=v)
+        input(type="button", value="Delete this sample(use with care!)", onClick='deletesample()')
+        table(id='tab')
+          - each k,v in sam
+              tr
+                td
+                  | !{k}:
+                td
+                  if k in disabledfields 
+                    input(type="text",name=k, value=v, disabled)
+                  else
+                    input(type="text",name=k, value=v)
             br
       if collection == 'methylation'
+        
         if samples
           select(name='sample', id='sample', onChange='populate_methylation_table()')
             - each s,i in samples
@@ -52,14 +57,30 @@ block content
                 option(value=s['sampleid'], selected)=s.sampleid
               else
                 option(value=s['sampleid'])=s.sampleid
-            option(value="all")="All Samples"
+          br
           table(id='tab')
         br
-        
-        
+      
+      
+      
+      br
+      | Editing Options:
+      
       input(type="button", value="Add a new key/value", onClick='addnewtag()')
-      input(type="button", value="Back", onClick="window.history.back(-1)")
       input(type='submit', value = 'Save Edits', title="Save Edits", name='Save Edits', class ="bigbutton")
+      br
+      
+      | Sample Options:
+      br
+      input(type="button", value="Select All Fields for Group", onClick="selectAll()")
+      input(type="button", value="De-select All Fields for Group", onClick="selectNone()")
+      br
+      input(type="button", value="Delete this sample (use with care!)", onClick="window.open(delete_sample(),'_self');")
+      br
+      hr
+      
+      
+      
 
 block script    
   script(type='text/javascript')
@@ -83,9 +104,17 @@ block script
       cell = row.insertCell(1);
       cell.appendChild(document.createTextNode("Value"));
       cell = row.insertCell(2);
-      cell.appendChild(document.createTextNode("Group By"));
+      cell.appendChild(document.createTextNode("Show"));
+      cell = row.insertCell(3);
+      cell.appendChild(document.createTextNode("Notes"));
 
       for (s in sam) {
+        if (s === "_id") {
+          var n = document.getElementById("sampleoid");
+          n.value = sam["_id"];
+          continue;
+        }
+                
         var row = container.insertRow(rowcount);
         var cell1 = row.insertCell(0);
         cell1.appendChild(document.createTextNode(s));
@@ -93,8 +122,8 @@ block script
         var input = document.createElement("input");
         input.type = "text";
         input.name = s;
-        input.value = sam[s]
-        input.disabled = true;
+        input.value = sam[s];
+
         cell2.appendChild(input);
         var cell3 = row.insertCell(2);
         var x = document.createElement('input');
@@ -104,7 +133,16 @@ block script
           x.checked = "true";
         }
         cell3.appendChild(x);
+        if (s==="sampleid") {
+          cell = row.insertCell(3);
+          var span = document.createElement('span');
+          span.style.fontSize = '11px';
+          span.appendChild(document.createTextNode("<-- Modifying sampleid may cause data to be orphaned! "));
+          cell.appendChild(span);
+        }
+
         rowcount +=1;
+        
      }
     }
     
@@ -158,3 +196,34 @@ block script
       a.click();
       
     }
+    
+    function delete_sample() {  
+      var base = '/dbaccess/deletesample/';
+      
+      
+      var organisminuse = document.getElementById("organism").value
+      var sampleoid = document.getElementById("sampleoid").value;
+    
+      base += "?organism=" + organisminuse
+      base += "&sampleoid=" + sampleoid
+      
+      return base
+    }    
+    
+    function selectAll() {
+      for(var els = document.getElementsByTagName ('input'), i = els.length; i--;) {
+        if(els[i].type=='checkbox') {
+          els[i].checked = "true"
+        }
+      }
+    }
+
+    function selectNone() {
+      for(var els = document.getElementsByTagName ('input'), i = els.length; i--;) {
+        if(els[i].type=='checkbox') {
+          els[i].checked = ""
+        }
+      }
+    }
+        
+    

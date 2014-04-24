@@ -1,0 +1,18 @@
+extends base
+
+block title
+    h1 Epigenetics Database - View/Edit Meta Data
+
+block content
+  #padding-div 
+    h2 MetaData Editing - Deleting a sample!
+    form(name="main", id="main", action='/dbaccess/deletesample/', method='post')
+      input(type="hidden", id="confirm", name="confirm", value="True")
+      input(type="hidden", id="organism", name="organism", value=organism)
+      input(type="hidden", id="sampleoid", name="sampleoid", value= sampleoid)
+      p You have requested the deletion of sample "!{sampleid}" from the "!{project}" project. 
+      p (Sampleoid = !{sampleoid} ).
+      p If you are sure you'd like to continue, press the continue button below.
+      input(type='submit', value = 'Continue', title="Continue", name='Continue')
+      
+    

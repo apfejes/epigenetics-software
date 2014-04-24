@@ -1,0 +1,12 @@
+extends base
+
+block title
+    h1 Epigenetics Database - View/Edit Meta Data
+
+block content
+  #padding-div 
+    h2 MetaData Editing - completed 
+    p Sample !{sampleid} in project !{project} has been deleted from the !{organism}_epigenetics database.
+      | &nbsp;You can now close this window to continue.
+    input(type="button", value="Close", onClick="window.close(-1)")
+    

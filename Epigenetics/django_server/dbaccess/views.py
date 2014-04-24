@@ -13,6 +13,7 @@ from django.contrib.auth.models import User
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
+from bson.objectid import ObjectId
 
 from mongoengine.queryset import DoesNotExist
 from pymongo.mongo_client import MongoClient
@@ -45,31 +46,39 @@ def login_view(request):
     functions to process the login/password, and verify it against the database.'''
 
     try:
-        username = request.POST['username']    # from dialog boxes
-        password = request.POST['password']
+        print "request Method = ", request.method
+
+        if request.method == 'GET':
+            q = request.GET
+        elif request.method == 'POST':
+            q = request.POST
+
+        n = q['next']
+        print "next = ", n
+
+        username = q['username']    # from dialog boxes
+        password = q['password']
         user = User.objects.get(username = username)    # create a user object
         # user.backend = 'mongoengine.django.auth.MongoEngineBackend'
         user.backend = 'django.contrib.auth.backends.ModelBackend'    # this backend interacts with the database to interpret passwords
         authenticate(user = user, password = password)    # this command verifies that the password is correct
+        print "made it this far"
         if not user.check_password(password):
             print "LOGIN --->  Incorrect password %s: " % (username)
             return render(request, 'base.jade', {"message":"Incorrect password provided for user %s" % (username)})
+        print "made it this far 2"
         if user.is_active:    # users must be active to proceed
             login(request, user)    # create the login workings.
             request.session.set_expiry(60 * 60 * 1)    # 1 hour timeout
-            if request.method == 'POST':
-                if 'next' in request.POST:    # this passes in the URL where to go to after a successful login
-                    return HttpResponseRedirect(request.POST['next'])
-                else:
-                    print "next not found in request.POST", request.POST
-                    return render(request, 'base.jade', {"message":"Login successful"})
+            if n:
+                print "made it this far 3"
+                return HttpResponseRedirect(n)
             else:
-                if 'next' in request.GET:
-                    return HttpResponseRedirect(request.GET['next'])
-                else:
-                    print "next not found in request.Get", request.GET
-                    return render(request, 'base.jade', {"message":"Login successful"})
+                return render(request, 'base.jade', {"message":"Login successful"})
+
+
         else:    # Return a 'disabled account' error message
+            print "made it this far 5"
             print "LOGIN --->  Account for user %s has been deactivated." % (username)    # account exists, but has been locked.
             return render(request, 'base.jade', {"message":"Account for user %s has been deactivated." % (username)})
     except DoesNotExist:    # no user.
@@ -86,11 +95,16 @@ def logout_view(request):
 
 def loginpage(request):
     ''' a view for the home page, if required. '''
-    if request.method == "GET":
-        if 'next' in request.GET:
-            print "request.GET['next']= ", request.GET['next']
-            return render(request, 'loginpage.jade', {"next":request.GET['next']})
-    return render(request, 'loginpage.jade')
+    if request.method == 'GET':
+        q = request.GET
+    elif request.method == 'POST':
+        q = request.POST
+
+    if 'next' in q:
+        print "request.GET['next']= ", q['next']
+        return render(request, 'loginpage.jade', {"next":q['next']})
+
+    return render(request, 'loginpage.jade', {"next":None})
 
 def createuser(request):
     ''' a view for the home page, if required. '''
@@ -258,6 +272,7 @@ def view_query_form(request):
         gb = CreateListFromCursor(mongo[o + "_epigenetics"]['sample_groups'].find())
         byproj = {}
         for x in gb:
+            print "x = ", x
             a = x['available']
             if len(a) > 0:
                 a = [b.encode('utf-8') for b in x['available']]
@@ -507,13 +522,13 @@ def view_metadata3(request):
     organism = str(q.get("organism", None))
     project = str(q.get("project", None))
     collection = str(q.get("collection", None))
+    sampleoid = str(q.get("sampleoid", None))
 
     newfields = {}
     updated_groups = []
     for t in q:
         if t.startswith("label"):
-            v = t.replace("label", "value")
-            newfields[str(q.get(t))] = str(q.get(v))
+            newfields[str(t)] = str(q.get(t))
         if t.startswith("checkbox_"):
             v = t.replace("checkbox_", "")
             updated_groups.append(v)
@@ -523,9 +538,46 @@ def view_metadata3(request):
     one = mongo[organism + "_epigenetics"]['sample_groups'].find({"project":project, "default":{ "$exists": True}}).count()
     if one < 1:
         mongo[organism + "_epigenetics"]['sample_groups'].update({"project":project}, {"$set":{"default":updated_groups[0]}})
+
+    if sampleoid:
+        mongo[organism + "_epigenetics"]['samples'].update({"project":project, "_id":ObjectId(sampleoid)}, {"$set":newfields}, upsert = False)
+        print " ran -> mongo[%s_epigenetics]['samples'].update({\"project\":%s, \"_id\":%s}, {\"$set\":%s}, upsert = False)" % (organism, project, ObjectId(sampleoid), newfields)
+
     return render(request, 'metadata3.jade', {"type":collection})
 
 
+@login_required
+def delete_sample(request):
+
+    q = None
+    if request.method == 'GET':
+        q = request.GET
+    elif request.method == 'POST':    # If the query has been submitted...
+        q = request.POST
+
+    soid = q.get("sampleoid", None)
+    organism = q.get("organism", None)
+    confirm = q.get("confirm", None)
+    c = mongo[organism + "_epigenetics"]['samples'].find_one({"_id":ObjectId(soid)})
+    project = c['project']
+    sampleid = c['sampleid']
+
+    print "Confirm = ", confirm
+
+    if not confirm:
+        return render(request, 'delete_sample.jade', {"sampleoid":soid,
+                                                  "organism":organism,
+                                                  "project":project,
+                                                  "sampleid":sampleid})
+    else:
+        print "removing methylation data for %s from project %s" % (sampleid, project)
+        mongo[organism + "_epigenetics"]['methylation'].update({"project":project}, {"$unset":{"b." + str(sampleid):1}}, multi = True)
+        print "done"
+        print "removing sample %s from project %s" % (sampleid, project)
+        mongo[organism + "_epigenetics"]['samples'].remove({"_id":ObjectId(soid)})
+        return render(request, 'deleted.jade', {"organism":organism,
+                                                  "project":project,
+                                                  "sampleid":sampleid})
 
 @login_required
 def compound(request):
