@@ -1,0 +1,22 @@
+extends base
+
+block title
+    h1 Epigenetics Database - View/Edit Meta Data
+
+block content
+  #padding-div 
+    h2 MetaData: Select the samplesheet and beta value export to begin the upload process.
+    form(name="main", action='/dbaccess/import3/', method='post', enctype="multipart/form-data")
+      input(type="hidden", id="organism", name="organism", value=organism)
+      label Sample sheet:
+      input(type='file', name='sampleFile')
+      br
+      label Beta values file:
+      input(type='file', name='betaFile')
+      br      
+      label Project Name:
+      input(type="text", name="project")
+      br
+      input(type='submit',value = 'Next', title="Next", name='Next')
+    
+       

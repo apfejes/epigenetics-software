@@ -1,0 +1,18 @@
+extends base
+
+block title
+    h1 Epigenetics Database - View/Edit Meta Data
+
+block content
+  #padding-div 
+    h2 MetaData: Select a Database to begin the upload process.
+    form(name="main", action='/dbaccess/import2/', method='post')
+      if databases
+        select(name='organism', id='organism', onchange='update_data_by_org()')
+          - each db in databases
+            option(value=db)=db
+      br
+
+      input(type='submit',value = 'Next', title="Next", name='Next', class ="bigbutton")
+    
+       

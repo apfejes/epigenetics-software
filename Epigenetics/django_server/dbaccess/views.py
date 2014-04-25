@@ -5,7 +5,7 @@ Created on 2013-05-07
 '''
 
 
-import os, sys
+import os, sys, io
 
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
@@ -32,7 +32,6 @@ sys.path.insert(0, _root_dir + os.sep + "django_server")
 from django_server.settings import MONGO_HOST
 from django_server.settings import MONGO_PORT
 from django_server.settings import MONGO_SECURITY_DB
-
 
 print "connecting to: %s %s %s" % (MONGO_SECURITY_DB, MONGO_HOST, MONGO_PORT)
 mongo = MongoClient(MONGO_HOST, MONGO_PORT)    # general connection and library.
@@ -624,3 +623,91 @@ def compound(request):
                                              "organism":organism,
                                              "groups":groups,
                                              "groupby":groupby})
+
+@login_required()
+def import_metadata(request):
+
+    '''create a web page that allows you to pick a collection to modify.'''
+    organism_list = [str(x).replace("_epigenetics", "") for x in mongo.database_names() if x.endswith("_epigenetics") ]
+    return render(request, 'import.jade', {"databases":organism_list,
+                                             'collection_list':{'methylation':'Methylation'}})
+@login_required()
+def import_files(request):
+    q = None
+    if request.method == 'GET':
+        q = request.GET
+    elif request.method == 'POST':    # If the query has been submitted...
+        q = request.POST
+
+    organism = q.get("organism", None)
+    return render(request, 'import2.jade', {"organism":organism})
+
+def convert_number(x):
+    if x.isdigit():
+        x = int(x)
+    else:
+        try:
+            x = float(x)
+        except ValueError:
+            pass
+    return x
+
+
+@login_required()
+def import_process(request):
+
+    if request.method != "POST":
+        return render(request, 'base.jade', {"message":"The page you were attempting to view should only be arrived at via a POST query.  Something has gone wrong."})
+    organism = str(request.POST.get("organism", None))
+    project = str(request.POST.get("project", None))
+
+    print "organism = ", organism
+    print "project = ", project
+    first = True
+    headers = []
+    sampleIdCol = 0;
+    to_insert = []
+    count = 0
+    for line in io.StringIO(unicode(request.FILES['sampleFile'].read()), newline = None):
+        insertrow = {}
+        if first:    # header row
+            headers = line.split("\t")
+            headers = [str(col).replace("\n", "") for col in headers]
+            print "headers ", headers
+            if 'Sample_ID' in headers:
+                sampleIdCol = headers.index('Sample_ID')
+                headers[sampleIdCol] = "sampleid"
+            first = False
+        else:
+            data = line.split("\t")
+            data = [str(d) for d in data]
+            for i, x in enumerate(data):
+                x = str(x)
+                if i == sampleIdCol:
+                    insertrow[headers[i]] = str(x).replace(".", "_")
+                    continue
+                else:
+                    insertrow[headers[i]] = convert_number(x)
+            insertrow['project'] = project
+            print "insertrows = ", insertrow
+            to_insert.append(insertrow)
+            count += 1
+
+        if len(to_insert) > 0 and count % 10000 == 0:
+            print "%i lines processed" % count
+            mongo[organism + "_epigenetics_test"]['samples'].insert(to_insert)
+            to_insert = []
+
+    print "to insert size:", len(to_insert)
+    if to_insert:
+        mongo[organism + "_epigenetics_test"]['samples'].insert(to_insert)
+
+
+
+
+
+
+    # for line in io.StringIO(unicode(request.FILES['betaFile'].read()), newline = None):
+    #    print "betaFile = ", line
+
+    return render(request, 'import3.jade', {})
