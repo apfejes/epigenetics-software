@@ -271,7 +271,6 @@ def view_query_form(request):
         gb = CreateListFromCursor(mongo[o + "_epigenetics"]['sample_groups'].find())
         byproj = {}
         for x in gb:
-            print "x = ", x
             a = x['available']
             if len(a) > 0:
                 a = [b.encode('utf-8') for b in x['available']]
