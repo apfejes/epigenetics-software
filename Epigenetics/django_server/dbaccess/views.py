@@ -661,25 +661,29 @@ def import_process(request):
     organism = str(request.POST.get("organism", None))
     project = str(request.POST.get("project", None))
 
+
+    if not ('sampleFile' in request.FILES) or not ('betaFile' in request.FILES):
+	return render(request, 'base.jade', {"message":"One or more file selections were missing.  Please go back and try again."})
+       
+
     print "organism = ", organism
     print "project = ", project
     first = True
     headers = []
     sampleIdCol = 0;
     to_insert = []
-    count = 0
+    samples = 0
     for line in io.StringIO(unicode(request.FILES['sampleFile'].read()), newline = None):
         insertrow = {}
         if first:    # header row
-            headers = line.split("\t")
-            headers = [str(col).replace("\n", "") for col in headers]
+            headers = [str(col) for col in line.replace("\n","").split("\t")]
             print "headers ", headers
             if 'Sample_ID' in headers:
                 sampleIdCol = headers.index('Sample_ID')
                 headers[sampleIdCol] = "sampleid"
             first = False
         else:
-            data = line.split("\t")
+            data = line.replace("\n","").split("\t")
             data = [str(d) for d in data]
             for i, x in enumerate(data):
                 x = str(x)
@@ -691,23 +695,52 @@ def import_process(request):
             insertrow['project'] = project
             print "insertrows = ", insertrow
             to_insert.append(insertrow)
-            count += 1
+            samples += 1
 
-        if len(to_insert) > 0 and count % 10000 == 0:
-            print "%i lines processed" % count
+        if len(to_insert) > 0 and samples % 10000 == 0:
+            print "%i samples processed" % samples
             mongo[organism + "_epigenetics_test"]['samples'].insert(to_insert)
             to_insert = []
 
-    print "to insert size:", len(to_insert)
     if to_insert:
         mongo[organism + "_epigenetics_test"]['samples'].insert(to_insert)
+    print "%i samples processed" % samples
 
 
+    methylation = 0
+    first = True
+    to_insert = []
+    for line in io.StringIO(unicode(request.FILES['betaFile'].read()), newline = None):
+        insertrow = {}
+        if first:    # header row
+            headers = [str(col).replace(".AVG_Beta","").replace(".","_") for col in line.replace("\n","").split("\t")][1:]	
+            print "headers ", headers
+            first = False
+        else:
+            data = line.replace("\n","").split("\t")
+            data = [str(d) for d in line.split("\t")][1:]
+            insertrow['pid'] = data[0]
+            insertrow['project'] = project
+            insertrow['b'] = {}
+            for d in range(1,len(data)):
+                if data[d] == "NA":
+                    continue
+                insertrow['b'][headers[d]] = float(data[d])
+            print "insertrows = ", insertrow
+            to_insert.append(insertrow)
+            methylation += 1
 
+        if len(to_insert) > 0 and methylation % 10000 == 0:
+            print "%i methylation probes processed" % methylation
+            mongo[organism + "_epigenetics_test"]['methylation'].insert(to_insert)
+            to_insert = []
 
-
+    if to_insert:
+        mongo[organism + "_epigenetics_test"]['methylation'].insert(to_insert)
+    print "%i methylation probes processed" % methylation
 
     # for line in io.StringIO(unicode(request.FILES['betaFile'].read()), newline = None):
     #    print "betaFile = ", line
 
-    return render(request, 'import3.jade', {})
+    return render(request, 'import3.jade', {"samples":samples, "methylrows":methylation})
+
