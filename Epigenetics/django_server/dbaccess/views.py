@@ -5,7 +5,7 @@ Created on 2013-05-07
 '''
 
 
-import os, sys, io
+import os, sys, io, time
 
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
@@ -655,7 +655,7 @@ def convert_number(x):
 
 @login_required()
 def import_process(request):
-
+    time0 = time.time()
     if request.method != "POST":
         return render(request, 'base.jade', {"message":"The page you were attempting to view should only be arrived at via a POST query.  Something has gone wrong."})
     organism = str(request.POST.get("organism", None))
@@ -698,12 +698,11 @@ def import_process(request):
             samples += 1
 
         if len(to_insert) > 0 and samples % 10000 == 0:
-            print "%i samples processed" % samples
-            mongo[organism + "_epigenetics_test"]['samples'].insert(to_insert)
+            mongo[organism + "_epigenetics"]['samples'].insert(to_insert)
             to_insert = []
 
     if to_insert:
-        mongo[organism + "_epigenetics_test"]['samples'].insert(to_insert)
+        mongo[organism + "_epigenetics"]['samples'].insert(to_insert)
     print "%i samples processed" % samples
 
 
@@ -723,24 +722,25 @@ def import_process(request):
             insertrow['project'] = project
             insertrow['b'] = {}
             for d in range(1,len(data)):
-                if data[d] == "NA":
+                try:
+                    insertrow['b'][headers[d]] = float(data[d])
+                except ValueError:
                     continue
-                insertrow['b'][headers[d]] = float(data[d])
-            print "insertrows = ", insertrow
+            #print "insertrows = ", insertrow
             to_insert.append(insertrow)
             methylation += 1
 
         if len(to_insert) > 0 and methylation % 10000 == 0:
-            print "%i methylation probes processed" % methylation
-            mongo[organism + "_epigenetics_test"]['methylation'].insert(to_insert)
+            mongo[organism + "_epigenetics"]['methylation'].insert(to_insert)
             to_insert = []
+            render(request, 'base.jade',{"message":"processed " + str(methylation) + " rows"})
 
     if to_insert:
-        mongo[organism + "_epigenetics_test"]['methylation'].insert(to_insert)
+        mongo[organism + "_epigenetics"]['methylation'].insert(to_insert)
     print "%i methylation probes processed" % methylation
 
-    # for line in io.StringIO(unicode(request.FILES['betaFile'].read()), newline = None):
-    #    print "betaFile = ", line
+    time1 = time.time()
 
-    return render(request, 'import3.jade', {"samples":samples, "methylrows":methylation})
+    return render(request, 'import3.jade', {"project":project, "samples":samples,
+                           "methylrows":methylation, "timetaken":round(time1-time0,1)})
 
