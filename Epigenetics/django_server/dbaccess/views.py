@@ -573,9 +573,37 @@ def delete_sample(request):
         print "done"
         print "removing sample %s from project %s" % (sampleid, project)
         mongo[organism + "_epigenetics"]['samples'].remove({"_id":ObjectId(soid)})
-        return render(request, 'deleted.jade', {"organism":organism,
-                                                  "project":project,
-                                                  "sampleid":sampleid})
+        return render(request, 'deleted.jade', {"message":
+             "Sample %s in project %s has been deleted from the %s_epigenetics database." % (sampleid, project, organism)})
+
+
+
+@login_required
+def delete_project(request):
+
+    q = None
+    if request.method == 'GET':
+        q = request.GET
+    elif request.method == 'POST':    # If the query has been submitted...
+        q = request.POST
+
+    organism = q.get("organism", None)
+    confirm = q.get("confirm", None)
+    project = c['project']
+    if not confirm:
+        return render(request, 'delete_project.jade', {"organism":organism,
+                                                  "project":project})
+    else:
+        print "removing methylation data for %s from project %s" % (sampleid, project)
+        mongo[organism + "_epigenetics"]['methylation'].remove({"project":project}, multi = True)
+        print "done"
+        print "removing sample %s from project %s" % (sampleid, project)
+        mongo[organism + "_epigenetics"]['samples'].remove({"project":project}, multi = True)
+        return render(request, 'deleted.jade', {"message":
+             "Project '%s' has been deleted from the %s_epigenetics database." % (project, organism)})
+
+
+
 
 @login_required
 def compound(request):

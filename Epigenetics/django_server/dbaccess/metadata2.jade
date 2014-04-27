@@ -75,7 +75,10 @@ block content
       input(type="button", value="Select All Fields for Group", onClick="selectAll()")
       input(type="button", value="De-select All Fields for Group", onClick="selectNone()")
       br
+
+      | Purging Options:
       input(type="button", value="Delete this sample (use with care!)", onClick="window.open(delete_sample(),'_self');")
+      input(type="button", value="Delete this project (use with EXTREME care!)", onClick="window.open(delete_project(),'_self');")
       br
       hr
       
@@ -209,6 +212,19 @@ block script
       
       return base
     }    
+
+
+    function delete_project() {  
+      var base = '/dbaccess/deleteproject/';
+      
+      
+      var organisminuse = document.getElementById("organism").value
+      var proj = document.getElementById("project").value
+      base += "?organism=" + organisminuse
+      base += "&project=" + proj
+      return base
+    }    
+
     
     function selectAll() {
       for(var els = document.getElementsByTagName ('input'), i = els.length; i--;) {
