@@ -133,7 +133,7 @@ def FindBaseline(file_name, normalize = False):
     last_bp = 0
     last_ht = 0
     wigfile = WigFileThread.WigFileWriter(None)
-    wigfile.start_wig_writer(os.path.dirname(f_w_name) + "/../WIG", os.path.basename(f_w_name), trackname)
+    wigfile.start_wig_writer(os.path.dirname(f_w_name), os.path.basename(f_w_name), trackname)
 
 
     # for x in range (0, 5020):
