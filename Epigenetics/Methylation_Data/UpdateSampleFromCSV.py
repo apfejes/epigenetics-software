@@ -44,6 +44,8 @@ def importObjectsSampleData(mongo, csvbeta, project_name, collection):
         for i, h in enumerate(headers):
             if h == 'sampleid':
                 sampleid = b[i].replace(".", " ")
+            elif h == 'tissue':
+                probe_data['tissuetype'] = b[i]
             elif b[i]:
                 probe_data[h] = b[i]
 
