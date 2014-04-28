@@ -301,8 +301,7 @@ class MongoEpigeneticsWrapper():
 
 
         query_parameters['haswaves'] = {'$exists':False}
-        if project != "All" and project != "Tissue":
-            print "--->project = ", project
+        if project != "Tissue":
             if isinstance(project, list):
                 query_parameters["project"] = {'$in':project}
             else :
@@ -534,10 +533,7 @@ class MongoEpigeneticsWrapper():
 
             annotations['feature'].add((feature, feature_coord))
 
-        print "\n    Annotations found:"
-        for key, value in annotations.iteritems():
-            print "        ", key, len(value), value
-
+        print "\n %i Annotations found." % (len(annotations['feature']))
         self.svg_builder.annotations = annotations
         return None
 
