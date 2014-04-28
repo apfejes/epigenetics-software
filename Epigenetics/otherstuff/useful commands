@@ -10,6 +10,11 @@ db.waves.find().forEach(function(data) {
     db.waves.update({_id:data._id},{$set:{stddev:parseInt(data.stddev)}});
 })
 
+** Copy a collection from one file to another: 
+db.chromosomes.find().forEach(function(d){ db.getSiblingDB('humanGEO_epigenetics')['chromosomes'].insert(d); });
+ - Note, this is not a fast operation!
+
+
 
 **Upgrade Pyjade.**
 	sudo pip install pyjade --upgrade
