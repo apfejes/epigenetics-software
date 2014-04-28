@@ -587,17 +587,18 @@ def delete_project(request):
     elif request.method == 'POST':    # If the query has been submitted...
         q = request.POST
 
+
     organism = q.get("organism", None)
     confirm = q.get("confirm", None)
-    project = c['project']
+    project = q['project']
     if not confirm:
         return render(request, 'delete_project.jade', {"organism":organism,
                                                   "project":project})
     else:
-        print "removing methylation data for %s from project %s" % (sampleid, project)
+        print "removing methylation data for project %s" % (project)
         mongo[organism + "_epigenetics"]['methylation'].remove({"project":project}, multi = True)
         print "done"
-        print "removing sample %s from project %s" % (sampleid, project)
+        print "removing samples from project %s" % (project)
         mongo[organism + "_epigenetics"]['samples'].remove({"project":project}, multi = True)
         return render(request, 'deleted.jade', {"message":
              "Project '%s' has been deleted from the %s_epigenetics database." % (project, organism)})
@@ -691,7 +692,7 @@ def import_process(request):
 
     if not ('sampleFile' in request.FILES) or not ('betaFile' in request.FILES):
 	return render(request, 'base.jade', {"message":"One or more file selections were missing.  Please go back and try again."})
-       
+
 
     print "organism = ", organism
     print "project = ", project
@@ -703,14 +704,14 @@ def import_process(request):
     for line in io.StringIO(unicode(request.FILES['sampleFile'].read()), newline = None):
         insertrow = {}
         if first:    # header row
-            headers = [str(col) for col in line.replace("\n","").split("\t")]
+            headers = [str(col) for col in line.replace("\n", "").split("\t")]
             print "headers ", headers
             if 'Sample_ID' in headers:
                 sampleIdCol = headers.index('Sample_ID')
                 headers[sampleIdCol] = "sampleid"
             first = False
         else:
-            data = line.replace("\n","").split("\t")
+            data = line.replace("\n", "").split("\t")
             data = [str(d) for d in data]
             for i, x in enumerate(data):
                 x = str(x)
@@ -739,28 +740,28 @@ def import_process(request):
     for line in io.StringIO(unicode(request.FILES['betaFile'].read()), newline = None):
         insertrow = {}
         if first:    # header row
-            headers = [str(col).replace(".AVG_Beta","").replace(".","_") for col in line.replace("\n","").split("\t")][1:]	
+            headers = [str(col).replace(".AVG_Beta", "").replace(".", "_") for col in line.replace("\n", "").split("\t")][1:]
             print "headers ", headers
             first = False
         else:
-            data = line.replace("\n","").split("\t")
+            data = line.replace("\n", "").split("\t")
             data = [str(d) for d in line.split("\t")][1:]
             insertrow['pid'] = data[0]
             insertrow['project'] = project
             insertrow['b'] = {}
-            for d in range(1,len(data)):
+            for d in range(1, len(data)):
                 try:
                     insertrow['b'][headers[d]] = float(data[d])
                 except ValueError:
                     continue
-            #print "insertrows = ", insertrow
+            # print "insertrows = ", insertrow
             to_insert.append(insertrow)
             methylation += 1
 
         if len(to_insert) > 0 and methylation % 10000 == 0:
             mongo[organism + "_epigenetics"]['methylation'].insert(to_insert)
             to_insert = []
-            render(request, 'base.jade',{"message":"processed " + str(methylation) + " rows"})
+            render(request, 'base.jade', {"message":"processed " + str(methylation) + " rows"})
 
     if to_insert:
         mongo[organism + "_epigenetics"]['methylation'].insert(to_insert)
@@ -769,5 +770,5 @@ def import_process(request):
     time1 = time.time()
 
     return render(request, 'import3.jade', {"project":project, "samples":samples,
-                           "methylrows":methylation, "timetaken":round(time1-time0,1)})
+                           "methylrows":methylation, "timetaken":round(time1 - time0, 1)})
 
