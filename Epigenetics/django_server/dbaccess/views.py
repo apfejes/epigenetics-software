@@ -600,6 +600,8 @@ def delete_project(request):
         print "done"
         print "removing samples from project %s" % (project)
         mongo[organism + "_epigenetics"]['samples'].remove({"project":project}, multi = True)
+        print "removing sample_groups for project %s" % (project)
+        mongo[organism + "_epigenetics"]['sample_groups'].remove({"project":project}, multi = True)
         return render(request, 'deleted.jade', {"message":
              "Project '%s' has been deleted from the %s_epigenetics database." % (project, organism)})
 
