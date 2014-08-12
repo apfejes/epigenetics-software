@@ -98,7 +98,7 @@ def importObjectsSampleData(mongo, tsvgene):
             # process record[4, 7, 8, 9]
             if record[fields["Ensembl Gene ID"]] not in genes:    # new record.
                 g = {"gene":record[fields["Ensembl Gene ID"]],
-                     "chr": record[fields["Chromosome Name"]],
+                     "chr": "chr" + record[fields["Chromosome Name"]],
                      "start":int(record[fields["Gene Start (bp)"]]),
                      "end":int(record[fields["Gene End (bp)"]]),
                      "strand":int(record[fields["Strand"]]),
