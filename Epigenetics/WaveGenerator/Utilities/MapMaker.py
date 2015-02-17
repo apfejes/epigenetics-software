@@ -29,8 +29,6 @@ class MapMaker():
         # print "template_length", self.template_length
         # map = array('I')
 
-
-
     def makeIslands(self, start, end, list_reads,):
         '''create islands'''
 
@@ -38,7 +36,7 @@ class MapMaker():
         # print "coverage_map length:", end, ":", start, "=", end - start
         p = list_reads.head
 
-        while p != None:
+        while p is not None:
             # print p.holding.left_end, "-", p.holding.right_end
             if p.holding.read2 is None:    # set tag
                 read = p.holding.read1

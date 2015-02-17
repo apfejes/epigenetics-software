@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
             alignedread1 = alignedreadobjpet.read1
             chromosome = readahead.get_ref_name(alignedread1.tid)
             if current_chromosome != chromosome:
-                if current_chromosome != None:
+                if current_chromosome is not None:
                     print "chromosome", current_chromosome, "had", count, "reads"
                 current_chromosome = chromosome
                 chr_count = 0

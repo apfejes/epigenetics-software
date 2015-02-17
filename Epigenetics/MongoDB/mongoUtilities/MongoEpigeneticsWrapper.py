@@ -86,7 +86,7 @@ class MongoEpigeneticsWrapper():
         print "Checking validity of query inputs..."
         self.mongo.ensure_index(collection, 'chr')
         Chromosomes = self.mongo.distinct(collection, 'chr')
-        if project != None:
+        if project is not None:
             Projects = self.mongo.distinct(collection, "project")
         if chromosome not in Chromosomes:
             raise ValueError("Invalid chromosome name. Please choose from the following possible inputs:",
@@ -547,7 +547,7 @@ class MongoEpigeneticsWrapper():
     def find_coords_by_gene (self, name):
         '''given the name of a gene, get the coordinates'''
         r = self.mongo.find_one("ensgenes", {"namelc":name.lower()}, {"chr":1, "start":1, "end":1, "_id":0})
-        if r == None:
+        if r is None:
             return None
         else:
             return r
@@ -555,7 +555,7 @@ class MongoEpigeneticsWrapper():
     def find_coords_by_probeid (self, name):
         '''given the name of a probe get the coordinates'''
         r = self.mongo.find_one("annotations", {"targetid":name.lower()}, {"chr":1, "mapinfo":1, "_id":0})
-        if r == None:
+        if r is None:
             return None
         else:
             return r

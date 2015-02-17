@@ -118,11 +118,10 @@ def process_samples_in_order(connector,    # mongo connector
 
     print ("probe\tmean 1\tmean 2\tstdev 1\tstdev 2\tpvalue\tgroup 1\tgroup 2")
 
-
     for i in target_cursor:    # proces probe by probe
         # print "i = ", i
         count += 1
-        if limit > 0 and count > limit:
+        if 0 < limit < count:
             return
         row = {}
         data = {}
@@ -132,7 +131,6 @@ def process_samples_in_order(connector,    # mongo connector
         annotations_rec = connector.find_one("annotations", {"name":i}, {"n_snpcpg":1, "_id":0, "n_snpprobe":1})
         nsnpcpg = annotations_rec["n_snpcpg"]
         nsnpprobe = annotations_rec["n_snpprobe"]
-
 
         for c in data_cursor:
             sid = c['sid']

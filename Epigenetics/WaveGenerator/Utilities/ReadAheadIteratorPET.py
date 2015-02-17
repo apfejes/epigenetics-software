@@ -126,7 +126,7 @@ class ReadAheadIteratorPET():
 
     def read_ahead(self):
         '''read ahead, go as far as needed - pushes data into the buffer'''
-        if (self.reserve_read != None):    # break when there is already a read in the reserve.  don't read ahead.
+        if self.reserve_read is not None:    # break when there is already a read in the reserve.  don't read ahead.
             return None
         if ReadAheadIteratorPET.buffer_reads.size() > 0:
             first_read_start = ReadAheadIteratorPET.buffer_reads.head.holding.left_end
@@ -163,7 +163,7 @@ class ReadAheadIteratorPET():
                     '''traverse list backwards'''
                     p = ReadAheadIteratorPET.buffer_reads.tail
                     added = False
-                    while p != None:
+                    while p is not None:
                         if read.left_end >= p.holding.left_end:
                             ReadAheadIteratorPET.buffer_reads.insert_after(p, read)
                             added = True
@@ -181,7 +181,7 @@ class ReadAheadIteratorPET():
             return None
         elif ReadAheadIteratorPET.buffer_reads.size() == 0 and self.isReadValid:
             # end of chromosome - move to next
-            if self.reserve_read != None:    # there is a read from the next chromosome waiting
+            if self.reserve_read is not None:    # there is a read from the next chromosome waiting
                 self.current_chromosome = self.reserve_read.chromosome_id
                 if (self.reserve_read.read1.is_paired and not self.reserve_read.read1.mate_is_unmapped):
                     ReadAheadIteratorPET.reads_processed[self.reserve_read.read1.qname] = self.reserve_read.read1
@@ -208,7 +208,7 @@ class ReadAheadIteratorPET():
 
     def isValid(self):
         '''function to be used to test if the current read is valid.'''
-        if ReadAheadIteratorPET.buffer_reads.size() > 0 or ReadAheadIteratorPET.reserve_read != None:
+        if ReadAheadIteratorPET.buffer_reads.size() > 0 or ReadAheadIteratorPET.reserve_read is not None:
             return True
         else:
             return self.isReadValid

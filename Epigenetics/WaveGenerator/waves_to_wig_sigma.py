@@ -107,7 +107,7 @@ def convert_waves_to_wig(wavesfile, output, autothresh):
         offset = 0
         if start < 1:
             offset = 0 - start + 1
-            start = start + offset
+            start += offset
         print_queue.put("fixedStep chrom=" + w['chr'] + " start=" + str(start) + " step=1")
         # determine max pdf (where x = mu)
         maxpdf = 1.0 / (w['stddev'] * math.sqrt(2.0 * math.pi))

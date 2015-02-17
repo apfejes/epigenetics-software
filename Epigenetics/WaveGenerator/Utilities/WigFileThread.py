@@ -21,7 +21,7 @@ class WigFileWriter(threading.Thread):
         threading.Thread.__init__(self)
         self.queue = queue
         self.t = None    # thread
-        if filewriter != None:
+        if filewriter is not None:
             self.f = filewriter
 
     def process_map(self, item):
@@ -70,7 +70,7 @@ class WigFileWriter(threading.Thread):
         '''close the filewriter'''
         queue.join()
 
-        if (self.f != None):
+        if self.f is not None:
             self.f.close()
 
     @staticmethod

@@ -34,7 +34,7 @@ def ConvertToBedViaR(cel_file, bpmapfile):
 
 
     bedfile = StringUtils.rreplace(cel_file, 'CEL', 'BED', 2)
-    bedfile = bedfile + "like"
+    bedfile += "like"
 
     print "input file: %s" % (cel_file)
     print "Will be writing out to %s" % (bedfile)

@@ -32,7 +32,7 @@ class StringWriter(threading.Thread):
         self.supress_print = supress_print
         self.IS_CLOSED = True
         self.END_PROCESSES = False
-        if file_name != None:
+        if file_name is not None:
             self.printout = True
             path = os.path.dirname(os.path.abspath(__file__))
             path = path.rsplit("/", 1)
@@ -85,7 +85,7 @@ class StringWriter(threading.Thread):
             #    else:
             #        continue'''
         try:
-            if queue != None:
+            if queue is not None:
                 while queue.qsize() > 0:
                     string = queue.get()    # grabs string from queue
                     self.process_string(string)    # print retrieved string

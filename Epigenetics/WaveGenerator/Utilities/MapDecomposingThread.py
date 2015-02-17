@@ -269,7 +269,7 @@ class MapDecomposer(multiprocessing.Process):
 
             mu, sigma = self.get_mu(tested)    # returns mu and sigma.
 
-            if mu != None:
+            if mu is not None:
                 peaks.append(WaveFileThread.wave(item.chr, mu + item.start, sigma, cur_height, wave_number))
                 n = self.subtract_gausian(n, cur_height, sigma, mu)    # subtract gausian
                 if number_waves:

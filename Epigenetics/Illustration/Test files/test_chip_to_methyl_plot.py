@@ -1,15 +1,14 @@
-'''
+"""
 Created on 2013-06-07
 
 @author: sperez
 
 There are two ways to combine data in 1 plot. Either we query the chipseq data first (executed when chip_first = True)
 and then query the methylation data. Or we can do the opposite.
-'''
+"""
 import os, sys
-from time import time
 sys.path.insert(0, "/home/sperez/epigenetics-software/epigenetics-software/Epigenetics")
-from MongoDB.mongoUtilities import MongoEpigeneticsWrapper
+from Epigenetics.MongoDB.mongoUtilities import MongoEpigeneticsWrapper
 
 
 m = MongoEpigeneticsWrapper.MongoEpigeneticsWrapper("human_epigenetics")

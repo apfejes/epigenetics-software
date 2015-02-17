@@ -121,7 +121,7 @@ def process_BAM_reads(PARAM, mapmaker, map_queues, print_queue, wigfile, worker_
                     wigfile.add_map(coverage_map, current_chromosome,
                                     block_left)
             # reset all variables to move onto new chromosome
-            if current_chromosome != None:
+            if current_chromosome is not None:
                 print_queue.put("chromosome %s had %i reads" % (current_chromosome, count))
             current_chromosome = chromosome
             reads_list.destroy()
@@ -198,7 +198,7 @@ def process_WIG_reads(PARAM, map_queues, print_queue, worker_processes):
 
 
             if chromosome != current_chromosome:
-                if current_chromosome != None:
+                if current_chromosome is not None:
                     print_queue.put("chromosome %s had %i regions of enrichment" % (current_chromosome, count - 1))
                     # count-1 since remove first 'fixedStep' of new chrom.
                     count = 1    # to take into account the first 'fixedStep' line of new chrom.
@@ -336,14 +336,14 @@ def main(PARAM):
         for queue in map_queues:
             queue.close()
         print_queue.put("Processor threads terminated. Please be patient while buffers are flushed.")
-        if PARAM.get("make_wig") and wigfile != None:
+        if PARAM.get("make_wig") and wigfile is not None:
             print_queue.put("Closing Wigwriter.  This may take some time.")
             wigfile.close_wig_writer()
             print_queue.put("Wigwriter closed.")
         while wave_queue.qsize() > 0:
             print_queue.put("waiting on wave_queue to empty")
             time.sleep(1)
-        if wavefile != None:
+        if wavefile is not None:
             wavefile.close_wave_writer()
         wave_queue.close()
         print_queue.put("wave_queue closed")

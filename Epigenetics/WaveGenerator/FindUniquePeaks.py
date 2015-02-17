@@ -319,7 +319,6 @@ def run(mongo, output, db):
             else:    # append to global all_paired list.
                 all_paired.append(ap)
 
-
     # CALCULATE NORMALIZATION ON WAVE PAIRS THAT MEET FDR
     print "Collecting wave pairs that meet FDR cutoff."
     x = []
@@ -331,7 +330,7 @@ def run(mongo, output, db):
         # if pairs.k <= user_ks_fdr:
         if pairs.p <= PVAL_THRESH:
             ratio = float(pairs.ht1) / pairs.ht2
-            if ratio > (float(1) / 10) and ratio < 10:    # 10 arbitrarily picked to remove outliers.
+            if (float(1) / 10) < ratio < 10:    # 10 arbitrarily picked to remove outliers.
                 x.append(pairs.ht1)
                 y.append(pairs.ht2)
                 if DEBUG_PRINT:
@@ -344,7 +343,6 @@ def run(mongo, output, db):
             time.sleep(1)
         print_thread.END_PROCESSES = True
         print_thread.f.close()
-
 
     # NORMALIZATION
     print "\nCalculating normalization required for peaks."

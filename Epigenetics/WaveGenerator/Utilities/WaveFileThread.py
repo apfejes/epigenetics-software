@@ -43,7 +43,7 @@ class WaveFileWriter(threading.Thread):
     def process_wave(self, w):
         '''converts a wave object to a string and writes it to a file, specified
         in the __init__ function'''
-        if (w.number != None):
+        if w.number is not None:
             self.f.write("%s\t%i\t%i\t%s\t%i\n" % (w.chromosome, w.crest,
                                            w.sigma, str(round(w.height, 2)),
                                            w.number))

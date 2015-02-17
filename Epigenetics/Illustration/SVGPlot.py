@@ -107,7 +107,7 @@ class Plot(object):
         X = [-sigmas * stddev, -1 * stddev, -1 * stddev, 0, stddev, stddev, sigmas * stddev]
         Y = [0, 0, height, height, height, 0, 0]
 
-        if horizontal == True:
+        if horizontal is True:
             X = [round((x - self.start + pos) * self.scale_x, 2) + self.MARGIN for x in X]
             # Scale Y and inverse the coordinates
             Y = [round(y1 * self.scale_y, 2) for y1 in Y]
@@ -458,11 +458,11 @@ class Plot(object):
             tic_x = self.MARGIN - smallfont * 2
             tic_y = tic + 1
             if len(str(label)) == 1:
-                tic_x = tic_x + 3
+                tic_x += 3
             if len(str(label)) == 2:
-                tic_x = tic_x + 2
+                tic_x += 2
             if len(str(label)) >= 3:
-                tic_x = tic_x - 10
+                tic_x -= 10
             ticmarker = (Text(label, insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
             self.elements.append(ticline)
             self.elements.append(ticmarker)
@@ -481,9 +481,9 @@ class Plot(object):
             tic_x = self.width - self.RIGHT_MARGIN + smallfont
             tic_y = tic + 1
             if len(str(label)) == 1:
-                tic_x = tic_x + 3
+                tic_x += 3
             if len(str(label)) == 2:
-                tic_x = tic_x + 2
+                tic_x += 2
             ticmarker = (Text(label, insert = (tic_x, tic_y), fill = legend_color, font_size = smallfont))
             self.elements.append(ticline)
             self.elements.append(ticmarker)

@@ -229,10 +229,9 @@ def run(mongo, output, db):
         # decide which peaks to use for normalization - make changes here.
         for b in both:
             ratio = float(b.ht1) / b.ht2
-            if b.p < 0.0005 and ratio > (float(1) / 20) and ratio < 20:
+            if b.p < 0.0005 and (float(1) / 20) < ratio < 20:
                 x.append(b.ht1)
                 y.append(b.ht2)
-
 
     # h1 = histogram.Histogram("/home/afejes/temp/test_hist_x.svg", 100, x_max = 100)
     # h1.add_data(x)
@@ -259,7 +258,6 @@ def run(mongo, output, db):
     print "linear - least squares : coeff %s err %s" % (coeff, err)
     myodr = odr.ODR(mydata, linear, coeff)
     myodr.set_job(fit_type = 0)
-
 
     fit2 = myodr.run()
     # fit.pprint()

@@ -53,7 +53,9 @@ def panning(pan_factor, start, end):
 
 def check(p):
     '''Verify that information is complete before processing, otherwise, don't try to generate an SVG'''
-    if p['chromosome'] != None and p['organism'] != None and p['collection'] != None:
+    if p['chromosome'] is not None and \
+                    p['organism'] is not None and \
+                    p['collection'] is not None:
         return True
     else:
         return False

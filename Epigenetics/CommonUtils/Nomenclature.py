@@ -24,8 +24,6 @@ chr_yeast = {
     'chr16': 'chrXVI'
 }
 
-
-@staticmethod
 def chromosome(database, chrom):
     """Function to convert the name of a chrom to the correct string for
     a given database"""
